@@ -1,0 +1,25 @@
+/* =========================================================
+   progreso.css · Módulo «progreso» · nivel OPCIONAL
+   <progress> nativo pintado con los tokens. Depende de: nucleo.css.
+   Bloques: componentes.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.progreso{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2) var(--e-3);margin-bottom:var(--e-4)}
+.progreso-etq{flex:1 1 100%;font-weight:var(--peso-medio)}
+.progreso-barra{
+  flex:1 1 var(--ancho-progreso-min);
+  width:100%;
+  height:var(--e-2);
+  -webkit-appearance:none;
+  appearance:none;
+  border:0;
+  border-radius:var(--r-pill);
+  background:var(--linea);
+  overflow:hidden;
+}
+.progreso-barra::-webkit-progress-bar{background:var(--linea);border-radius:var(--r-pill)}
+.progreso-barra::-webkit-progress-value{background:var(--azul);border-radius:var(--r-pill);transition:width var(--dur-media)}
+.progreso-barra::-moz-progress-bar{background:var(--azul);border-radius:var(--r-pill)}
+.progreso-txt{min-width:var(--e-9);font-size:var(--t-sm);font-weight:var(--peso-semi);text-align:right;color:var(--gris)}

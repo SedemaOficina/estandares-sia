@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guía visual del estándar de formularios</title>
+<meta name="description" content="Guía visual interactiva del estándar de formularios del Sistema de Información Ambiental (SEDEMA): piezas, estados, código para copiar y probador de validaciones.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../codigo/css/tokens.css">
+<link rel="stylesheet" href="../codigo/css/base.css">
+<link rel="stylesheet" href="../codigo/css/nucleo.css">
+<link rel="stylesheet" href="../codigo/modulos/opciones/opciones.css">
+<link rel="stylesheet" href="../codigo/modulos/combo/combo.css">
+<link rel="stylesheet" href="../codigo/modulos/cascadas/cascadas.css">
+<link rel="stylesheet" href="../codigo/modulos/fecha/fecha.css">
+<link rel="stylesheet" href="../codigo/modulos/repetibles/repetibles.css">
+<link rel="stylesheet" href="../codigo/modulos/toggle/toggle.css">
+<link rel="stylesheet" href="../codigo/modulos/escala/escala.css">
+<link rel="stylesheet" href="../codigo/modulos/pasos/pasos.css">
+<link rel="stylesheet" href="../codigo/modulos/revision/revision.css">
+<link rel="stylesheet" href="../codigo/modulos/acuse/acuse.css">
+<link rel="stylesheet" href="../codigo/modulos/acordeon/acordeon.css">
+<link rel="stylesheet" href="../codigo/modulos/pestanas/pestanas.css">
+<link rel="stylesheet" href="../codigo/modulos/migas/migas.css">
+<link rel="stylesheet" href="../codigo/modulos/progreso/progreso.css">
+<link rel="stylesheet" href="../codigo/modulos/paginacion/paginacion.css">
+<link rel="stylesheet" href="../codigo/modulos/modal/modal.css">
+<link rel="stylesheet" href="../codigo/modulos/tooltip/tooltip.css">
+<link rel="stylesheet" href="../codigo/modulos/tabla/tabla.css">
+<link rel="stylesheet" href="../codigo/modulos/copiar/copiar.css">
+<link rel="stylesheet" href="../codigo/modulos/descarga/descarga.css">
+<link rel="stylesheet" href="../codigo/modulos/archivos/archivos.css">
+<link rel="stylesheet" href="../codigo/modulos/chips/chips.css">
+<link rel="stylesheet" href="../vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="../vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.css">
+<link rel="stylesheet" href="../codigo/modulos/mapa/mapa.css">
+<link rel="stylesheet" href="guia.css">
+</head>
+<body>
+<a class="salto" href="#contenido">Ir al contenido</a>
+
+<header class="cabecera">
+  <div class="cabecera-int">
+    <img class="cabecera-logo" src="../codigo/imagenes/logotipo-sedema.png" width="3829" height="771" alt="Gobierno de la Ciudad de México · Secretaría del Medio Ambiente">
+    <div class="cabecera-titulo"><h1 class="titulo-pagina">Guía visual del estándar de formularios</h1><p class="bajada guia-bajada">Sistema de Información Ambiental · versión <span data-version></span>. Cada muestra usa el CSS y el JavaScript reales del paquete: lo que ves aquí es lo que tu formulario debe verse.</p></div>
+  </div>
+</header>
+
+<div class="guia-cuerpo">
+  <nav class="guia-nav" aria-label="Secciones de la guía">
+    <label class="solo-lector" for="guia-salto">Ir a la sección</label>
+    <select class="control control-select guia-nav-select" id="guia-salto" data-nav-select>
+      <option value="inicio">¿Qué necesito?</option>
+      <option value="fundamentos">Fundamentos</option>
+      <option value="nucleo">Núcleo</option>
+      <option value="modulos">Módulos</option>
+      <option value="validaciones">Probador de validaciones</option>
+      <option value="pares">Sí y no</option>
+      <option value="ejemplos">Formularios de ejemplo</option>
+      <option value="verificacion">Antes de liberar</option>
+    </select>
+    <ol class="guia-nav-lista" data-nav-lista>
+      <li><a href="#inicio">¿Qué necesito?</a></li>
+      <li><a href="#fundamentos">Fundamentos</a></li>
+      <li><a href="#nucleo">Núcleo (BASE)</a></li>
+      <li><a href="#modulos">Módulos</a><ol class="guia-nav-sub" data-nav-modulos></ol></li>
+      <li><a href="#validaciones">Probador de validaciones</a></li>
+      <li><a href="#pares">Sí y no</a></li>
+      <li><a href="#ejemplos">Formularios de ejemplo</a></li>
+      <li><a href="#verificacion">Antes de liberar</a></li>
+    </ol>
+  </nav>
+
+  <main class="guia-main" id="contenido">
+
+    <!-- ========== 0. Inicio y árbol de decisión ========== -->
+    <section class="guia-seccion" id="inicio" aria-labelledby="t-inicio">
+      <h2 class="titulo-bloque" id="t-inicio">¿Qué necesito para mi formulario?</h2>
+      <p class="bajada">El paquete es un catálogo de piezas. El <strong>núcleo</strong> va siempre; cada módulo se copia sólo si el formulario lo necesita. Marca lo que tu formulario pide y la guía te dice qué archivos incluir, en qué orden y con qué nivel de exigencia.</p>
+      <div class="guia-dos">
+        <form class="guia-arbol" data-arbol aria-labelledby="t-arbol">
+          <h3 class="rotulo" id="t-arbol">Mi formulario…</h3>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="pasos" value="pasos,revision,acuse,modal,copiar"><span class="casilla-texto">tiene más de una pantalla de preguntas (pasos, revisión y acuse)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="opciones" value="opciones" checked><span class="casilla-texto">pide elegir entre opciones (radios, casillas, Sí/No, tarjetas)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="otro" value="otro"><span class="casilla-texto">alguna lista puede no cubrir el caso («Otro» con especificación)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="combo" value="combo"><span class="casilla-texto">usa un catálogo largo (8 o más valores)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="cascadas" value="cascadas"><span class="casilla-texto">pide alcaldía, colonia y código postal</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="fecha" value="fecha"><span class="casilla-texto">pide fechas u horas</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="identificadores" value="identificadores"><span class="casilla-texto">pide CURP, RFC o un folio</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="archivos" value="archivos"><span class="casilla-texto">recibe fotografías o documentos</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="mapa" value="mapa"><span class="casilla-texto">necesita un punto en el mapa (además de la dirección)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="repetibles" value="repetibles,modal"><span class="casilla-texto">tiene elementos repetibles («agregar otro»)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="escala" value="escala,opciones"><span class="casilla-texto">es una encuesta con escalas</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="interna" value="tabla,paginacion,pestanas,migas,chips,descarga,modal"><span class="casilla-texto">es una consulta o captura interna (tablas, paginación, pestañas, sugerencias)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="terceros" value=""><span class="casilla-texto">captura datos de terceros (se desactiva el autocompletado en esos campos)</span></label>
+        </form>
+        <div class="guia-resultado" aria-live="polite">
+          <h3 class="rotulo">Qué incluir</h3>
+          <ol class="guia-piezas" data-arbol-piezas></ol>
+          <h3 class="rotulo">Etiquetas para pegar en tu HTML</h3>
+          <div class="guia-codigo"><pre class="guia-pre" id="arbol-codigo" tabindex="0"><code data-arbol-codigo></code></pre><button type="button" class="btn btn-secundario guia-copiar" data-copiar="#arbol-codigo"><svg class="icono" aria-hidden="true"><use href="#i-copiar"></use></svg>Copiar</button></div>
+          <p class="texto-gris" data-arbol-nota></p>
+        </div>
+      </div>
+      <h3 class="rotulo">Cómo se usa el paquete, en cuatro pasos</h3>
+      <ol class="guia-pasos-uso">
+        <li><strong>Copia el núcleo</strong> (<code>codigo/css/</code>, <code>codigo/js/</code>, <code>codigo/fuentes/</code>, <code>codigo/iconos/</code>) y los módulos que te indique el árbol de arriba, en el orden que aparece.</li>
+        <li><strong>Declara cada campo con atributos</strong>: <code>data-campo</code>, <code>data-formato</code>, <code>required</code> o <code>data-requerido</code>, <code>data-si</code>, <code>data-uso</code>, <code>data-finalidad</code>. Los mensajes, patrones y límites viven en <code>validaciones.config.js</code>; no los escribas en el HTML.</li>
+        <li><strong>Copia la plantilla</strong> que más se parezca (por pasos o de una página), sustituye el contenido y ajusta <code>configuracion-*.js</code> (envío y, si hay mapa, su proveedor).</li>
+        <li><strong>Verifica antes de liberar</strong>: <code>npm run verificar</code> y la lista de la última sección. El servidor repite toda validación con <code>codigo/servidor/validar.mjs</code> y el esquema que genera <code>herramientas/esquema-desde-html.mjs</code>.</li>
+      </ol>
+    </section>
+
+    <!-- ========== 1. Fundamentos ========== -->
+    <section class="guia-seccion" id="fundamentos" aria-labelledby="t-fundamentos">
+      <h2 class="titulo-bloque" id="t-fundamentos">Fundamentos: color, tipografía, medidas e iconos</h2>
+      <p class="bajada">Todo valor vive en <code>tokens.css</code>. Esta sección se dibuja leyendo esos valores de la hoja cargada: si cambia un token, cambia aquí.</p>
+
+      <h3 class="rotulo">Paleta: un color, un trabajo</h3>
+      <div data-paleta></div>
+
+      <h3 class="rotulo">Contraste medido sobre cada fondo real</h3>
+      <p class="texto-gris" data-resumen-contraste></p>
+      <div class="guia-tabla-marco" tabindex="0" role="region" aria-label="Tabla de contraste medido">
+        <table class="guia-tabla" id="guia-tabla-contraste">
+          <thead><tr><th scope="col">Id</th><th scope="col">Muestra</th><th scope="col">Par</th><th scope="col">Razón</th><th scope="col">Mínimo</th><th scope="col">Resultado</th><th scope="col">Dónde</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h3 class="rotulo">Tipografía y escala fluida</h3>
+      <p class="texto-gris">Cabin para títulos, Roboto para el cuerpo, autoalojadas. Los tamaños grandes crecen con el ancho de la pantalla entre un mínimo legible en teléfono y un máximo en escritorio; el cuerpo nunca baja de 16 px.</p>
+      <div class="guia-escala" data-escala></div>
+
+      <h3 class="rotulo">Los seis niveles de jerarquía</h3>
+      <div class="tarjeta guia-jerarquia">
+        <p class="guia-nivel">1 · Título de página</p><p class="titulo-pagina">Solicitud de ejemplo</p>
+        <p class="guia-nivel">2 · Título de paso</p><p class="titulo-paso">¿Qué quieres solicitar?</p>
+        <p class="guia-nivel">3 · Título de bloque</p><p class="titulo-bloque">Participación</p>
+        <p class="guia-nivel">4 · Pregunta (etiqueta del campo)</p><p class="etiqueta">¿Hay riesgo inmediato para personas o bienes?</p>
+        <p class="guia-nivel">5 · Texto y ayuda</p><p>Texto corrido: Roboto 16, interlineado 1.55, ancho máximo de 70 caracteres.</p><p class="ayuda">Ayuda de campo: Roboto 13, gris.</p>
+        <p class="guia-nivel">6 · Rótulo</p><p class="rotulo">Folio</p>
+      </div>
+
+      <h3 class="rotulo">Radios, espaciado, trazos, tamaños táctiles y puntos de quiebre</h3>
+      <div data-medidas></div>
+
+      <h3 class="rotulo">Catálogo cerrado de iconos</h3>
+      <p class="texto-gris">Un solo conjunto SVG (<code>codigo/iconos/sprite.svg</code>). Heredan el color del texto; el decorativo lleva <code>aria-hidden</code>; el que comunica algo va siempre junto a texto, y sólo «cerrar» y «buscar» pueden ir solos, con nombre accesible y 44 px.</p>
+      <div class="guia-iconos" data-iconos></div>
+    </section>
+
+    <!-- ========== 2. Núcleo ========== -->
+    <section class="guia-seccion" id="nucleo" aria-labelledby="t-nucleo">
+      <h2 class="titulo-bloque" id="t-nucleo">Núcleo: lo que todo formulario lleva</h2>
+      <p class="bajada">Nivel <span class="guia-nivel-badge" data-nivel="BASE">BASE</span>. Archivos: <span data-nucleo-archivos></span>. Cada muestra está viva: escribe, falla la validación y corrígela.</p>
+      <div data-fichas-nucleo></div>
+    </section>
+
+    <!-- ========== 3. Módulos ========== -->
+    <section class="guia-seccion" id="modulos" aria-labelledby="t-modulos">
+      <h2 class="titulo-bloque" id="t-modulos">Módulos: se copian sólo los que el formulario usa</h2>
+      <p class="bajada">Cada ficha dice para qué sirve la pieza, cuándo elegirla, cuándo no, de qué depende, cómo se comporta en teléfono y en escritorio, y trae el HTML mínimo para copiar. Niveles: <span class="guia-nivel-badge" data-nivel="BASE">BASE</span> obligatorio · <span class="guia-nivel-badge" data-nivel="RECOMENDADO">RECOMENDADO</span> salvo justificación escrita · <span class="guia-nivel-badge" data-nivel="OPCIONAL">OPCIONAL</span> si el formulario lo necesita.</p>
+      <div data-fichas-modulos></div>
+    </section>
+
+    <!-- ========== 4. Probador de validaciones ========== -->
+    <section class="guia-seccion" id="validaciones" aria-labelledby="t-validaciones">
+      <h2 class="titulo-bloque" id="t-validaciones">Probador de validaciones</h2>
+      <p class="bajada">Escribe y mira al instante el resultado, el mensaje y el dato <em>normalizado</em> que se conserva. Los casos precargados son válidos, inválidos y límite. Todo viene de <code>validaciones.config.js</code>, el mismo archivo que usa el servidor.</p>
+      <div data-probador></div>
+      <h3 class="rotulo">CURP y fecha de nacimiento, juntas</h3>
+      <p class="texto-gris">Datos exclusivamente ficticios. La fecha se deriva de la CURP; si además se escribe, debe coincidir (validación cruzada, bloqueante por omisión).</p>
+      <form class="tarjeta guia-demo-form" data-formkit data-demo-form>
+        <div class="fila">
+          <div class="campo" data-campo="pr_curp" data-formato="curp" data-uso="Muestra del probador." data-deriva="fechaNacimiento=pr_nac_derivada sexo=pr_sexo"><label class="etiqueta" for="pr_curp">CURP</label><input class="control" id="pr_curp" name="pr_curp" type="text" maxlength="18" autocomplete="off"></div>
+          <div class="campo" data-campo="pr_nac_derivada" data-formato="fecha" data-uso="Derivado de la CURP."><label class="etiqueta" for="pr_nac_derivada">Fecha derivada</label><input class="control" id="pr_nac_derivada" name="pr_nac_derivada" type="date" readonly></div>
+        </div>
+        <div class="fila">
+          <div class="campo" data-campo="pr_sexo" data-uso="Derivado de la CURP."><label class="etiqueta" for="pr_sexo">Sexo derivado</label><input class="control" id="pr_sexo" name="pr_sexo" type="text" readonly></div>
+          <div class="campo" data-campo="pr_nac" data-formato="fecha" data-uso="Muestra del probador." data-cruzada="curp-fecha" data-cruzada-campos="curp=pr_curp fecha=pr_nac"><label class="etiqueta" for="pr_nac">Fecha de nacimiento escrita</label><input class="control" id="pr_nac" name="pr_nac" type="date"></div>
+        </div>
+        <div class="guia-casos" data-casos-curp></div>
+      </form>
+    </section>
+
+    <!-- ========== 5. Sí y no ========== -->
+    <section class="guia-seccion" id="pares" aria-labelledby="t-pares">
+      <h2 class="titulo-bloque" id="t-pares">Sí y no</h2>
+      <p class="bajada">Pares de la misma situación: el primero cumple el estándar, el segundo es el error que el estándar evita. Cada uno dice con palabras cuál es, no sólo con color.</p>
+      <div data-pares-sino></div>
+    </section>
+
+    <!-- ========== 6. Ejemplos ========== -->
+    <section class="guia-seccion" id="ejemplos" aria-labelledby="t-ejemplos">
+      <h2 class="titulo-bloque" id="t-ejemplos">Formularios de ejemplo, armados con distintas piezas</h2>
+      <p class="bajada">Cuatro formularios completos con datos ficticios que se pueden llenar y enviar de manera simulada hasta el acuse. Elige el ancho o míralos lado a lado en teléfono y escritorio. Las plantillas de <code>codigo/plantillas/</code> son el punto de partida para copiar.</p>
+      <div class="guia-ejemplos-barra" role="group" aria-label="Ancho de la vista">
+        <span class="texto-gris">Ancho:</span>
+        <button type="button" class="btn btn-secundario guia-ancho" data-ancho="320" aria-pressed="false">320</button>
+        <button type="button" class="btn btn-secundario guia-ancho" data-ancho="390" aria-pressed="true">390</button>
+        <button type="button" class="btn btn-secundario guia-ancho" data-ancho="768" aria-pressed="false">768</button>
+        <button type="button" class="btn btn-secundario guia-ancho" data-ancho="1280" aria-pressed="false">1280</button>
+        <button type="button" class="btn btn-secundario guia-ancho" data-ancho="lado" aria-pressed="false">Lado a lado</button>
+      </div>
+      <div class="pestanas" data-pestanas>
+        <div class="pestanas-lista" role="tablist" aria-label="Formularios de ejemplo">
+          <button type="button" class="pestana" role="tab" id="tab-solicitud" aria-controls="panel-solicitud" aria-selected="true">Solicitud por pasos</button>
+          <button type="button" class="pestana" role="tab" id="tab-registro" aria-controls="panel-registro" aria-selected="false" tabindex="-1">Registro de una página</button>
+          <button type="button" class="pestana" role="tab" id="tab-encuesta" aria-controls="panel-encuesta" aria-selected="false" tabindex="-1">Encuesta</button>
+          <button type="button" class="pestana" role="tab" id="tab-interna" aria-controls="panel-interna" aria-selected="false" tabindex="-1">Consulta y captura interna</button>
+        </div>
+        <div class="pestanas-panel" role="tabpanel" id="panel-solicitud" aria-labelledby="tab-solicitud" tabindex="0">
+          <p class="texto-gris">Pasos, opciones con «Otro», cascada alcaldía → colonia → cp, fecha con «Hoy», archivos, mapa, revisión, acuse y aviso de privacidad. Prueba <code>?simular=error</code>, <code>limite</code> o <code>lento</code> en la plantilla.</p>
+          <div class="guia-marcos" data-marcos><iframe class="guia-marco" src="../codigo/plantillas/por-pasos.html" title="Solicitud de ejemplo por pasos" loading="lazy"></iframe></div>
+        </div>
+        <div class="pestanas-panel" role="tabpanel" id="panel-registro" aria-labelledby="tab-registro" tabindex="0" hidden>
+          <p class="texto-gris">CURP con derivados en solo lectura, confirmación de correo (cruzada), numérico con unidad, combo con chips, opción múltiple con máximo, rango de fechas con atajos, escala, repetibles, interruptor y migas.</p>
+          <div class="guia-marcos" data-marcos><iframe class="guia-marco" data-src="../codigo/plantillas/una-pagina.html" title="Registro de ejemplo de una página" loading="lazy"></iframe></div>
+        </div>
+        <div class="pestanas-panel" role="tabpanel" id="panel-encuesta" aria-labelledby="tab-encuesta" tabindex="0" hidden>
+          <p class="texto-gris">Encuesta anónima de una página: escala, opciones con «Otro», texto libre y barra de progreso.</p>
+          <div class="guia-marcos" data-marcos><iframe class="guia-marco" data-src="ejemplos/encuesta.html" title="Encuesta de ejemplo" loading="lazy"></iframe></div>
+        </div>
+        <div class="pestanas-panel" role="tabpanel" id="panel-interna" aria-labelledby="tab-interna" tabindex="0" hidden>
+          <p class="texto-gris">Consulta interna: pestañas, tabla con orden y acciones por fila (en teléfono, tarjetas), paginación que conserva filtros, descarga; y captura rápida con chips de uso frecuente, «Hoy» y folio copiable.</p>
+          <div class="guia-marcos" data-marcos><iframe class="guia-marco" data-src="ejemplos/captura-interna.html" title="Consulta y captura interna de ejemplo" loading="lazy"></iframe></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 7. Verificación ========== -->
+    <section class="guia-seccion" id="verificacion" aria-labelledby="t-verificacion">
+      <h2 class="titulo-bloque" id="t-verificacion">Antes de liberar un formulario</h2>
+      <p class="bajada">Lista corta para quien adopta el paquete. La lista completa, con evidencia por punto, está en <code>docs/08-verificacion-y-cierre.md</code>.</p>
+      <ol class="guia-lista-verif">
+        <li><code>npm run verificar</code> en verde: auditor de CSS, contraste, pruebas en navegador (móvil y escritorio) y axe-core.</li>
+        <li>Todo campo declara <code>data-uso</code>; los de datos personales, <code>data-finalidad</code>; los que no deben guardarse en borrador, <code>data-sensible</code> (<code>node herramientas/auditar-campos.mjs</code> lo comprueba).</li>
+        <li>Cada campo de identidad, contacto y domicilio de quien llena lleva su <code>autocomplete</code>; los de terceros lo desactivan con su motivo en comentario.</li>
+        <li>Una sola acción principal por pantalla; «Atrás» como enlace con flecha; sin «Aceptar» ni «OK».</li>
+        <li>Los mensajes de error dicen qué hacer; el resumen recibe el foco; nada se comunica sólo con color.</li>
+        <li>Recorrido completo sólo con teclado, y con lector de pantalla real (NVDA o VoiceOver): ninguna herramienta lo sustituye.</li>
+        <li>Probado en un iPhone y un Android reales, con red limitada; sin desplazamiento horizontal en 320 px ni con zoom al 400 %.</li>
+        <li>El servidor repite toda validación con <code>codigo/servidor/validar.mjs</code> y el esquema regenerado del HTML final; aplica límite por origen e idempotencia.</li>
+        <li>Aviso de privacidad en pantalla antes de enviar; los fundamentos sin verificar quedan como <span class="pendiente">[Art. __, fracc. __]</span>.</li>
+        <li>Sin llamadas a terceros (consola y red limpias), salvo el mapa base declarado en configuración.</li>
+        <li><strong>Verificado en móvil y en escritorio</strong> (casilla obligatoria del cierre de bloque).</li>
+      </ol>
+    </section>
+  </main>
+</div>
+
+<footer class="pie"><div class="pie-int"><p>Secretaría del Medio Ambiente de la Ciudad de México · Sistema de Información Ambiental · Estándar de formularios v<span data-version></span>.</p></div></footer>
+
+<!-- Pantalla de límite y acuse para las muestras que envían -->
+<div class="guia-toast" data-toast role="status" aria-live="polite" hidden></div>
+
+<!-- ===== Plantillas de las muestras del núcleo. Cada <template data-demo> se clona dentro de un formulario vivo y su HTML se muestra para copiar. ===== -->
+<template data-demo="campo-texto">
+<div class="fila">
+  <div class="campo" data-campo="n_nombre" data-formato="nombre" data-requerido data-sensible data-uso="Identificar a la persona." data-finalidad="Dirigirse a ella al dar seguimiento.">
+    <label class="etiqueta" for="n_nombre">Nombre</label>
+    <p class="ayuda">Como aparece en tu identificación.</p>
+    <input class="control" id="n_nombre" name="n_nombre" type="text" maxlength="80" autocomplete="given-name">
+  </div>
+  <div class="campo" data-campo="n_correo" data-formato="correo" data-requerido data-sensible data-uso="Enviar el seguimiento." data-finalidad="Informar el avance.">
+    <label class="etiqueta" for="n_correo">Correo electrónico</label>
+    <input class="control" id="n_correo" name="n_correo" type="email" maxlength="120" autocomplete="email">
+  </div>
+</div>
+<div class="fila">
+  <div class="campo" data-campo="n_tel" data-formato="telefono" data-sensible data-uso="Aclarar dudas." data-finalidad="Llamar si la persona lo pidió.">
+    <label class="etiqueta" for="n_tel">Teléfono</label>
+    <p class="ayuda">Diez dígitos; se aceptan espacios y guiones.</p>
+    <input class="control" id="n_tel" name="n_tel" type="tel" autocomplete="tel-national">
+  </div>
+  <div class="campo" data-campo="n_cant" data-formato="numero" data-uso="Dimensionar.">
+    <label class="etiqueta" for="n_cant">Superficie</label>
+    <div class="control-grupo"><input class="control" id="n_cant" name="n_cant" type="text" inputmode="decimal" min="0" max="10000" step="any" autocomplete="off"><span class="control-unidad" aria-hidden="true">m²</span></div>
+  </div>
+</div>
+<div class="fila-2-1">
+  <div class="campo" data-campo="n_calle" data-uso="Localizar el sitio."><label class="etiqueta" for="n_calle">Calle (fila 2-1: el primero ocupa el doble)</label><input class="control" id="n_calle" name="n_calle" type="text" maxlength="120" autocomplete="address-line1"></div>
+  <div class="campo" data-campo="n_num" data-uso="Localizar el sitio."><label class="etiqueta" for="n_num">Número</label><input class="control" id="n_num" name="n_num" type="text" maxlength="10" autocomplete="off"></div>
+</div>
+<div class="fila-3">
+  <div class="campo" data-campo="n_a" data-formato="numero" data-uso="Muestra de fila a tercios."><label class="etiqueta" for="n_a">Altura</label><div class="control-grupo"><input class="control" id="n_a" name="n_a" type="text" inputmode="decimal" min="0" max="60" step="any" autocomplete="off"><span class="control-unidad" aria-hidden="true">m</span></div></div>
+  <div class="campo" data-campo="n_b" data-formato="numero" data-uso="Muestra."><label class="etiqueta" for="n_b">Diámetro</label><div class="control-grupo"><input class="control" id="n_b" name="n_b" type="text" inputmode="decimal" min="0" max="500" step="any" autocomplete="off"><span class="control-unidad" aria-hidden="true">cm</span></div></div>
+  <div class="campo" data-campo="n_c" data-formato="numero" data-uso="Muestra."><label class="etiqueta" for="n_c">Ejemplares</label><input class="control control-corto" id="n_c" name="n_c" type="text" inputmode="numeric" min="1" max="999" step="1" autocomplete="off"></div>
+</div>
+<div class="campo" data-campo="n_desc" data-requerido data-uso="Valorar el caso.">
+  <label class="etiqueta" for="n_desc">Describe la situación</label>
+  <p class="ayuda">Con tus palabras; sin datos de otras personas.</p>
+  <textarea class="control control-texto" id="n_desc" name="n_desc" rows="3" minlength="40" maxlength="300" data-legible autocomplete="off"></textarea>
+</div>
+</template>
+
+<template data-demo="select-casilla">
+<div class="fila">
+  <div class="campo" data-campo="n_via" data-requerido data-uso="Localizar el sitio.">
+    <label class="etiqueta" for="n_via">Tipo de vía</label>
+    <div class="select"><select class="control control-select" id="n_via" name="n_via"><option value="">Elige una opción</option><option value="calle">Calle</option><option value="avenida">Avenida</option><option value="calzada">Calzada</option></select></div>
+  </div>
+  <div class="campo" data-campo="n_folio" data-formato="folio" data-uso="Referencia del sistema." data-copiable>
+    <label class="etiqueta" for="n_folio">Folio asignado (solo lectura)</label>
+    <input class="control" id="n_folio" name="n_folio" type="text" value="EJ-2026-000123" readonly autocomplete="off">
+  </div>
+</div>
+<div class="fila">
+  <div class="campo" data-campo="n_desh" data-uso="Muestra de deshabilitado.">
+    <label class="etiqueta" for="n_desh">Campo deshabilitado (no aplica aún)</label>
+    <input class="control" id="n_desh" name="n_desh" type="text" value="No disponible" disabled>
+  </div>
+  <div class="campo" data-campo="n_err" data-formato="cp" data-uso="Muestra de error.">
+    <label class="etiqueta" for="n_err">Código postal (muestra de error)</label>
+    <input class="control" id="n_err" name="n_err" type="text" inputmode="numeric" value="1234" aria-invalid="true" autocomplete="off">
+  </div>
+</div>
+<div class="destacado" data-campo="n_acepta" data-requerido data-uso="Constancia de que se informó.">
+  <label class="casilla"><input class="casilla-input" type="checkbox" name="n_acepta" value="si"><span class="casilla-texto"><span class="etiqueta destacado-nombre">Leí el aviso de privacidad</span><span class="destacado-ayuda">Casilla de declaración o consentimiento: nunca premarcada.</span></span></label>
+</div>
+</template>
+
+<template data-demo="condicional">
+<fieldset class="grupo" data-campo="n_contacto" data-requerido data-uso="Decidir si se piden datos de contacto.">
+  <legend class="etiqueta">¿Quieres que te contactemos?</legend>
+  <div class="opciones-cortas">
+    <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="n_contacto" value="si"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Sí</span></label>
+    <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="n_contacto" value="no"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>No</span></label>
+  </div>
+</fieldset>
+<div data-si="n_contacto=si">
+  <div class="campo" data-campo="n_correo2" data-formato="correo" data-requerido data-sensible data-uso="Contacto." data-finalidad="Informar el avance.">
+    <label class="etiqueta" for="n_correo2">Correo electrónico</label>
+    <p class="ayuda">Sólo existe mientras la respuesta sea «Sí»: si cambias a «No», no se valida ni viaja, y lo escrito se conserva.</p>
+    <input class="control" id="n_correo2" name="n_correo2" type="email" autocomplete="email">
+  </div>
+</div>
+</template>
+
+<template data-demo="botones-avisos">
+<div class="acciones guia-acciones-demo">
+  <button type="button" class="btn-atras"><svg class="icono" aria-hidden="true"><use href="#i-flecha-izq"></use></svg>Atrás</button>
+  <button type="button" class="btn btn-secundario">Guardar borrador</button>
+  <button type="button" class="btn btn-peligro"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg>Descartar</button>
+  <button type="button" class="btn btn-primario">Continuar</button>
+</div>
+<div class="guia-fila-demo">
+  <button type="button" class="btn btn-primario" data-demo-foco>Con foco</button>
+  <button type="button" class="btn btn-primario" aria-disabled="true">Deshabilitado accesible</button>
+  <button type="button" class="btn btn-primario" aria-busy="true" aria-disabled="true"><svg class="icono icono-giro" aria-hidden="true"><use href="#i-cargando"></use></svg>Enviando…</button>
+  <button type="button" class="btn-enlace"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-copiar"></use></svg>Enlace-botón</button>
+  <button type="button" class="btn-icono" aria-label="Cerrar"><svg class="icono" aria-hidden="true"><use href="#i-cerrar"></use></svg></button>
+</div>
+<p class="aviso"><svg class="icono" aria-hidden="true"><use href="#i-info"></use></svg><span class="aviso-texto"><strong>Aviso.</strong> Algo que hay que leer, sin alarma. Cortés: no interrumpe al lector de pantalla.</span></p>
+<p class="aviso aviso-advertencia"><svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg><span class="aviso-texto"><strong>Advertencia.</strong> Atención sin bloqueo: puedes continuar, pero revisa.</span></p>
+<p class="aviso aviso-bloqueo" role="alert"><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"><strong>No puedes continuar.</strong> Lo único que impide seguir. Asertivo: el lector lo anuncia al momento.</span></p>
+<p class="aviso aviso-ok" role="status"><svg class="icono" aria-hidden="true"><use href="#i-ok"></use></svg><span class="aviso-texto"><strong>Recibido.</strong> El sistema confirma que recibió o guardó.</span></p>
+<p class="texto-gris">Lo que el proyecto no resuelve se dice: <span class="pendiente">Pendiente: horario de atención</span>. El rótulo va en el HTML, no en CSS, para que el lector lo lea.</p>
+</template>
+
+<template data-demo="resumen">
+<div class="campo" data-campo="n_r1" data-formato="cp" data-requerido data-uso="Muestra."><label class="etiqueta" for="n_r1">Código postal</label><input class="control" id="n_r1" name="n_r1" type="text" inputmode="numeric" autocomplete="postal-code"></div>
+<div class="campo" data-campo="n_r2" data-formato="fecha" data-no-futura data-requerido data-uso="Muestra."><label class="etiqueta" for="n_r2">Fecha de los hechos</label><input class="control" id="n_r2" name="n_r2" type="date" autocomplete="off"></div>
+<p class="aviso aviso-bloqueo estado-envio" data-estado-envio role="alert" tabindex="-1" hidden><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"></span></p>
+<div class="acciones"><button type="submit" class="btn btn-primario btn-ancho" data-accion="enviar">Enviar (simulado; botón a lo ancho con .btn-ancho)</button></div>
+</template>
+
+<!-- ===== Plantillas de las muestras de módulos ===== -->
+<template data-demo="opciones">
+<fieldset class="grupo" data-campo="m_tipo" data-requerido data-uso="Muestra.">
+  <legend class="etiqueta">Tarjetas seleccionables (opción única)</legend>
+  <div class="opciones">
+    <label class="opcion"><input class="opcion-input" type="radio" name="m_tipo" value="a"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Información</span><span class="opcion-desc">Quiero conocer un dato.</span></label>
+    <label class="opcion"><input class="opcion-input" type="radio" name="m_tipo" value="b"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Visita técnica</span><span class="opcion-desc">Que revisen un sitio.</span></label>
+    <label class="opcion"><input class="opcion-input" type="radio" name="m_tipo" value="c" disabled><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Deshabilitada</span><span class="opcion-desc">No disponible por ahora.</span></label>
+  </div>
+</fieldset>
+<fieldset class="grupo" data-campo="m_sn" data-requerido data-uso="Muestra.">
+  <legend class="etiqueta">Sí / No (variante corta)</legend>
+  <div class="opciones-cortas">
+    <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="m_sn" value="si"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Sí</span></label>
+    <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="m_sn" value="no"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>No</span></label>
+  </div>
+</fieldset>
+<fieldset class="grupo" data-campo="m_multi" data-requerido data-min-opciones="1" data-max-opciones="2" data-uso="Muestra.">
+  <legend class="etiqueta">Opción múltiple en lista (elige hasta 2)</legend>
+  <div class="opciones-lista">
+    <label class="opcion-fila"><input class="opcion-fila-input" type="checkbox" name="m_multi" value="1"><span><span class="opcion-nombre">Reforestación</span><span class="opcion-desc">Jornadas de plantación.</span></span></label>
+    <label class="opcion-fila"><input class="opcion-fila-input" type="checkbox" name="m_multi" value="2"><span><span class="opcion-nombre">Monitoreo</span></span></label>
+    <label class="opcion-fila"><input class="opcion-fila-input" type="checkbox" name="m_multi" value="3"><span><span class="opcion-nombre">Talleres</span></span></label>
+  </div>
+</fieldset>
+</template>
+
+<template data-demo="otro">
+<fieldset class="grupo" data-campo="m_motivo" data-requerido data-uso="Muestra.">
+  <legend class="etiqueta">¿A qué viniste?</legend>
+  <div class="opciones-lista">
+    <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="m_motivo" value="pasear"><span><span class="opcion-nombre">A pasear</span></span></label>
+    <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="m_motivo" value="ejercicio"><span><span class="opcion-nombre">A hacer ejercicio</span></span></label>
+    <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="m_motivo" value="otro"><span><span class="opcion-nombre">Otro</span></span></label>
+  </div>
+</fieldset>
+<div class="campo" data-campo="m_motivo_otro" data-si="m_motivo=otro" data-otro-de="m_motivo" data-requerido data-uso="Muestra.">
+  <label class="etiqueta" for="m_motivo_otro">Especifica cuál</label>
+  <input class="control" id="m_motivo_otro" name="m_motivo_otro" type="text" maxlength="80" autocomplete="off">
+</div>
+<div class="campo" data-campo="m_sel" data-requerido data-uso="Muestra.">
+  <label class="etiqueta" for="m_sel">«Otro» en una lista desplegable</label>
+  <div class="select"><select class="control control-select" id="m_sel" name="m_sel"><option value="">Elige una opción</option><option value="a">Árbol</option><option value="b">Arbusto</option><option value="otro">Otro</option></select></div>
+</div>
+<div class="campo" data-campo="m_sel_otro" data-si="m_sel=otro" data-otro-de="m_sel" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_sel_otro">Especifica cuál</label><input class="control" id="m_sel_otro" name="m_sel_otro" type="text" maxlength="80" autocomplete="off"></div>
+</template>
+
+<template data-demo="combo">
+<div class="fila">
+  <div class="campo" data-campo="m_alc" data-requerido data-uso="Muestra.">
+    <label class="etiqueta" for="m_alc">Alcaldía (lista cerrada)</label>
+    <p class="ayuda">Escribe «co» y usa las flechas.</p>
+    <div class="combo" data-combo data-catalogo="alcaldias"><input class="control" id="m_alc" name="m_alc" type="text" autocomplete="off"><ul class="combo-lista" hidden></ul></div>
+  </div>
+  <div class="campo" data-campo="m_esp" data-uso="Muestra.">
+    <label class="etiqueta" for="m_esp">Especie (acepta valor libre)</label>
+    <p class="ayuda">Si no está en la lista, se guarda como lo escribas.</p>
+    <div class="combo" data-combo data-catalogo="especies" data-libre><input class="control" id="m_esp" name="m_esp" type="text" autocomplete="off"><ul class="combo-lista" hidden></ul></div>
+  </div>
+</div>
+</template>
+
+<template data-demo="cascadas">
+<div data-cascada data-catalogo="cdmx">
+  <div class="fila">
+    <div class="campo" data-campo="m_alcaldia" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_alcaldia">Alcaldía</label><div class="select"><select class="control control-select" id="m_alcaldia" name="m_alcaldia" data-nivel="alcaldia"><option value="">Elige una opción</option></select></div></div>
+    <div class="campo" data-campo="m_colonia" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_colonia">Colonia</label><p class="ayuda">Se habilita al elegir la alcaldía.</p><div class="select"><select class="control control-select" id="m_colonia" name="m_colonia" data-nivel="colonia" disabled><option value="">Elige una opción</option></select></div></div>
+  </div>
+  <div class="campo" data-campo="m_cp" data-formato="cp" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_cp">Código postal</label><p class="ayuda">Escríbelo primero (por ejemplo 04010) y propone alcaldía y colonia; el catálogo es ficticio.</p><input class="control control-corto" id="m_cp" name="m_cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="off"></div>
+  <div class="cascada-manual" data-cascada-manual hidden><p class="texto-gris">Sin catálogo: captura manual.</p></div>
+</div>
+</template>
+
+<template data-demo="fecha">
+<div data-rango="m_desde,m_hasta" data-atajos="7,30">
+  <div class="fila">
+    <div class="campo" data-campo="m_desde" data-formato="fecha" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_desde">Desde</label><div class="fecha-grupo"><input class="control" id="m_desde" name="m_desde" type="date" autocomplete="off"><button type="button" class="btn btn-secundario fecha-hoy" data-hoy></button></div></div>
+    <div class="campo" data-campo="m_hasta" data-formato="fecha" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_hasta">Hasta</label><div class="fecha-grupo"><input class="control" id="m_hasta" name="m_hasta" type="date" autocomplete="off"><button type="button" class="btn btn-secundario fecha-hoy" data-hoy></button></div></div>
+  </div>
+</div>
+<div class="fila">
+  <div class="campo" data-campo="m_nac" data-formato="fecha" data-no-futura data-uso="Muestra."><label class="etiqueta" for="m_nac">Fecha no futura</label><input class="control" id="m_nac" name="m_nac" type="date" autocomplete="off"></div>
+  <div class="campo" data-campo="m_hora" data-formato="hora" data-uso="Muestra."><label class="etiqueta" for="m_hora">Hora</label><div class="fecha-grupo"><input class="control" id="m_hora" name="m_hora" type="time" autocomplete="off"><button type="button" class="btn btn-secundario fecha-hoy" data-ahora></button></div></div>
+</div>
+</template>
+
+<template data-demo="identificadores">
+<div class="fila">
+  <div class="campo" data-campo="m_curp" data-formato="curp" data-uso="Muestra." data-deriva="fechaNacimiento=m_curp_nac sexo=m_curp_sexo"><label class="etiqueta" for="m_curp">CURP</label><p class="ayuda">Mayúsculas al escribir; 18 caracteres. Ficticia: PEGJ900515HDFRRN09</p><input class="control" id="m_curp" name="m_curp" type="text" maxlength="18" autocomplete="off"></div>
+  <div class="campo" data-campo="m_rfc" data-formato="rfc" data-uso="Muestra."><label class="etiqueta" for="m_rfc">RFC</label><input class="control" id="m_rfc" name="m_rfc" type="text" maxlength="13" autocomplete="off"></div>
+</div>
+<div class="fila">
+  <div class="campo" data-campo="m_curp_nac" data-formato="fecha" data-uso="Derivado."><label class="etiqueta" for="m_curp_nac">Fecha de nacimiento (derivada)</label><input class="control" id="m_curp_nac" name="m_curp_nac" type="date" readonly></div>
+  <div class="campo" data-campo="m_curp_sexo" data-uso="Derivado."><label class="etiqueta" for="m_curp_sexo">Sexo (derivado)</label><input class="control" id="m_curp_sexo" name="m_curp_sexo" type="text" readonly></div>
+</div>
+</template>
+
+<template data-demo="repetibles">
+<div class="repetible" data-repetible="m_personas" data-min="1" data-max="3" data-etiqueta="Persona">
+  <p class="etiqueta">Personas (1 a 3)</p>
+  <ol class="repetible-lista" data-repetible-lista></ol>
+  <template data-repetible-plantilla><li><div class="fila"><div class="campo" data-campo="m_personas.#.nombre" data-formato="nombre" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_p-#-n">Nombre</label><input class="control" id="m_p-#-n" name="m_personas[#][nombre]" type="text" autocomplete="off"></div><div class="campo" data-campo="m_personas.#.edad" data-formato="numero" data-uso="Muestra."><label class="etiqueta" for="m_p-#-e">Edad</label><input class="control control-corto" id="m_p-#-e" name="m_personas[#][edad]" type="text" inputmode="numeric" min="0" max="120" step="1" autocomplete="off"></div></div></li></template>
+  <button type="button" class="btn btn-secundario" data-repetible-agregar><svg class="icono" aria-hidden="true"><use href="#i-mas"></use></svg>Agregar persona</button>
+</div>
+</template>
+
+<template data-demo="toggle">
+<div class="toggle" data-campo="m_avisos" data-uso="Muestra.">
+  <span class="etiqueta" id="m_t_avisos">Recibir recordatorios</span>
+  <button type="button" class="toggle-btn" role="switch" aria-checked="false" aria-labelledby="m_t_avisos" data-toggle><span class="toggle-pista" aria-hidden="true"><span class="toggle-perilla"></span></span><span class="toggle-estado" data-toggle-estado></span></button>
+  <input type="hidden" name="m_avisos">
+</div>
+</template>
+
+<template data-demo="escala">
+<fieldset class="grupo escala" data-campo="m_escala" data-requerido data-uso="Muestra.">
+  <legend class="etiqueta">¿Qué tan clara fue la información?</legend>
+  <div class="escala-puntos">
+    <label class="escala-punto"><input class="opcion-input" type="radio" name="m_escala" value="1"><span class="escala-num">1</span><span class="solo-lector"> Nada clara</span></label>
+    <label class="escala-punto"><input class="opcion-input" type="radio" name="m_escala" value="2"><span class="escala-num">2</span></label>
+    <label class="escala-punto"><input class="opcion-input" type="radio" name="m_escala" value="3"><span class="escala-num">3</span></label>
+    <label class="escala-punto"><input class="opcion-input" type="radio" name="m_escala" value="4"><span class="escala-num">4</span></label>
+    <label class="escala-punto"><input class="opcion-input" type="radio" name="m_escala" value="5"><span class="escala-num">5</span><span class="solo-lector"> Muy clara</span></label>
+  </div>
+  <div class="escala-extremos" aria-hidden="true"><span>Nada clara</span><span>Muy clara</span></div>
+</fieldset>
+</template>
+
+<template data-demo="modal">
+<div class="guia-fila-demo">
+  <button type="button" class="btn btn-secundario" data-abre-dialogo="demo-dialogo">Abrir diálogo de contenido</button>
+  <button type="button" class="btn btn-peligro" data-demo-confirma>Descartar (pide confirmación)</button>
+</div>
+<p class="texto-gris" data-demo-confirma-resultado aria-live="polite"></p>
+<dialog class="dialogo" id="demo-dialogo" aria-labelledby="demo-dialogo-t">
+  <h2 class="titulo-bloque dialogo-titulo" id="demo-dialogo-t">Aviso de privacidad simplificado</h2>
+  <p class="priv-parrafo">La Secretaría usa estos datos sólo para atender la solicitud. Fundamento: <span class="pendiente">[Art. __, fracc. __]</span>.</p>
+  <div class="dialogo-cierre"><button type="button" class="btn btn-primario" data-cierra-dialogo>Cerrar</button></div>
+</dialog>
+</template>
+
+<template data-demo="copiar">
+<div class="campo" data-campo="m_folio" data-formato="folio" data-uso="Muestra." data-copiable><label class="etiqueta" for="m_folio">Folio (solo lectura, copiable)</label><input class="control mono" id="m_folio" name="m_folio" type="text" value="EJ-2026-000123" readonly autocomplete="off"></div>
+<div class="guia-fila-demo"><span class="acuse-valor" id="m_folio_txt">EJEMPLO-K3F9A</span><button type="button" class="btn-enlace" data-copiar="#m_folio_txt"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-copiar"></use></svg>Copiar folio</button><button type="button" class="btn-enlace" data-compartir data-compartir-texto="Folio de ejemplo"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-compartir"></use></svg>Compartir</button></div>
+</template>
+
+<template data-demo="descarga">
+<div class="guia-fila-demo">
+  <a class="btn btn-secundario descarga" href="data:text/plain;charset=utf-8,Acuse%20de%20ejemplo" download="acuse-ejemplo.txt" data-descarga data-formato="TXT" data-peso="1 KB">Descargar acuse</a>
+  <button type="button" class="btn btn-secundario descarga" data-descarga data-generar="demo" data-formato="CSV">Generar y descargar</button>
+</div>
+</template>
+
+<template data-demo="acordeon">
+<details class="plegable"><summary class="plegable-titulo">¿Cómo copio mi ubicación desde el teléfono?</summary><div class="plegable-cuerpo">Mantén pulsado el punto en tu aplicación de mapas y elige «Copiar coordenadas».</div></details>
+<details class="plegable" open><summary class="plegable-titulo">¿Qué pasa con mis datos?</summary><div class="plegable-cuerpo">La Secretaría los usa sólo para atender la solicitud.</div></details>
+</template>
+
+<template data-demo="pestanas">
+<div class="pestanas" data-pestanas>
+  <div class="pestanas-lista" role="tablist" aria-label="Muestra de pestañas">
+    <button type="button" class="pestana" role="tab" id="m_tab1" aria-controls="m_panel1" aria-selected="true">Datos</button>
+    <button type="button" class="pestana" role="tab" id="m_tab2" aria-controls="m_panel2" aria-selected="false" tabindex="-1">Historial</button>
+    <button type="button" class="pestana" role="tab" id="m_tab3" aria-controls="m_panel3" aria-selected="false" tabindex="-1">Documentos</button>
+  </div>
+  <div class="pestanas-panel" role="tabpanel" id="m_panel1" aria-labelledby="m_tab1" tabindex="0"><p class="texto-gris">Contenido de la pestaña Datos. Usa las flechas para cambiar.</p></div>
+  <div class="pestanas-panel" role="tabpanel" id="m_panel2" aria-labelledby="m_tab2" tabindex="0" hidden><p class="texto-gris">Contenido de Historial.</p></div>
+  <div class="pestanas-panel" role="tabpanel" id="m_panel3" aria-labelledby="m_tab3" tabindex="0" hidden><p class="texto-gris">Contenido de Documentos.</p></div>
+</div>
+</template>
+
+<template data-demo="migas">
+<nav class="migas" aria-label="Ubicación (muestra)"><ol class="migas-lista"><li class="migas-item"><a class="migas-enlace" href="#migas">Inicio</a></li><li class="migas-item"><a class="migas-enlace" href="#migas">Expedientes</a></li><li class="migas-item"><span class="migas-actual" aria-current="page">Expediente 123</span></li></ol></nav>
+</template>
+
+<template data-demo="progreso">
+<div class="progreso" data-progreso><label class="progreso-etq" for="m_pg">Subiendo archivos</label><progress class="progreso-barra" id="m_pg" max="100" value="40"></progress><span class="progreso-txt" data-progreso-texto aria-hidden="true"></span></div>
+<div class="progreso" data-progreso><label class="progreso-etq" for="m_pg2">Indeterminado</label><progress class="progreso-barra" id="m_pg2" max="100"></progress><span class="progreso-txt" data-progreso-texto aria-hidden="true"></span></div>
+</template>
+
+<template data-demo="paginacion">
+<ul class="guia-lista-resultados" id="m_resultados" tabindex="-1" aria-label="Resultados de muestra"></ul>
+<nav class="paginacion" data-paginacion data-total="312" data-pagina="2" data-tamano="20" data-tamanos="10,20,50" data-lista="#m_resultados" aria-label="Páginas de resultados (muestra)"></nav>
+</template>
+
+<template data-demo="tooltip">
+<div class="campo" data-campo="m_tt" data-uso="Muestra."><label class="etiqueta" for="m_tt">Folio anterior <span class="tooltip" data-tooltip><button type="button" class="btn-icono tooltip-btn" aria-expanded="false" aria-label="Ayuda sobre el folio"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-ayuda"></use></svg></button><span class="tooltip-texto" role="tooltip" hidden>El folio aparece en la esquina superior de tu acuse anterior.</span></span></label><input class="control" id="m_tt" name="m_tt" type="text" autocomplete="off"></div>
+</template>
+
+<template data-demo="tabla">
+<div class="tabla-marco" data-tabla data-clave="folio">
+  <table class="tabla"><caption class="tabla-titulo">Solicitudes (muestra)</caption>
+    <thead><tr><th scope="col" data-ordenable>Folio</th><th scope="col" data-ordenable>Título</th><th scope="col" data-ordenable>Fecha</th><th scope="col">Acciones</th></tr></thead>
+    <tbody>
+      <tr data-folio="EJ-001"><td>EJ-001</td><td>Árbol de prueba inclinado</td><td>2026-03-01</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
+      <tr data-folio="EJ-002"><td>EJ-002</td><td>Residuos de prueba</td><td>2026-02-10</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
+      <tr data-folio="EJ-003"><td>EJ-003</td><td>Registro con un título muy largo que no cabe en una línea</td><td>2026-01-20</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
+    </tbody>
+  </table>
+  <p class="tabla-vacia" data-tabla-vacia hidden>No hay resultados.</p>
+</div>
+</template>
+
+<template data-demo="archivos">
+<div class="campo" data-campo="m_fotos" data-uso="Muestra." data-max="3">
+  <span class="etiqueta" id="m_et_fotos">Fotografías o documentos</span>
+  <p class="ayuda" id="m_ay_fotos">Arrastra aquí o elige. En el teléfono aparece el botón de cámara.</p>
+  <div data-archivos>
+    <button type="button" class="zona-carga" aria-describedby="m_ay_fotos"><svg class="icono" aria-hidden="true"><use href="#i-adjunto"></use></svg><span class="zona-carga-texto">Elegir archivos o arrastrarlos aquí</span><span class="zona-carga-limite" data-limite-texto></span></button>
+    <button type="button" class="btn btn-secundario zona-camara" data-camara hidden>Tomar fotografía</button>
+    <input type="file" hidden><input type="file" accept="image/*" capture="environment" hidden data-entrada-camara>
+    <div data-rechazos></div><ul class="lista-arch"></ul>
+  </div>
+</div>
+</template>
+
+<template data-demo="mapa">
+<div class="vias">
+<div class="vias-item campo" data-campo="m_punto" data-uso="Muestra.">
+  <span class="etiqueta" id="m_et_punto">Punto en el mapa (sin mapa base configurado)</span>
+  <p class="ayuda">Toca o haz clic para colocar el punto; arrástralo; con el mapa enfocado, Enter lo coloca en el centro. Un dedo desplaza la página, dos el mapa.</p>
+  <div class="mapa" data-mapa data-confirmar role="application" aria-labelledby="m_et_punto" tabindex="0"></div>
+  <p class="mapa-sin" data-mapa-sin hidden></p>
+  <div class="mapa-barra"><output class="coords" data-mapa-coords aria-live="polite">Sin punto marcado.</output><button type="button" class="btn btn-secundario" data-mapa-confirmar hidden>Confirmar punto</button></div>
+  <input type="hidden" name="m_lat" data-mapa-lat><input type="hidden" name="m_lon" data-mapa-lon>
+</div>
+<div class="vias-item campo" data-campo="m_coords" data-formato="coordenadas" data-uso="Muestra."><label class="etiqueta" for="m_coords">Otra vía: coordenadas (latitud, longitud)</label><p class="ayuda">El mapa nunca es el único camino: dirección, coordenadas o alcaldía y colonia.</p><input class="control" id="m_coords" name="m_coords" type="text" inputmode="decimal" autocomplete="off"></div>
+</div>
+<div class="ficha" aria-live="polite">
+  <p class="rotulo">Resultado del cruce (ejemplo estático; el cruce real se resuelve en el servidor)</p>
+  <div class="ficha-fila"><span class="ficha-etq">Alcaldía</span><span class="ficha-valor">Coyoacán (ficticio)</span></div>
+  <div class="ficha-fila"><span class="ficha-etq">Categoría de suelo</span><span class="ficha-valor pendiente">Pendiente: capa oficial</span></div>
+  <div class="ficha-fila"><span class="ficha-etq">Autoridad competente</span><span class="ficha-valor">Se enuncia con palabras, no sólo con color.</span></div>
+</div>
+</template>
+
+<template data-demo="chips">
+<div class="campo" data-campo="m_cat" data-requerido data-uso="Muestra." data-chips><label class="etiqueta" for="m_cat">Categoría (con sugerencias de uso frecuente)</label><p class="ayuda">Escribe un valor y sal del campo: aparece como sugerencia. El historial vive sólo en este dispositivo.</p><input class="control" id="m_cat" name="m_cat" type="text" maxlength="60" autocomplete="off"></div>
+</template>
+
+<script src="../codigo/js/validaciones.config.js"></script>
+<script src="../codigo/js/iconos.js"></script>
+<script src="../codigo/catalogos/cdmx-ejemplo.js"></script>
+<script src="pares.js"></script>
+<script src="manifiesto.js"></script>
+<script src="guia-config.js"></script>
+<script src="../codigo/js/formkit.core.js"></script>
+<script src="../codigo/modulos/otro/otro.js"></script>
+<script src="../codigo/modulos/combo/combo.js"></script>
+<script src="../codigo/modulos/cascadas/cascadas.js"></script>
+<script src="../codigo/modulos/fecha/fecha.js"></script>
+<script src="../codigo/modulos/identificadores/identificadores.js"></script>
+<script src="../codigo/modulos/repetibles/repetibles.js"></script>
+<script src="../codigo/modulos/toggle/toggle.js"></script>
+<script src="../codigo/modulos/pasos/pasos.js"></script>
+<script src="../codigo/modulos/revision/revision.js"></script>
+<script src="../codigo/modulos/acuse/acuse.js"></script>
+<script src="../codigo/modulos/modal/modal.js"></script>
+<script src="../codigo/modulos/copiar/copiar.js"></script>
+<script src="../codigo/modulos/descarga/descarga.js"></script>
+<script src="../codigo/modulos/pestanas/pestanas.js"></script>
+<script src="../codigo/modulos/progreso/progreso.js"></script>
+<script src="../codigo/modulos/paginacion/paginacion.js"></script>
+<script src="../codigo/modulos/tooltip/tooltip.js"></script>
+<script src="../codigo/modulos/tabla/tabla.js"></script>
+<script src="../codigo/modulos/archivos/archivos.js"></script>
+<script src="../vendor/leaflet/leaflet.js"></script>
+<script src="../vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.js"></script>
+<script src="../codigo/modulos/mapa/mapa.js"></script>
+<script src="../codigo/modulos/chips/chips.js"></script>
+<script src="guia.js"></script>
+</body>
+</html>

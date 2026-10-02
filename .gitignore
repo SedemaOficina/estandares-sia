@@ -1,0 +1,7 @@
+# Dependencias de verificación (se instalan con npm install)
+node_modules
+# Pruebas de humo de trabajo: no forman parte del paquete
+pruebas/_humo/
+# Carpeta de lo que se retira a mano
+_to_delete/
+**/_to_delete/

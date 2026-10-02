@@ -1,0 +1,1212 @@
+{
+ "_nota": "Fuente única de las reglas del estándar genérico de formularios del SIA. docs/01-reglas.md se GENERA de este archivo con herramientas/generar-reglas.mjs; no se edita a mano. Numeración FRM-NN corrida (decisión C13). «nivel»: BASE (obligatorio en todo formulario), RECOMENDADO (salvo justificación escrita), OPCIONAL (si el formulario lo necesita). «tipo»: «decisión heredada» = viene de los paquetes A o B (se cita su regla y, si la fase 0 la decidió, su conflicto Cn); «decisión del encargo» = la fija el encargo del estándar genérico (se cita su sección); «mejor práctica adicional» = ninguno la tenía y se agrega con criterio de accesibilidad o de la norma de construcción. «origen» cita A FRM-xx (paquete A), B FRM-XXX-xx (paquete B), Cn (conflicto decidido en la fase 0), «encargo n» (sección del encargo) o «norma n» (norma de construcción de sistemas). «verificacion»: cómo se comprueba.",
+ "secciones": [
+  {
+   "id": 1,
+   "titulo": "Estructura y flujo"
+  },
+  {
+   "id": 2,
+   "titulo": "Campos y etiquetas"
+  },
+  {
+   "id": 3,
+   "titulo": "Tipos de pregunta"
+  },
+  {
+   "id": 4,
+   "titulo": "Validación y errores"
+  },
+  {
+   "id": 5,
+   "titulo": "Acciones y retroalimentación"
+  },
+  {
+   "id": 6,
+   "titulo": "Borrador y envío"
+  },
+  {
+   "id": 7,
+   "titulo": "Ubicación y domicilio"
+  },
+  {
+   "id": 8,
+   "titulo": "Archivos y evidencia"
+  },
+  {
+   "id": 9,
+   "titulo": "Datos personales y protección contra el abuso"
+  },
+  {
+   "id": 10,
+   "titulo": "Móvil y escritorio"
+  },
+  {
+   "id": 11,
+   "titulo": "Hojas de estilo y código"
+  },
+  {
+   "id": 12,
+   "titulo": "Textos y pendientes visibles"
+  },
+  {
+   "id": 13,
+   "titulo": "Bibliotecas, tipografías y verificación"
+  }
+ ],
+ "reglas": [
+  {
+   "id": "FRM-01",
+   "seccion": 1,
+   "titulo": "Un formulario de más de una pantalla se divide en pasos",
+   "regla": "Todo formulario con más de una pantalla de preguntas se organiza en pasos con título propio (módulo «pasos»), barra de avance visible y un bloque de acciones por paso. Un formulario corto va en una sola página con la plantilla una-pagina.html.",
+   "porque": "Una pantalla con todo junto se abandona; el avance visible dice cuánto falta y dónde se está.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-01",
+    "B FRM-EST-01"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos.prueba.mjs: recorrido completo; manifiesto nivel RECOMENDADO"
+  },
+  {
+   "id": "FRM-02",
+   "seccion": 1,
+   "titulo": "La barra de pasos es navegable y exige lo mismo que «Continuar»",
+   "regla": "Cada paso de la barra es un botón. Avanzar desde la barra valida los pasos intermedios y se detiene en el primero con errores; retroceder siempre se permite y no valida. Los pasos futuros quedan habilitados para que el teclado pueda inspeccionarlos.",
+   "porque": "Dos caminos para avanzar con reglas distintas producen envíos incompletos; deshabilitar pasos esconde el recorrido al teclado.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-02",
+    "B FRM-EST-02",
+    "C8"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos.prueba.mjs: «la barra permite inspeccionar pasos futuros…»"
+  },
+  {
+   "id": "FRM-03",
+   "seccion": 1,
+   "titulo": "Al abrir un paso, el foco va a su título y se anuncia",
+   "regla": "Al cambiar de paso el foco se coloca en el título (h2.titulo-paso con tabindex -1) y la región viva anuncia «Paso X de N · Título». En ningún otro momento el formulario mueve el foco por la persona, salvo al resumen de errores.",
+   "porque": "Sin foco, quien usa lector de pantalla queda donde estaba y no sabe que la página cambió.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-05",
+    "B FRM-EST-01"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos.prueba.mjs: «el foco va al título del paso»"
+  },
+  {
+   "id": "FRM-04",
+   "seccion": 1,
+   "titulo": "La barra de avance no se apaga en teléfono ni tapa lo enfocado",
+   "regla": "En pantalla angosta la barra conserva los círculos y muestra «Paso X de N · Título» en lugar de las etiquetas. Si la barra es fija, el documento declara scroll-padding-top con su alto para que ningún campo enfocado quede debajo.",
+   "porque": "Quitar la barra en el teléfono quita la orientación justo donde más falta; una barra fija que tapa el campo enfocado hace invisible el error.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-03",
+    "A FRM-04"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "03-anchos.prueba.mjs: 320, 360 y 390 px; base.css html{scroll-padding-top}"
+  },
+  {
+   "id": "FRM-05",
+   "seccion": 1,
+   "titulo": "Una pantalla de revisión antes de enviar, con «Editar» que aterriza en el campo",
+   "regla": "Los formularios por pasos muestran todo lo capturado agrupado por paso antes de enviar (módulo «revision»). Cada bloque lleva «Editar», que abre el paso y enfoca el campo correspondiente.",
+   "porque": "Revisar antes de enviar evita envíos equivocados y repeticiones; «Editar» que sólo cambia de paso obliga a buscar el campo.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-08"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos.prueba.mjs: «Editar» aterriza en el campo"
+  },
+  {
+   "id": "FRM-06",
+   "seccion": 1,
+   "titulo": "Un acuse con folio al terminar",
+   "regla": "Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue y, si existe, descarga del comprobante. El foco va al título del acuse y se anuncia.",
+   "porque": "Sin acuse la persona no sabe si terminó; sin folio no puede dar seguimiento.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-09",
+    "B FRM-EST-03"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs"
+  },
+  {
+   "id": "FRM-07",
+   "seccion": 1,
+   "titulo": "La pregunta condicional existe sólo mientras aplica",
+   "regla": "Un bloque con data-si=\"campo=valor|valor2\" se muestra sólo si la respuesta coincide. Mientras está oculto no se valida ni viaja en el envío; lo escrito se conserva por si la persona vuelve a cambiar de opinión. El servidor descarta con señal lo que llegue de un bloque cuya condición no se cumple.",
+   "porque": "Validar lo oculto bloquea sin motivo visible; borrar lo escrito castiga explorar; aceptar en el servidor lo que no se pidió es una puerta.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-11",
+    "B FRM-EST-05"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "04-modulos.prueba.mjs: condicional; 06-servidor: condición incumplida"
+  },
+  {
+   "id": "FRM-08",
+   "seccion": 1,
+   "titulo": "Enlace de salto al contenido y una sola jerarquía de encabezados",
+   "regla": "La primera pieza enfocable de la página es «Ir al contenido». Los encabezados siguen la jerarquía de seis niveles del estándar (página, paso, bloque, pregunta, texto y ayuda, rótulo) sin saltos.",
+   "porque": "Sin salto, el teclado recorre la cabecera en cada paso; sin jerarquía, el lector de pantalla no puede navegar por títulos.",
+   "nivel": "BASE",
+   "origen": [
+    "B FRM-EST-06",
+    "A FRM-91",
+    "B FRM-STY-04"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "05-accesibilidad.prueba.mjs (axe heading-order, bypass); guía: jerarquía"
+  },
+  {
+   "id": "FRM-09",
+   "seccion": 2,
+   "titulo": "Cada control tiene su etiqueta visible y asociada",
+   "regla": "Toda entrada lleva label[for] o legend visible. El placeholder nunca sustituye a la etiqueta; la ayuda va en un párrafo propio antes del control, enlazado con aria-describedby.",
+   "porque": "Un texto encima no es etiqueta; el placeholder desaparece al escribir y el lector no siempre lo lee.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-20",
+    "B FRM-CMP-01"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "05-accesibilidad.prueba.mjs (axe label); guía: sí y no"
+  },
+  {
+   "id": "FRM-10",
+   "seccion": 2,
+   "titulo": "Lo obligatorio se marca con asterisco gris y con la palabra",
+   "regla": "Los campos obligatorios llevan un asterisco gris (--gris) con aria-hidden y la palabra «(obligatorio)» sólo para lectores de pantalla; la leyenda «Los campos con * son obligatorios» aparece una vez por pantalla. Los opcionales no se marcan.",
+   "porque": "El rojo del asterisco se confunde con error (decisión C2); sin la palabra, el lector de pantalla no lo sabe.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-30",
+    "B FRM-CMP-02",
+    "C2"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "nucleo.css .marca-oblig; 04-modulos: resumen de obligatorios"
+  },
+  {
+   "id": "FRM-11",
+   "seccion": 2,
+   "titulo": "Cada campo se declara con atributos y la validación vive en un solo archivo",
+   "regla": "El HTML declara cada campo con data-campo, data-formato, required o data-requerido, data-si, data-uso, data-finalidad, data-sensible y las cruzadas. Los patrones, límites y mensajes viven únicamente en validaciones.config.js; los ajustes por formulario, en FORMKIT_CONFIG.",
+   "porque": "Un catálogo paralelo al HTML se desincroniza y acopla (A); mensajes y patrones dispersos en el código incumplen «cero valores fijos» (B). La fusión toma lo mejor de ambos.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-28",
+    "B FRM-CMP-10",
+    "C1"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "04-modulos.prueba.mjs: esquema derivado del HTML coincide con el navegador"
+  },
+  {
+   "id": "FRM-12",
+   "seccion": 2,
+   "titulo": "Cada campo declara autocompletado, inputmode y enterkeyhint cuando aplican",
+   "regla": "Los datos de identidad, contacto y domicilio de quien llena llevan el autocomplete que corresponde (given-name, email, tel-national, postal-code, street-address…); los datos de terceros llevan autocomplete=\"off\" con el motivo en un comentario. El teclado del teléfono se elige con inputmode y type.",
+   "porque": "El autocompletado del dispositivo ahorra tecleo y errores; en datos de terceros rellenaría con los datos de quien captura.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-23",
+    "B FRM-CMP-04"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "herramientas/auditar-campos.mjs D2 y D4"
+  },
+  {
+   "id": "FRM-13",
+   "seccion": 2,
+   "titulo": "Un dato, un campo; campos alineados por renglón",
+   "regla": "Lo que se usa por separado se pide por separado (nombre y apellidos; calle y número). En escritorio los campos de una fila se alinean con subcuadrícula para que los controles queden a la misma altura aunque una etiqueta ocupe dos líneas; en teléfono van en una columna.",
+   "porque": "Un dato compuesto no se puede validar ni consultar; controles desalineados parecen descuido y confunden la lectura por filas.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-22",
+    "A FRM-32"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "base.css .fila (subgrid); guía: núcleo"
+  },
+  {
+   "id": "FRM-14",
+   "seccion": 2,
+   "titulo": "Solo lectura no es deshabilitado",
+   "regla": "Un dato que la persona debe ver y copiar va readonly (borde discontinuo, se envía, copiable con data-copiable). Deshabilitado (disabled) es sólo para lo que no aplica todavía: no se envía y el teclado lo salta.",
+   "porque": "Deshabilitar un folio que hay que copiar lo vuelve inalcanzable; marcar readonly lo que no aplica lo envía.",
+   "nivel": "BASE",
+   "origen": [
+    "encargo 5.2"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "guía: sí y no; 02-una-pagina: derivados copiables"
+  },
+  {
+   "id": "FRM-15",
+   "seccion": 2,
+   "titulo": "Texto largo con contador y mínimo legible",
+   "regla": "El texto libre lleva maxlength visible como contador y, cuando se exige una descripción, minlength y data-legible: se rechaza el tecleo al azar por forma, nunca por ortografía.",
+   "porque": "Sin contador se corta sin aviso; validar el sentido castiga a quien escribe distinto.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-35",
+    "B FRM-CMP-08",
+    "B FRM-VAL-06"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: validación en el momento acordado"
+  },
+  {
+   "id": "FRM-16",
+   "seccion": 3,
+   "titulo": "Las opciones son controles nativos cubiertos por su tarjeta",
+   "regla": "Opción única y múltiple se construyen con input radio o checkbox dentro de label, agrupados en fieldset con legend. La tarjeta seleccionable y la variante corta Sí/No son el mismo control con otra piel: lo elegido se marca con fondo, sombra interior y palomita, nunca sólo con color.",
+   "porque": "Un div con onclick no recibe foco ni se anuncia; marcar sólo con color excluye a quien no lo distingue.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-26",
+    "B FRM-CMP-05",
+    "B FRM-CMP-06",
+    "C3"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "04-modulos; 05-accesibilidad; manifiesto «opciones»"
+  },
+  {
+   "id": "FRM-17",
+   "seccion": 3,
+   "titulo": "Sí/No ocupa el alto táctil según el puntero, no según el ancho",
+   "regla": "La opción corta mide --alto-opcion con ratón y sube a --alto-control con pointer:coarse. Nunca se premarca.",
+   "porque": "El dedo necesita 44 px aunque la pantalla sea ancha; el ratón no necesita botones enormes.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-27"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "03-anchos.prueba.mjs: objetivos táctiles ≥ 44 px"
+  },
+  {
+   "id": "FRM-18",
+   "seccion": 3,
+   "titulo": "«Otro» es un componente, con especificación o simple",
+   "regla": "Cuando la lista puede no cubrir el caso, la opción «Otro» va al final; con data-otro-de el campo de especificación aparece sólo al elegirla, es obligatorio mientras exista, rechaza repetir una opción de la lista y conserva lo escrito. Cuando el detalle no aporta, «Otro» es una opción más.",
+   "porque": "Sin «Otro» la persona miente o abandona; una especificación que no se exige produce «otro» vacíos.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "encargo 5.2"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "04-modulos.prueba.mjs: «Otro»"
+  },
+  {
+   "id": "FRM-19",
+   "seccion": 3,
+   "titulo": "La lista desplegable con búsqueda es cerrada por omisión",
+   "regla": "El combo (módulo «combo») filtra desde la primera letra, se opera con flechas, Enter y Escape, y sólo acepta valores del catálogo. Con data-libre acepta lo escrito. Se usa a partir de 8 opciones; con menos, radios o select nativo.",
+   "porque": "Un valor libre en un campo de catálogo rompe la consulta; un select de 40 opciones es intransitable en el teléfono.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-24",
+    "A FRM-25",
+    "B FRM-CMP-03",
+    "C4"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "04-modulos.prueba.mjs: combo"
+  },
+  {
+   "id": "FRM-20",
+   "seccion": 3,
+   "titulo": "Fechas con «Hoy», horas con «Ahora», rangos con atajos y sin fechas imposibles",
+   "regla": "Los campos de fecha son type=date con botón «Hoy» (módulo «fecha»); los de hora, «Ahora». Un rango declara data-rango y atajos; la fecha final anterior a la inicial es una validación cruzada. data-no-futura rechaza fechas posteriores a hoy, que el servidor resuelve con su propio reloj.",
+   "porque": "Escribir la fecha de hoy es el caso más frecuente; un rango invertido o una fecha futura de nacimiento son errores silenciosos.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "encargo 5.2",
+    "A FRM-29"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "02-una-pagina: rango y atajos; 06-servidor: max «hoy»"
+  },
+  {
+   "id": "FRM-21",
+   "seccion": 3,
+   "titulo": "CURP de 18 caracteres con derivados en solo lectura y cruzada con la fecha de nacimiento",
+   "regla": "La CURP se normaliza a mayúsculas, exige 18 caracteres, estructura, fecha real, entidad y dígito verificador (estructura a confirmar con RENAPO: [Fuente: __]). De ella se derivan fecha de nacimiento y sexo a campos de solo lectura (data-deriva). Si además se pide la fecha, debe coincidir (cruzada curp-fecha, bloqueante por omisión).",
+   "porque": "Pedir lo que la CURP ya contiene es doble captura y doble error; una CURP de 17 caracteres pasa desapercibida sin regla.",
+   "nivel": "OPCIONAL",
+   "origen": [
+    "encargo 5.5"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "04-modulos.prueba.mjs: CURP (18, estructura, fecha, entidad, dígito) y cruzada"
+  },
+  {
+   "id": "FRM-22",
+   "seccion": 3,
+   "titulo": "Grupos repetibles con mínimo, máximo y confirmación para quitar",
+   "regla": "«Agregar otro» (módulo «repetibles») clona una plantilla con índice, enfoca el primer campo de la fila nueva, respeta data-min y data-max (el botón se marca con aria-disabled, no desaparece) y pide confirmación antes de quitar una fila con contenido.",
+   "porque": "Sin límite se capturan listas infinitas; sin confirmación se pierde lo escrito con un toque.",
+   "nivel": "OPCIONAL",
+   "origen": [
+    "encargo 5.2"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "02-una-pagina: repetibles; 04-modulos"
+  },
+  {
+   "id": "FRM-23",
+   "seccion": 3,
+   "titulo": "Interruptor sólo para ajustes de efecto inmediato; escala sobre radios",
+   "regla": "El interruptor (role=switch, módulo «toggle») se usa para preferencias que aplican al momento, con texto de estado; nunca para preguntas de un trámite. La escala (módulo «escala») es un grupo de radios con extremos nombrados.",
+   "porque": "Un interruptor en una pregunta no dice qué se envía; una escala con botones sueltos no se opera con flechas.",
+   "nivel": "OPCIONAL",
+   "origen": [
+    "encargo 5.2"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "02-una-pagina: interruptor y escala; manifiesto"
+  },
+  {
+   "id": "FRM-24",
+   "seccion": 3,
+   "titulo": "Pestañas, acordeón, migas, progreso, paginación, ayuda desplegable y tabla son módulos con teclado completo",
+   "regla": "Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape; tabla ordenable con aria-sort y acciones por fila con nombre completo, que en teléfono se vuelve tarjetas.",
+   "porque": "Un componente a medias (sólo ratón, sólo escritorio) excluye a una parte de las personas y obliga a rehacerlo después.",
+   "nivel": "OPCIONAL",
+   "origen": [
+    "encargo 5.1",
+    "encargo 5.4"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos"
+  },
+  {
+   "id": "FRM-25",
+   "seccion": 3,
+   "titulo": "Chips de uso frecuente sólo con historial del propio dispositivo",
+   "regla": "Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible.",
+   "porque": "Un historial compartido o enviado es una fuga de datos; sugerir datos personales los expone en pantallas ajenas.",
+   "nivel": "OPCIONAL",
+   "origen": [
+    "encargo 5.2"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad"
+  },
+  {
+   "id": "FRM-26",
+   "seccion": 4,
+   "titulo": "El error aparece al salir del campo si se escribió algo; se recalcula al corregir; nunca en un campo intacto",
+   "regla": "La validación individual corre al salir del campo (blur) sólo si la persona escribió algo; una vez marcado, se recalcula en cada tecla y se limpia en cuanto el valor es válido. Salir de un campo sin tocarlo no produce error. Al continuar o enviar se validan todos.",
+   "porque": "Regañar mientras se escribe interrumpe; no avisar hasta el final obliga a volver atrás; marcar lo intacto parece acusar.",
+   "nivel": "BASE",
+   "origen": [
+    "encargo 5.5",
+    "A FRM-36",
+    "B FRM-VAL-03",
+    "C5"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "01-por-pasos.prueba.mjs: validación en el momento acordado"
+  },
+  {
+   "id": "FRM-27",
+   "seccion": 4,
+   "titulo": "El mensaje dice qué campo y qué hacer, con ejemplo",
+   "regla": "Cada mensaje nombra la regla incumplida y cómo cumplirla («Escribe 10 dígitos, sin lada internacional. Ejemplo: 5512345678»). Nunca «Campo inválido». Los mensajes viven en validaciones.config.js, no en el HTML ni en el código de los módulos.",
+   "porque": "«Campo inválido» obliga a adivinar; un mensaje en el HTML se repite distinto en cada formulario.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-34",
+    "B FRM-VAL-04"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "guía: probador y sí y no; 06-servidor: cada error trae mensaje"
+  },
+  {
+   "id": "FRM-28",
+   "seccion": 4,
+   "titulo": "Resumen de errores al inicio, con rol de alerta, foco y enlaces",
+   "regla": "Al continuar o enviar con errores aparece un resumen con role=alert que recibe el foco y enlaza a cada campo; cada enlace mide al menos 24 px. Al corregir el último error el resumen desaparece.",
+   "porque": "Sin resumen, quien usa lector de pantalla no sabe cuántos errores hay ni dónde; sin foco, no se entera.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-33",
+    "B FRM-VAL-02",
+    "B FRM-VAL-07"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos; 02-una-pagina; 05-accesibilidad (target-size)"
+  },
+  {
+   "id": "FRM-29",
+   "seccion": 4,
+   "titulo": "El estado de error vive en aria-invalid y se comunica con icono, texto y borde",
+   "regla": "El control inválido lleva aria-invalid=\"true\" y aria-describedby al mensaje; el CSS lee el atributo. El mensaje lleva icono y texto; el borde cambia de color y grosor. Nada se comunica sólo con color.",
+   "porque": "Una clase .invalido duplica el estado; el color solo excluye a quien no lo distingue.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-37",
+    "B FRM-VAL-05"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "auditor-css A10; 05-accesibilidad"
+  },
+  {
+   "id": "FRM-30",
+   "seccion": 4,
+   "titulo": "Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real, hora, numérico, texto, coordenadas, folio, contraseña",
+   "regla": "Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir; el número respeta min, max y step.",
+   "porque": "Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.",
+   "nivel": "BASE",
+   "origen": [
+    "encargo 5.5",
+    "C10"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "guía: probador; 06-servidor; validaciones.config.js"
+  },
+  {
+   "id": "FRM-31",
+   "seccion": 4,
+   "titulo": "Las validaciones cruzadas marcan los campos implicados y pueden ser advertencia",
+   "regla": "Una cruzada (data-cruzada con data-cruzada-campos) se evalúa cuando todos sus campos tienen valor, marca el campo que la lleva y el otro, y se libera en ambos al corregir. Con data-cruzada-nivel=\"advertencia\" (ámbar, con icono) informa sin bloquear; cp↔colonia es advertencia por omisión.",
+   "porque": "Marcar sólo un campo manda a corregir el que estaba bien; bloquear por un catálogo que puede estar desactualizado impide trámites legítimos.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "encargo 5.5"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "04-modulos.prueba.mjs: cruzada CURP↔fecha; cascadas (advertencia)"
+  },
+  {
+   "id": "FRM-32",
+   "seccion": 4,
+   "titulo": "Se exige lo obligatorio: no se avanza ni se envía con pendientes",
+   "regla": "Continuar y enviar validan todo lo visible y activo; los campos ocultos por condición no cuentan. La casilla de declaración o consentimiento es obligatoria y nunca va premarcada.",
+   "porque": "Un envío incompleto genera un expediente que hay que perseguir; un consentimiento premarcado no es consentimiento.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-38",
+    "B FRM-DP-02"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: enviar sin casillas; guía: sí y no"
+  },
+  {
+   "id": "FRM-33",
+   "seccion": 4,
+   "titulo": "El navegador ayuda; el servidor defiende con las mismas reglas",
+   "regla": "Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor además revisa la firma de los archivos, el límite por origen y la idempotencia.",
+   "porque": "La validación del navegador se salta con una petición directa; una segunda lista de reglas se desactualiza.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-70",
+    "B FRM-VAL-08"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "06-servidor-y-herramientas.prueba.mjs; 04-modulos: esquema vs navegador"
+  },
+  {
+   "id": "FRM-34",
+   "seccion": 5,
+   "titulo": "Una sola acción principal por pantalla",
+   "regla": "Cada pantalla tiene un solo botón con relleno guinda. Lo demás es secundario (gris con borde), peligro (rojo, sólo destructivo y con confirmación), enlace-botón o botón de icono con nombre accesible y 44 px.",
+   "porque": "Dos botones guinda compiten y la persona no sabe cuál la lleva adelante.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-40",
+    "B FRM-ACC-01"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "guía: botones; sí y no"
+  },
+  {
+   "id": "FRM-35",
+   "seccion": 5,
+   "titulo": "«Atrás» es un enlace azul con flecha, nunca un botón gris",
+   "regla": "Retroceder se presenta como enlace-botón azul con flecha a la izquierda; nunca compite visualmente con la acción principal ni se confunde con «Cancelar».",
+   "porque": "Un «Atrás» gris junto a «Continuar» guinda se pulsa por error; la flecha dice la dirección sin leer.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-41",
+    "B FRM-ACC-01",
+    "C7"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "guía: botones; nucleo.css .btn-atras"
+  },
+  {
+   "id": "FRM-36",
+   "seccion": 5,
+   "titulo": "Los botones dicen qué hacen; nunca «Aceptar» ni «OK»",
+   "regla": "La etiqueta es un verbo concreto con su objeto («Enviar solicitud», «Guardar borrador», «Descartar»). Los botones de icono llevan aria-label; los de descarga dicen formato y peso.",
+   "porque": "«Aceptar» no dice qué se acepta; un icono sin nombre es un botón mudo para el lector de pantalla.",
+   "nivel": "BASE",
+   "origen": [
+    "B FRM-ACC-02"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "03-anchos: ningún botón sin nombre; guía: botones"
+  },
+  {
+   "id": "FRM-37",
+   "seccion": 5,
+   "titulo": "Un botón no se deshabilita en silencio: aria-disabled y aria-busy",
+   "regla": "Mientras se envía, el botón lleva aria-disabled y aria-busy con texto «Enviando…» y conserva el foco; al terminar se recupera. Si una acción no está disponible, se deja pulsar y se explica, o se marca con aria-disabled, nunca con disabled.",
+   "porque": "disabled saca el botón del orden de tabulación y el lector de pantalla no sabe por qué desapareció.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-42",
+    "B FRM-ACC-03"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: el botón se recupera; 02-una-pagina: agregar al máximo"
+  },
+  {
+   "id": "FRM-38",
+   "seccion": 5,
+   "titulo": "Toda acción que no se deshace pide confirmación dentro de la página",
+   "regla": "Quitar, descartar o eliminar abren un diálogo nativo con role=alertdialog (FormKit.confirma), con el foco inicial en la opción segura, Escape para cancelar y retorno del foco al botón que lo abrió. Nunca window.confirm.",
+   "porque": "window.confirm no se puede estilizar ni accesibilizar y en algunos visores no aparece; un diálogo que enfoca «Eliminar» borra con Enter por accidente.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-44",
+    "B FRM-ACC-04"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "04-modulos: diálogo de confirmación; 02-una-pagina: quitar fila"
+  },
+  {
+   "id": "FRM-39",
+   "seccion": 5,
+   "titulo": "Cuatro avisos, cada uno con icono, texto y rol",
+   "regla": "Neutro (informa, sin rol), advertencia (ámbar, sin bloqueo), bloqueo (rojo, role=alert) y éxito (verde, role=status). Lo que impide continuar es asertivo; lo demás es cortés. Un aviso nunca sustituye al mensaje del campo.",
+   "porque": "Un aviso rojo para todo entrena a ignorarlo; un alert cortés no se oye.",
+   "nivel": "BASE",
+   "origen": [
+    "encargo 5.4"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "guía: botones y avisos; 05-accesibilidad"
+  },
+  {
+   "id": "FRM-40",
+   "seccion": 5,
+   "titulo": "Lo que cambia sin recargar se anuncia",
+   "regla": "Errores, avisos, resultados de paginación, pasos, copiar, archivos agregados o quitados y cambios de pestaña se anuncian en una región viva (FormKit.anuncia). El foco sólo se mueve al cambiar de paso, al resumen de errores y al título del acuse.",
+   "porque": "Lo que aparece en silencio no existe para quien no ve la pantalla.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-49"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "05-accesibilidad; verificación manual con lector de pantalla (no automatizable)"
+  },
+  {
+   "id": "FRM-41",
+   "seccion": 5,
+   "titulo": "Copiar y compartir confirman con palabras",
+   "regla": "Copiar un folio o un dato de solo lectura cambia el texto del botón a «Copiado» un momento y lo anuncia; si el portapapeles falla se dice «No se pudo copiar». Compartir usa la API nativa si existe y, si no, copia el enlace.",
+   "porque": "Un clic sin confirmación deja la duda; un fallo silencioso hace que la persona copie a mano lo que creía copiado.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "encargo 5.4"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "01-por-pasos: copiar folio; 04-modulos: copiar"
+  },
+  {
+   "id": "FRM-42",
+   "seccion": 6,
+   "titulo": "Todo formulario largo guarda borrador en el dispositivo y lo ofrece al volver",
+   "regla": "Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja «Tienes un borrador» con Recuperar y Descartar (con confirmación). El aviso dice que el borrador aún no se presenta.",
+   "porque": "Perder diez minutos de captura por cerrar la pestaña es la causa principal de abandono.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-14",
+    "A FRM-17",
+    "B FRM-EST-04"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: borrador se guarda, se ofrece y se restaura"
+  },
+  {
+   "id": "FRM-43",
+   "seccion": 6,
+   "titulo": "El borrador nunca incluye campos sensibles ni archivos, y se invalida con la estructura",
+   "regla": "Los campos con data-sensible y los archivos no se guardan en el borrador: se piden de nuevo. Un borrador de otra versión del formulario o caducado no se ofrece. El borrador se escribe también al salir de la página (pagehide) y se borra al enviar.",
+   "porque": "Un nombre y un correo en el almacén local de una computadora compartida son una fuga; un borrador viejo contra un formulario nuevo produce datos inconsistentes.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-15",
+    "A FRM-16",
+    "B FRM-DP-03"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: lo sensible se pide de nuevo; el borrador se borra al enviar"
+  },
+  {
+   "id": "FRM-44",
+   "seccion": 6,
+   "titulo": "Todo envío tiene límite de espera, clave de idempotencia y dice qué pasó",
+   "regla": "El envío lleva AbortController con plazo configurable y una clave de idempotencia por intento. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver».",
+   "porque": "Un giro eterno y una pantalla en blanco son el peor error posible; un reenvío sin idempotencia duplica expedientes.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-42",
+    "A FRM-43",
+    "B FRM-SEG-02"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: error simulado, límite y éxito"
+  },
+  {
+   "id": "FRM-45",
+   "seccion": 6,
+   "titulo": "El envío no se duplica",
+   "regla": "Mientras el envío está en curso el botón está ocupado y un segundo clic no manda nada; Enter en un campo intermedio avanza de paso en lugar de enviar.",
+   "porque": "Dos clics nerviosos en «Enviar» crean dos expedientes.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-42"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "formkit.core.js enviar(); 01-por-pasos"
+  },
+  {
+   "id": "FRM-46",
+   "seccion": 7,
+   "titulo": "La dirección va primero y el mapa nunca es el único camino",
+   "regla": "El domicilio se pide en campos (alcaldía, colonia, código postal, calle y número) y el mapa, si existe, es una ayuda adicional: siempre hay alternativa por texto o por coordenadas. El resultado de cualquier cruce se dice con palabras, no sólo con color.",
+   "porque": "Un mapa no se opera con teclado ni con lector de pantalla; sin mosaicos queda en blanco.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-50",
+    "B FRM-UBI-05",
+    "B FRM-UBI-06"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "guía: mapa (vías); manifiesto «mapa»"
+  },
+  {
+   "id": "FRM-47",
+   "seccion": 7,
+   "titulo": "Cascada alcaldía → colonia → código postal con catálogo versionado y camino inverso",
+   "regla": "La cascada (módulo «cascadas») toma sus filas de FORMKIT_CATALOGOS.<nombre> con fuente y fecha de corte declaradas; cambiar un padre reinicia a los hijos y lo anuncia; escribir el código postal propone alcaldía y colonia; la colonia propone el CP. Sin catálogo se muestra la captura manual. El catálogo que viaja con el paquete es ficticio y se sustituye por el oficial.",
+   "porque": "Una lista de colonias escrita en el HTML se desactualiza y pesa; obligar a elegir alcaldía cuando la persona sabe su CP es un paso de más.",
+   "nivel": "OPCIONAL",
+   "origen": [
+    "encargo 5.2"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "04-modulos: cascadas; 01-por-pasos: cascada por CP y regreso"
+  },
+  {
+   "id": "FRM-48",
+   "seccion": 7,
+   "titulo": "El código postal lleva cinco dígitos, se conserva como texto y su ámbito es configurable",
+   "regla": "El CP se valida con cinco dígitos y se guarda como texto (conserva el cero inicial). Si el formulario declara ámbito (FORMKIT_CONFIG.ambito.cp, por omisión 01000–16999 para la Ciudad de México), un CP fuera se rechaza con el mensaje configurado.",
+   "porque": "Como número, 01000 se vuelve 1000; un CP de otra entidad en un trámite de la Ciudad se detecta hasta la ventanilla.",
+   "nivel": "BASE",
+   "origen": [
+    "encargo 5.5",
+    "C10"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "guía: probador cp; 06-servidor"
+  },
+  {
+   "id": "FRM-49",
+   "seccion": 7,
+   "titulo": "El punto en el mapa se coloca con toque, arrastre o teclado, se confirma y no se pide geolocalización por omisión",
+   "regla": "El mapa (Leaflet autoalojado con gestos: un dedo desplaza la página, dos el mapa) coloca el punto al tocar, permite arrastrarlo y, con el mapa enfocado, Enter lo coloca en el centro. Con data-confirmar el punto debe confirmarse. Las coordenadas se enuncian en texto (lon, lat en EPSG:4326, seis decimales). La geolocalización del dispositivo sólo se ofrece con data-geolocalizacion. El ámbito se acota y un punto fuera se dice al momento.",
+   "porque": "Un mapa que atrapa el desplazamiento del teléfono bloquea la página; un punto sin confirmar se envía por un roce; pedir permiso de ubicación sin motivo ahuyenta.",
+   "nivel": "OPCIONAL",
+   "origen": [
+    "A FRM-53",
+    "A FRM-54",
+    "B FRM-UBI-01",
+    "B FRM-UBI-03"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: mapa toca, confirma; mapa.js"
+  },
+  {
+   "id": "FRM-50",
+   "seccion": 7,
+   "titulo": "El mapa base, el marcador y el cruce son del proyecto, no de un tercero",
+   "regla": "Las teselas se declaran en FORMKIT_CONFIG.mapa (proveedor, atribución, clave), vacías por omisión: sin teselas el punto sigue pudiendo colocarse. El marcador es propio e incrustado. El cruce con capas (alcaldía, suelo, competencia) se resuelve en el servidor contra la capa completa.",
+   "porque": "Una tesela o un icono que no carga por política de red deja el mapa en blanco; un cruce en el navegador es manipulable.",
+   "nivel": "OPCIONAL",
+   "origen": [
+    "A FRM-55",
+    "A FRM-56",
+    "A FRM-57",
+    "B FRM-UBI-04",
+    "B FRM-LIB-03"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "03-anchos: nada se pide a un tercero; mapa.css marcador"
+  },
+  {
+   "id": "FRM-51",
+   "seccion": 8,
+   "titulo": "La zona de carga dice formatos, peso y número antes, y el código los aplica",
+   "regla": "La zona (módulo «archivos») muestra «Formatos admitidos: … Hasta N archivos de M MB» leyendo la configuración; acepta arrastrar, elegir y, en teléfono, tomar fotografía (capture). Un archivo soltado fuera de la zona no abre el navegador.",
+   "porque": "Descubrir el límite después de elegir diez fotos es volver a empezar.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-60",
+    "A FRM-64",
+    "B FRM-ARC-01"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: archivos; archivos.js"
+  },
+  {
+   "id": "FRM-52",
+   "seccion": 8,
+   "titulo": "Cada rechazo dice su motivo y cada archivo muestra su estado",
+   "regla": "Lo que se sabe sin leer el archivo (tipo, peso, número, vacío, duplicado) se rechaza en el acto con motivo; lo que exige leerlo (firma real, dimensiones, optimización) se muestra en la lista con estado, progreso y «Reintentar». El tipo real se verifica por firma (bytes iniciales), no por extensión; los duplicados por SHA-256; el nombre se sanea.",
+   "porque": "«Archivo no válido» no dice qué cambiar; un .jpg que no es imagen pasa la extensión y rompe el servidor.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-61",
+    "B FRM-ARC-03"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: rechazo inmediato con motivo, error tras leer"
+  },
+  {
+   "id": "FRM-53",
+   "seccion": 8,
+   "titulo": "Las fotografías se optimizan en el navegador y se conserva la huella del original",
+   "regla": "Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6).",
+   "porque": "Una foto de 12 MB desde la calle no sube; sin huella no se prueba que la imagen es la que se tomó; el EXIF revela la ubicación de quien denuncia.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-62",
+    "A FRM-63",
+    "B FRM-ARC-02",
+    "C6"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: sha256 en payload; validaciones.config.js ARCHIVOS"
+  },
+  {
+   "id": "FRM-54",
+   "seccion": 8,
+   "titulo": "El servidor revalida los archivos",
+   "regla": "El servidor comprueba de nuevo tipo real, peso, número y total, y conserva el original antes de cualquier transformación. Los archivos no entran al borrador local.",
+   "porque": "La validación del navegador se salta; un archivo que entró sin revisar es un riesgo permanente.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-65",
+    "A FRM-66",
+    "B FRM-ARC-03"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "codigo/servidor/validar.mjs; 06-servidor"
+  },
+  {
+   "id": "FRM-55",
+   "seccion": 9,
+   "titulo": "No se pide un dato sin uso declarado; los personales declaran finalidad; los sensibles no se guardan",
+   "regla": "Todo campo declara data-uso. Los datos personales declaran data-finalidad y, los de identidad o contacto, data-sensible. herramientas/auditar-campos.mjs lo comprueba y el inventario (FormKit.iniciar().inventario()) lo enumera para el aviso de privacidad.",
+   "porque": "Un dato «por si acaso» es un dato personal que hay que resguardar, justificar y suprimir con reglas.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-80",
+    "A FRM-82",
+    "B FRM-CMP-09",
+    "norma 1.8"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "herramientas/auditar-campos.mjs D1–D3"
+  },
+  {
+   "id": "FRM-56",
+   "seccion": 9,
+   "titulo": "El aviso de privacidad se lee en pantalla antes de enviar y los fundamentos sin verificar quedan en hueco",
+   "regla": "El aviso simplificado se abre en un diálogo desde la pantalla de envío, inmediatamente antes de la casilla de declaración. Toda cita normativa que no esté verificada se deja como [Art. __, fracc. __] con el rótulo de pendiente.",
+   "porque": "Un enlace a otra página no se lee; un artículo inventado llega a un documento firmado.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-81",
+    "A FRM-94",
+    "B FRM-DP-02",
+    "B FRM-TXT-03"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: diálogo de privacidad; revisión jurídica (no automatizable)"
+  },
+  {
+   "id": "FRM-57",
+   "seccion": 9,
+   "titulo": "El anonimato es posible: el contacto se pide sólo si la persona lo elige",
+   "regla": "Los datos de contacto van detrás de una pregunta condicional «¿Quieres que te contactemos?»; si la respuesta es no, no se piden ni viajan.",
+   "porque": "Exigir identificarse para denunciar desalienta y expone.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "B FRM-DP-01"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: contacto condicional; 06-servidor: contacto no"
+  },
+  {
+   "id": "FRM-58",
+   "seccion": 9,
+   "titulo": "Prueba de humanidad accesible, campo trampa y tiempo mínimo como señales; límite por origen en el servidor",
+   "regla": "La casilla de declaración, el campo trampa fuera de pantalla y el tiempo de llenado viajan en meta como señales que el servidor pondera; nunca acertijos visuales ni reconocimiento de imágenes. El límite por origen endurece antes de cortar y sus cifras no se publican.",
+   "porque": "Un captcha visual excluye; un límite publicado se calibra desde fuera.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "A FRM-71",
+    "A FRM-72",
+    "A FRM-74",
+    "B FRM-SEG-01",
+    "B FRM-SEG-03",
+    "B FRM-SEG-04"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "01-por-pasos: límite; validar.mjs señales"
+  },
+  {
+   "id": "FRM-59",
+   "seccion": 9,
+   "titulo": "Cero valores fijos en el código",
+   "regla": "Dominio, destino del envío, proveedor del mapa, catálogos, límites, mensajes y plazos viven en configuración (FORMKIT_CONFIG, FORMKIT_OPCIONES, FORMKIT_CATALOGOS, validaciones.config.js). Si al cambiar de dominio hay que tocar código fuente, el diseño está mal.",
+   "porque": "Un valor escrito en el código se despliega mal en el siguiente ambiente.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-83",
+    "norma 1.6"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "revisión de código; plantillas: configuracion-*.js"
+  },
+  {
+   "id": "FRM-60",
+   "seccion": 10,
+   "titulo": "Móvil primero: el CSS parte del teléfono y sólo crece",
+   "regla": "Las hojas se escriben para el ancho más angosto y las adaptaciones usan únicamente min-width en los tres puntos de corte (560, 760 y 1024 px, declarados en tokens.css). Nunca max-width.",
+   "porque": "Un diseño de escritorio recortado para el teléfono deja objetivos pequeños y textos que desbordan.",
+   "nivel": "BASE",
+   "origen": [
+    "encargo 4"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "auditor-css A11 (sólo min-width y puntos declarados)"
+  },
+  {
+   "id": "FRM-61",
+   "seccion": 10,
+   "titulo": "Sin desplazamiento horizontal de 320 a 1920 px",
+   "regla": "Toda página del paquete se verifica en 320, 360, 390, 768, 1024, 1280 y 1920 px sin desplazamiento horizontal ni contenido cortado; sólo tablas, código y mapas pueden ser más anchos, dentro de su propio contenedor con desplazamiento.",
+   "porque": "Un desplazamiento lateral en el teléfono esconde el botón de enviar.",
+   "nivel": "BASE",
+   "origen": [
+    "encargo 4",
+    "B FRM-A11Y-05"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "03-anchos.prueba.mjs"
+  },
+  {
+   "id": "FRM-62",
+   "seccion": 10,
+   "titulo": "Todo lo que se toca mide al menos 44 px con puntero táctil",
+   "regla": "Botones, enlaces de acción, opciones, pestañas y controles miden al menos 44 px en teléfono; los enlaces dentro de texto corrido cumplen 24 px con espacio alrededor.",
+   "porque": "El dedo no acierta a 32 px; errar un botón en la calle es abandonar.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-46",
+    "B FRM-A11Y-02"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "03-anchos.prueba.mjs: objetivos táctiles (320–768)"
+  },
+  {
+   "id": "FRM-63",
+   "seccion": 10,
+   "titulo": "Teclado adecuado, zoom permitido, áreas seguras y alto dinámico",
+   "regla": "Cada campo declara inputmode y type para el teclado correcto; el viewport nunca bloquea el zoom; los bloques fijos respetan env(safe-area-inset-*); los altos que dependen de la pantalla usan dvh o clamp.",
+   "porque": "Un teclado alfabético para un CP, un zoom bloqueado o una barra bajo la muesca del teléfono son fricciones que se suman.",
+   "nivel": "BASE",
+   "origen": [
+    "encargo 4"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "auditar-campos.mjs D4; tokens.css --safe-*; base.css"
+  },
+  {
+   "id": "FRM-64",
+   "seccion": 10,
+   "titulo": "Mismo comportamiento en teléfono y escritorio; los perfiles se prueban por separado",
+   "regla": "Toda prueba de flujo corre en un perfil móvil táctil (390 px) y en uno de escritorio (1280 px). La ficha de cada módulo dice cómo se comporta en cada uno. Ningún bloque se cierra sin la casilla «Verificado en móvil y en escritorio».",
+   "porque": "Lo que funciona con ratón falla con dedo y viceversa; comprobarlo al final cuesta el doble.",
+   "nivel": "BASE",
+   "origen": [
+    "encargo 4",
+    "encargo 9"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "01-por-pasos y 02-una-pagina en PERFILES; docs/08"
+  },
+  {
+   "id": "FRM-65",
+   "seccion": 10,
+   "titulo": "Movimiento reducido, alto contraste forzado e impresión",
+   "regla": "Con prefers-reduced-motion no hay transiciones ni animaciones; con forced-colors los bordes y el foco se conservan; la hoja de impresión oculta lo interactivo y muestra el acuse completo.",
+   "porque": "Una animación puede marear; el modo de alto contraste borra lo que sólo era color de fondo.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-48",
+    "B FRM-A11Y-04"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "03-anchos: movimiento reducido; nucleo.css adaptaciones"
+  },
+  {
+   "id": "FRM-66",
+   "seccion": 11,
+   "titulo": "Orden fijo de bloques en toda hoja",
+   "regla": "Cada hoja declara sus bloques con /* @bloque nombre */ en el orden variables → reinicio → estructura → componentes → estados → utilidades → adaptaciones; una regla nueva va en su bloque, nunca al final. Los módulos declaran componentes → estados → adaptaciones.",
+   "porque": "Añadir al final es lo que produce selectores duplicados que el navegador no avisa.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-85",
+    "B FRM-STY-05",
+    "norma 8.3"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "auditor-css A13"
+  },
+  {
+   "id": "FRM-67",
+   "seccion": 11,
+   "titulo": "Ningún color ni longitud literal fuera de tokens.css",
+   "regla": "Colores sólo como var(--token) definidos en :root de tokens.css; longitudes, radios, trazos, duraciones e interlineados sólo desde tokens. La guía visual puede definir variables propias con prefijo --guia-, declaradas en la configuración del auditor.",
+   "porque": "Un #9D2148 suelto se convierte en tres guindas distintos en seis meses.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-86",
+    "B FRM-STY-01"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "auditor-css A04, A05, A06, A15"
+  },
+  {
+   "id": "FRM-68",
+   "seccion": 11,
+   "titulo": "Un selector, una declaración; sin !important; sin id; dos niveles como máximo",
+   "regla": "Cada selector se declara una vez por contexto (las excepciones deliberadas llevan comentario); una propiedad aparece una vez por regla; !important sólo en prefers-reduced-motion; nada se estiliza por id; las cadenas no pasan de dos niveles; los estados se leen de atributos ([aria-invalid], [aria-pressed], :checked), nunca de clases .activo.",
+   "porque": "La especificidad acumulada obliga a !important, y !important obliga a más !important.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-88",
+    "B FRM-STY-02",
+    "B FRM-STY-03",
+    "B FRM-STY-06"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "auditor-css A01, A02, A03, A07, A08, A10"
+  },
+  {
+   "id": "FRM-69",
+   "seccion": 11,
+   "titulo": "[hidden] se oculta sin !important y nada lo pisa",
+   "regla": "[hidden]{display:none} va al final del núcleo sin !important (decisión C9). Todo módulo que declare display en un elemento que puede ocultarse usa .clase:not([hidden]).",
+   "porque": "Un display:flex posterior deja visible lo oculto y el formulario envía o valida lo que no debía verse.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-88",
+    "C9"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "03-anchos.prueba.mjs: todo [hidden] se ve como display:none"
+  },
+  {
+   "id": "FRM-70",
+   "seccion": 11,
+   "titulo": "Sin manejadores en línea, sin estilos en línea, sin código zombi",
+   "regla": "Los eventos se registran por delegación en el código; el HTML no lleva onclick ni style (salvo variables de muestra en la guía). Toda clase y variable declarada se usa en algún HTML o script del paquete.",
+   "porque": "Un onclick en el HTML no se puede probar ni auditar; una clase sin uso es una promesa que nadie cumple.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-89",
+    "A FRM-90",
+    "B FRM-STY-07"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "auditor-css A09, A16; revisión"
+  },
+  {
+   "id": "FRM-71",
+   "seccion": 11,
+   "titulo": "Núcleo obligatorio y módulos independientes con manifiesto",
+   "regla": "El núcleo (tokens, base, nucleo, validaciones.config, iconos, formkit.core) va siempre; cada módulo vive en su carpeta con su CSS y su JS, declara en codigo/manifiesto.json nivel, propósito, cuándo, cuándo no, dependencias, accesibilidad y comportamiento en teléfono y escritorio, y se activa solo si el formulario contiene su selector. Los módulos de ámbito documento se inician una sola vez aunque la página tenga varios formularios.",
+   "porque": "Un paquete monolítico se copia entero o no se copia; un módulo sin ficha se usa mal.",
+   "nivel": "BASE",
+   "origen": [
+    "C1",
+    "encargo 7"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "06-servidor: manifiesto; 04-modulos: varios formularios en una página"
+  },
+  {
+   "id": "FRM-72",
+   "seccion": 11,
+   "titulo": "Iconografía: un solo sprite SVG, catálogo cerrado",
+   "regla": "Los iconos viven en codigo/iconos/sprite.svg (24 símbolos), se inyectan una vez por página y heredan el color del texto. El decorativo lleva aria-hidden; el que comunica va junto a texto; sólo «cerrar» y «buscar» pueden ir solos, con nombre accesible.",
+   "porque": "Iconos de tres fuentes distintas se ven distintos y pesan; un icono sin nombre es mudo.",
+   "nivel": "BASE",
+   "origen": [
+    "encargo 5.4"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "guía: catálogo de iconos; 03-anchos: nombres"
+  },
+  {
+   "id": "FRM-73",
+   "seccion": 12,
+   "titulo": "Registro institucional claro: frases cortas, voz activa, sin siglas sin explicar",
+   "regla": "Los textos del formulario hablan a la persona de tú con oraciones cortas; el nombre de la institución se escribe completo la primera vez. Las acciones se atribuyen a «la Secretaría».",
+   "porque": "Un formulario que no se entiende se llena mal o no se llena.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-92",
+    "B FRM-TXT-04"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "revisión editorial (no automatizable)"
+  },
+  {
+   "id": "FRM-74",
+   "seccion": 12,
+   "titulo": "Lo que no se dice, no se promete",
+   "regla": "No se anuncian plazos, correos automáticos ni seguimientos que el sistema no cumpla. El acuse dice sólo lo que ocurrirá.",
+   "porque": "Una promesa incumplida en pantalla se convierte en queja.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-93",
+    "B FRM-TXT-01"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "revisión de contenido"
+  },
+  {
+   "id": "FRM-75",
+   "seccion": 12,
+   "titulo": "Lo pendiente se ve, con rótulo «Pendiente» en el HTML",
+   "regla": "Todo dato no resuelto (horario, fundamento, teléfono) se muestra con la clase .pendiente y la palabra «Pendiente:» escrita en el HTML, nunca sólo en CSS, para que el lector de pantalla la lea.",
+   "porque": "Un hueco invisible llega a producción como si estuviera resuelto.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-95",
+    "B FRM-TXT-02",
+    "C11"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "guía: pendiente; revisión"
+  },
+  {
+   "id": "FRM-76",
+   "seccion": 12,
+   "titulo": "Datos de ejemplo siempre ficticios y legibles",
+   "regla": "Nombres, correos, teléfonos, folios y catálogos de muestra son inequívocamente falsos (ejemplo.local, teléfonos de ceros, «Fulana de Tal»), marcados como ficticios, y legibles para que no parezcan un error del sistema.",
+   "porque": "Un dato creíble en una base de pruebas termina en una captura o en producción y ya no se distingue.",
+   "nivel": "BASE",
+   "origen": [
+    "norma 3",
+    "encargo"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "revisión; catálogo cdmx-ejemplo.js es_ficticio"
+  },
+  {
+   "id": "FRM-77",
+   "seccion": 13,
+   "titulo": "Todo se sirve desde el propio servidor",
+   "regla": "Tipografías, CSS, JS, iconos, Leaflet y axe-core viajan en el paquete; ninguna página pide nada a un tercero salvo el mapa base declarado en configuración.",
+   "porque": "Un recurso externo bloqueado por política de red deja la página rota; además filtra la IP de la persona.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-96",
+    "B FRM-LIB-01"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "03-anchos: nada se pide a un tercero"
+  },
+  {
+   "id": "FRM-78",
+   "seccion": 13,
+   "titulo": "Cabin 600/700 para títulos y Roboto 400/500/700 para el cuerpo, autoalojadas con licencia",
+   "regla": "Las tipografías se incluyen en codigo/fuentes con su licencia (OFL / Apache) y sólo los pesos declarados en tokens.css (decisión C12).",
+   "porque": "Una tipografía desde Google Fonts es una petición a un tercero; pesos de más son kilobytes de más.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-97",
+    "C12"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "06-servidor: tipografías; 03-anchos: las tipografías cargan"
+  },
+  {
+   "id": "FRM-79",
+   "seccion": 13,
+   "titulo": "Cada biblioteca con versión exacta, licencia y suma de verificación",
+   "regla": "vendor/MANIFIESTO.json registra Leaflet, leaflet-gesture-handling y axe-core con versión, licencia y SHA-256; herramientas/vendor.mjs --verificar lo comprueba.",
+   "porque": "Una biblioteca sin suma puede cambiar sin que nadie lo note.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-98",
+    "B FRM-LIB-02"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "06-servidor: bibliotecas coinciden con el manifiesto"
+  },
+  {
+   "id": "FRM-80",
+   "seccion": 13,
+   "titulo": "Lo que sólo sirve para verificar no viaja al sitio",
+   "regla": "Playwright y axe-core son devDependencies; el código del estándar no tiene dependencias. La carpeta pruebas/_humo y node_modules no entran en el ZIP.",
+   "porque": "Una herramienta de pruebas en producción es superficie de ataque y peso.",
+   "nivel": "BASE",
+   "origen": [
+    "A FRM-99"
+   ],
+   "tipo": "decisión heredada",
+   "verificacion": "package.json; construir.mjs --zip"
+  },
+  {
+   "id": "FRM-81",
+   "seccion": 13,
+   "titulo": "Ningún bloque se cierra sin verificación con evidencia",
+   "regla": "Antes de liberar: npm run verificar en verde (auditor, contraste, campos, bibliotecas, documentos generados, pruebas en dos perfiles y siete anchos, axe-core); capturas en verificacion/capturas; recorrido con teclado y lector de pantalla real; prueba en un iPhone y un Android reales con red limitada; casilla «Verificado en móvil y en escritorio». Lo que no pudo comprobarse se escribe.",
+   "porque": "«Se ve bien» sin evidencia no es verificación; lo que no se escribe se olvida.",
+   "nivel": "BASE",
+   "origen": [
+    "B FRM-MET-02",
+    "encargo 9"
+   ],
+   "tipo": "decisión del encargo",
+   "verificacion": "herramientas/verificar.mjs; docs/08-verificacion-y-cierre.md"
+  }
+ ]
+}

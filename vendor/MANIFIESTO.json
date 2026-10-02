@@ -1,0 +1,62 @@
+{
+  "generado": "2026-10-02T03:44:38.432Z",
+  "origen": "registro de npm (tarball oficial)",
+  "bibliotecas": [
+    {
+      "paquete": "leaflet",
+      "version": "1.9.4",
+      "licencia": "BSD-2-Clause",
+      "uso": "Mapa de ubicación (sólo cuando el formulario pide un punto): lo usa el módulo «mapa» (codigo/modulos/mapa). El mapa base (teselas) se declara en FORMKIT_CONFIG.mapa.",
+      "archivos": [
+        {
+          "ruta": "leaflet/leaflet.js",
+          "sha256": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a"
+        },
+        {
+          "ruta": "leaflet/leaflet.css",
+          "sha256": "a7837102824184820dfa198d1ebcd109ff6d0ff9a2672a074b9a1b4d147d04c6"
+        },
+        {
+          "ruta": "leaflet/LICENSE",
+          "sha256": "53e8dc25862014e4324741ca18fbe3611e11d42ef69f59f86ea8c5389647d4cb"
+        }
+      ]
+    },
+    {
+      "paquete": "leaflet-gesture-handling",
+      "version": "1.2.2",
+      "licencia": "MIT",
+      "uso": "Evita que el mapa atrape el desplazamiento de la página en el teléfono.",
+      "archivos": [
+        {
+          "ruta": "leaflet-gesture-handling/leaflet-gesture-handling.min.js",
+          "sha256": "676ed5a363588b77a4958c202a4860caca2244c24d39a04ffa8e1e179f3abd9f"
+        },
+        {
+          "ruta": "leaflet-gesture-handling/leaflet-gesture-handling.min.css",
+          "sha256": "2e126218bf33767c26a908312b8e465e8bb166762132b0dda2be30c8bc4ac528"
+        },
+        {
+          "ruta": "leaflet-gesture-handling/LICENSE",
+          "sha256": "303cbde6c588c765225c677d5a6f508d6d1a1cea7cab2428a986f10067efe3d2"
+        }
+      ]
+    },
+    {
+      "paquete": "axe-core",
+      "version": "4.13.0",
+      "licencia": "MPL-2.0",
+      "uso": "Sólo verificación (pruebas/accesibilidad.prueba.mjs). No viaja al sitio publicado.",
+      "archivos": [
+        {
+          "ruta": "axe-core/axe.min.js",
+          "sha256": "c24f097bd2f451d4f933e8bc7d8d539f8672a2ebcb5cc9f9f3eec8ca9470a0c1"
+        },
+        {
+          "ruta": "axe-core/LICENSE",
+          "sha256": "af175b9d96ee93c21a036152e1b905b0b95304d4ae8c2c921c7609100ba8df7e"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Encuesta de ejemplo</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../codigo/css/tokens.css">
+<link rel="stylesheet" href="../../codigo/css/base.css">
+<link rel="stylesheet" href="../../codigo/css/nucleo.css">
+<link rel="stylesheet" href="../../codigo/modulos/opciones/opciones.css">
+<link rel="stylesheet" href="../../codigo/modulos/escala/escala.css">
+<link rel="stylesheet" href="../../codigo/modulos/progreso/progreso.css">
+<link rel="stylesheet" href="../../codigo/modulos/acuse/acuse.css">
+</head>
+<body>
+<a class="salto" href="#contenido">Ir al contenido</a>
+<aside class="entorno-pruebas" aria-label="Aviso de entorno">Encuesta de ejemplo · datos ficticios · nada se envía</aside>
+<header class="cabecera"><div class="cabecera-int"><img class="cabecera-logo" src="../../codigo/imagenes/logotipo-sedema.png" width="3829" height="771" alt="Gobierno de la Ciudad de México · Secretaría del Medio Ambiente"><div class="cabecera-titulo"><h1 class="titulo-pagina">¿Cómo fue tu visita al parque?</h1></div></div></header>
+<main class="pagina" id="contenido">
+  <form id="encuesta" class="tarjeta" data-formkit action="#" method="post">
+    <p class="bajada">Tres preguntas, un minuto. Es anónima: no pedimos tu nombre.</p>
+    <div class="progreso" data-progreso>
+      <label class="progreso-etq" for="pg">Avance de la encuesta</label>
+      <progress class="progreso-barra" id="pg" max="3" value="0"></progress>
+      <span class="progreso-txt" data-progreso-texto aria-hidden="true"></span>
+    </div>
+
+    <fieldset class="grupo escala" data-campo="limpieza" data-requerido data-uso="Medir la percepción de limpieza.">
+      <legend class="etiqueta">¿Qué tan limpio encontraste el parque?</legend>
+      <div class="escala-puntos">
+        <label class="escala-punto"><input class="opcion-input" type="radio" name="limpieza" value="1"><span class="escala-num">1</span><span class="solo-lector"> Nada limpio</span></label>
+        <label class="escala-punto"><input class="opcion-input" type="radio" name="limpieza" value="2"><span class="escala-num">2</span></label>
+        <label class="escala-punto"><input class="opcion-input" type="radio" name="limpieza" value="3"><span class="escala-num">3</span></label>
+        <label class="escala-punto"><input class="opcion-input" type="radio" name="limpieza" value="4"><span class="escala-num">4</span></label>
+        <label class="escala-punto"><input class="opcion-input" type="radio" name="limpieza" value="5"><span class="escala-num">5</span><span class="solo-lector"> Muy limpio</span></label>
+      </div>
+      <div class="escala-extremos" aria-hidden="true"><span>Nada limpio</span><span>Muy limpio</span></div>
+    </fieldset>
+
+    <fieldset class="grupo" data-campo="motivo" data-requerido data-uso="Conocer el uso del parque.">
+      <legend class="etiqueta">¿A qué viniste?</legend>
+      <div class="opciones">
+        <label class="opcion"><input class="opcion-input" type="radio" name="motivo" value="pasear"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>A pasear</span></label>
+        <label class="opcion"><input class="opcion-input" type="radio" name="motivo" value="ejercicio"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>A hacer ejercicio</span></label>
+        <label class="opcion"><input class="opcion-input" type="radio" name="motivo" value="evento"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>A un evento</span></label>
+        <label class="opcion"><input class="opcion-input" type="radio" name="motivo" value="otro"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Otro</span></label>
+      </div>
+    </fieldset>
+    <div class="campo" data-campo="motivo_otro" data-si="motivo=otro" data-otro-de="motivo" data-requerido data-uso="Registrar motivos no previstos.">
+      <label class="etiqueta" for="motivo_otro">Especifica cuál</label>
+      <input class="control" id="motivo_otro" name="motivo_otro" type="text" maxlength="80" autocomplete="off">
+    </div>
+
+    <div class="campo" data-campo="comentario" data-uso="Recoger sugerencias.">
+      <label class="etiqueta" for="comentario">¿Algo que quieras contarnos?</label>
+      <p class="ayuda">Opcional. No incluyas datos personales.</p>
+      <textarea class="control control-texto" id="comentario" name="comentario" rows="3" maxlength="300" autocomplete="off"></textarea>
+    </div>
+
+    <p class="aviso aviso-bloqueo estado-envio" data-estado-envio role="alert" tabindex="-1" hidden><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"></span></p>
+    <div class="acciones"><button type="submit" class="btn btn-primario" data-accion="enviar">Enviar respuestas</button></div>
+  </form>
+  <section class="tarjeta acuse" data-acuse hidden>
+    <div class="acuse-marca" aria-hidden="true"><svg class="icono"><use href="#i-palomita"></use></svg></div>
+    <h2 class="titulo-paso" tabindex="-1">Gracias por responder</h2>
+    <p class="bajada texto-centrado">Tus respuestas ayudan a mejorar el parque.</p>
+  </section>
+</main>
+<footer class="pie"><div class="pie-int"><p>Secretaría del Medio Ambiente de la Ciudad de México.</p></div></footer>
+<script>
+window.FORMKIT_CONFIG = {};
+window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => ok({ folio: '', fecha: new Date().toISOString() }), 300)) };
+</script>
+<script src="../../codigo/js/validaciones.config.js"></script>
+<script src="../../codigo/js/iconos.js"></script>
+<script src="../../codigo/js/formkit.core.js"></script>
+<script src="../../codigo/modulos/otro/otro.js"></script>
+<script src="../../codigo/modulos/progreso/progreso.js"></script>
+<script src="../../codigo/modulos/acuse/acuse.js"></script>
+<script src="encuesta.js"></script>
+</body>
+</html>

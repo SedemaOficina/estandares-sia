@@ -1,0 +1,256 @@
+{
+  "formulario": "una-pagina.html",
+  "generado": "2026-10-02T06:44:22.127Z",
+  "campos": {
+    "nombre": {
+      "etiqueta": "Nombre(s)",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "nombre",
+      "sensible": true,
+      "uso": "Registro.",
+      "finalidad": "Identificar a la persona registrada.",
+      "atributos": {
+        "maxlength": "80"
+      },
+      "autocomplete": "given-name"
+    },
+    "apellidos": {
+      "etiqueta": "Apellido(s)",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "nombre",
+      "sensible": true,
+      "uso": "Registro.",
+      "finalidad": "Identificar a la persona registrada.",
+      "atributos": {
+        "maxlength": "80"
+      },
+      "autocomplete": "family-name"
+    },
+    "curp": {
+      "etiqueta": "CURP Son 18 caracteres, como aparecen en tu acta o identificación. La fecha de nacimiento y el sexo se toman de ella.",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "curp",
+      "sensible": true,
+      "uso": "Registro.",
+      "finalidad": "Identificar a la persona sin ambigüedad.",
+      "atributos": {
+        "maxlength": "18",
+        "deriva": "fechaNacimiento=nacimiento sexo=sexo",
+        "enmascara": ""
+      },
+      "autocomplete": "off"
+    },
+    "nacimiento": {
+      "etiqueta": "Fecha de nacimiento",
+      "tipo": "texto",
+      "requerido": false,
+      "formato": "fecha",
+      "sensible": false,
+      "uso": "Derivado de la CURP; no se pide por separado.",
+      "atributos": {
+        "copiable": ""
+      },
+      "autocomplete": "bday"
+    },
+    "sexo": {
+      "etiqueta": "Sexo",
+      "tipo": "texto",
+      "requerido": false,
+      "sensible": false,
+      "uso": "Derivado de la CURP; no se pide por separado.",
+      "atributos": {},
+      "autocomplete": "off"
+    },
+    "correo": {
+      "etiqueta": "Correo electrónico",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "correo",
+      "sensible": true,
+      "uso": "Contacto.",
+      "finalidad": "Enviar la confirmación del registro.",
+      "atributos": {
+        "maxlength": "120"
+      },
+      "autocomplete": "email"
+    },
+    "correo2": {
+      "etiqueta": "Confirma tu correo",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "correo",
+      "sensible": true,
+      "uso": "Evitar errores de captura en el correo.",
+      "atributos": {
+        "maxlength": "120"
+      },
+      "autocomplete": "off",
+      "cruzadas": [
+        {
+          "clave": "igual",
+          "mapa": {
+            "original": "correo",
+            "confirmacion": "correo2"
+          },
+          "nivel": "error"
+        }
+      ]
+    },
+    "telefono": {
+      "etiqueta": "Teléfono",
+      "tipo": "texto",
+      "requerido": false,
+      "formato": "telefono",
+      "sensible": true,
+      "uso": "Contacto.",
+      "finalidad": "Aclarar dudas del registro.",
+      "atributos": {},
+      "autocomplete": "tel-national"
+    },
+    "personas": {
+      "etiqueta": "Personas en tu hogar",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "numero",
+      "sensible": false,
+      "uso": "Dimensionar el programa.",
+      "atributos": {
+        "min": "1",
+        "max": "20",
+        "step": "1"
+      },
+      "autocomplete": "off"
+    },
+    "alcaldia": {
+      "etiqueta": "Alcaldía donde participas",
+      "tipo": "combo",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Ubicar la participación por territorio.",
+      "atributos": {
+        "chips": ""
+      },
+      "cerrado": true,
+      "catalogo": "alcaldias",
+      "autocomplete": "off"
+    },
+    "intereses": {
+      "etiqueta": "¿Qué actividades te interesan? (elige hasta 3)",
+      "tipo": "multiple",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Asignar actividades.",
+      "atributos": {
+        "minOpciones": "1",
+        "maxOpciones": "3"
+      },
+      "opciones": [
+        "reforestacion",
+        "monitoreo",
+        "talleres",
+        "otro"
+      ]
+    },
+    "intereses_otro": {
+      "etiqueta": "Especifica cuál",
+      "tipo": "texto",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Registrar intereses no previstos.",
+      "atributos": {
+        "maxlength": "80",
+        "otroDe": "intereses"
+      },
+      "autocomplete": "off",
+      "si": {
+        "campo": "intereses",
+        "valores": [
+          "otro"
+        ]
+      }
+    },
+    "desde": {
+      "etiqueta": "Desde",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "fecha",
+      "sensible": false,
+      "uso": "Periodo de participación.",
+      "atributos": {},
+      "autocomplete": "off"
+    },
+    "hasta": {
+      "etiqueta": "Hasta",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "fecha",
+      "sensible": false,
+      "uso": "Periodo de participación.",
+      "atributos": {},
+      "autocomplete": "off"
+    },
+    "interes": {
+      "etiqueta": "¿Qué tanto te interesa participar?",
+      "tipo": "opcion",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Medir el interés declarado.",
+      "atributos": {},
+      "opciones": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ]
+    },
+    "acompanantes.#.nombre": {
+      "etiqueta": "Nombre",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "nombre",
+      "sensible": false,
+      "uso": "Registrar acompañantes.",
+      "atributos": {
+        "maxlength": "80"
+      },
+      "autocomplete": "off"
+    },
+    "acompanantes.#.edad": {
+      "etiqueta": "Edad",
+      "tipo": "texto",
+      "requerido": false,
+      "formato": "numero",
+      "sensible": false,
+      "uso": "Adecuar la actividad a la edad.",
+      "atributos": {
+        "min": "0",
+        "max": "120",
+        "step": "1"
+      },
+      "autocomplete": "off"
+    },
+    "avisos": {
+      "etiqueta": "Recibir recordatorios de las jornadas",
+      "tipo": "toggle",
+      "requerido": false,
+      "sensible": false,
+      "uso": "Decidir si se envían recordatorios.",
+      "atributos": {}
+    },
+    "aviso": {
+      "etiqueta": "Leí el aviso de privacidad y acepto el tratamiento de mis datos",
+      "tipo": "casilla",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Dejar constancia de que se informó a la persona.",
+      "atributos": {}
+    }
+  },
+  "repetibles": [
+    "acompanantes"
+  ]
+}

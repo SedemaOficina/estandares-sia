@@ -1,0 +1,22 @@
+/* =========================================================
+   repetibles.css · Módulo «repetibles» · nivel OPCIONAL
+   Grupos repetibles: cada fila es una tarjeta con cabecera y botón de quitar.
+   Depende de: nucleo.css. Bloques: componentes → estados.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.repetible{margin-bottom:var(--e-5)}
+.repetible-lista{display:flex;flex-direction:column;gap:var(--e-3);margin-bottom:var(--e-3)}
+.repetible-fila{
+  padding:var(--e-4);
+  background:var(--fondo);
+  border:var(--b-1) solid var(--linea);
+  border-radius:var(--r-caja);
+}
+.repetible-cabecera{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3);margin-bottom:var(--e-3)}
+.repetible-titulo{font-family:var(--fuente-titulo);font-weight:var(--peso-semi);color:var(--guinda)}
+
+/* @bloque estados */
+
+.repetible-fila:focus-within{border-color:var(--borde)}

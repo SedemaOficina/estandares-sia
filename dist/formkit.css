@@ -1,0 +1,1940 @@
+/* GENERADO: núcleo + todos los módulos. Para copiar sólo lo que se usa, toma los archivos de codigo/. */
+/* ===== codigo/css/tokens.css ===== */
+/* =========================================================
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.0.0
+
+   El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
+   capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
+   un valor literal de esos conceptos: si hace falta uno que no existe, se
+   declara aquí con su función (FRM-67). El auditor lo comprueba.
+
+   Orden del archivo: tipografías autoalojadas → variables en :root.
+   Las adaptaciones por puntero y por ancho viven en cada hoja, no aquí.
+
+   PUNTOS DE QUIEBRE. CSS no admite variables dentro de @media, así que los
+   tokens --bp-* son la referencia documentada y el auditor rechaza cualquier
+   @media que no use exactamente esos valores. El diseño parte del móvil:
+   toda adaptación se escribe con (min-width: …).
+       --bp-sm 560px  teléfono grande / apaisado
+       --bp-md 760px  tableta y escritorio angosto
+       --bp-lg 1024px escritorio
+   ========================================================= */
+
+/* @bloque variables */
+
+/* ---------- Tipografías autoalojadas ----------
+   Subconjunto latino (cubre á é í ó ú ñ ü ¿ ¡) y sólo los pesos que el
+   estándar usa: Cabin 600 y 700 para títulos; Roboto 400, 500 y 700 para el
+   cuerpo (decisión C12). Sin CDN: el formulario abre sin señal y no le dice
+   a un tercero quién lo abrió (FRM-77). font-display:swap evita texto
+   invisible mientras carga. */
+@font-face{font-family:'Cabin';font-style:normal;font-weight:600;font-display:swap;src:url('../codigo/fuentes/cabin-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Cabin';font-style:normal;font-weight:700;font-display:swap;src:url('../codigo/fuentes/cabin-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:400;font-display:swap;src:url('../codigo/fuentes/roboto-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:500;font-display:swap;src:url('../codigo/fuentes/roboto-latin-500-normal.woff2') format('woff2')}
+@font-face{font-family:'Roboto';font-style:normal;font-weight:700;font-display:swap;src:url('../codigo/fuentes/roboto-latin-700-normal.woff2') format('woff2')}
+
+:root{
+  /* La página se declara clara: así el navegador no pinta en negro los
+     controles del sistema (lista nativa, selector de fecha). */
+  color-scheme:light;
+
+  /* ---------- Color: un color, un trabajo ----------
+     Seis familias y ninguna suelta. Los contrastes de cada par están medidos
+     sobre cada fondo real en herramientas/pares-contraste.json.
+       guinda → identidad, títulos y la ÚNICA acción principal por pantalla
+       dorado → filetes; como texto sólo en su variante oscura
+       azul   → lo que se toca y lo que quedó elegido
+       rojo   → error: lo que impide continuar; acción destructiva
+       ámbar  → atención sin bloqueo: advertencia a la persona y pendiente del proyecto
+       verde  → el sistema confirma que recibió o guardó
+       neutro → aviso: lo que hay que leer sin alarmarse */
+
+  /* Identidad */
+  --guinda:#9D2148;
+  --guinda-osc:#7A1A38;      /* acción principal al pasar el cursor o pulsar */
+  --guinda-cl:#F7F1F3;       /* fondo tenue de identidad y fila alterna de tabla */
+  --dorado:#B28E5C;          /* SÓLO filetes y rellenos decorativos (3.04:1) */
+  --dorado-txt:#8C6C3E;      /* el dorado cuando debe leerse (4.85:1 sobre blanco) */
+
+  /* Neutros */
+  --texto:#2B2D2E;           /* cuerpo y respuesta de la persona */
+  --gris:#55585A;            /* texto secundario, marca de obligatorio */
+  --gris-cl:#6B6E70;         /* ayudas, contadores, marcadores de campo */
+  --linea:#DCDEE0;           /* separa; NUNCA delimita un control (1.35:1) */
+  --borde:#878B8E;           /* delimita un control: 3:1 o más sobre blanco y página */
+  --fondo:#F4F5F6;           /* fondo de página */
+  --blanco:#FFFFFF;
+  --beige:#FFFEF8;           /* encabezado y pie institucionales */
+  --aviso-bg:#F7F8F9;        /* fondo del aviso neutro y de lo deshabilitado */
+
+  /* Interacción */
+  --azul:#1A56A8;            /* lo tocable y lo elegido */
+  --azul-cl:#EEF3FA;         /* fondo de lo elegido o señalado */
+  --foco:#1A73C7;            /* anillo de foco: no se usa para nada más */
+
+  /* Función */
+  --error:#B3261E;  --error-bg:#FDF3F2;  --error-txt:#8C1D18;
+  --pend:#8A5200;   --pend-bg:#FFF3CD;   --pend-txt:#6B4A00;
+  --ok:#1B6B43;     --ok-bg:#F1F8F4;     --ok-txt:#145032;
+
+  /* Superficies auxiliares */
+  --mapa-bg:#E8EAEC;
+  --carga-bg:#FCFCFD;
+  --solo-lectura-bg:#F9FAFB; /* campo de solo lectura: se distingue del deshabilitado por el borde, no sólo por el fondo */
+
+  /* Transparencias derivadas (sólo aquí, nunca sueltas) */
+  --velo:rgba(0,0,0,.55);
+  --sombra-color:rgba(0,0,0,.12);
+  --halo-foco:rgba(26,115,199,.18);
+
+  /* ---------- Tipografía ----------
+     Los tamaños grandes son fluidos: crecen con el ancho de pantalla entre
+     un mínimo legible en teléfono y un máximo en escritorio. El cuerpo nunca
+     baja de 16 px: en iOS un campo con letra menor hace zoom al enfocarse. */
+  --fuente-titulo:'Cabin','Roboto',Arial,sans-serif;
+  --fuente-cuerpo:'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  --fuente-mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  --t-xs:12px; --t-sm:13px; --t-md:14px; --t-base:16px;
+  --t-lg:clamp(18px, 1.5vw + 12px, 20px);
+  --t-xl:clamp(21px, 2vw + 12px, 24px);
+  --t-2xl:clamp(24px, 3vw + 12px, 30px);
+
+  --peso-normal:400; --peso-medio:500; --peso-semi:600; --peso-fuerte:700;
+  --interlineado-cuerpo:1.55;
+  --interlineado-compacto:1.35;
+  --interlineado-titulo:1.2;
+  --tracking-rotulo:.06em;
+
+  /* ---------- Espaciado: múltiplos de 4; el de sección es fluido ---------- */
+  --e-1:4px;  --e-2:8px;  --e-3:12px; --e-4:16px; --e-5:20px;
+  --e-6:24px; --e-7:32px; --e-8:40px; --e-9:48px; --e-11:96px;
+  --e-seccion:clamp(16px, 2vw + 8px, 32px);   /* relleno de tarjeta y separación entre bloques */
+  --e-pagina:clamp(16px, 3vw, 40px);          /* margen lateral de la página: 16 px mínimo en móvil */
+
+  /* ---------- Radios ---------- */
+  --r-ctrl:6px; --r-caja:10px; --r-pill:999px;
+
+  /* ---------- Trazos ---------- */
+  --b-1:1px; --b-2:2px; --b-3:3px; --b-4:4px;
+  --foco-ancho:3px;
+  --foco-sep:2px;
+
+  /* ---------- Tamaños ---------- */
+  --objetivo-min:44px;       /* mínimo de cualquier control que se toca (decisión del estándar; AA exige 24) */
+  --alto-control:48px;       /* campos y botones */
+  --alto-opcion:40px;        /* opción corta con ratón; con el dedo sube a --alto-control */
+  --tam-casilla:20px;
+  --icono:20px;              /* icono junto a texto */
+  --icono-sm:16px;           /* icono dentro de un mensaje de error o ayuda */
+  --bolita:28px;             /* círculo de la barra de pasos */
+  --alto-logo:48px;
+  --marca-acuse:64px;
+  --ancho-pagina:980px;
+  --ancho-lectura:70ch;
+  --ancho-dialogo:560px;
+  --ancho-acuse:460px;
+  --ancho-tarjeta-min:230px;
+  --ancho-boton-min:96px;
+  --ancho-chip-max:240px;
+  --alto-mapa:clamp(260px, 45vh, 420px);
+  --alto-lista-max:320px;
+  --alto-texto-min:130px;
+  --alto-barra-fija:150px;
+  --alto-barra-fija-movil:112px;
+  --alto-tooltip-max:200px;
+  --ancho-tooltip-max:280px;
+  --ancho-progreso-min:120px;
+  --ancho-tabla-min:560px;   /* por debajo, la tabla pasa a tarjetas apiladas */
+  --vista-previa:96px;       /* miniatura de imagen en la lista de archivos */
+
+  /* ---------- Puntos de quiebre (referencia; ver nota de cabecera) ---------- */
+  --bp-sm:560px; --bp-md:760px; --bp-lg:1024px;
+
+  /* ---------- Área segura (teléfonos con muesca) ---------- */
+  --safe-inf:env(safe-area-inset-bottom, 0px);
+  --safe-izq:env(safe-area-inset-left, 0px);
+  --safe-der:env(safe-area-inset-right, 0px);
+
+  /* ---------- Capas de apilamiento ---------- */
+  --z-base:0;
+  --z-lista:30;      /* listas desplegables y tooltips */
+  --z-barra:40;      /* barra de pasos fija y barra de acciones fija */
+  --z-dialogo:50;    /* hoja inferior y diálogo con polyfill */
+
+  /* ---------- Movimiento ---------- */
+  --dur-rapida:.15s;
+  --dur-media:.3s;
+  --dur-nula:.01ms;
+
+  /* ---------- Opacidad ---------- */
+  --op-inactivo:.45;
+
+  /* ---------- Sombras ---------- */
+  --sombra-lista:0 6px 18px var(--sombra-color);
+  --sombra-hoja:0 -6px 24px var(--sombra-color);
+}
+
+
+/* ===== codigo/css/base.css ===== */
+/* =========================================================
+   base.css · Estándar de formularios del SIA (SEDEMA)
+
+   Reinicio y estructura de página. No contiene componentes ni valores
+   literales: todo viene de tokens.css. Se escribe para el teléfono; lo que
+   cambia en pantallas anchas vive en el bloque «adaptaciones» de nucleo.css.
+
+   Bloques (orden fijo del paquete): reinicio → estructura.
+   ========================================================= */
+
+/* @bloque reinicio */
+
+*,*::before,*::after{box-sizing:border-box}
+
+/* Con una barra fija arriba, todo desplazamiento automático (el foco al
+   abrir un paso, el salto al resumen de errores) debe detenerse por debajo
+   de ella. Se declara una vez aquí y cubre cualquier elemento. */
+html{scroll-padding-top:var(--alto-barra-fija-movil);-webkit-text-size-adjust:100%}
+
+body{
+  margin:0;
+  background:var(--fondo);
+  color:var(--texto);
+  font-family:var(--fuente-cuerpo);
+  font-size:var(--t-base);
+  line-height:var(--interlineado-cuerpo);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Los encabezados no traen margen propio: el espacio lo decide el bloque
+   que los contiene, nunca el navegador. */
+h1,h2,h3,h4{
+  margin:0;
+  font-family:var(--fuente-titulo);
+  font-weight:var(--peso-semi);
+  line-height:var(--interlineado-titulo);
+  text-wrap:balance;
+}
+
+p,dl,dd,figure{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+fieldset{margin:0;padding:0;border:0;min-width:0}
+legend{padding:0}
+
+/* Los controles heredan la tipografía de la página: sin esto cada sistema
+   operativo pinta la suya y la columna queda dispareja. */
+input,select,textarea{font:inherit;color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+img,svg{max-width:100%}
+a{color:var(--azul)}
+
+/* @bloque estructura */
+
+/* Zona de contenido. El relleno inferior deja aire para la última acción y
+   respeta la franja segura de los teléfonos con muesca. */
+.pagina{
+  max-width:var(--ancho-pagina);
+  margin-inline:auto;
+  padding:var(--e-5) var(--e-pagina) calc(var(--e-11) + var(--safe-inf));
+}
+
+/* Una tarjeta es un paso o una pantalla completa; no se anidan tarjetas. */
+.tarjeta{
+  margin-bottom:var(--e-5);
+  padding:var(--e-seccion);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--linea);
+  border-radius:var(--r-caja);
+}
+
+/* Renglones de campos: en teléfono una columna; en tableta y escritorio las
+   columnas que su nombre indica (bloque adaptaciones de nucleo.css). */
+.fila,.fila-3,.fila-2-1{display:grid;grid-template-columns:1fr;gap:var(--e-4);align-items:start}
+
+/* Los seis niveles de jerarquía. Se distinguen por familia, tamaño y color a
+   la vez; una diferencia de medio punto no se percibe como jerarquía.
+     1 título de página  · Cabin 2xl guinda
+     2 título de paso    · Cabin xl guinda, peso fuerte
+     3 título de bloque  · Cabin lg guinda con filete dorado
+     4 pregunta          · Roboto base, peso medio (la etiqueta del campo)
+     5 texto y ayuda     · Roboto base / md / sm
+     6 rótulo            · Roboto sm mayúsculas espaciadas */
+.titulo-pagina{font-size:var(--t-2xl);color:var(--guinda)}
+
+.titulo-paso{
+  margin-bottom:var(--e-2);
+  font-size:var(--t-xl);
+  font-weight:var(--peso-fuerte);
+  color:var(--guinda);
+}
+
+.titulo-bloque{
+  margin:var(--e-seccion) 0 var(--e-2);
+  padding-top:var(--e-3);
+  border-top:var(--b-2) solid var(--dorado);
+  font-size:var(--t-lg);
+  color:var(--guinda);
+}
+
+.rotulo{
+  margin:var(--e-6) 0 var(--e-3);
+  padding-bottom:var(--e-2);
+  border-bottom:var(--b-1) solid var(--linea);
+  font-family:var(--fuente-cuerpo);
+  font-size:var(--t-sm);
+  letter-spacing:var(--tracking-rotulo);
+  text-transform:uppercase;
+  color:var(--gris);
+}
+
+/* Bajada del título de paso: dice qué se pide y para qué. */
+.bajada{max-width:var(--ancho-lectura);margin-bottom:var(--e-5);font-size:var(--t-md);color:var(--gris)}
+
+/* ---------- Encabezado y pie institucionales ----------
+   El logotipo es ancho (Gobierno · Secretaría): va en su renglón y el título
+   debajo. El fondo beige y el filete dorado son la identidad de encabezado y
+   pie. El logotipo es un enlace al sitio de la Secretaría (FRM-34). */
+.cabecera{
+  padding:var(--e-4) var(--e-pagina);
+  background:var(--beige);
+  border-bottom:var(--b-3) solid var(--dorado);
+}
+.cabecera-int{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:var(--e-3);
+  max-width:var(--ancho-pagina);
+  margin-inline:auto;
+}
+.cabecera-logo{display:block;width:auto;height:auto;max-width:100%;max-height:var(--alto-logo)}
+.cabecera-titulo{width:100%;padding-top:var(--e-3);border-top:var(--b-1) solid var(--linea)}
+
+.pie{
+  padding:var(--e-7) var(--e-pagina) calc(var(--e-7) + var(--safe-inf));
+  background:var(--beige);
+  border-top:var(--b-3) solid var(--dorado);
+  font-size:var(--t-sm);
+  color:var(--gris);
+}
+.pie-int{max-width:var(--ancho-pagina);margin-inline:auto}
+
+/* Enlace de salto al contenido: primer elemento enfocable de la página. */
+.salto{
+  position:absolute;
+  top:0;
+  left:0;
+  z-index:var(--z-dialogo);
+  padding:var(--e-3) var(--e-5);
+  background:var(--guinda);
+  border-radius:0 0 var(--r-ctrl) 0;
+  font-weight:var(--peso-semi);
+  color:var(--blanco);
+  transform:translateY(-200%);
+}
+
+/* Texto sólo para lector de pantalla: sigue en el árbol de accesibilidad. */
+.solo-lector{
+  position:absolute;
+  width:var(--b-1);
+  height:var(--b-1);
+  margin:calc(var(--b-1) * -1);
+  padding:0;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+
+/* Aviso de entorno de pruebas: visible mientras se trabaja con datos ficticios. */
+.entorno-pruebas{
+  padding:var(--e-2) var(--e-pagina);
+  background:var(--pend-bg);
+  border-bottom:var(--b-1) dashed var(--pend);
+  font-size:var(--t-sm);
+  font-weight:var(--peso-medio);
+  text-align:center;
+  color:var(--pend-txt);
+}
+
+
+/* ===== codigo/css/nucleo.css ===== */
+/* =========================================================
+   nucleo.css · Estándar de formularios del SIA (SEDEMA)
+
+   Componentes BASE: los que todo formulario lleva (campo, control, botón,
+   aviso, resumen de errores, icono). Los componentes RECOMENDADOS y
+   OPCIONALES viven cada uno en su módulo (codigo/modulos/<nombre>/).
+
+   Reglas de la hoja (FRM-66 a FRM-70):
+     · un selector, una declaración;
+     · especificidad plana: clases, a lo más dos niveles;
+     · componente y variante en el MISMO elemento (class="btn btn-primario");
+     · el estado se lee del atributo ([aria-invalid], [aria-disabled],
+       [readonly], :checked, [open], [hidden]), nunca de una clase;
+     · ningún color, medida, duración ni capa literal: todo es un token;
+     · se escribe para el teléfono; las pantallas anchas se adaptan con
+       (min-width) en el bloque «adaptaciones».
+
+   Bloques, en orden fijo: componentes → estados → utilidades → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+/* ---------- Campo ----------
+   Etiqueta visible arriba, ayuda, control y error, en ese orden. El error
+   reserva su renglón con min-height para que, al aparecer, no empuje los
+   botones que la persona iba a pulsar (decisión C5). */
+.campo{margin-bottom:var(--e-5)}
+.etiqueta{
+  display:block;
+  margin-bottom:var(--e-1);
+  font-weight:var(--peso-medio);
+  line-height:var(--interlineado-compacto);
+  color:var(--texto);
+}
+/* La marca de obligatorio es gris y va con la palabra (decisión C2): el
+   color solo no lo dice y el guinda está reservado a la acción principal. */
+.marca-oblig{margin-left:var(--e-1);font-weight:var(--peso-fuerte);color:var(--gris)}
+.ayuda{margin-bottom:var(--e-2);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
+.ayuda:empty{margin:0}
+.contador{margin-top:var(--e-1);font-size:var(--t-xs);text-align:right;color:var(--gris-cl)}
+
+/* Error del campo: icono + palabra «Error» + qué hacer. No depende del rojo. */
+.err{
+  display:flex;
+  align-items:flex-start;
+  gap:var(--e-1);
+  min-height:var(--e-5);
+  margin-top:var(--e-1);
+  font-size:var(--t-sm);
+  font-weight:var(--peso-medio);
+  line-height:var(--interlineado-compacto);
+  color:var(--error);
+}
+.err-icono{flex:none;width:var(--icono-sm);height:var(--icono-sm);margin-top:var(--b-1)}
+/* El renglón del error siempre existe (reserva su alto): vacío no muestra icono. */
+.err:not([data-nivel]) .err-icono{display:none}
+
+.leyenda-oblig{
+  margin-bottom:var(--e-4);
+  padding:var(--e-2) var(--e-3);
+  background:var(--guinda-cl);
+  border-radius:var(--r-ctrl);
+  font-size:var(--t-sm);
+  color:var(--gris);
+}
+
+/* El control: texto, número, fecha, hora, teléfono, select y área de texto.
+   Letra de 16 px como mínimo (iOS hace zoom con menos). Su borde es
+   --borde (3:1 exigido a un control), nunca --linea. */
+.control{
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  min-height:var(--alto-control);
+  padding:var(--e-3);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-ctrl);
+  font-size:var(--t-base);
+  color:var(--texto);
+  transition:border-color var(--dur-rapida),box-shadow var(--dur-rapida);
+}
+/* El campo de fecha de iPhone trae un ancho mínimo propio y se salía de la
+   tarjeta; sin la apariencia del sistema respeta el ancho de la columna. */
+.control[type="date"],.control[type="time"]{-webkit-appearance:none;appearance:none;text-align:left}
+.control-texto{min-height:var(--alto-texto-min);overflow:hidden;line-height:var(--interlineado-cuerpo);resize:none}
+.control-corto{max-width:var(--ancho-tarjeta-min)}
+
+/* El select se dibuja igual que los demás campos. La flecha es un borde
+   girado, no una imagen (una imagen incrustada es un color fuera de :root). */
+.select{position:relative}
+.select::after{
+  content:'';
+  position:absolute;
+  top:50%;
+  right:var(--e-4);
+  width:var(--e-2);
+  height:var(--e-2);
+  border-right:var(--b-2) solid var(--gris);
+  border-bottom:var(--b-2) solid var(--gris);
+  transform:translateY(-70%) rotate(45deg);
+  pointer-events:none;
+}
+.control-select{-webkit-appearance:none;appearance:none;padding-right:var(--e-9);cursor:pointer}
+
+/* Campo con unidad o prefijo visible (pesos, metros, +52). */
+.control-grupo{display:flex;align-items:stretch}
+.control-unidad{
+  display:flex;
+  align-items:center;
+  padding:0 var(--e-3);
+  background:var(--fondo);
+  border:var(--b-1) solid var(--borde);
+  border-left:0;
+  border-radius:0 var(--r-ctrl) var(--r-ctrl) 0;
+  font-size:var(--t-md);
+  color:var(--gris);
+  white-space:nowrap;
+}
+
+/* Casilla suelta (conformidad, aceptación). La casilla es la nativa. */
+.casilla{display:flex;align-items:flex-start;gap:var(--e-3);min-height:var(--objetivo-min);cursor:pointer}
+.casilla-input{flex:none;width:var(--tam-casilla);height:var(--tam-casilla);margin:var(--e-1) 0 0;accent-color:var(--azul)}
+.casilla-texto{flex:1;min-width:0;padding-top:var(--e-1)}
+
+/* Caja destacada para consentimiento y prueba de humanidad: no es una
+   pregunta de la persona, sino algo que el sistema comprueba. */
+.destacado{
+  display:flex;
+  align-items:flex-start;
+  gap:var(--e-3);
+  margin:var(--e-2) 0;
+  padding:var(--e-4);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-caja);
+}
+.destacado-nombre{display:block;font-weight:var(--peso-medio);line-height:var(--interlineado-compacto)}
+.destacado-ayuda{display:block;margin-top:var(--e-1);font-size:var(--t-sm);color:var(--gris-cl)}
+
+/* ---------- Iconos ----------
+   Un solo conjunto SVG (codigo/iconos/sprite.svg). Heredan el color del
+   texto; decorativos con aria-hidden; con significado, siempre junto a texto. */
+.icono{flex:none;width:var(--icono);height:var(--icono);fill:none;stroke:currentColor;stroke-width:var(--b-2);stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+.icono-sm{width:var(--icono-sm);height:var(--icono-sm)}
+
+/* ---------- Botones ----------
+   Una sola acción principal por pantalla (FRM-34): el botón guinda. El
+   secundario lleva borde gris (decisión C7); «Atrás» es azul con flecha
+   porque es lo tocable; el de peligro es rojo y pide confirmación. */
+.acciones{
+  display:flex;
+  flex-direction:column-reverse;
+  gap:var(--e-3);
+  margin-top:var(--e-6);
+  padding-top:var(--e-5);
+  border-top:var(--b-1) solid var(--linea);
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:var(--e-2);
+  width:100%;
+  min-height:var(--alto-control);
+  padding:var(--e-3) var(--e-6);
+  border:var(--b-1) solid transparent;
+  border-radius:var(--r-ctrl);
+  font-family:var(--fuente-titulo);
+  font-size:var(--t-base);
+  font-weight:var(--peso-semi);
+  text-decoration:none;
+  transition:background var(--dur-rapida),border-color var(--dur-rapida);
+}
+.btn-primario{background:var(--guinda);color:var(--blanco)}
+.btn-secundario{background:var(--blanco);border-color:var(--borde);color:var(--gris)}
+.btn-peligro{background:var(--blanco);border-color:var(--error);color:var(--error-txt)}
+/* «Atrás» y los enlaces-botón no tienen caja: se leen como texto que se toca. */
+.btn-atras{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--e-2);
+  align-self:center;
+  min-height:var(--objetivo-min);
+  padding:var(--e-3) var(--e-1);
+  background:none;
+  border:0;
+  border-radius:var(--r-ctrl);
+  font-family:var(--fuente-titulo);
+  font-weight:var(--peso-semi);
+  color:var(--azul);
+}
+.btn-enlace{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--e-1);
+  min-height:var(--objetivo-min);
+  padding:var(--e-2) var(--e-1);
+  background:none;
+  border:0;
+  font-size:var(--t-sm);
+  font-weight:var(--peso-semi);
+  text-decoration:underline;
+  color:var(--azul);
+}
+/* Icono solo (cerrar, quitar): únicamente con nombre accesible y 44 px. */
+.btn-icono{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  width:var(--objetivo-min);
+  height:var(--objetivo-min);
+  background:none;
+  border:var(--b-1) solid transparent;
+  border-radius:var(--r-ctrl);
+  color:var(--gris);
+}
+
+/* ---------- Avisos ----------
+   Un aviso es algo que hay que leer, no una alarma: neutro con filete. El
+   rojo es sólo para lo que impide continuar; el verde, para que el sistema
+   confirme; el ámbar, para atención sin bloqueo. Lleva icono y palabra. */
+.aviso{
+  display:flex;
+  gap:var(--e-3);
+  margin:var(--e-4) 0;
+  padding:var(--e-4);
+  background:var(--aviso-bg);
+  border-left:var(--b-4) solid var(--borde);
+  border-radius:0 var(--r-ctrl) var(--r-ctrl) 0;
+  font-size:var(--t-md);
+  color:var(--texto);
+}
+.aviso-advertencia{background:var(--pend-bg);border-left-color:var(--pend);color:var(--pend-txt)}
+.aviso-bloqueo{background:var(--error-bg);border-left-color:var(--error);color:var(--error-txt)}
+.aviso-ok{background:var(--ok-bg);border-left-color:var(--ok);color:var(--ok-txt)}
+.aviso-texto{flex:1;min-width:0}
+
+/* Marcador de pendiente visible: lo que el proyecto aún no resuelve se dice
+   con este rótulo, nunca se oculta ni se inventa (FRM-75). El texto va en el
+   HTML, no en ::before, para que el lector de pantalla lo lea (decisión C11). */
+.pendiente{
+  padding:var(--e-1) var(--e-2);
+  background:var(--pend-bg);
+  border:var(--b-1) dashed var(--pend);
+  border-radius:var(--e-1);
+  font-size:var(--t-xs);
+  font-weight:var(--peso-semi);
+  font-style:normal;
+  color:var(--pend-txt);
+}
+
+/* Resumen de errores al inicio del paso: recibe el foco y enlaza a cada
+   campo (FRM-28). */
+.resumen-errores{
+  margin-bottom:var(--e-5);
+  padding:var(--e-4) var(--e-4) var(--e-4) var(--e-5);
+  background:var(--error-bg);
+  border:var(--b-2) solid var(--error);
+  border-radius:var(--r-ctrl);
+  color:var(--error-txt);
+}
+.resumen-errores-titulo{display:flex;align-items:center;gap:var(--e-2);margin-bottom:var(--e-2);font-weight:var(--peso-fuerte);color:var(--error)}
+.resumen-errores-lista{margin-left:var(--e-5);font-size:var(--t-md);list-style:disc}
+.resumen-errores-lista li{padding:var(--e-1) 0} /* separa los enlaces para cumplir los 24 px de WCAG 2.5.8 */
+.resumen-errores-enlace{font-weight:var(--peso-semi);color:var(--error)}
+/* «Borrador guardado»: el sistema avisa en verde, discreto, con aria-live. */
+.guardado{height:0;overflow:hidden;font-size:var(--t-sm);color:var(--ok);opacity:0;transition:opacity var(--dur-media)}
+
+/* Franja de borrador recuperado, antes del formulario. */
+.franja{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:var(--e-3);
+  margin-bottom:var(--e-4);
+  padding:var(--e-3) var(--e-4);
+  background:var(--blanco);
+  border-bottom:var(--b-1) solid var(--linea);
+  box-shadow:inset 0 var(--b-3) 0 var(--dorado);
+}
+.franja-texto{flex:1 1 var(--ancho-tarjeta-min);font-size:var(--t-md)}
+
+/* Anuncio de estado de envío (error de red, plazo vencido): recibe el foco. */
+.estado-envio{margin-top:var(--e-4)}
+
+/* @bloque estados */
+
+/* Foco: el MISMO anillo en todo el paquete y sobre cualquier fondo. Es la
+   única regla de foco; los componentes no declaran la suya. [data-demo-foco]
+   existe para que la guía visual muestre el estado sin depender del teclado. */
+:focus-visible,[data-demo-foco]{outline:var(--foco-ancho) solid var(--foco);outline-offset:var(--foco-sep)}
+.salto:focus{transform:translateY(0)}
+
+/* Campo enfocado: borde y halo del color de foco. */
+.control:focus{border-color:var(--foco);box-shadow:0 0 0 var(--b-2) var(--halo-foco)}
+
+/* Error: borde grueso y fondo tenue. Se lee del atributo que ya anuncia el
+   lector de pantalla (aria-invalid). El relleno se compensa para que el
+   control no cambie de tamaño. */
+.control[aria-invalid="true"]{padding:calc(var(--e-3) - var(--b-1));background:var(--error-bg);border:var(--b-2) solid var(--error)}
+.destacado:has([aria-invalid="true"]){border-color:var(--error);border-width:var(--b-2)}
+.destacado:has(.casilla-input:checked){background:var(--azul-cl);border-color:var(--azul)}
+
+/* Advertencia en el renglón de error: cruzada degradada o sugerencia sin bloqueo. */
+.err[data-nivel="advertencia"]{color:var(--pend-txt)}
+
+/* Solo lectura frente a deshabilitado: ambos se distinguen del campo normal
+   y entre sí sin depender sólo del color. Solo lectura: borde discontinuo,
+   texto pleno, se puede seleccionar y se envía. Deshabilitado: borde tenue,
+   texto atenuado, no se envía. */
+.control[readonly]{background:var(--solo-lectura-bg);border-style:dashed;cursor:default}
+.control:disabled{background:var(--aviso-bg);border-color:var(--linea);color:var(--gris-cl);cursor:not-allowed}
+.control-select[data-vacio]{color:var(--gris-cl)}
+
+.btn-primario:hover{background:var(--guinda-osc)}
+.btn-secundario:hover{border-color:var(--gris);color:var(--texto)}
+.btn-peligro:hover{background:var(--error-bg)}
+.btn-atras:hover{text-decoration:underline}
+.btn-icono:hover{background:var(--azul-cl);color:var(--azul)}
+/* Deshabilitado accesible: aria-disabled conserva el foco y el anuncio; la
+   acción la bloquea formkit. :disabled queda para lo que de verdad no aplica. */
+.btn:disabled,.btn[aria-disabled="true"]{opacity:var(--op-inactivo);cursor:not-allowed}
+.btn[aria-busy="true"]{cursor:progress}
+
+.guardado[data-visible]{height:auto;padding-bottom:var(--e-2);opacity:1}
+
+/* @bloque utilidades */
+
+/* El atributo hidden debe ganar siempre. Va AQUÍ, después de las reglas de
+   componente, y gana por orden sin necesidad de !important (decisión C9).
+   Los módulos no declaran display en selectores de la misma especificidad
+   que [hidden] salvo en elementos que nunca se ocultan con el atributo. */
+[hidden]{display:none}
+
+.texto-gris{font-size:var(--t-md);color:var(--gris)}
+.texto-centrado{text-align:center}
+.mono{font-family:var(--fuente-mono)}
+
+/* @bloque adaptaciones */
+
+/* Alineación de campos que comparten renglón: el renglón declara cuatro
+   filas (etiqueta, ayuda, control, error) y cada campo las adopta con
+   subgrid, de modo que las columnas alinean aunque unos lleven ayuda y otros no. */
+@supports (grid-template-rows: subgrid){
+  .fila,.fila-3,.fila-2-1{grid-template-rows:auto auto auto auto;row-gap:0}
+  .fila > .campo,.fila-3 > .campo,.fila-2-1 > .campo{display:grid;grid-template-rows:subgrid;grid-row:span 4;gap:0;align-content:start}
+  .etiqueta{grid-row:1}
+  .ayuda{grid-row:2}
+  .control,.select,.control-grupo{grid-row:3}
+  .err{grid-row:4}
+}
+
+/* Con el dedo hace falta más superficie; con el ratón, no. */
+@media (pointer: coarse){
+  .btn-enlace{min-height:var(--alto-control)}
+}
+
+/* Tableta y escritorio: renglones en columnas, acciones en fila con la
+   principal a la derecha, botones a su medida. */
+@media (min-width:760px){
+  html{scroll-padding-top:var(--alto-barra-fija)}
+  .fila{grid-template-columns:1fr 1fr}
+  .fila-3{grid-template-columns:1fr 1fr 1fr}
+  .fila-2-1{grid-template-columns:2fr 1fr}
+  .acciones{flex-direction:row;justify-content:space-between}
+  .btn:not(.btn-ancho){width:auto}
+  .btn-primario{margin-left:auto}
+  .btn-atras{align-self:auto}
+}
+
+/* Con movimiento reducido no hay transiciones ni desplazamiento suave. Es el
+   único lugar donde se admite !important (FRM-68). */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:var(--dur-nula) !important;
+    animation-iteration-count:1 !important;
+    transition-duration:var(--dur-nula) !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+/* Modo de contraste forzado: el sistema impone sus colores; lo que hoy es
+   sólo fondo lleva borde para seguir viéndose. */
+@media (forced-colors: active){
+  .destacado:has(.casilla-input:checked){outline:var(--b-3) solid Highlight}
+}
+
+@media print{
+  .acciones,.salto,.franja,.guardado{display:none}
+}
+
+
+/* ===== codigo/modulos/opciones/opciones.css ===== */
+/* =========================================================
+   opciones.css · Módulo «opciones» · nivel BASE
+
+   Opción única (radio), opción múltiple (casilla), tarjetas seleccionables
+   con descripción y la variante corta Sí/No. Son controles NATIVOS vestidos
+   (decisión C3): el input real cubre toda la tarjeta, de modo que teclado
+   (flechas), lector de pantalla y dedo usan el control del navegador.
+   Lo elegido se marca con fondo azul tenue, sombra interior y palomita:
+   nunca sólo con color, y sin que el control cambie de tamaño.
+
+   Depende de: nucleo.css. JS: ninguno (el núcleo valida).
+   Bloques: componentes → estados → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.grupo{margin-bottom:var(--e-5)}
+/* Tarjetas en rejilla: en teléfono una columna; desde tableta, las que quepan. */
+.opciones{display:grid;grid-template-columns:1fr;gap:var(--e-3)}
+/* Dos o tres opciones cortas (sí / no): en fila. Con ratón miden --alto-opcion;
+   con el dedo suben a --alto-control: la regla mide el puntero, no el ancho. */
+.opciones-cortas{display:flex;flex-wrap:wrap;gap:var(--e-3)}
+.opcion{
+  position:relative;
+  display:block;
+  min-height:var(--objetivo-min);
+  padding:var(--e-4);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-caja);
+  cursor:pointer;
+  transition:border-color var(--dur-rapida),background var(--dur-rapida),box-shadow var(--dur-rapida);
+}
+.opcion-corta{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:1 1 var(--ancho-boton-min);
+  min-height:var(--alto-opcion);
+  padding:var(--e-2) var(--e-5);
+  border-radius:var(--r-ctrl);
+  text-align:center;
+}
+/* El input nativo cubre la tarjeta: invisible pero operable y anunciado. */
+.opcion-input{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  margin:0;
+  opacity:0;
+  cursor:pointer;
+}
+.opcion-nombre{display:flex;align-items:center;gap:var(--e-2);font-family:var(--fuente-titulo);font-weight:var(--peso-semi);line-height:var(--interlineado-compacto);color:var(--azul)}
+.opcion-desc{display:block;margin-top:var(--e-1);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris)}
+/* La palomita de lo elegido: siempre presente en el HTML, visible sólo al marcar. */
+.opcion-marca{display:none;width:var(--icono-sm);height:var(--icono-sm)}
+/* En la variante corta el nombre va en gris: lo tocable se pinta de azul al elegirlo. */
+.opcion-corta .opcion-nombre{color:var(--gris)}
+
+/* Lista vertical de opciones con el control visible (radio o casilla a la
+   izquierda): para listas largas donde la tarjeta sería excesiva. */
+.opciones-lista{display:flex;flex-direction:column;gap:var(--e-2)}
+.opcion-fila{
+  display:flex;
+  align-items:flex-start;
+  gap:var(--e-3);
+  min-height:var(--objetivo-min);
+  padding:var(--e-3);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-ctrl);
+  cursor:pointer;
+}
+.opcion-fila-input{flex:none;width:var(--tam-casilla);height:var(--tam-casilla);margin:var(--e-1) 0 0;accent-color:var(--azul)}
+
+/* @bloque estados */
+
+.opcion:hover{background:var(--azul-cl);border-color:var(--azul)}
+/* Elegida: sombra interior en lugar de borde grueso (el tamaño no cambia). */
+.opcion:has(.opcion-input:checked){background:var(--azul-cl);border-color:var(--azul);box-shadow:inset 0 0 0 var(--b-1) var(--azul)}
+.opcion:has(.opcion-input:checked) .opcion-marca{display:inline-block}
+.opcion-corta:has(.opcion-input:checked) .opcion-nombre{color:var(--azul)}
+.opcion:has(.opcion-input:focus-visible){outline:var(--foco-ancho) solid var(--foco);outline-offset:var(--foco-sep)}
+.opcion:has(.opcion-input:disabled){opacity:var(--op-inactivo);cursor:not-allowed}
+.opcion-fila:hover{border-color:var(--azul)}
+.opcion-fila:has(.opcion-fila-input:checked){background:var(--azul-cl);border-color:var(--azul);box-shadow:inset 0 0 0 var(--b-1) var(--azul)}
+.opcion-fila:has(.opcion-fila-input:focus-visible){outline:var(--foco-ancho) solid var(--foco);outline-offset:var(--foco-sep)}
+/* Error del grupo: borde rojo en cada opción, además del mensaje. */
+.grupo:has([aria-invalid="true"]) .opcion{border-color:var(--error)}
+.grupo:has([aria-invalid="true"]) .opcion-fila{border-color:var(--error)}
+
+/* @bloque adaptaciones */
+
+@media (min-width:760px){
+  .opciones{grid-template-columns:repeat(auto-fill,minmax(var(--ancho-tarjeta-min),1fr))}
+  .opcion-corta{flex:0 1 auto;min-width:var(--ancho-boton-min)}
+}
+
+@media (pointer: coarse){
+  .opcion-corta{min-height:var(--alto-control)}
+}
+
+@media (forced-colors: active){
+  .opcion:has(.opcion-input:checked){outline:var(--b-3) solid Highlight}
+  .opcion-fila:has(.opcion-fila-input:checked){outline:var(--b-3) solid Highlight}
+}
+
+
+/* ===== codigo/modulos/combo/combo.css ===== */
+/* =========================================================
+   combo.css · Módulo «combo» · nivel RECOMENDADO
+   Lista desplegable con búsqueda. Depende de: nucleo.css (.control).
+   Bloques: componentes → estados.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.combo{position:relative}
+.combo-lista{
+  position:absolute;
+  top:calc(100% + var(--e-1));
+  left:0;
+  right:0;
+  z-index:var(--z-lista);
+  max-height:var(--alto-lista-max);
+  padding:var(--e-1) 0;
+  overflow-y:auto;
+  background:var(--blanco);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-ctrl);
+  box-shadow:var(--sombra-lista);
+  scrollbar-width:thin;
+  scrollbar-color:var(--borde) transparent;
+}
+.combo-opcion{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:var(--e-3);
+  min-height:var(--objetivo-min);
+  padding:var(--e-3);
+  line-height:var(--interlineado-compacto);
+  cursor:pointer;
+}
+.combo-nombre{overflow-wrap:anywhere}
+.combo-detalle{flex-shrink:0;font-size:var(--t-sm);color:var(--gris-cl)}
+.combo-vacio{padding:var(--e-3);font-size:var(--t-sm);font-style:italic;color:var(--gris-cl)}
+
+/* @bloque estados */
+
+/* La opción activa se marca con aria-selected, el mismo atributo que anuncia el lector. */
+.combo-opcion:hover,.combo-opcion[aria-selected="true"]{background:var(--azul-cl)}
+.combo-opcion[aria-selected="true"] .combo-nombre{color:var(--azul);font-weight:var(--peso-semi)}
+
+
+/* ===== codigo/modulos/fecha/fecha.css ===== */
+/* =========================================================
+   fecha.css · Módulo «fecha» · nivel RECOMENDADO
+   Control de fecha u hora con botón «Hoy» / «Ahora» y atajos de rango.
+   Depende de: nucleo.css. Bloques: componentes → estados → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+/* Control y botón en fila; en teléfono el botón queda debajo a todo lo ancho. */
+.fecha-grupo{display:flex;flex-direction:column;gap:var(--e-2)}
+.fecha-hoy{flex:none}
+.fecha-atajos{display:flex;flex-wrap:wrap;gap:var(--e-2);margin-bottom:var(--e-3)}
+.fecha-atajo{flex:1 1 auto;min-height:var(--objetivo-min);padding:var(--e-2) var(--e-3);font-size:var(--t-sm)}
+
+/* @bloque estados */
+
+.fecha-atajo[aria-pressed="true"]{background:var(--azul-cl);border-color:var(--azul);color:var(--azul)}
+
+/* @bloque adaptaciones */
+
+@media (min-width:560px){
+  .fecha-grupo{flex-direction:row}
+  .fecha-hoy{width:auto}
+  .fecha-atajo{flex:0 1 auto}
+}
+
+
+/* ===== codigo/modulos/repetibles/repetibles.css ===== */
+/* =========================================================
+   repetibles.css · Módulo «repetibles» · nivel OPCIONAL
+   Grupos repetibles: cada fila es una tarjeta con cabecera y botón de quitar.
+   Depende de: nucleo.css. Bloques: componentes → estados.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.repetible{margin-bottom:var(--e-5)}
+.repetible-lista{display:flex;flex-direction:column;gap:var(--e-3);margin-bottom:var(--e-3)}
+.repetible-fila{
+  padding:var(--e-4);
+  background:var(--fondo);
+  border:var(--b-1) solid var(--linea);
+  border-radius:var(--r-caja);
+}
+.repetible-cabecera{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3);margin-bottom:var(--e-3)}
+.repetible-titulo{font-family:var(--fuente-titulo);font-weight:var(--peso-semi);color:var(--guinda)}
+
+/* @bloque estados */
+
+.repetible-fila:focus-within{border-color:var(--borde)}
+
+
+/* ===== codigo/modulos/toggle/toggle.css ===== */
+/* =========================================================
+   toggle.css · Módulo «toggle» · nivel OPCIONAL
+   Interruptor: el estado se lee de aria-checked; perilla y texto «Sí/No»
+   acompañan al color. Depende de: nucleo.css. Bloques: componentes → estados.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.toggle{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--e-3);margin-bottom:var(--e-5)}
+.toggle-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--e-3);
+  min-height:var(--objetivo-min);
+  padding:var(--e-2) var(--e-1);
+  background:none;
+  border:0;
+  border-radius:var(--r-ctrl);
+  font-weight:var(--peso-medio);
+  color:var(--gris);
+}
+.toggle-pista{
+  position:relative;
+  display:inline-block;
+  width:var(--e-9);
+  height:var(--e-6);
+  background:var(--borde);
+  border-radius:var(--r-pill);
+  transition:background var(--dur-rapida);
+}
+.toggle-perilla{
+  position:absolute;
+  top:var(--b-2);
+  left:var(--b-2);
+  width:var(--e-5);
+  height:var(--e-5);
+  background:var(--blanco);
+  border-radius:var(--r-pill);
+  transition:transform var(--dur-rapida);
+}
+.toggle-estado{min-width:var(--e-7)}
+
+/* @bloque estados */
+
+.toggle-btn[aria-checked="true"] .toggle-pista{background:var(--azul)}
+.toggle-btn[aria-checked="true"] .toggle-perilla{transform:translateX(var(--e-6))}
+.toggle-btn[aria-checked="true"] .toggle-estado{color:var(--azul)}
+
+
+/* ===== codigo/modulos/escala/escala.css ===== */
+/* =========================================================
+   escala.css · Módulo «escala» · nivel OPCIONAL
+
+   Escala o valoración (1 a 5, Nada–Mucho): radios nativos en fila con los
+   extremos rotulados. Es un fieldset con legend; cada punto es una etiqueta
+   con su radio invisible encima, igual que las opciones. Sin JS: el núcleo
+   valida como opción única.
+
+   Contrato HTML:
+     <fieldset class="grupo escala" data-campo="satisfaccion" data-requerido>
+       <legend class="etiqueta">¿Qué tan clara fue la información?</legend>
+       <div class="escala-puntos">
+         <label class="escala-punto"><input class="opcion-input" type="radio" name="satisfaccion" value="1"><span class="escala-num">1</span></label>
+         …
+       </div>
+       <div class="escala-extremos" aria-hidden="true"><span>Nada clara</span><span>Muy clara</span></div>
+     </fieldset>
+   Los extremos se repiten en texto oculto dentro del primer y último radio
+   (span.solo-lector) para que el lector de pantalla los lea.
+   Depende de: nucleo.css, opciones.css (.opcion-input).
+   ========================================================= */
+
+/* @bloque componentes */
+
+.escala-puntos{display:flex;gap:var(--e-2)}
+.escala-punto{
+  position:relative;
+  flex:1 1 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:var(--alto-control);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-ctrl);
+  cursor:pointer;
+  transition:background var(--dur-rapida),border-color var(--dur-rapida);
+}
+.escala-num{font-family:var(--fuente-titulo);font-weight:var(--peso-semi);color:var(--gris)}
+.escala-extremos{display:flex;justify-content:space-between;margin-top:var(--e-2);font-size:var(--t-sm);color:var(--gris-cl)}
+
+/* @bloque estados */
+
+.escala-punto:hover{border-color:var(--azul)}
+.escala-punto:has(.opcion-input:checked){background:var(--azul);border-color:var(--azul)}
+.escala-punto:has(.opcion-input:checked) .escala-num{color:var(--blanco)}
+.escala-punto:has(.opcion-input:focus-visible){outline:var(--foco-ancho) solid var(--foco);outline-offset:var(--foco-sep)}
+.grupo:has([aria-invalid="true"]) .escala-punto{border-color:var(--error)}
+
+
+/* ===== codigo/modulos/pasos/pasos.css ===== */
+/* =========================================================
+   pasos.css · Módulo «pasos» · nivel RECOMENDADO
+
+   Barra de pasos fija y navegable. Que un paso esté hecho lo dicen la
+   palomita y el número; que tenga error, el icono de alerta: nunca sólo el
+   color. En teléfono las etiquetas se ocultan y aparece «Paso X de N ·
+   Título». La barra queda fija arriba y el desplazamiento automático la
+   respeta (scroll-padding-top en base.css).
+   También define la barra de acciones fija en teléfono (opcional, clase
+   .acciones-fijas): queda al pie, respeta la franja segura y no tapa el
+   campo enfocado porque el relleno inferior de la página lo compensa.
+
+   Depende de: nucleo.css. Bloques: componentes → estados → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.barra-fija{
+  position:sticky;
+  top:0;
+  z-index:var(--z-barra);
+  margin-bottom:var(--e-5);
+  padding:var(--e-2) 0;
+  background:var(--fondo);
+  border-bottom:var(--b-1) solid var(--linea);
+}
+.pasos{display:flex;align-items:flex-start}
+.pasos-item{position:relative;flex:1;display:flex}
+/* La línea de enlace va detrás del círculo, dentro del contexto de apilamiento de la barra. */
+.pasos-item::before{
+  content:'';
+  position:absolute;
+  top:calc(var(--bolita) / 2 + var(--e-1));
+  left:-50%;
+  z-index:-1;
+  width:100%;
+  height:var(--b-2);
+  background:var(--linea);
+}
+.pasos-item:first-child::before{display:none}
+.pasos-btn{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:var(--e-2);
+  min-height:var(--objetivo-min);
+  padding:var(--e-1);
+  background:none;
+  border:0;
+  border-radius:var(--r-ctrl);
+  color:var(--gris-cl);
+}
+.pasos-bolita{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:var(--bolita);
+  height:var(--bolita);
+  background:var(--blanco);
+  border:var(--b-2) solid var(--borde);
+  border-radius:var(--r-pill);
+  font-family:var(--fuente-titulo);
+  font-weight:var(--peso-fuerte);
+  font-size:var(--t-sm);
+  line-height:1;
+  color:var(--gris);
+}
+.pasos-icono{display:none}
+.pasos-etq{display:none;font-size:var(--t-xs);line-height:var(--interlineado-compacto);text-align:center}
+/* «Paso 2 de 5 · Título»: en teléfono sustituye a las etiquetas. */
+.pasos-actual{display:block;margin-top:var(--e-2);font-size:var(--t-sm);font-weight:var(--peso-fuerte);text-align:center}
+
+/* Recordatorio de lo que se está haciendo, dentro de la barra fija. Se
+   oculta con [hidden]: por eso el display se declara sólo cuando no lo está
+   (esta hoja carga después de nucleo.css y, a igual especificidad, ganaría). */
+.recordatorio:not([hidden]){
+  display:flex;
+  align-items:center;
+  gap:var(--e-3);
+  margin:var(--e-3) var(--e-pagina) 0;
+  padding:var(--e-2) var(--e-3);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--linea);
+  border-left:var(--b-4) solid var(--dorado);
+  border-radius:var(--r-ctrl);
+  font-size:var(--t-md);
+}
+.recordatorio-texto{flex:1}
+
+/* Barra de acciones fija al pie en teléfono (opcional). */
+.acciones-fijas{
+  position:sticky;
+  bottom:0;
+  z-index:var(--z-barra);
+  margin:var(--e-6) calc(var(--e-seccion) * -1) calc(var(--e-seccion) * -1);
+  padding:var(--e-3) calc(var(--e-seccion) + var(--safe-izq)) calc(var(--e-3) + var(--safe-inf)) calc(var(--e-seccion) + var(--safe-der));
+  background:var(--blanco);
+  border-top:var(--b-1) solid var(--linea);
+  border-radius:0 0 var(--r-caja) var(--r-caja);
+}
+
+/* @bloque estados */
+
+.pasos-btn[data-hecho]{color:var(--gris)}
+.pasos-btn[data-hecho] .pasos-bolita{border-color:var(--gris-cl)}
+.pasos-btn[data-hecho] .pasos-num{display:none}
+.pasos-btn[data-hecho] .pasos-hecho{display:block}
+.pasos-btn[data-error]{color:var(--error-txt)}
+.pasos-btn[data-error] .pasos-bolita{border-color:var(--error);color:var(--error)}
+.pasos-btn[data-error] .pasos-num{display:none}
+.pasos-btn[data-error] .pasos-error{display:block}
+.pasos-btn[aria-current="step"]{color:var(--texto);font-weight:var(--peso-fuerte);cursor:default}
+.pasos-btn[aria-current="step"] .pasos-bolita{background:var(--texto);border-color:var(--texto);color:var(--blanco)}
+.pasos-btn:hover .pasos-bolita{border-color:var(--azul)}
+.pasos-btn[aria-current="step"]:hover .pasos-bolita{border-color:var(--texto)}
+/* Lo hecho pinta su línea de enlace. */
+.pasos-item:has([data-hecho])::before,.pasos-item:has([aria-current="step"])::before{background:var(--gris-cl)}
+
+/* @bloque adaptaciones */
+
+@media (min-width:760px){
+  .barra-fija{padding:var(--e-3) 0 var(--e-2)}
+  .pasos-etq{display:block}
+  .pasos-actual{display:none}
+  .acciones-fijas{position:static;margin:var(--e-6) 0 0;padding:var(--e-5) 0 0;border-radius:0}
+}
+
+@media (forced-colors: active){
+  .pasos-btn[aria-current="step"] .pasos-bolita{outline:var(--b-3) solid Highlight}
+}
+
+@media print{
+  .barra-fija{display:none}
+}
+
+
+/* ===== codigo/modulos/revision/revision.css ===== */
+/* =========================================================
+   revision.css · Módulo «revision» · nivel RECOMENDADO
+   Un bloque plegable por paso; cada dato con «Editar». En teléfono la
+   etiqueta y el valor se apilan; desde tableta van en dos columnas.
+   Depende de: nucleo.css. Bloques: componentes → estados → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.rev-bloque{margin-bottom:var(--e-3);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl)}
+.rev-titulo{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:var(--e-2) var(--e-3);
+  min-height:var(--objetivo-min);
+  padding:var(--e-3) var(--e-4);
+  list-style:none;
+  cursor:pointer;
+}
+.rev-titulo::-webkit-details-marker{display:none}
+.rev-rotulo{font-size:var(--t-xs);font-weight:var(--peso-semi);letter-spacing:var(--tracking-rotulo);text-transform:uppercase;color:var(--gris)}
+.rev-resumen{flex:1 1 100%;font-size:var(--t-md);overflow-wrap:anywhere}
+.rev-flecha{margin-left:auto;color:var(--gris);transition:transform var(--dur-rapida)}
+.rev-datos{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:var(--b-1);
+  margin:0 var(--e-4) var(--e-4);
+  overflow:hidden;
+  background:var(--linea);
+  border:var(--b-1) solid var(--linea);
+  border-radius:var(--r-ctrl);
+  font-size:var(--t-md);
+}
+.rev-dato-etq{padding:var(--e-2) var(--e-3) 0;background:var(--blanco);font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
+.rev-dato-valor{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--e-2);padding:0 var(--e-3) var(--e-2);background:var(--blanco);white-space:pre-wrap;word-break:break-word}
+
+/* @bloque estados */
+
+.rev-bloque[open] .rev-titulo{border-bottom:var(--b-1) solid var(--linea);margin-bottom:var(--e-3)}
+.rev-bloque[open] .rev-flecha{transform:rotate(180deg)}
+
+/* @bloque adaptaciones */
+
+@media (min-width:760px){
+  .rev-resumen{flex:1 1 auto}
+  .rev-datos{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
+  .rev-dato-etq{padding:var(--e-3);background:var(--fondo)}
+  .rev-dato-valor{padding:var(--e-3)}
+}
+
+
+/* ===== codigo/modulos/acuse/acuse.css ===== */
+/* =========================================================
+   acuse.css · Módulo «acuse» · nivel RECOMENDADO
+   El único lugar donde el verde aparece como marca: el sistema confirma que
+   recibió. El folio va en una tarjeta con su dato, no en un botón.
+   Depende de: nucleo.css. Bloques: componentes → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.acuse{padding:var(--e-4) 0;text-align:center}
+.acuse-marca{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:var(--marca-acuse);
+  height:var(--marca-acuse);
+  margin:0 auto var(--e-4);
+  background:var(--ok);
+  border-radius:var(--r-pill);
+  color:var(--blanco);
+}
+.acuse-marca .icono{width:var(--e-7);height:var(--e-7)}
+.acuse-datos{
+  max-width:var(--ancho-acuse);
+  margin:var(--e-4) auto var(--e-2);
+  text-align:left;
+  background:var(--blanco);
+  border:var(--b-1) solid var(--linea);
+  border-left:var(--b-4) solid var(--dorado);
+  border-radius:var(--r-caja);
+}
+.acuse-dato{padding:var(--e-3) var(--e-4)}
+.acuse-etq{display:block;font-size:var(--t-xs);font-weight:var(--peso-fuerte);letter-spacing:var(--tracking-rotulo);text-transform:uppercase;color:var(--gris)}
+.acuse-fila{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--e-3);margin-top:var(--e-1)}
+.acuse-valor{font-family:var(--fuente-mono);font-size:var(--t-lg);font-weight:var(--peso-fuerte);letter-spacing:var(--tracking-rotulo);overflow-wrap:anywhere;color:var(--guinda)}
+.acuse-acciones{display:flex;flex-direction:column;gap:var(--e-3);max-width:var(--ancho-acuse);margin:var(--e-5) auto 0}
+
+/* «Qué sigue»: secuencia numerada por CSS (el orden de la lista es el de los números). */
+.secuencia{max-width:var(--ancho-acuse);margin:var(--e-5) auto 0;padding-top:var(--e-5);text-align:left;border-top:var(--b-1) solid var(--linea);counter-reset:sec}
+.secuencia-item{position:relative;min-height:var(--e-7);padding:var(--e-1) 0 var(--e-6) var(--e-9);counter-increment:sec;font-size:var(--t-md)}
+.secuencia-item::before{
+  content:counter(sec);
+  position:absolute;
+  top:0;
+  left:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:var(--e-7);
+  height:var(--e-7);
+  background:var(--guinda-cl);
+  border:var(--b-2) solid var(--guinda);
+  border-radius:var(--r-pill);
+  font-family:var(--fuente-titulo);
+  font-size:var(--t-sm);
+  font-weight:var(--peso-fuerte);
+  color:var(--guinda);
+}
+.secuencia-item::after{
+  content:'';
+  position:absolute;
+  top:calc(var(--e-7) + var(--b-2));
+  bottom:var(--b-2);
+  left:calc(var(--e-4) - var(--b-1));
+  width:var(--b-2);
+  background:var(--dorado);
+}
+.secuencia-item:last-child::after{display:none}
+
+/* @bloque adaptaciones */
+
+@media (min-width:560px){
+  .acuse-acciones{flex-direction:row;justify-content:center}
+}
+
+
+/* ===== codigo/modulos/modal/modal.css ===== */
+/* =========================================================
+   modal.css · Módulo «modal» · nivel RECOMENDADO
+   <dialog> nativo. En teléfono es una hoja inferior a todo lo ancho, con
+   esquinas superiores redondeadas y respeto a la franja segura; desde
+   tableta, una caja centrada. Usa dvh: el alto del teléfono cambia con la
+   barra del navegador y vh dejaría el pie fuera de pantalla.
+   Depende de: nucleo.css. Bloques: componentes → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.dialogo{
+  position:fixed;
+  inset:auto 0 0 0;
+  width:100%;
+  max-width:100%;
+  max-height:calc(90dvh - var(--safe-inf));
+  margin:0;
+  padding:var(--e-6) var(--e-pagina) calc(var(--e-6) + var(--safe-inf));
+  overflow:auto;
+  background:var(--blanco);
+  border:0;
+  border-radius:var(--r-caja) var(--r-caja) 0 0;
+  box-shadow:var(--sombra-hoja);
+  color:var(--texto);
+}
+.dialogo::backdrop{background:var(--velo)}
+.dialogo-titulo{margin-top:0;padding-top:0;border-top:0}
+.dialogo-acciones{margin-top:var(--e-5)}
+.dialogo-cierre{display:flex;justify-content:flex-end;margin-top:var(--e-5)}
+
+/* Aviso en línea antes del diálogo de privacidad. */
+.priv{margin:var(--e-1) 0 var(--e-4);padding:var(--e-4);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.priv-parrafo{margin-bottom:var(--e-3);font-size:var(--t-md)}
+.priv-parrafo:last-child{margin-bottom:0}
+
+/* @bloque adaptaciones */
+
+@media (min-width:560px){
+  .dialogo{
+    inset:0;
+    width:calc(100% - var(--e-6));
+    max-width:var(--ancho-dialogo);
+    max-height:90dvh;
+    margin:auto;
+    padding:var(--e-6);
+    border-radius:var(--r-caja);
+    box-shadow:none;
+  }
+}
+
+
+/* ===== codigo/modulos/copiar/copiar.css ===== */
+/* =========================================================
+   copiar.css · Módulo «copiar» · nivel RECOMENDADO
+   Campo de solo lectura con su botón «Copiar» al lado.
+   Depende de: nucleo.css. Bloques: componentes → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.copiar-grupo{display:flex;flex-direction:column;gap:var(--e-2)}
+.copiar-btn{flex:none}
+
+/* @bloque adaptaciones */
+
+@media (min-width:560px){
+  .copiar-grupo{flex-direction:row}
+  .copiar-btn{width:auto}
+}
+
+
+/* ===== codigo/modulos/descarga/descarga.css ===== */
+/* =========================================================
+   descarga.css · Módulo «descarga» · nivel OPCIONAL
+   Botón o enlace de descarga: icono, acción y detalle (formato, peso).
+   Depende de: nucleo.css. Bloques: componentes.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.descarga{text-decoration:none}
+.descarga-detalle{font-weight:var(--peso-normal);color:var(--gris)}
+
+
+/* ===== codigo/modulos/acordeon/acordeon.css ===== */
+/* =========================================================
+   acordeon.css · Módulo «acordeon» · nivel OPCIONAL
+
+   Acordeón y secciones plegables con <details>/<summary>: el navegador ya
+   da el teclado (Enter, espacio) y el estado expandido al lector de
+   pantalla, sin una línea de JavaScript. CUÁNDO: datos accesorios o
+   preguntas frecuentes. CUÁNDO NO: contenido que la persona necesita para
+   decidir, ni campos obligatorios (lo plegado se pasa por alto).
+
+   Contrato HTML:
+     <details class="plegable"><summary class="plegable-titulo">¿Cómo copio mi ubicación?</summary>
+       <div class="plegable-cuerpo">…</div></details>
+   Depende de: nucleo.css. Bloques: componentes → estados.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.plegable{margin-bottom:var(--e-2);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.plegable-titulo{
+  position:relative;
+  display:block;
+  min-height:var(--objetivo-min);
+  padding:var(--e-3) var(--e-9) var(--e-3) var(--e-4);
+  font-family:var(--fuente-titulo);
+  font-weight:var(--peso-fuerte);
+  line-height:var(--interlineado-compacto);
+  list-style:none;
+  cursor:pointer;
+}
+.plegable-titulo::-webkit-details-marker{display:none}
+/* La flecha se dibuja con bordes: una imagen sería un color fuera de :root. */
+.plegable-titulo::after{
+  content:'';
+  position:absolute;
+  top:50%;
+  right:var(--e-5);
+  width:var(--e-2);
+  height:var(--e-2);
+  margin-top:calc(var(--e-1) * -2);
+  border-right:var(--b-2) solid var(--guinda);
+  border-bottom:var(--b-2) solid var(--guinda);
+  transform:rotate(45deg);
+  transition:transform var(--dur-rapida);
+}
+.plegable-cuerpo{padding:0 var(--e-4) var(--e-4);font-size:var(--t-md);color:var(--gris)}
+
+/* @bloque estados */
+
+.plegable-titulo:hover{color:var(--azul)}
+.plegable[open] .plegable-titulo::after{transform:rotate(-135deg)}
+.plegable[open] .plegable-titulo{border-bottom:var(--b-1) solid var(--linea);margin-bottom:var(--e-3)}
+
+
+/* ===== codigo/modulos/pestanas/pestanas.css ===== */
+/* =========================================================
+   pestanas.css · Módulo «pestanas» · nivel OPCIONAL
+   Lista de pestañas con desplazamiento horizontal en teléfono (no se
+   apilan ni se cortan) y panel debajo. El estado se lee de aria-selected.
+   Depende de: nucleo.css. Bloques: componentes → estados.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.pestanas{margin-bottom:var(--e-5)}
+.pestanas-lista{
+  display:flex;
+  gap:var(--e-1);
+  overflow-x:auto;
+  border-bottom:var(--b-2) solid var(--linea);
+  scrollbar-width:thin;
+}
+.pestana{
+  flex:none;
+  min-height:var(--objetivo-min);
+  margin-bottom:calc(var(--b-2) * -1);
+  padding:var(--e-3) var(--e-4);
+  background:none;
+  border:0;
+  border-bottom:var(--b-3) solid transparent;
+  font-family:var(--fuente-titulo);
+  font-weight:var(--peso-semi);
+  white-space:nowrap;
+  color:var(--gris);
+}
+.pestanas-panel{padding-top:var(--e-4)}
+
+/* @bloque estados */
+
+.pestana:hover{color:var(--azul)}
+.pestana[aria-selected="true"]{border-bottom-color:var(--guinda);color:var(--guinda)}
+
+
+/* ===== codigo/modulos/migas/migas.css ===== */
+/* =========================================================
+   migas.css · Módulo «migas» · nivel OPCIONAL
+
+   Migas de pan: dónde está la persona dentro del sitio o del trámite.
+   CUÁNDO: consulta interna con varios niveles (expediente → documento).
+   CUÁNDO NO: dentro de un formulario por pasos, cuya ubicación ya la dice
+   la barra de pasos. En teléfono se muestra sólo el nivel anterior con
+   flecha («← Expedientes»); desde tableta, la ruta completa.
+
+   Contrato HTML:
+     <nav class="migas" aria-label="Ubicación">
+       <ol class="migas-lista">
+         <li class="migas-item"><a class="migas-enlace" href="…">Inicio</a></li>
+         <li class="migas-item"><a class="migas-enlace" href="…">Expedientes</a></li>
+         <li class="migas-item"><span class="migas-actual" aria-current="page">Expediente 123</span></li>
+       </ol></nav>
+   Depende de: nucleo.css. Bloques: componentes → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.migas{margin-bottom:var(--e-4);font-size:var(--t-sm)}
+.migas-lista{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-1)}
+.migas-item{display:none;align-items:center;gap:var(--e-1)}
+/* El separador es un borde girado, no un carácter que el lector leería. */
+.migas-item::after{
+  content:'';
+  display:inline-block;
+  width:var(--e-1);
+  height:var(--e-1);
+  margin:0 var(--e-1);
+  border-right:var(--b-1) solid var(--gris-cl);
+  border-bottom:var(--b-1) solid var(--gris-cl);
+  transform:rotate(-45deg);
+}
+.migas-item:last-child::after{display:none}
+.migas-enlace{display:inline-flex;align-items:center;min-height:var(--objetivo-min);padding:0 var(--e-1);color:var(--azul)}
+.migas-actual{display:inline-flex;align-items:center;min-height:var(--objetivo-min);padding:0 var(--e-1);font-weight:var(--peso-medio);color:var(--texto)}
+/* En teléfono: sólo el nivel anterior, como «volver». */
+.migas-item:nth-last-child(2){display:inline-flex}
+.migas-item:nth-last-child(2)::after{display:none}
+.migas-item:nth-last-child(2) .migas-enlace::before{
+  content:'';
+  display:inline-block;
+  width:var(--e-2);
+  height:var(--e-2);
+  margin-right:var(--e-2);
+  border-left:var(--b-2) solid currentColor;
+  border-bottom:var(--b-2) solid currentColor;
+  transform:rotate(45deg);
+}
+
+/* @bloque adaptaciones */
+
+@media (min-width:760px){
+  .migas-item{display:inline-flex}
+  .migas-item:nth-last-child(2)::after{display:inline-block}
+  .migas-item:nth-last-child(2) .migas-enlace::before{display:none}
+}
+
+
+/* ===== codigo/modulos/progreso/progreso.css ===== */
+/* =========================================================
+   progreso.css · Módulo «progreso» · nivel OPCIONAL
+   <progress> nativo pintado con los tokens. Depende de: nucleo.css.
+   Bloques: componentes.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.progreso{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2) var(--e-3);margin-bottom:var(--e-4)}
+.progreso-etq{flex:1 1 100%;font-weight:var(--peso-medio)}
+.progreso-barra{
+  flex:1 1 var(--ancho-progreso-min);
+  width:100%;
+  height:var(--e-2);
+  -webkit-appearance:none;
+  appearance:none;
+  border:0;
+  border-radius:var(--r-pill);
+  background:var(--linea);
+  overflow:hidden;
+}
+.progreso-barra::-webkit-progress-bar{background:var(--linea);border-radius:var(--r-pill)}
+.progreso-barra::-webkit-progress-value{background:var(--azul);border-radius:var(--r-pill);transition:width var(--dur-media)}
+.progreso-barra::-moz-progress-bar{background:var(--azul);border-radius:var(--r-pill)}
+.progreso-txt{min-width:var(--e-9);font-size:var(--t-sm);font-weight:var(--peso-semi);text-align:right;color:var(--gris)}
+
+
+/* ===== codigo/modulos/paginacion/paginacion.css ===== */
+/* =========================================================
+   paginacion.css · Módulo «paginacion» · nivel OPCIONAL
+   En teléfono: Anterior · «Página X de N» · Siguiente, con objetivos de
+   44 px. Desde tableta: números, rango y selector de tamaño.
+   Depende de: nucleo.css. Bloques: componentes → estados → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.paginacion{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--e-3);margin:var(--e-5) 0}
+.paginacion-rango{display:none;font-size:var(--t-sm);color:var(--gris)}
+.paginacion-lista{display:flex;align-items:center;gap:var(--e-1);order:1;width:100%;justify-content:space-between}
+.paginacion-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:var(--e-1);
+  min-width:var(--objetivo-min);
+  min-height:var(--objetivo-min);
+  padding:var(--e-2) var(--e-3);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-ctrl);
+  font-weight:var(--peso-medio);
+  color:var(--azul);
+}
+.paginacion-num{display:none}
+.paginacion-salto{display:none;padding:0 var(--e-1);color:var(--gris-cl)}
+.paginacion-compacto{order:0;width:100%;font-size:var(--t-sm);font-weight:var(--peso-semi);text-align:center;color:var(--gris)}
+.paginacion-tamano{display:none;align-items:center;gap:var(--e-2);font-size:var(--t-sm);color:var(--gris)}
+.paginacion-select{width:auto;min-height:var(--objetivo-min);padding:var(--e-2) var(--e-7) var(--e-2) var(--e-3)}
+
+/* @bloque estados */
+
+.paginacion-btn:hover{border-color:var(--azul);background:var(--azul-cl)}
+.paginacion-btn[aria-current="page"]{background:var(--guinda);border-color:var(--guinda);color:var(--blanco);cursor:default}
+.paginacion-btn[aria-disabled="true"]{opacity:var(--op-inactivo);cursor:not-allowed}
+
+/* @bloque adaptaciones */
+
+@media (min-width:760px){
+  .paginacion-rango{display:block}
+  .paginacion-lista{order:0;width:auto;justify-content:flex-start}
+  .paginacion-num{display:inline-flex}
+  .paginacion-salto{display:inline-block}
+  .paginacion-compacto{display:none}
+  .paginacion-tamano{display:inline-flex}
+}
+
+
+/* ===== codigo/modulos/tooltip/tooltip.css ===== */
+/* =========================================================
+   tooltip.css · Módulo «tooltip» · nivel OPCIONAL
+   Botón de ayuda junto a la etiqueta y texto desplegable debajo (no
+   flotante sobre otros controles: en teléfono se taparían).
+   Depende de: nucleo.css. Bloques: componentes → estados.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.tooltip{position:relative;display:inline-flex;align-items:center;vertical-align:middle}
+.tooltip-btn{width:var(--objetivo-min);height:var(--objetivo-min);margin:calc(var(--e-3) * -1) 0;color:var(--azul)}
+.tooltip-texto{
+  position:absolute;
+  top:100%;
+  left:0;
+  z-index:var(--z-lista);
+  width:max-content;
+  max-width:var(--ancho-tooltip-max);
+  max-height:var(--alto-tooltip-max);
+  margin-top:var(--e-1);
+  padding:var(--e-3);
+  overflow:auto;
+  background:var(--texto);
+  border-radius:var(--r-ctrl);
+  box-shadow:var(--sombra-lista);
+  font-size:var(--t-sm);
+  font-weight:var(--peso-normal);
+  line-height:var(--interlineado-compacto);
+  color:var(--blanco);
+}
+
+/* @bloque estados */
+
+.tooltip-btn[aria-expanded="true"]{background:var(--azul-cl)}
+
+
+/* ===== codigo/modulos/tabla/tabla.css ===== */
+/* =========================================================
+   tabla.css · Módulo «tabla» · nivel OPCIONAL
+
+   Tabla de consulta: encabezado guinda, filas alternas, caption como
+   título. En teléfono (por debajo de --bp-md) cada fila es una tarjeta y
+   cada celda muestra su encabezado desde data-etiqueta; desde tableta es
+   tabla de verdad con desplazamiento horizontal controlado si no cabe.
+   Depende de: nucleo.css. Bloques: componentes → estados → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.tabla-marco{margin:var(--e-4) 0;overflow-x:auto}
+.tabla{width:100%;border-collapse:collapse;font-size:var(--t-md)}
+.tabla-titulo{padding:var(--e-2) 0 var(--e-3);font-family:var(--fuente-titulo);font-size:var(--t-lg);font-weight:var(--peso-semi);text-align:left;color:var(--guinda)}
+/* Teléfono: el encabezado se oculta visualmente (sigue para el lector) y las celdas se apilan. */
+.tabla thead{position:absolute;width:var(--b-1);height:var(--b-1);overflow:hidden;clip:rect(0,0,0,0)}
+.tabla tr{display:block;margin-bottom:var(--e-3);padding:var(--e-2) var(--e-3);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl)}
+.tabla td{display:flex;flex-wrap:wrap;gap:var(--e-1) var(--e-3);padding:var(--e-2) 0;border-bottom:var(--b-1) solid var(--linea);vertical-align:top}
+.tabla td:last-child{border-bottom:0}
+.tabla td::before{content:attr(data-etiqueta);flex:0 0 40%;font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
+.tabla th{padding:var(--e-2) var(--e-3);background:var(--guinda);font-family:var(--fuente-titulo);font-size:var(--t-md);font-weight:var(--peso-fuerte);text-align:left;color:var(--blanco)}
+.tabla-orden{display:inline-flex;align-items:center;gap:var(--e-1);min-height:var(--objetivo-min);padding:0;background:none;border:0;font:inherit;color:inherit}
+.tabla-orden-icono{opacity:var(--op-inactivo);transition:transform var(--dur-rapida)}
+.tabla-acciones{display:flex;gap:var(--e-1)}
+.tabla-vacia{padding:var(--e-5);text-align:center;color:var(--gris)}
+/* Tabla de captura: filas repetibles con el mismo marco. */
+.tabla-captura .repetible-fila{padding:var(--e-3)}
+
+/* @bloque estados */
+
+[aria-sort="ascending"] .tabla-orden-icono{opacity:1;transform:rotate(180deg)}
+[aria-sort="descending"] .tabla-orden-icono{opacity:1}
+.tabla[aria-busy="true"]{opacity:var(--op-inactivo)}
+
+/* @bloque adaptaciones */
+
+@media (min-width:760px){
+  .tabla{min-width:var(--ancho-tabla-min)}
+  .tabla thead{position:static;width:auto;height:auto;overflow:visible;clip:auto}
+  .tabla tr{display:table-row;margin:0;padding:0;background:none;border:0;border-radius:0}
+  .tabla td{display:table-cell;padding:var(--e-2) var(--e-3)}
+  .tabla td::before{display:none}
+  .tabla tr:nth-child(even){background:var(--guinda-cl)}
+}
+
+
+/* ===== codigo/modulos/archivos/archivos.css ===== */
+/* =========================================================
+   archivos.css · Módulo «archivos» · nivel RECOMENDADO
+   Zona de carga (botón real que recibe arrastrados), botón de cámara, lista
+   de archivos con vista previa, estado, quitar y reintentar, y rechazos
+   con motivo. Depende de: nucleo.css. Bloques: componentes → estados.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.zona-carga{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:var(--e-2);
+  width:100%;
+  padding:var(--e-7) var(--e-4);
+  background:var(--carga-bg);
+  border:var(--b-2) dashed var(--borde);
+  border-radius:var(--r-caja);
+  text-align:center;
+  color:var(--azul);
+  transition:border-color var(--dur-rapida),background var(--dur-rapida);
+}
+.zona-carga-texto{display:block;font-family:var(--fuente-titulo);font-weight:var(--peso-semi)}
+.zona-carga-limite{display:block;font-size:var(--t-sm);color:var(--gris)}
+.zona-camara{margin-top:var(--e-3)}
+.lista-arch{display:flex;flex-direction:column;gap:var(--e-2);margin-top:var(--e-4)}
+.arch{
+  display:flex;
+  align-items:center;
+  gap:var(--e-3);
+  padding:var(--e-2) var(--e-2) var(--e-2) var(--e-3);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--linea);
+  border-radius:var(--r-ctrl);
+  font-size:var(--t-md);
+}
+.arch-vista{flex:none;width:var(--vista-previa);height:var(--vista-previa);object-fit:cover;border-radius:var(--r-ctrl);background:var(--fondo)}
+.arch-icono{color:var(--gris)}
+.arch-cuerpo{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--e-1)}
+.arch-nombre{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arch-estado{font-size:var(--t-sm);color:var(--gris)}
+.arch-quitar{color:var(--error)}
+/* Rechazo de un archivo: dice cuál y por qué, en el lugar donde iba a estar. */
+.arch-rechazo{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:var(--e-1) var(--e-2);
+  margin-top:var(--e-3);
+  padding:var(--e-3);
+  background:var(--error-bg);
+  border:var(--b-1) solid var(--error);
+  border-radius:var(--r-ctrl);
+  font-size:var(--t-md);
+  color:var(--error-txt);
+}
+
+/* @bloque estados */
+
+.zona-carga:hover,.zona-carga[data-encima]{background:var(--azul-cl);border-color:var(--azul)}
+.arch[data-estado="error"]{border-color:var(--error);background:var(--error-bg)}
+.arch[data-estado="error"] .arch-estado{color:var(--error-txt)}
+.arch[data-estado="procesando"] .arch-estado{color:var(--azul)}
+.arch-quitar:hover{background:var(--error-bg);color:var(--error)}
+.icono-giro{animation:giro var(--dur-media) linear infinite}
+@keyframes giro{to{transform:rotate(1turn)}}
+
+
+/* ===== codigo/modulos/mapa/mapa.css ===== */
+/* =========================================================
+   mapa.css · Módulo «mapa» · nivel OPCIONAL
+   Marco del mapa con alto fluido, barra de coordenadas y aviso de «sin
+   mapa». El mapa vive en su propia capa de apilamiento (isolation): las
+   bibliotecas de mapa numeran sus capas del 200 al 1000 y sin eso pasarían
+   por encima de la barra fija y de las listas. El marcador es propio y
+   hereda el guinda. Depende de: nucleo.css, vendor/leaflet.
+   Bloques: componentes → estados → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.mapa{
+  position:relative;
+  z-index:var(--z-base);
+  isolation:isolate;
+  height:var(--alto-mapa);
+  margin-bottom:var(--e-3);
+  background:var(--mapa-bg);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-caja);
+  overflow:hidden;
+}
+.mapa-marcador{color:var(--guinda);filter:drop-shadow(0 var(--b-1) var(--b-2) var(--sombra-color))}
+.mapa-barra{display:flex;flex-direction:column;gap:var(--e-3);margin-bottom:var(--e-3)}
+.coords{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--e-2);
+  min-height:var(--objetivo-min);
+  padding:var(--e-2) var(--e-3);
+  background:var(--fondo);
+  border-radius:var(--r-ctrl);
+  font-family:var(--fuente-mono);
+  font-size:var(--t-sm);
+  font-weight:var(--peso-semi);
+}
+/* Si el mapa no carga, la persona lo lee y sigue por otra vía. */
+.mapa-sin{
+  margin-bottom:var(--e-3);
+  padding:var(--e-4);
+  background:var(--aviso-bg);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-caja);
+  font-size:var(--t-md);
+}
+/* Vías alternativas enunciadas juntas: dirección, mapa, coordenadas. */
+.vias{margin-bottom:var(--e-4);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.vias-item{padding:var(--e-4);border-top:var(--b-1) solid var(--linea)}
+.vias-item:first-child{border-top:0}
+/* Resultado del cruce con las capas, dicho con palabras además del color. */
+.ficha{margin:var(--e-4) 0 var(--e-6);padding:var(--e-4);background:var(--aviso-bg);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.ficha-fila{display:flex;flex-direction:column;gap:var(--e-1);padding:var(--e-2) 0;border-bottom:var(--b-1) dotted var(--borde);font-size:var(--t-md)}
+.ficha-etq{font-size:var(--t-sm);color:var(--gris)}
+.ficha-valor{font-weight:var(--peso-semi)}
+
+/* @bloque estados */
+
+.mapa[aria-invalid="true"]{border:var(--b-2) solid var(--error)}
+.ficha[data-fuera]{background:var(--error-bg);border-color:var(--error)}
+
+/* @bloque adaptaciones */
+
+@media (min-width:560px){
+  .mapa-barra{flex-direction:row;flex-wrap:wrap;align-items:center}
+  .ficha-fila{flex-direction:row;gap:var(--e-3)}
+  .ficha-etq{flex-shrink:0;width:40%}
+}
+
+
+/* ===== codigo/modulos/cascadas/cascadas.css ===== */
+/* =========================================================
+   cascadas.css · Módulo «cascadas» · nivel OPCIONAL
+   Los campos de la cascada son selects y un campo de texto del núcleo;
+   aquí sólo se agrupa el bloque y se marca la captura manual alternativa.
+   Depende de: nucleo.css. Bloques: componentes.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.cascada-manual{padding:var(--e-4);background:var(--aviso-bg);border:var(--b-1) dashed var(--borde);border-radius:var(--r-caja)}
+
+
+/* ===== codigo/modulos/chips/chips.css ===== */
+/* =========================================================
+   chips.css · Módulo «chips» · nivel OPCIONAL
+   Sugerencias de un toque: botón con estado aria-pressed y su «quitar».
+   Depende de: nucleo.css. Bloques: componentes → estados.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.chips:not([hidden]){display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2);margin-bottom:var(--e-2)}
+.chip{
+  display:inline-flex;
+  align-items:center;
+  max-width:var(--ancho-chip-max);
+  min-height:var(--objetivo-min);
+  padding:var(--e-1) var(--e-3);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-pill) 0 0 var(--r-pill);
+  font-size:var(--t-sm);
+  color:var(--texto);
+}
+.chip-texto{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-quitar{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:var(--objetivo-min);
+  min-height:var(--objetivo-min);
+  margin-left:calc(var(--e-2) * -1);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--borde);
+  border-left:0;
+  border-radius:0 var(--r-pill) var(--r-pill) 0;
+  color:var(--gris);
+  cursor:pointer;
+}
+.chips-borrar{margin-left:auto}
+
+/* @bloque estados */
+
+.chip:hover,.chip-quitar:hover{border-color:var(--azul);color:var(--azul)}
+.chip[aria-pressed="true"]{background:var(--azul-cl);border-color:var(--azul);color:var(--azul);font-weight:var(--peso-semi)}

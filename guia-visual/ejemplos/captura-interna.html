@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Captura interna de ejemplo</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../codigo/css/tokens.css">
+<link rel="stylesheet" href="../../codigo/css/base.css">
+<link rel="stylesheet" href="../../codigo/css/nucleo.css">
+<link rel="stylesheet" href="../../codigo/modulos/pestanas/pestanas.css">
+<link rel="stylesheet" href="../../codigo/modulos/tabla/tabla.css">
+<link rel="stylesheet" href="../../codigo/modulos/paginacion/paginacion.css">
+<link rel="stylesheet" href="../../codigo/modulos/combo/combo.css">
+<link rel="stylesheet" href="../../codigo/modulos/chips/chips.css">
+<link rel="stylesheet" href="../../codigo/modulos/fecha/fecha.css">
+<link rel="stylesheet" href="../../codigo/modulos/descarga/descarga.css">
+<link rel="stylesheet" href="../../codigo/modulos/modal/modal.css">
+<link rel="stylesheet" href="../../codigo/modulos/migas/migas.css">
+</head>
+<body>
+<a class="salto" href="#contenido">Ir al contenido</a>
+<aside class="entorno-pruebas" aria-label="Aviso de entorno">Captura interna de ejemplo · datos ficticios · nada se envía</aside>
+<header class="cabecera"><div class="cabecera-int"><img class="cabecera-logo" src="../../codigo/imagenes/logotipo-sedema.png" width="3829" height="771" alt="Gobierno de la Ciudad de México · Secretaría del Medio Ambiente"><div class="cabecera-titulo"><h1 class="titulo-pagina">Registros de ejemplo · consulta y captura</h1></div></div></header>
+<main class="pagina" id="contenido">
+  <nav class="migas" aria-label="Ubicación"><ol class="migas-lista"><li class="migas-item"><a class="migas-enlace" href="#">Inicio</a></li><li class="migas-item"><a class="migas-enlace" href="#">Registros</a></li><li class="migas-item"><span class="migas-actual" aria-current="page">Ejemplo</span></li></ol></nav>
+
+  <div class="pestanas" data-pestanas>
+    <div class="pestanas-lista" role="tablist" aria-label="Vistas">
+      <button type="button" class="pestana" role="tab" id="t-consulta" aria-controls="p-consulta" aria-selected="true">Consulta</button>
+      <button type="button" class="pestana" role="tab" id="t-captura" aria-controls="p-captura" aria-selected="false" tabindex="-1">Captura rápida</button>
+    </div>
+
+    <div class="pestanas-panel tarjeta" role="tabpanel" id="p-consulta" aria-labelledby="t-consulta" tabindex="0">
+      <form id="filtros" data-formkit action="#" method="post">
+        <div class="fila">
+          <div class="campo" data-campo="buscar" data-uso="Filtrar registros."><label class="etiqueta" for="buscar">Buscar por folio o título</label><input class="control" id="buscar" name="buscar" type="search" autocomplete="off"></div>
+          <div class="campo" data-campo="estado" data-uso="Filtrar por estado."><label class="etiqueta" for="estado">Estado</label><div class="select"><select class="control control-select" id="estado" name="estado"><option value="">Todos</option><option value="recibido">Recibido</option><option value="atencion">En atención</option><option value="cerrado">Cerrado</option></select></div></div>
+        </div>
+      </form>
+      <div class="tabla-marco" data-tabla data-clave="folio">
+        <table class="tabla" id="tabla-registros">
+          <caption class="tabla-titulo">Registros</caption>
+          <thead><tr><th scope="col" data-ordenable>Folio</th><th scope="col" data-ordenable>Título</th><th scope="col" data-ordenable>Fecha</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+          <tbody data-filas></tbody>
+        </table>
+        <p class="tabla-vacia" data-tabla-vacia hidden>No hay registros con esos filtros. Cambia la búsqueda o el estado.</p>
+        <p class="aviso aviso-bloqueo" data-tabla-error role="alert" tabindex="-1" hidden><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"></span></p>
+        <p class="aviso" data-tabla-cargando hidden><svg class="icono icono-giro" aria-hidden="true"><use href="#i-cargando"></use></svg><span class="aviso-texto">Cargando registros…</span></p>
+      </div>
+      <nav class="paginacion" data-paginacion data-total="0" data-pagina="1" data-tamano="10" data-tamanos="5,10,20" data-lista="#tabla-registros" aria-label="Páginas de registros"></nav>
+      <div class="acciones"><a class="btn btn-secundario descarga" href="data:text/csv;charset=utf-8,folio%2Ctitulo%0AEJ-1%2CEjemplo" download="registros-ejemplo.csv" data-descarga data-formato="CSV" data-peso="1 KB">Descargar lista</a></div>
+    </div>
+
+    <div class="pestanas-panel tarjeta" role="tabpanel" id="p-captura" aria-labelledby="t-captura" tabindex="0" hidden>
+      <form id="captura" data-formkit data-borrador="sia-ejemplo-captura" action="#" method="post">
+        <p class="bajada">Captura por personal: sugerencias de uso frecuente y fecha con «Hoy».</p>
+        <div class="fila">
+          <div class="campo" data-campo="categoria" data-requerido data-uso="Clasificar el registro." data-chips>
+            <label class="etiqueta" for="categoria">Categoría</label>
+            <div class="combo" data-combo data-catalogo="categorias"><input class="control" id="categoria" name="categoria" type="text" autocomplete="off"><ul class="combo-lista" hidden></ul></div>
+          </div>
+          <div class="campo" data-campo="fecha" data-formato="fecha" data-no-futura data-requerido data-uso="Fecha del registro.">
+            <label class="etiqueta" for="fecha">Fecha</label>
+            <div class="fecha-grupo"><input class="control" id="fecha" name="fecha" type="date" autocomplete="off"><button type="button" class="btn btn-secundario fecha-hoy" data-hoy></button></div>
+          </div>
+        </div>
+        <div class="campo" data-campo="titulo" data-requerido data-uso="Identificar el registro." data-chips>
+          <label class="etiqueta" for="titulo">Título</label>
+          <input class="control" id="titulo" name="titulo" type="text" maxlength="120" autocomplete="off">
+        </div>
+        <div class="campo" data-campo="folio_ref" data-formato="folio" data-uso="Relacionar con un registro previo." data-copiable>
+          <label class="etiqueta" for="folio_ref">Folio asignado</label>
+          <p class="ayuda">Lo asigna el sistema; sólo lectura.</p>
+          <input class="control" id="folio_ref" name="folio_ref" type="text" value="EJ-2026-000123" readonly autocomplete="off">
+        </div>
+        <p class="aviso aviso-bloqueo estado-envio" data-estado-envio role="alert" tabindex="-1" hidden><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"></span></p>
+        <div class="acciones"><button type="button" class="btn btn-peligro" data-limpiar>Descartar captura</button><button type="submit" class="btn btn-primario" data-accion="enviar">Guardar registro</button></div>
+      </form>
+    </div>
+  </div>
+</main>
+<footer class="pie"><div class="pie-int"><p>Secretaría del Medio Ambiente de la Ciudad de México · Sistema de Información Ambiental.</p></div></footer>
+<script>
+window.FORMKIT_CONFIG = {};
+window.FORMKIT_CATALOGOS = { categorias: ['Arbolado', 'Residuos', 'Ruido', 'Fauna', 'Agua', 'Aire', 'Suelo', 'Áreas verdes', 'Otro'] };
+window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => ok({ folio: 'EJ-' + Date.now().toString(36).toUpperCase(), fecha: new Date().toISOString() }), 300)) };
+</script>
+<script src="../../codigo/js/validaciones.config.js"></script>
+<script src="../../codigo/js/iconos.js"></script>
+<script src="../../codigo/js/formkit.core.js"></script>
+<script src="../../codigo/modulos/pestanas/pestanas.js"></script>
+<script src="../../codigo/modulos/tabla/tabla.js"></script>
+<script src="../../codigo/modulos/paginacion/paginacion.js"></script>
+<script src="../../codigo/modulos/combo/combo.js"></script>
+<script src="../../codigo/modulos/chips/chips.js"></script>
+<script src="../../codigo/modulos/fecha/fecha.js"></script>
+<script src="../../codigo/modulos/identificadores/identificadores.js"></script>
+<script src="../../codigo/modulos/copiar/copiar.js"></script>
+<script src="../../codigo/modulos/descarga/descarga.js"></script>
+<script src="../../codigo/modulos/modal/modal.js"></script>
+<script src="captura-interna.js"></script>
+</body>
+</html>

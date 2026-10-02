@@ -1,0 +1,47 @@
+/* =========================================================
+   toggle.css · Módulo «toggle» · nivel OPCIONAL
+   Interruptor: el estado se lee de aria-checked; perilla y texto «Sí/No»
+   acompañan al color. Depende de: nucleo.css. Bloques: componentes → estados.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.toggle{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--e-3);margin-bottom:var(--e-5)}
+.toggle-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--e-3);
+  min-height:var(--objetivo-min);
+  padding:var(--e-2) var(--e-1);
+  background:none;
+  border:0;
+  border-radius:var(--r-ctrl);
+  font-weight:var(--peso-medio);
+  color:var(--gris);
+}
+.toggle-pista{
+  position:relative;
+  display:inline-block;
+  width:var(--e-9);
+  height:var(--e-6);
+  background:var(--borde);
+  border-radius:var(--r-pill);
+  transition:background var(--dur-rapida);
+}
+.toggle-perilla{
+  position:absolute;
+  top:var(--b-2);
+  left:var(--b-2);
+  width:var(--e-5);
+  height:var(--e-5);
+  background:var(--blanco);
+  border-radius:var(--r-pill);
+  transition:transform var(--dur-rapida);
+}
+.toggle-estado{min-width:var(--e-7)}
+
+/* @bloque estados */
+
+.toggle-btn[aria-checked="true"] .toggle-pista{background:var(--azul)}
+.toggle-btn[aria-checked="true"] .toggle-perilla{transform:translateX(var(--e-6))}
+.toggle-btn[aria-checked="true"] .toggle-estado{color:var(--azul)}

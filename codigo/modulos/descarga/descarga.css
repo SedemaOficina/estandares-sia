@@ -1,0 +1,10 @@
+/* =========================================================
+   descarga.css · Módulo «descarga» · nivel OPCIONAL
+   Botón o enlace de descarga: icono, acción y detalle (formato, peso).
+   Depende de: nucleo.css. Bloques: componentes.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.descarga{text-decoration:none}
+.descarga-detalle{font-weight:var(--peso-normal);color:var(--gris)}

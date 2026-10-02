@@ -1,0 +1,48 @@
+/* =========================================================
+   escala.css · Módulo «escala» · nivel OPCIONAL
+
+   Escala o valoración (1 a 5, Nada–Mucho): radios nativos en fila con los
+   extremos rotulados. Es un fieldset con legend; cada punto es una etiqueta
+   con su radio invisible encima, igual que las opciones. Sin JS: el núcleo
+   valida como opción única.
+
+   Contrato HTML:
+     <fieldset class="grupo escala" data-campo="satisfaccion" data-requerido>
+       <legend class="etiqueta">¿Qué tan clara fue la información?</legend>
+       <div class="escala-puntos">
+         <label class="escala-punto"><input class="opcion-input" type="radio" name="satisfaccion" value="1"><span class="escala-num">1</span></label>
+         …
+       </div>
+       <div class="escala-extremos" aria-hidden="true"><span>Nada clara</span><span>Muy clara</span></div>
+     </fieldset>
+   Los extremos se repiten en texto oculto dentro del primer y último radio
+   (span.solo-lector) para que el lector de pantalla los lea.
+   Depende de: nucleo.css, opciones.css (.opcion-input).
+   ========================================================= */
+
+/* @bloque componentes */
+
+.escala-puntos{display:flex;gap:var(--e-2)}
+.escala-punto{
+  position:relative;
+  flex:1 1 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:var(--alto-control);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-ctrl);
+  cursor:pointer;
+  transition:background var(--dur-rapida),border-color var(--dur-rapida);
+}
+.escala-num{font-family:var(--fuente-titulo);font-weight:var(--peso-semi);color:var(--gris)}
+.escala-extremos{display:flex;justify-content:space-between;margin-top:var(--e-2);font-size:var(--t-sm);color:var(--gris-cl)}
+
+/* @bloque estados */
+
+.escala-punto:hover{border-color:var(--azul)}
+.escala-punto:has(.opcion-input:checked){background:var(--azul);border-color:var(--azul)}
+.escala-punto:has(.opcion-input:checked) .escala-num{color:var(--blanco)}
+.escala-punto:has(.opcion-input:focus-visible){outline:var(--foco-ancho) solid var(--foco);outline-offset:var(--foco-sep)}
+.grupo:has([aria-invalid="true"]) .escala-punto{border-color:var(--error)}

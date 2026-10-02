@@ -1,0 +1,68 @@
+/* =========================================================
+   mapa.css · Módulo «mapa» · nivel OPCIONAL
+   Marco del mapa con alto fluido, barra de coordenadas y aviso de «sin
+   mapa». El mapa vive en su propia capa de apilamiento (isolation): las
+   bibliotecas de mapa numeran sus capas del 200 al 1000 y sin eso pasarían
+   por encima de la barra fija y de las listas. El marcador es propio y
+   hereda el guinda. Depende de: nucleo.css, vendor/leaflet.
+   Bloques: componentes → estados → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.mapa{
+  position:relative;
+  z-index:var(--z-base);
+  isolation:isolate;
+  height:var(--alto-mapa);
+  margin-bottom:var(--e-3);
+  background:var(--mapa-bg);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-caja);
+  overflow:hidden;
+}
+.mapa-marcador{color:var(--guinda);filter:drop-shadow(0 var(--b-1) var(--b-2) var(--sombra-color))}
+.mapa-barra{display:flex;flex-direction:column;gap:var(--e-3);margin-bottom:var(--e-3)}
+.coords{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--e-2);
+  min-height:var(--objetivo-min);
+  padding:var(--e-2) var(--e-3);
+  background:var(--fondo);
+  border-radius:var(--r-ctrl);
+  font-family:var(--fuente-mono);
+  font-size:var(--t-sm);
+  font-weight:var(--peso-semi);
+}
+/* Si el mapa no carga, la persona lo lee y sigue por otra vía. */
+.mapa-sin{
+  margin-bottom:var(--e-3);
+  padding:var(--e-4);
+  background:var(--aviso-bg);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-caja);
+  font-size:var(--t-md);
+}
+/* Vías alternativas enunciadas juntas: dirección, mapa, coordenadas. */
+.vias{margin-bottom:var(--e-4);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.vias-item{padding:var(--e-4);border-top:var(--b-1) solid var(--linea)}
+.vias-item:first-child{border-top:0}
+/* Resultado del cruce con las capas, dicho con palabras además del color. */
+.ficha{margin:var(--e-4) 0 var(--e-6);padding:var(--e-4);background:var(--aviso-bg);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.ficha-fila{display:flex;flex-direction:column;gap:var(--e-1);padding:var(--e-2) 0;border-bottom:var(--b-1) dotted var(--borde);font-size:var(--t-md)}
+.ficha-etq{font-size:var(--t-sm);color:var(--gris)}
+.ficha-valor{font-weight:var(--peso-semi)}
+
+/* @bloque estados */
+
+.mapa[aria-invalid="true"]{border:var(--b-2) solid var(--error)}
+.ficha[data-fuera]{background:var(--error-bg);border-color:var(--error)}
+
+/* @bloque adaptaciones */
+
+@media (min-width:560px){
+  .mapa-barra{flex-direction:row;flex-wrap:wrap;align-items:center}
+  .ficha-fila{flex-direction:row;gap:var(--e-3)}
+  .ficha-etq{flex-shrink:0;width:40%}
+}

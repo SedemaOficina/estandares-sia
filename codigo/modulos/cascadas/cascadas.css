@@ -1,0 +1,10 @@
+/* =========================================================
+   cascadas.css · Módulo «cascadas» · nivel OPCIONAL
+   Los campos de la cascada son selects y un campo de texto del núcleo;
+   aquí sólo se agrupa el bloque y se marca la captura manual alternativa.
+   Depende de: nucleo.css. Bloques: componentes.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.cascada-manual{padding:var(--e-4);background:var(--aviso-bg);border:var(--b-1) dashed var(--borde);border-radius:var(--r-caja)}

@@ -1,0 +1,275 @@
+{
+  "formulario": "por-pasos.html",
+  "generado": "2026-10-02T06:44:22.071Z",
+  "campos": {
+    "tipo": {
+      "etiqueta": "Tipo de solicitud",
+      "tipo": "opcion",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Turnar la solicitud al área que corresponde.",
+      "atributos": {},
+      "opciones": [
+        "informacion",
+        "visita",
+        "otro"
+      ]
+    },
+    "tipo_otro": {
+      "etiqueta": "Especifica cuál",
+      "tipo": "texto",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Clasificar una solicitud que no encaja en las opciones.",
+      "atributos": {
+        "maxlength": "80",
+        "otroDe": "tipo"
+      },
+      "autocomplete": "off",
+      "si": {
+        "campo": "tipo",
+        "valores": [
+          "otro"
+        ]
+      }
+    },
+    "urgente": {
+      "etiqueta": "¿Hay riesgo inmediato para personas o bienes?",
+      "tipo": "opcion",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Priorizar la atención.",
+      "atributos": {},
+      "opciones": [
+        "si",
+        "no"
+      ]
+    },
+    "fecha_hechos": {
+      "etiqueta": "¿Cuándo ocurrió o cuándo lo necesitas?",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "fecha",
+      "sensible": false,
+      "uso": "Ubicar la solicitud en el tiempo.",
+      "atributos": {
+        "max": "hoy",
+        "noFutura": ""
+      },
+      "autocomplete": "off"
+    },
+    "descripcion": {
+      "etiqueta": "Cuéntanos con tus palabras",
+      "tipo": "textarea",
+      "requerido": true,
+      "formato": "texto",
+      "sensible": false,
+      "uso": "Valorar el caso y decidir la atención.",
+      "atributos": {
+        "minlength": "40",
+        "maxlength": "600",
+        "legible": true
+      },
+      "autocomplete": "off"
+    },
+    "alcaldia": {
+      "etiqueta": "Alcaldía",
+      "tipo": "select",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Turnar a la autoridad competente en el territorio.",
+      "atributos": {},
+      "opciones": null,
+      "autocomplete": "off"
+    },
+    "colonia": {
+      "etiqueta": "Colonia",
+      "tipo": "select",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Localizar el sitio.",
+      "atributos": {},
+      "opciones": null,
+      "autocomplete": "off"
+    },
+    "cp": {
+      "etiqueta": "Código postal",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "cp",
+      "sensible": false,
+      "uso": "Verificar que el sitio está en la Ciudad de México.",
+      "atributos": {
+        "maxlength": "5"
+      },
+      "autocomplete": "off",
+      "cruzadas": [
+        {
+          "clave": "cp-colonia",
+          "mapa": {
+            "cp": "cp",
+            "colonia": "colonia"
+          },
+          "nivel": "advertencia",
+          "catalogo": "cdmx"
+        }
+      ]
+    },
+    "calle": {
+      "etiqueta": "Calle y número",
+      "tipo": "texto",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Localizar el sitio.",
+      "atributos": {
+        "maxlength": "120"
+      },
+      "autocomplete": "off"
+    },
+    "alcaldia_manual": {
+      "etiqueta": "Alcaldía",
+      "tipo": "texto",
+      "requerido": false,
+      "sensible": false,
+      "uso": "Localizar el sitio sin catálogo.",
+      "atributos": {
+        "maxlength": "60"
+      },
+      "autocomplete": "off"
+    },
+    "colonia_manual": {
+      "etiqueta": "Colonia",
+      "tipo": "texto",
+      "requerido": false,
+      "sensible": false,
+      "uso": "Localizar el sitio sin catálogo.",
+      "atributos": {
+        "maxlength": "80"
+      },
+      "autocomplete": "off"
+    },
+    "referencia": {
+      "etiqueta": "Referencia cercana",
+      "tipo": "texto",
+      "requerido": false,
+      "sensible": false,
+      "uso": "Facilitar que el personal encuentre el sitio.",
+      "atributos": {
+        "maxlength": "120"
+      },
+      "autocomplete": "off"
+    },
+    "punto": {
+      "etiqueta": "Punto en el mapa (opcional)",
+      "tipo": "mapa",
+      "requerido": false,
+      "sensible": false,
+      "uso": "Afinar la ubicación cuando la dirección no basta.",
+      "atributos": {}
+    },
+    "coordenadas": {
+      "etiqueta": "Coordenadas (latitud, longitud)",
+      "tipo": "texto",
+      "requerido": false,
+      "formato": "coordenadas",
+      "sensible": false,
+      "uso": "Ubicar el sitio cuando la persona ya tiene las coordenadas.",
+      "atributos": {},
+      "autocomplete": "off"
+    },
+    "fotos": {
+      "etiqueta": "Fotografías o documentos",
+      "tipo": "archivos",
+      "requerido": false,
+      "sensible": false,
+      "uso": "Documentar la solicitud.",
+      "atributos": {
+        "conservarExif": "false"
+      }
+    },
+    "contacto": {
+      "etiqueta": "¿Quieres que te contactemos?",
+      "tipo": "opcion",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Decidir si se piden datos de contacto.",
+      "atributos": {},
+      "opciones": [
+        "si",
+        "no"
+      ]
+    },
+    "nombre": {
+      "etiqueta": "Nombre",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "nombre",
+      "sensible": true,
+      "uso": "Identificar a quien solicita.",
+      "finalidad": "Dirigirse a la persona al dar seguimiento.",
+      "atributos": {
+        "maxlength": "80"
+      },
+      "autocomplete": "given-name",
+      "si": {
+        "campo": "contacto",
+        "valores": [
+          "si"
+        ]
+      }
+    },
+    "correo": {
+      "etiqueta": "Correo electrónico",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "correo",
+      "sensible": true,
+      "uso": "Enviar el seguimiento.",
+      "finalidad": "Informar el avance de la solicitud.",
+      "atributos": {
+        "maxlength": "120"
+      },
+      "autocomplete": "email",
+      "si": {
+        "campo": "contacto",
+        "valores": [
+          "si"
+        ]
+      }
+    },
+    "telefono": {
+      "etiqueta": "Teléfono",
+      "tipo": "texto",
+      "requerido": false,
+      "formato": "telefono",
+      "sensible": true,
+      "uso": "Aclarar dudas.",
+      "finalidad": "Aclarar la solicitud por llamada, si la persona lo pidió.",
+      "atributos": {},
+      "autocomplete": "tel-national",
+      "si": {
+        "campo": "contacto",
+        "valores": [
+          "si"
+        ]
+      }
+    },
+    "aviso": {
+      "etiqueta": "Leí el aviso de privacidad",
+      "tipo": "casilla",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Dejar constancia de que se informó a la persona.",
+      "atributos": {}
+    },
+    "humano": {
+      "etiqueta": "No soy un programa automático",
+      "tipo": "casilla",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Distinguir personas de envíos automáticos.",
+      "atributos": {}
+    }
+  },
+  "repetibles": []
+}
