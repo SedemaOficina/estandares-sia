@@ -24,8 +24,6 @@
       que: 'Elegir la licencia del código y la de la documentación, con apoyo jurídico; el logotipo institucional y las marcas de redes sociales quedan fuera de ella.' },
     { de: 'Los dos', tema: 'Historial limpio', quien: 'Decide la Secretaría',
       que: 'Autorizar que los guardados se rehagan sin la firma de la herramienta de trabajo y sin el correo personal, y crear de nuevo el repositorio vacío en GitHub antes de subirlo.' },
-    { de: 'Formularios', tema: 'Fallas del validador del servidor', quien: 'Lo resuelve quien programa',
-      que: 'Corregir, antes de publicar, las fallas del validador del servidor que señaló la auditoría del 14 oct 2026.' },
     { de: 'Formularios', tema: 'Versión 1.1.0', quien: 'Decide la Secretaría',
       que: 'Publicar formularios como 1.1.0, porque trae módulos y bloques nuevos, y marcar esa versión en el historial.' },
     { de: 'Formularios', tema: 'Avisos de privacidad', quien: 'Lo resuelve la Unidad de Transparencia',

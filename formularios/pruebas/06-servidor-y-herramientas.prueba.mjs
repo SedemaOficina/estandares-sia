@@ -76,7 +76,63 @@ test('servidor · esquema de una página: CURP y su cruzada con la fecha de naci
   assert.ok(r3.errores.some((x) => x.campo === 'correo2'), 'la confirmación distinta se rechaza');
 });
 
-const herramienta = (nombre, args) => test(`herramientas · ${nombre}`, () => {
+/* Un registro de una página completo y correcto, tal como lo manda el navegador. */
+const REGISTRO = { datos: { nombre: 'Fulana', apellido_paterno: 'de Tal', curp: 'PEGJ900515HDFRRN09', nacimiento: '1990-05-15', edad: '36', correo: 'a@ejemplo.local', correo2: 'a@ejemplo.local', personas: '3', alcaldia: 'Coyoacán', intereses: ['reforestacion'], desde: '2026-10-20', hasta: '2026-10-27', interes: '4', aviso: 'si' }, archivos: [], meta: { idempotencia: 'abc' } };
+
+test('servidor · grupos repetibles: cada fila se valida con su patrón, con mínimo y máximo de filas', () => {
+  const e = esquema('una-pagina');
+  const r0 = validaPayload(structuredClone(REGISTRO), e, { catalogos: CAT });
+  assert.deepEqual(r0.errores, [], `un registro completo sin acompañantes se acepta: ${JSON.stringify(r0.errores)}`);
+  const con = (extra) => validaPayload({ ...structuredClone(REGISTRO), datos: { ...REGISTRO.datos, ...extra } }, e, { catalogos: CAT });
+  assert.deepEqual(con({ 'acompanantes.0.nombre': 'Persona Uno', 'acompanantes.0.edad': '12' }).errores, [], 'una fila completa se acepta');
+  assert.ok(con({ 'acompanantes.0.edad': '12' }).errores.some((x) => x.campo === 'acompanantes.0.nombre'), 'una fila sin su dato obligatorio se rechaza');
+  assert.ok(con({ 'acompanantes.0.nombre': 'Persona Uno', 'acompanantes.0.edad': '500' }).errores.some((x) => x.campo === 'acompanantes.0.edad'), 'el dato de una fila cumple su formato');
+  assert.ok(con({ 'acompanantes.0.inventado': 'x' }).errores.some((x) => x.campo === 'acompanantes.0.inventado'), 'un campo que la fila no declara se rechaza');
+  assert.ok(con({ 'acompanantes.#.nombre': 'x' }).errores.some((x) => x.campo === 'acompanantes.#.nombre'), 'el patrón no se acepta como dato');
+  const cuatro = Object.fromEntries([0, 1, 2, 3].map((i) => [`acompanantes.${i}.nombre`, `Persona ${i}`]));
+  assert.ok(con(cuatro).errores.some((x) => x.campo === 'acompanantes' && /máximo/.test(x.mensaje)), 'más filas que el máximo se rechazan');
+});
+
+test('servidor · el punto del mapa llega como {type, coordinates}, con números en rango y dentro del ámbito', () => {
+  const e = esquema('por-pasos');
+  const punto = (v) => validaPayload({ ...structuredClone(BUENO), datos: { ...BUENO.datos, punto: v } }, e, { catalogos: CAT });
+  assert.deepEqual(punto({ type: 'Point', coordinates: [-99.1332, 19.4326] }).errores, [], 'el punto que manda el navegador se acepta');
+  for (const malo of [{ tipo: 'Point', coordinates: [-99.13, 19.43] }, { type: 'Point', coordinates: ['<b>', {}] }, { type: 'Point', coordinates: [-99.13, 19.43], extra: 1 }, '19.43,-99.13']) {
+    assert.ok(punto(malo).errores.some((x) => x.campo === 'punto'), `punto mal formado se rechaza: ${JSON.stringify(malo)}`);
+  }
+  assert.ok(punto({ type: 'Point', coordinates: [-103.35, 20.67] }).errores.some((x) => x.campo === 'punto'), 'un punto fuera de la Ciudad se rechaza');
+});
+
+test('servidor · envíos mal formados o con claves especiales se rechazan sin detener el proceso', () => {
+  const e = esquema('por-pasos');
+  for (const malo of [null, [], 'texto', { datos: [] }, { datos: {}, archivos: {} }, { datos: {}, meta: 'x' }]) {
+    const r = validaPayload(malo, e, { catalogos: CAT });
+    assert.equal(r.ok, false, `se rechaza: ${JSON.stringify(malo)}`);
+  }
+  const especiales = JSON.parse('{"__proto__": {"x": 1}, "constructor": "c", "toString": "t", "hasOwnProperty": "h"}');
+  const r = validaPayload({ ...structuredClone(BUENO), datos: { ...BUENO.datos, ...especiales } }, e, { catalogos: CAT });
+  for (const k of ['__proto__', 'constructor', 'toString', 'hasOwnProperty']) assert.ok(r.errores.some((x) => x.campo === k), `«${k}» no cuenta como campo declarado`);
+  assert.equal(Object.getPrototypeOf(r.datos), Object.prototype, 'los datos devueltos son un objeto común');
+  assert.equal(Object.hasOwn(r.datos, '__proto__'), false, 'sin la clave __proto__');
+  const archivos = validaPayload({ ...structuredClone(BUENO), archivos: [{ campo: 'constructor', nombre: 'a.jpg', size: 10 }, { campo: 'nombre', nombre: 'a.jpg', size: 10 }, { campo: 'fotos', nombre: 'a.jpg', size: '10' }, null] }, e, { catalogos: CAT });
+  assert.equal(archivos.ok, false);
+  assert.equal(archivos.errores.length, 4, `cada archivo mal dirigido o mal formado es un error: ${JSON.stringify(archivos.errores)}`);
+});
+
+test('servidor · el tipo de cada dato: listas u objetos donde va texto se rechazan; opciones repetidas no cuentan', () => {
+  const e = esquema('por-pasos');
+  const con = (extra) => validaPayload({ ...structuredClone(BUENO), datos: { ...BUENO.datos, ...extra } }, e, { catalogos: CAT });
+  assert.ok(con({ calle: ['Calle', 'de', 'Prueba'] }).errores.some((x) => x.campo === 'calle'), 'una lista donde va texto se rechaza');
+  assert.ok(con({ num_ext: { $gt: '' } }).errores.some((x) => x.campo === 'num_ext'), 'un objeto donde va texto se rechaza');
+  assert.ok(con({ urgente: ['no'] }).errores.some((x) => x.campo === 'urgente'), 'una lista en una opción única se rechaza');
+  const u = esquema('una-pagina');
+  const rep = validaPayload({ ...structuredClone(REGISTRO), datos: { ...REGISTRO.datos, intereses: ['reforestacion', 'reforestacion', 'reforestacion', 'reforestacion'] } }, u, { catalogos: CAT });
+  assert.deepEqual(rep.datos.intereses, ['reforestacion'], 'las opciones repetidas cuentan una vez');
+  const toggle = validaPayload({ ...structuredClone(REGISTRO), datos: { ...REGISTRO.datos, avisos: { a: 1 } } }, u, { catalogos: CAT });
+  assert.ok(toggle.errores.some((x) => x.campo === 'avisos'), 'el interruptor sólo acepta «si»');
+});
+
+const herramienta =(nombre, args) => test(`herramientas · ${nombre}`, () => {
   const r = spawnSync(process.execPath, args, { cwd: RAIZ, encoding: 'utf8' });
   assert.equal(r.status, 0, (r.stdout + r.stderr).split('\n').slice(-30).join('\n'));
 });

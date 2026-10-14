@@ -114,7 +114,7 @@ Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({
 ```json
 {
   "datos":    { "tipo": "otro", "tipo_otro": "…", "cp": "04010", "telefono": "5500000000", "personas.0.nombre": "…" },
-  "archivos": [ { "nombre": "foto.jpg", "size": 812331, "type": "image/jpeg", "sha256_original": "…", "optimizada": true } ],
+  "archivos": [ { "campo": "fotos", "nombre": "foto.jpg", "size": 812331, "type": "image/jpeg", "sha256_original": "…", "optimizada": true } ],
   "meta":     { "version_formulario": "1", "ms_en_formulario": 184233, "trampa": "", "idempotencia": "uuid" }
 }
 ```

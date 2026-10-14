@@ -2,6 +2,7 @@
 
 ## Sin publicar · 2026-10-14
 
+- **Validador del servidor corregido** (auditoría del 14 oct 2026): el punto del mapa viaja como `{type: "Point", coordinates}`, como esperan el servidor y `docs/06` (antes `tipo`, y el servidor rechazaba todo envío con punto); cada fila de un grupo repetible se valida con su patrón y con el mínimo y máximo de filas, que ahora guarda el esquema (`limitesRepetibles`) (antes el servidor exigía un campo con «#» y rechazaba todo registro de la plantilla de una página); un envío mal formado se rechaza sin detener el proceso; las claves `__proto__`, `constructor` y `prototype` no cuentan como campos; cada dato debe tener su tipo (texto, lista sólo en opción múltiple sin repetidas, punto con números dentro del ámbito, interruptor sólo «si»); los archivos sólo se aceptan en campos de archivos activos. Cuatro pruebas nuevas en `06-servidor` y, en `01-por-pasos` y `02-una-pagina`, el servidor valida lo que el navegador realmente envía.
 - El estándar pasa a la carpeta común `estandares-sia/formularios`, junto a `geovisores/` y una portada de guía común (decisión de la Secretaría). Nada se publica en GitHub todavía.
 - `herramientas/auditor-css.mjs`: en Windows, `path.relative` devolvía rutas con diagonal invertida y el auditor reportaba cada variable de `tokens.css` como «definida fuera de tokens.css» (1,501 falsos hallazgos). Las rutas se normalizan a diagonal normal.
 - `guia-visual/index.html`: enlace de regreso a la portada común (`../../guia-visual/`). `guia-visual/artefacto.html` se regenera con cada cambio de la guía.

@@ -9,7 +9,7 @@
    ========================================================= */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sirve, abreNavegador, abrePagina, PERFILES, PAGINAS, capturaPayload } from './ayudas.mjs';
+import { sirve, abreNavegador, abrePagina, PERFILES, PAGINAS, capturaPayload, validaEnServidor } from './ayudas.mjs';
 
 let servidor, navegador;
 test.before(async () => { servidor = await sirve(); navegador = await abreNavegador(); });
@@ -112,6 +112,8 @@ for (const perfil of Object.values(PERFILES)) {
     assert.equal(caja.payload.datos.intereses_otro, 'Compostaje');
     assert.equal(caja.payload.datos.intereses.length, 3);
     assert.equal(caja.payload.datos.avisos, 'si', 'el interruptor viaja como valor del campo oculto');
+    const enServidor = await validaEnServidor(caja.payload, 'una-pagina');
+    assert.deepEqual(enServidor.errores, [], 'el servidor acepta lo que el navegador envía, acompañantes incluidos');
     assert.deepEqual(p.registro, [], 'consola y red limpias');
     await p.context().close();
   });

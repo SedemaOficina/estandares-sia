@@ -28,8 +28,14 @@ const atributos = (tag) => {
   return a;
 };
 
-/* Plantillas de repetibles: los campos con # se registran como patrón. */
+/* Plantillas de repetibles: los campos con # se registran como patrón, y
+   cada grupo guarda su mínimo y máximo de filas y su nombre para los mensajes. */
 const repetibles = [...html.matchAll(/data-repetible="([^"]+)"/g)].map((m) => m[1]);
+const limitesRepetibles = {};
+for (const m of html.matchAll(/<\w+([^>]*\sdata-repetible="([^"]+)"[^>]*)>/g)) {
+  const a = atributos(m[1]);
+  limitesRepetibles[m[2]] = { min: Number(a['data-min'] || 0), max: a['data-max'] ? Number(a['data-max']) : null, etiqueta: a['data-etiqueta'] || m[2] };
+}
 
 const campos = {};
 const re = /<(\w+)([^>]*\sdata-campo="([^"]+)"[^>]*)>/g;
@@ -125,7 +131,7 @@ for (const m of html.matchAll(/<div[^>]*\sdata-cascada\b[^>]*>/g)) {
   }
 }
 
-const esquema = { formulario: entrada.replace(/\\/g, '/').split('/').pop(), generado: new Date().toISOString(), campos, repetibles };
+const esquema = { formulario: entrada.replace(/\\/g, '/').split('/').pop(), generado: new Date().toISOString(), campos, repetibles, limitesRepetibles };
 /* Si el esquema no cambió, se conserva el archivo con su fecha: así una
    construcción sin cambios no marca el archivo como cambiado. */
 let previo = null;

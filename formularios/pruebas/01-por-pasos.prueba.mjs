@@ -10,7 +10,7 @@
    ========================================================= */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sirve, abreNavegador, abrePlantilla, PERFILES, PNG_1x1, pngRuido, visible, continuar, llenaSolicitud, llenaLugar, llenaContacto, aceptaDeclaraciones, capturaPayload } from './ayudas.mjs';
+import { sirve, abreNavegador, abrePlantilla, PERFILES, PNG_1x1, pngRuido, visible, continuar, llenaSolicitud, llenaLugar, llenaContacto, aceptaDeclaraciones, capturaPayload, validaEnServidor } from './ayudas.mjs';
 
 let servidor, navegador;
 test.before(async () => { servidor = await sirve(); navegador = await abreNavegador(); });
@@ -173,6 +173,8 @@ for (const [clave, perfil] of Object.entries(PERFILES)) {
     assert.ok(caja.payload.meta.idempotencia, 'lleva clave de idempotencia');
     assert.equal(caja.payload.archivos.length, 1, 'viaja la imagen adjuntada de nuevo (los archivos no se guardan en el borrador)');
     assert.equal(caja.payload.archivos[0].sha256.length, 64, 'cada archivo lleva su huella SHA-256');
+    const enServidor = await validaEnServidor(caja.payload, 'por-pasos');
+    assert.deepEqual(enServidor.errores, [], 'el servidor acepta lo que el navegador envía, punto del mapa incluido');
     await p.click('[data-copiar="#folio"]');
     await p.waitForTimeout(150);
     assert.match(await p.locator('[data-copiar="#folio"]').textContent(), /Copiado|No se pudo copiar/, 'copiar confirma con palabras');

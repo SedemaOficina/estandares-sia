@@ -10,7 +10,8 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { existsSync, readdirSync } from 'node:fs';
 import { basename, dirname, extname, join, resolve, normalize } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from '@playwright/test';
 
 export const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -134,9 +135,19 @@ export async function capturaPayload(p) {
   await p.exposeFunction('__capturaPayload', (x) => { caja.payload = x; });
   await p.evaluate(() => {
     const original = window.FORMKIT_OPCIONES.enviar;
-    window.FORMKIT_OPCIONES.enviar = (pl, o) => { window.__capturaPayload(JSON.parse(JSON.stringify({ datos: pl.datos, meta: pl.meta, archivos: (pl.archivos || []).map((a) => ({ nombre: a.nombre, size: a.size, sha256: a.sha256_original, lat: a.lat_captura })) }))); return original(pl, o); };
+    window.FORMKIT_OPCIONES.enviar = (pl, o) => { window.__capturaPayload(JSON.parse(JSON.stringify({ datos: pl.datos, meta: pl.meta, archivos: (pl.archivos || []).map((a) => ({ campo: a.campo, nombre: a.nombre, size: a.size, sha256: a.sha256_original, sha256_original: a.sha256_original, lat: a.lat_captura })) }))); return original(pl, o); };
   });
   return caja;
+}
+
+/* El servidor valida lo que el navegador realmente envía: el esquema sale de
+   la plantilla y el validador es el de codigo/servidor. */
+export async function validaEnServidor(payload, plantilla) {
+  const { validaPayload } = await import(pathToFileURL(resolve(RAIZ, 'codigo/servidor/validar.mjs')).href);
+  await import(pathToFileURL(resolve(RAIZ, 'codigo/catalogos/cdmx-ejemplo.js')).href);
+  const esquema = JSON.parse(execFileSync(process.execPath, [resolve(RAIZ, 'herramientas/esquema-desde-html.mjs'), resolve(RAIZ, 'codigo/plantillas', `${plantilla}.html`)], { encoding: 'utf8' }));
+  const C = globalThis.FORMKIT_CATALOGOS;
+  return validaPayload(payload, esquema, { catalogos: { cdmx: C.cdmx.filas, alcaldias: C.alcaldias } });
 }
 
 /* Medidas de accesibilidad operables por máquina. */

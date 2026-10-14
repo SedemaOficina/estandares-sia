@@ -1,6 +1,6 @@
 {
   "formulario": "una-pagina.html",
-  "generado": "2026-10-14T17:42:56.691Z",
+  "generado": "2026-10-14T19:08:07.783Z",
   "campos": {
     "nombre": {
       "etiqueta": "Nombre(s)",
@@ -271,5 +271,12 @@
   },
   "repetibles": [
     "acompanantes"
-  ]
+  ],
+  "limitesRepetibles": {
+    "acompanantes": {
+      "min": 0,
+      "max": 3,
+      "etiqueta": "Acompañante"
+    }
+  }
 }

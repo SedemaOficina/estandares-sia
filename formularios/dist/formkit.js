@@ -3014,7 +3014,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         enBorrador: true,
         restaura: (el, v) => { const s = estadoDe.get(el); if (s && v) { const [lat, lon] = v.split(',').map(Number); s.coloca({ lat, lon }, true); } },
         valida: (el) => { const s = estadoDe.get(el); return s && s.fuera ? FormKit.config.ambito.coordenadas.mensaje : ''; },
-        alArmar: (form, payload) => { for (const el of form.querySelectorAll('[data-campo]')) { const s = estadoDe.get(el); if (s && s.punto && payload.datos[el.dataset.campo]) payload.datos[el.dataset.campo] = { tipo: 'Point', coordinates: [Number(s.punto.lon.toFixed(6)), Number(s.punto.lat.toFixed(6))] }; } }
+        alArmar: (form, payload) => { for (const el of form.querySelectorAll('[data-campo]')) { const s = estadoDe.get(el); if (s && s.punto && payload.datos[el.dataset.campo]) payload.datos[el.dataset.campo] = { type: 'Point', coordinates: [Number(s.punto.lon.toFixed(6)), Number(s.punto.lat.toFixed(6))] }; } }
       }
     },
     iniciar(form, ctx) {

@@ -1,6 +1,6 @@
 {
   "formulario": "por-pasos.html",
-  "generado": "2026-10-14T17:37:17.852Z",
+  "generado": "2026-10-14T19:08:07.699Z",
   "campos": {
     "tipo": {
       "etiqueta": "Tipo de solicitud",
@@ -408,5 +408,6 @@
       "atributos": {}
     }
   },
-  "repetibles": []
+  "repetibles": [],
+  "limitesRepetibles": {}
 }
