@@ -1,7 +1,9 @@
-# Dependencias de verificación (se instalan con npm install)
-node_modules
-# Pruebas de humo de trabajo: no forman parte del paquete
-pruebas/_humo/
-# Carpeta de lo que se retira a mano
+node_modules/
+claves.local.json
+.DS_Store
+Thumbs.db
+# Pruebas de humo de trabajo de formularios: no forman parte del paquete
+formularios/pruebas/_humo/
+# Lo que se retira a mano va fuera de esta carpeta, pero por si acaso
 _to_delete/
 **/_to_delete/

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guía visual · Estándar de geovisores del SIA</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../formularios/codigo/css/tokens.css">
+<link rel="stylesheet" href="../../formularios/codigo/css/base.css">
+<link rel="stylesheet" href="../../formularios/codigo/css/nucleo.css">
+<link rel="stylesheet" href="../codigo/css/tokens-mapa.css">
+<link rel="stylesheet" href="../codigo/css/temas.css">
+<link rel="stylesheet" href="../codigo/css/armazon.css">
+<link rel="stylesheet" href="guia.css">
+</head>
+<body>
+<a class="salto" href="#contenido">Ir al contenido</a>
+
+<header class="cabecera">
+  <div class="cabecera-int">
+    <img class="cabecera-logo" src="../../formularios/codigo/imagenes/logotipo-sedema.png" width="3829" height="771" alt="Gobierno de la Ciudad de México · Secretaría del Medio Ambiente">
+    <div class="cabecera-titulo">
+      <p class="guia-volver"><a class="guia-volver-enlace" href="../../guia-visual/index.html">← Guía de los estándares del SIA</a></p>
+      <h1 class="titulo-pagina">Guía visual del estándar de geovisores</h1>
+    </div>
+  </div>
+</header>
+
+<main class="pagina" id="contenido">
+  <p class="bajada">Esta página carga las hojas reales: las de formularios (<code>../formularios</code>) y las del mapa (<code>codigo/css</code>). Los colores, razones de contraste y distancias de color se calculan aquí, en el navegador, con los valores que la hoja tiene en este momento; no se copian. La hoja de esta guía (<code>guia.css</code>) solo ordena las muestras.</p>
+
+  <nav class="guia-indice" aria-label="Contenido de la guía">
+    <ul class="guia-lista-indice">
+      <li><a href="#muestra">Muestra del mapa</a></li>
+      <li><a href="#mapas-base">Mapas base</a></li>
+      <li><a href="#paleta">Paleta del mapa</a></li>
+      <li><a href="#contraste">Contraste medido</a></li>
+      <li><a href="#rampas">Rampas y daltonismo</a></li>
+      <li><a href="#foco">Foco de dos tonos</a></li>
+      <li><a href="#nombres">Nombres del mapa</a></li>
+      <li><a href="#medidas">Medidas</a></li>
+      <li><a href="#capas">Capas</a></li>
+      <li><a href="#temas">Tema por visor</a></li>
+      <li><a href="#componentes">Componentes</a></li>
+      <li><a href="#pares">Sí y no</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== Muestra del mapa ===== -->
+  <section class="guia-seccion" id="muestra" aria-labelledby="t-muestra">
+    <h2 class="titulo-bloque" id="t-muestra">Muestra del mapa</h2>
+    <p class="bajada">El fondo propio, los límites con su franja blanca, los nombres con contorno, lo elegido en azul, el lugar buscado en guinda, el punto de «mi ubicación», la escala y el norte, todo pintado con los tokens. Los nombres están a su tamaño real; en una pantalla angosta se ve solo una parte. El botón de capas (el cuarto de la columna de la derecha) abre el menú para cambiar el mapa base y la opacidad de la capa de datos.</p>
+    <div class="guia-fila" role="group" aria-label="Capa de datos de la muestra">
+      <button type="button" class="btn btn-secundario" data-vista="fondo" aria-pressed="true">Sin capa de datos</button>
+      <button type="button" class="btn btn-secundario" data-vista="rampa" aria-pressed="false">Colonias con la rampa de prioridad</button>
+      <button type="button" class="btn btn-secundario" data-vista="verdor" aria-pressed="false">Colonias con la rampa de verdor</button>
+    </div>
+    <div class="guia-mapa" id="guia-mapa" data-vista="fondo" data-base="propio">
+      <svg class="guia-mapa-svg" width="100%" height="100%" role="img" aria-labelledby="guia-mapa-nombre" focusable="false">
+        <title id="guia-mapa-nombre">Muestra de un mapa: manzanas, un parque, un lago, límites de colonia y de alcaldía, una colonia elegida, puntos, un lugar buscado y una ubicación.</title>
+        <defs>
+          <pattern id="guia-manzanas" patternUnits="userSpaceOnUse" width="120" height="90">
+            <rect class="g-manzana" x="10" y="10" width="100" height="70" rx="2"/>
+            <line class="g-calle" x1="0" y1="0" x2="120" y2="0" stroke-width="8"/>
+            <line class="g-calle" x1="0" y1="90" x2="120" y2="90" stroke-width="8"/>
+            <line class="g-calle" x1="0" y1="0" x2="0" y2="90" stroke-width="8"/>
+            <line class="g-calle" x1="120" y1="0" x2="120" y2="90" stroke-width="8"/>
+          </pattern>
+        </defs>
+        <!-- Mapa base -->
+        <rect class="g-suelo" x="0" y="0" width="1400" height="400"/>
+        <rect class="g-manzana-capa" x="0" y="0" width="860" height="400" fill="url(#guia-manzanas)"/>
+        <path class="g-verde" d="M216,96 h104 v40 h-104 z"/>
+        <ellipse class="g-agua" cx="95" cy="262" rx="85" ry="32"/>
+        <text class="g-proveedor" x="232" y="152">Parque España</text>
+        <text class="g-proveedor" x="600" y="200">Av. Insurgentes Sur</text>
+        <!-- Capa de datos: su opacidad la cambia el menú de capas -->
+        <g id="guia-capa-datos">
+          <polygon class="g-col g-col-1" points="0,0 200,0 200,150 0,170"/>
+          <polygon class="g-col g-col-2" points="200,0 560,0 560,140 200,150"/>
+          <polygon class="g-col g-col-3" points="0,170 200,150 220,400 0,400"/>
+          <polygon class="g-col g-col-4" points="200,150 560,140 580,400 220,400"/>
+          <polygon class="g-col g-col-5" points="560,0 860,0 820,400 580,400 560,140"/>
+        </g>
+        <polygon class="g-fuera" points="860,0 1400,0 1400,400 820,400"/>
+        <!-- Lo que va encima: sobre la satelital lleva el halo de un solo filtro (GEO-79) -->
+        <g class="g-encima">
+          <path class="g-halo" d="M0,170 L200,150 L560,140 M200,0 L200,150 L220,400 M560,0 L560,140 L580,400" stroke-width="6"/>
+          <path class="g-lim-col" d="M0,170 L200,150 L560,140 M200,0 L200,150 L220,400 M560,0 L560,140 L580,400" stroke-width="1.5"/>
+          <path class="g-halo" d="M860,0 L820,400" stroke-width="9"/>
+          <path class="g-lim-alc" d="M860,0 L820,400" stroke-width="2.5"/>
+          <polygon class="g-resalte" points="200,0 560,0 560,140 200,150" stroke-width="3"/>
+          <polygon class="g-halo" points="200,150 560,140 580,400 220,400" stroke-width="8"/>
+          <polygon class="g-elegido" points="200,150 560,140 580,400 220,400" stroke-width="3"/>
+          <circle class="g-punto" cx="150" cy="108" r="6" stroke-width="1.5"/>
+          <circle class="g-punto" cx="420" cy="220" r="6" stroke-width="1.5"/>
+          <circle class="g-punto" cx="480" cy="300" r="6" stroke-width="1.5"/>
+          <circle class="g-punto-b" cx="700" cy="90" r="6" stroke-width="1.5"/>
+          <circle class="g-punto" cx="400" cy="60" r="6" stroke-width="1.5"/>
+          <circle class="g-precision" cx="292" cy="182" r="28" stroke-width="1"/>
+          <circle class="g-ubicacion" cx="292" cy="182" r="7" stroke-width="2.5"/>
+          <path class="g-buscado" d="M175,228 c-9,-12 -13,-18 -13,-25 a13,13 0 1 1 26,0 c0,7 -4,13 -13,25 z" stroke-width="1.6"/>
+          <circle class="g-buscado-centro" cx="175" cy="203" r="4.5"/>
+          <text class="g-nombre g-nombre-fuerte" x="620" y="40">CUAUHTÉMOC</text>
+          <text class="g-nombre" x="228" y="121">Juárez</text>
+          <text class="g-nombre" x="40" y="128">Condesa</text>
+          <text class="g-nombre" x="228" y="236">Roma Norte</text>
+          <text class="g-nombre" x="640" y="260">Doctores</text>
+          <text class="g-nombre g-nombre-calle" x="40" y="184">Av. Álvaro Obregón</text>
+        </g>
+      </svg>
+      <p class="guia-lugar"><span class="guia-lugar-titulo">Roma Norte</span>Colonia elegida · Cuauhtémoc</p>
+      <div class="guia-ctrl" role="group" aria-label="Botones del mapa (muestra)">
+        <button type="button" class="guia-ctrl-btn" aria-label="Acercar" title="Acercar"><svg class="guia-ctrl-icono g-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button type="button" class="guia-ctrl-btn" aria-label="Alejar" title="Alejar"><svg class="guia-ctrl-icono g-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/></svg></button>
+        <button type="button" class="guia-ctrl-btn" aria-label="Ver toda la ciudad" title="Ver toda la ciudad"><svg class="guia-ctrl-icono g-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7M5 10v10h5v-6h4v6h5V10"/></svg></button>
+        <button type="button" class="guia-ctrl-btn" id="guia-boton-capas" aria-label="Capas del mapa" title="Capas del mapa" aria-expanded="false" aria-controls="guia-menu-capas"><svg class="guia-ctrl-icono g-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5M3 17l9 5 9-5"/></svg></button>
+        <button type="button" class="guia-ctrl-btn" aria-label="Mi ubicación" title="Mi ubicación"><svg class="guia-ctrl-icono g-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+      </div>
+      <div class="guia-menu-capas" id="guia-menu-capas" role="group" aria-label="Capas del mapa" hidden>
+        <fieldset class="guia-menu-grupo">
+          <legend class="guia-menu-titulo">Mapa base</legend>
+          <label class="casilla"><input class="casilla-input" type="radio" name="guia-base" value="propio" checked><span class="casilla-texto">Fondo propio</span></label>
+          <label class="casilla"><input class="casilla-input" type="radio" name="guia-base" value="claro"><span class="casilla-texto">Calles claras de un proveedor (dibujo)</span></label>
+          <label class="casilla"><input class="casilla-input" type="radio" name="guia-base" value="satelital"><span class="casilla-texto">Satelital (dibujo)</span></label>
+          <label class="casilla"><input class="casilla-input" type="radio" name="guia-base" value="ninguno"><span class="casilla-texto">Sin mapa base</span></label>
+        </fieldset>
+        <div class="guia-menu-grupo">
+          <p class="guia-menu-fila"><label class="guia-menu-titulo" for="guia-opacidad">Opacidad de la capa de datos</label><output class="guia-opacidad-valor" id="guia-opacidad-valor" for="guia-opacidad">100 %</output></p>
+          <input class="guia-opacidad" id="guia-opacidad" type="range" min="20" max="100" step="10" value="100" aria-valuetext="100 %" aria-describedby="guia-opacidad-nota" disabled>
+          <p class="guia-menu-nota" id="guia-opacidad-nota">Se activa con una capa de datos: elígela con los botones de arriba de la muestra.</p>
+        </div>
+      </div>
+      <div class="guia-simbologia" id="guia-simbologia-fondo">
+        <p class="guia-simbologia-fila"><svg width="14" height="14" aria-hidden="true" focusable="false"><circle class="g-punto" cx="7" cy="7" r="5" stroke-width="1.5"/></svg>Sitio propuesto</p>
+        <p class="guia-simbologia-fila"><svg width="14" height="14" aria-hidden="true" focusable="false"><circle class="g-ubicacion" cx="7" cy="7" r="5" stroke-width="2"/></svg>Tu ubicación</p>
+      </div>
+      <div class="guia-simbologia" id="guia-simbologia-rampa" hidden>
+        <p id="guia-simbologia-titulo">Prioridad</p>
+        <p class="guia-simbologia-rampa" aria-hidden="true"><span class="guia-simbologia-clase" data-clase="1"></span><span class="guia-simbologia-clase" data-clase="2"></span><span class="guia-simbologia-clase" data-clase="3"></span><span class="guia-simbologia-clase" data-clase="4"></span><span class="guia-simbologia-clase" data-clase="5"></span></p>
+        <p class="guia-simbologia-fila" id="guia-simbologia-extremos">Muy baja … Muy alta</p>
+      </div>
+      <div class="guia-norte" role="img" aria-label="Norte"><span class="guia-norte-letra" aria-hidden="true">N</span><svg class="guia-norte-flecha" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path class="g-norte-lleno" d="M8 1 L13 15 L8 11 Z"/><path class="g-norte-hueco" d="M8 1 L3 15 L8 11 Z" stroke-width="1.2"/></svg></div>
+      <p class="guia-escala">200 m</p>
+      <p class="guia-credito"><span class="guia-credito-base" id="guia-credito-base">Manzanas: Catastro CDMX · </span><a class="guia-credito-enlace" href="#mapas-base">Fuentes</a></p>
+    </div>
+    <p class="guia-pie">Las muestras sobre el mapa (botones, menú de capas, tarjeta del lugar, simbología, norte, escala y crédito) usan los tokens reales, pero no son los componentes: esos se extraen de los proyectos en la fase 2. El contorno dorado de Juárez es el resalte al pasar el puntero; el azul de Roma Norte, lo elegido.</p>
+    <ul class="guia-lista">
+      <li><strong>Norte:</strong> abajo a la derecha, junto a la escala, sobre fondo blanco y con la letra N. Apunta siempre arriba porque el mapa no gira, y no atiende toques (GEO-36). En un visor real, escala y norte se quitan en el celular; aquí se dejan para verlos.</li>
+      <li><strong>Menú de capas:</strong> mapa base (una sola opción a la vez, con la vigente marcada) y opacidad de la capa de datos, de 20 a 100 % en pasos de 10, con el valor escrito (GEO-33). Con el ratón o el dedo, elegir un mapa base cierra el menú; con el teclado, las flechas cambian la opción y Escape cierra el menú y regresa al botón. Cada opción y el deslizador miden 44 px de alto, para el dedo.</li>
+      <li><strong>Opacidad:</strong> se activa al elegir una capa de datos con los botones de arriba. Con menos de 100 % se ve el mapa base debajo de las colonias. Los límites, los nombres y los puntos no cambian: siempre van encima y opacos.</li>
+      <li><strong>Crédito:</strong> cambia con el mapa base y va en un renglón sobre fondo blanco; si no cabe, se recorta (GEO-37). Los mapas base distintos del fondo propio son dibujos: esta página no pide teselas a ningún servidor.</li>
+    </ul>
+  </section>
+
+  <!-- ===== Mapas base ===== -->
+  <section class="guia-seccion" id="mapas-base" aria-labelledby="t-mapas-base">
+    <h2 class="titulo-bloque" id="t-mapas-base">Mapas base: qué opciones hay y cómo se ven</h2>
+    <p class="bajada">El mapa base es lo que va debajo de los datos: calles, manzanas, parques, agua o la foto de satélite. Cada visor elige el suyo según el proyecto (D7, GEO-74). Las muestras de esta sección son dibujos hechos con los colores del estándar, no teselas reales: esta página no pide nada a ningún servidor de mapas. Lo que no se pudo comprobar en las fuentes del estándar queda marcado como pendiente.</p>
+    <p class="guia-recomendacion"><strong>Por omisión, el fondo propio.</strong> Es la única opción que no llama a otro servidor, no necesita llave y no tiene licencia por resolver (D7, GEO-74 y la guía de decisión). La satelital queda para la captura en campo, cuando la Secretaría resuelva la licencia de Esri. Si se contrata un proveedor de calles claras, y cuál, es una decisión pendiente de la Secretaría.</p>
+
+    <h3 class="rotulo">Cómo se ve cada uno</h3>
+    <div class="guia-bases">
+      <article class="guia-base">
+        <h4 class="guia-base-titulo">Fondo propio</h4>
+        <p class="guia-base-estado" data-estado="recomendado">Recomendado por omisión</p>
+        <div class="guia-base-muestra" data-base="propio">
+          <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-suelo" width="240" height="110"/><path class="g-calle" d="M74,0 V110 M146,0 V110 M0,50 H240" stroke-width="8"/><rect class="g-manzana" x="6" y="6" width="64" height="40" rx="2"/><rect class="g-manzana" x="78" y="6" width="64" height="40" rx="2"/><rect class="g-manzana" x="150" y="6" width="84" height="40" rx="2"/><rect class="g-manzana" x="6" y="54" width="64" height="50" rx="2"/><rect class="g-verde" x="78" y="54" width="64" height="50" rx="2"/><ellipse class="g-agua" cx="192" cy="80" rx="40" ry="22"/><text class="g-proveedor" x="80" y="98">Parque España</text><g class="g-encima"><path class="g-halo" d="M0,52 L240,46" stroke-width="6"/><path class="g-lim-col" d="M0,52 L240,46" stroke-width="1.5"/><circle class="g-punto" cx="40" cy="80" r="6" stroke-width="1.5"/><text class="g-nombre" x="150" y="30">Roma Norte</text></g></svg>
+        </div>
+        <p class="guia-base-texto">Suelo neutro, manzanas de Catastro, áreas verdes y agua, con los colores del estándar y sin nombres ni puntos de interés que compitan con los datos. Lo arma la Secretaría con sus datos y no llama a nadie. Para deck.gl, para datos sensibles y para la consulta urbana. Lo usan GA y PR.</p>
+      </article>
+      <article class="guia-base">
+        <h4 class="guia-base-titulo">Calles claras de un proveedor</h4>
+        <p class="guia-base-estado" data-estado="pendiente">Solo con llave contratada</p>
+        <div class="guia-base-muestra" data-base="claro">
+          <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-suelo" width="240" height="110"/><path class="g-calle" d="M74,0 V110 M146,0 V110 M0,50 H240" stroke-width="8"/><rect class="g-manzana" x="6" y="6" width="64" height="40" rx="2"/><rect class="g-manzana" x="78" y="6" width="64" height="40" rx="2"/><rect class="g-manzana" x="150" y="6" width="84" height="40" rx="2"/><rect class="g-manzana" x="6" y="54" width="64" height="50" rx="2"/><rect class="g-verde" x="78" y="54" width="64" height="50" rx="2"/><ellipse class="g-agua" cx="192" cy="80" rx="40" ry="22"/><text class="g-proveedor" x="80" y="98">Parque España</text><g class="g-encima"><path class="g-halo" d="M0,52 L240,46" stroke-width="6"/><path class="g-lim-col" d="M0,52 L240,46" stroke-width="1.5"/><circle class="g-punto" cx="40" cy="80" r="6" stroke-width="1.5"/><text class="g-nombre" x="150" y="30">Roma Norte</text></g></svg>
+        </div>
+        <p class="guia-base-texto">Calles, manzanas y nombres del proveedor en tonos claros. Trae sus propios nombres y puntos de interés (en cursiva en el dibujo), que compiten con los del visor. CARTO (CP y AP; PR lo cambió por el fondo propio) y Esri calles (PL). Cada tesela se pide al servidor del proveedor.</p>
+      </article>
+      <article class="guia-base">
+        <h4 class="guia-base-titulo">Satelital</h4>
+        <p class="guia-base-estado" data-estado="pendiente">Licencia pendiente</p>
+        <div class="guia-base-muestra" data-base="satelital">
+          <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-suelo" width="240" height="110"/><path class="g-calle" d="M74,0 V110 M146,0 V110 M0,50 H240" stroke-width="8"/><rect class="g-manzana" x="6" y="6" width="64" height="40" rx="2"/><rect class="g-manzana" x="78" y="6" width="64" height="40" rx="2"/><rect class="g-manzana" x="150" y="6" width="84" height="40" rx="2"/><rect class="g-manzana" x="6" y="54" width="64" height="50" rx="2"/><rect class="g-verde" x="78" y="54" width="64" height="50" rx="2"/><ellipse class="g-agua" cx="192" cy="80" rx="40" ry="22"/><text class="g-proveedor" x="80" y="98">Parque España</text><g class="g-encima"><path class="g-halo" d="M0,52 L240,46" stroke-width="6"/><path class="g-lim-col" d="M0,52 L240,46" stroke-width="1.5"/><circle class="g-punto" cx="40" cy="80" r="6" stroke-width="1.5"/><text class="g-nombre" x="150" y="30">Roma Norte</text></g></svg>
+        </div>
+        <p class="guia-base-texto">Foto aérea: techos, copas y banquetas. Para la captura en campo, donde la persona se ubica por lo que ve (PL). Todo lo de encima lleva el halo blanco (GEO-79). Esri (PL, PR y CP), a veces con una capa de nombres de vías encima; PR usó antes Sentinel-2 de EOX.</p>
+      </article>
+      <article class="guia-base">
+        <h4 class="guia-base-titulo">Sin mapa base</h4>
+        <p class="guia-base-estado">Respaldo</p>
+        <div class="guia-base-muestra" data-base="ninguno">
+          <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-suelo" width="240" height="110"/><path class="g-calle" d="M74,0 V110 M146,0 V110 M0,50 H240" stroke-width="8"/><rect class="g-manzana" x="6" y="6" width="64" height="40" rx="2"/><rect class="g-manzana" x="78" y="6" width="64" height="40" rx="2"/><rect class="g-manzana" x="150" y="6" width="84" height="40" rx="2"/><rect class="g-manzana" x="6" y="54" width="64" height="50" rx="2"/><rect class="g-verde" x="78" y="54" width="64" height="50" rx="2"/><ellipse class="g-agua" cx="192" cy="80" rx="40" ry="22"/><text class="g-proveedor" x="80" y="98">Parque España</text><g class="g-encima"><path class="g-halo" d="M0,52 L240,46" stroke-width="6"/><path class="g-lim-col" d="M0,52 L240,46" stroke-width="1.5"/><circle class="g-punto" cx="40" cy="80" r="6" stroke-width="1.5"/><text class="g-nombre" x="150" y="30">Roma Norte</text></g></svg>
+        </div>
+        <p class="guia-base-texto">Solo el gris de fondo, con las capas de datos encima. Es lo que trae formularios por omisión (FRM-50) y lo que queda si el fondo cae (GEO-75): el punto se puede colocar y mover igual.</p>
+      </article>
+    </div>
+
+    <h3 class="rotulo">Las opciones, quién las da y qué piden</h3>
+    <div class="guia-envoltura-tabla">
+      <table class="guia-tabla" id="guia-tabla-bases">
+        <caption class="solo-lector">Opciones de mapa base: quién lo da, crédito, llave y límites, si llama a otro servidor y qué dice el estándar</caption>
+        <thead><tr><th scope="col">Opción</th><th scope="col">Quién lo da y quién lo usa</th><th scope="col">Crédito que se pone</th><th scope="col">Llave, cuenta y límites</th><th scope="col">¿Llama a otro servidor?</th><th scope="col">En el estándar</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Fondo propio</th><td>La Secretaría, con las manzanas del Catastro de la CDMX y las áreas verdes, los cuerpos de agua y las ANP y AVA de la Secretaría (GA, PR). Lo usan GA y PR.</td><td>El de cada fuente; por ejemplo, «Manzanas: Catastro CDMX».</td><td>No necesita llave ni cuenta. Se prepara por zona; las manzanas se cargan desde el zoom 13–14.</td><td>No.</td><td>Recomendado por omisión (D7, GEO-74).</td></tr>
+          <tr><th scope="row">Sin mapa base</th><td>Nadie. Formularios lo trae vacío por omisión (FRM-50).</td><td>Solo el de las capas de datos.</td><td>No necesita llave ni cuenta.</td><td>No.</td><td>Respaldo: es lo que queda si el fondo cae (GEO-75).</td></tr>
+          <tr><th scope="row">Calles claras de CARTO (Positron, con datos de OpenStreetMap)</th><td>CARTO. CP y AP lo usan con llave; PR lo usó y lo cambió por el fondo propio (PR v1.4, 12 oct 2026).</td><td>«© OSM · © CARTO» (CP) o «Cartografía base de CARTO y © colaboradores de OpenStreetMap» (AP), con enlace a la página de créditos de cada uno.</td><td>Desde agosto de 2026 pide llave: AP vio «API KEY REQUIRED» estampado en su mapa. La llave se declara en la configuración, no escrita en el código del mapa (formularios, módulo mapa). <span class="pendiente">Pendiente: verificar en la página de CARTO las condiciones de uso, los límites y el costo de la llave.</span></td><td>Sí: cada tesela se pide al servidor de CARTO, que recibe la dirección IP de la persona.</td><td>Solo con llave contratada (GEO-74).</td></tr>
+          <tr><th scope="row">Calles de Esri (World Street Map)</th><td>Esri. PL lo usa como segundo fondo.</td><td>«Calles: Esri, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), NGCC, © OpenStreetMap contributors y GIS User Community» y «Powered by Esri» (PL, tomado del servicio el 5 oct 2026).</td><td>Las mismas condiciones que la satelital de Esri. <span class="pendiente">Pendiente: la licencia de la Secretaría y las condiciones en la página de Esri.</span></td><td>Sí: al servidor de Esri.</td><td>Opción con licencia pendiente.</td></tr>
+          <tr><th scope="row">Satelital de Esri (World Imagery)</th><td>Esri. La usan PL, PR y CP.</td><td>«Imagen: Esri, Vantor, Earthstar Geographics y GIS User Community» y «Powered by Esri» (PL, tomado del servicio el 24 sep 2026); con la capa de nombres de vías, además «Vías: Esri, HERE, Garmin, © OpenStreetMap contributors». CP todavía pone «Tiles © Esri · Maxar · Earthstar Geographics».</td><td>Según la bitácora de PR, Esri no permite usarla sin licencia; la vía en regla que anota es una cuenta de ArcGIS Location Platform con una llave restringida al dominio del sitio, con una cuota gratuita al mes. PL anota que su uso gratuito tiene límites. <span class="pendiente">Pendiente: la licencia de la Secretaría y verificar la cuota y las condiciones en la página de Esri.</span></td><td>Sí: al servidor de Esri.</td><td>La satelital para campo, con halo blanco (GEO-79); licencia pendiente de la Secretaría.</td></tr>
+          <tr><th scope="row">Satelital Sentinel-2 sin nubes 2024 (EOX)</th><td>EOX. PR la usó y la cambió por la de Esri.</td><td>Obligatorio, según PR. <span class="pendiente">Pendiente: verificar el texto exacto.</span></td><td>Sin llave. Según PR, licencia CC BY-NC-SA 4.0, solo para uso no comercial. <span class="pendiente">Pendiente: verificarlo en la página de EOX y si el uso de la Secretaría cabe en él.</span></td><td>Sí: al servidor de EOX.</td><td>No se usa: 10 m por píxel; de cerca se ve borrosa (GEO-74).</td></tr>
+          <tr><th scope="row">OpenStreetMap (teselas de su propio servidor)</th><td>OpenStreetMap. GA y PR lo descartaron.</td><td>«© colaboradores de OpenStreetMap», con enlace a openstreetmap.org/copyright, como lo ponen AP y CP en su crédito de CARTO. <span class="pendiente">Pendiente: verificar el texto que pide OpenStreetMap.</span></td><td>Sin llave, pero su política no admite uso intenso (GA, PR). <span class="pendiente">Pendiente: verificar la política vigente.</span></td><td>Sí: envía la dirección IP de cada persona.</td><td>No se usa; además, sus calles quedaban a 20–30 m de las de INEGI (GEO-74).</td></tr>
+          <tr><th scope="row">Esri gris</th><td>Esri. Descartado por los proyectos.</td><td>No aplica: no se usa.</td><td>Las mismas condiciones que los otros fondos de Esri.</td><td>Sí: al servidor de Esri.</td><td>No se usa: solo llega al zoom 16 (GEO-74).</td></tr>
+          <tr><th scope="row">Ortofoto de la Secretaría en el GeoServer del SIA</th><td>La Secretaría. PR la anotó como opción futura.</td><td>El de la Secretaría.</td><td>Sin llave de terceros; el SIA tendría que publicarla en internet (PR).</td><td>No a terceros: al servidor del SIA.</td><td>Futuro. <span class="pendiente">Pendiente de la Secretaría: publicarla.</span></td></tr>
+          <tr><th scope="row">INEGI</th><td>INEGI. Ningún proyecto lo usa como mapa base; GA y PR toman de INEGI las calles, no su mapa.</td><td><span class="pendiente">Pendiente: verificar.</span></td><td><span class="pendiente">Pendiente: verificar si INEGI ofrece teselas para usar como mapa base y con qué condiciones.</span></td><td>Sí: al servidor de INEGI.</td><td>Sin evaluar.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="rotulo">Cómo se muestran sobre el mapa</h3>
+    <ul class="guia-lista">
+      <li><strong>Se cambian en el menú de capas,</strong> que abre el botón de capas de la columna: una sola opción a la vez, con la vigente marcada (GEO-33). Pruébalo en la muestra de arriba.</li>
+      <li><strong>Orden:</strong> el mapa base abajo; encima, la capa de datos con su opacidad; hasta arriba, los límites con franja blanca, los nombres con contorno y los puntos con aro, siempre opacos.</li>
+      <li><strong>Sobre la satelital,</strong> todo lo de encima lleva el halo blanco de un solo filtro (GEO-79).</li>
+      <li><strong>Fuera de la ciudad,</strong> la máscara tapa el mapa base, sea cual sea (GEO-77).</li>
+      <li><strong>Si el fondo cae,</strong> a la tercera tesela fallida aparece un aviso y el mapa sigue sirviendo, como sin mapa base (GEO-75).</li>
+      <li><strong>El crédito cambia con el mapa base</strong> y siempre se ve, en un renglón sobre fondo blanco (MC07, MC08); en el celular se recorta y se abre al tocarlo (GEO-37). En la muestra de arriba, cambia al elegir otro mapa base.</li>
+    </ul>
+    <p class="guia-resumen" id="guia-resumen-bases" role="status"></p>
+    <div class="guia-envoltura-tabla">
+      <table class="guia-tabla" id="guia-tabla-bases-contraste">
+        <caption class="solo-lector">Contraste de los colores del estándar sobre cada mapa base</caption>
+        <thead><tr><th scope="col">Mapa base</th><th scope="col">Qué se midió</th><th scope="col">Pares</th><th scope="col">Razón más baja</th><th scope="col">Resultado</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="guia-pie"><span class="pendiente">Pendiente: medir con píxeles de teselas reales</span> el contraste sobre las calles claras y la satelital (fase 2), y el de las cifras sobre la rampa cuando la capa de datos tiene menos de 100 % de opacidad.</p>
+  </section>
+
+  <!-- ===== Paleta ===== -->
+  <section class="guia-seccion" id="paleta" aria-labelledby="t-paleta">
+    <h2 class="titulo-bloque" id="t-paleta">Paleta del mapa: un color, un trabajo</h2>
+    <p class="bajada">Solo lo que formularios no tiene. Donde un papel del mapa puede usar un color de formularios, el token lo nombra en lugar de copiarlo: la columna «es» lo dice. Los valores se leen de <code>tokens-mapa.css</code> en este momento.</p>
+    <div id="guia-paleta"></div>
+  </section>
+
+  <!-- ===== Contraste ===== -->
+  <section class="guia-seccion" id="contraste" aria-labelledby="t-contraste">
+    <h2 class="titulo-bloque" id="t-contraste">Contraste medido sobre cada fondo real</h2>
+    <p class="bajada">Cada par se mide sobre el fondo donde aparece en el mapa. Texto: 4.5:1; líneas, puntos, aros y foco: 3:1 (WCAG 2.2, criterios 1.4.3 y 1.4.11). La razón se calcula aquí, y <code>herramientas/contraste.mjs</code> la calcula por su lado. Si un par que se exige no cumple y espera una decisión de la Secretaría, se marca «Pendiente de decisión»; cuando la Secretaría decide, la decisión queda escrita en «Dónde» (por ejemplo, MC27 y D11).</p>
+    <p class="guia-resumen" id="guia-resumen-contraste" role="status"></p>
+    <div class="guia-envoltura-tabla">
+      <table class="guia-tabla" id="guia-tabla-contraste">
+        <caption class="solo-lector">Pares de color del mapa, razón de contraste y resultado</caption>
+        <thead><tr><th scope="col">Id</th><th scope="col">Muestra</th><th scope="col">Primer plano y fondo</th><th scope="col">Razón</th><th scope="col">Mínimo</th><th scope="col">Resultado</th><th scope="col">Dónde</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== Rampas ===== -->
+  <section class="guia-seccion" id="rampas" aria-labelledby="t-rampas">
+    <h2 class="titulo-bloque" id="t-rampas">Rampas de datos y daltonismo</h2>
+    <p class="bajada">Cada rampa vista tal cual y como la ven las personas con protanopia, deuteranopia y tritanopia (simulación de Machado, 2009). Debajo de cada fila, la distancia de color (ΔE) entre clases vecinas: debe ser 15 o más, y 50 o más entre los extremos. El cuadro punteado es «sin dato», y al final de cada fila va su distancia a la clase más parecida.</p>
+    <p class="guia-recomendacion"><strong>Rampa de verdor, aprobada por la Secretaría (14 oct 2026).</strong> Es la rampa «verde continuo» que la Secretaría eligió para Guardianes (GA) el 14 oct 2026: va del verde pálido al verde bosque y cambia sobre todo de claridad, por eso conserva el orden con cualquier visión. Pasa la misma prueba que la de prioridad y lleva texto oscuro sobre las clases 1 a 3 y blanco sobre la 4 y la 5. Con ella, «sin dato» pasa al gris medio de GA (#9A9A96), que queda lejos de todas las clases de las dos rampas.</p>
+    <div id="guia-rampas"></div>
+  </section>
+
+  <!-- ===== Foco ===== -->
+  <section class="guia-seccion" id="foco" aria-labelledby="t-foco">
+    <h2 class="titulo-bloque" id="t-foco">Foco de dos tonos</h2>
+    <p class="bajada">El anillo azul de formularios con su separación llena de blanco (D3). Sobre lo claro se ve el azul; sobre lo oscuro, el blanco. El foco se muestra con <code>data-demo-foco</code>, que aplica la misma regla que <code>:focus-visible</code>.</p>
+    <div class="guia-fondos">
+      <div class="guia-fondo" data-fondo="blanco"><span>Tarjeta</span><button type="button" class="btn btn-secundario" data-demo-foco>Con foco</button></div>
+      <div class="guia-fondo" data-fondo="suelo"><span>Suelo</span><button type="button" class="btn btn-secundario" data-demo-foco>Con foco</button></div>
+      <div class="guia-fondo" data-fondo="manzana"><span>Manzana</span><button type="button" class="btn btn-secundario" data-demo-foco>Con foco</button></div>
+      <div class="guia-fondo" data-fondo="verde"><span>Área verde</span><button type="button" class="btn btn-secundario" data-demo-foco>Con foco</button></div>
+      <div class="guia-fondo" data-fondo="agua"><span>Agua</span><button type="button" class="btn btn-secundario" data-demo-foco>Con foco</button></div>
+      <div class="guia-fondo" data-fondo="rampa-5"><span>Clase 5 de la prioridad</span><button type="button" class="btn btn-secundario" data-demo-foco>Con foco</button></div>
+    </div>
+  </section>
+
+  <!-- ===== Nombres ===== -->
+  <section class="guia-seccion" id="nombres" aria-labelledby="t-nombres">
+    <h2 class="titulo-bloque" id="t-nombres">Nombres del mapa</h2>
+    <p class="bajada">Cabin para alcaldías y Roboto para colonias y calles, en los pesos que trae formularios, siempre con contorno blanco. El contorno es lo que deja leer el nombre sobre la clase más oscura de la rampa o sobre la satelital.</p>
+    <div class="guia-fondos" id="guia-nombres"></div>
+    <div id="guia-escala-nombres"></div>
+  </section>
+
+  <!-- ===== Medidas ===== -->
+  <section class="guia-seccion" id="medidas" aria-labelledby="t-medidas">
+    <h2 class="titulo-bloque" id="t-medidas">Medidas del mapa</h2>
+    <p class="bajada">Solo las propias del mapa. Espaciado, radios, trazos y el mínimo táctil de 44 px son los de formularios.</p>
+    <div id="guia-medidas"></div>
+  </section>
+
+  <!-- ===== Capas ===== -->
+  <section class="guia-seccion" id="capas" aria-labelledby="t-capas">
+    <h2 class="titulo-bloque" id="t-capas">Capas de apilamiento</h2>
+    <p class="bajada">El mapa va aislado (<code>isolation: isolate</code>): sus capas internas, de 200 a 1000 en Leaflet, no compiten con la página. Lo de encima usa estas capas con nombre, por debajo de las de formularios. Las ventanas son <code>&lt;dialog&gt;</code> nativo y no necesitan número.</p>
+    <div class="guia-envoltura-tabla">
+      <table class="guia-tabla" id="guia-tabla-capas">
+        <caption class="solo-lector">Capas de apilamiento, de abajo arriba</caption>
+        <thead><tr><th scope="col">Token</th><th scope="col">Valor</th><th scope="col">Qué va</th><th scope="col">De</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== Temas ===== -->
+  <section class="guia-seccion" id="temas" aria-labelledby="t-temas">
+    <h2 class="titulo-bloque" id="t-temas">Tema por visor</h2>
+    <p class="bajada">Un tema cambia cuatro tokens: la marca, su fondo tenue, la superficie de la ficha y su texto (D4). El botón principal sigue en guinda, lo tocable en azul y el foco no cambia. Los tres temas son de visores reales.</p>
+    <p class="guia-recomendacion"><strong>Decisión de la Secretaría (D11, 14 oct 2026): las fichas de tema son siempre claras.</strong> Así lo tocable es azul en todos los visores. La marca va en el título de la ficha y en la franja de su borde izquierdo, donde su contraste está medido. La ficha oscura del tema hoja (GA), donde el enlace azul daba 1.73:1, pasa a ser clara.</p>
+    <div class="guia-temas" id="guia-temas"></div>
+  </section>
+
+  <!-- ===== Componentes ===== -->
+  <section class="guia-seccion" id="componentes" aria-labelledby="t-componentes">
+    <h2 class="titulo-bloque" id="t-componentes">Componentes del mapa</h2>
+    <p class="bajada">Los componentes no se escriben de nuevo: se extraen de los proyectos que ya funcionan y se agregan aquí, con sus estados, conforme llegan. Botones, avisos, ventanas, listas y campos son los de formularios y ya están en su guía visual.</p>
+    <div class="guia-envoltura-tabla">
+      <table class="guia-tabla" id="guia-tabla-componentes">
+        <caption class="solo-lector">Componentes del mapa, de dónde se extraen y en qué fase</caption>
+        <thead><tr><th scope="col">Componente</th><th scope="col">Reglas</th><th scope="col">Se extrae de</th><th scope="col">Estado</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== Sí y no ===== -->
+  <section class="guia-seccion" id="pares" aria-labelledby="t-pares">
+    <h2 class="titulo-bloque" id="t-pares">Sí y no</h2>
+    <p class="bajada">Pares de la misma situación: el primero cumple el estándar; el segundo es el error que lo hizo necesario, en el proyecto donde pasó. Cada uno dice con palabras cuál es.</p>
+
+    <div class="guia-par">
+      <figure class="guia-si"><p class="guia-veredicto">Sí · Límite con franja blanca debajo</p>
+        <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-manzana-capa" width="240" height="110" fill="url(#guia-manzanas)"/><path class="g-halo" d="M20,100 L120,10 L220,95" stroke-width="7"/><path class="g-lim-col" d="M20,100 L120,10 L220,95" stroke-width="1.5"/></svg>
+        <figcaption class="guia-pie">La línea se mide contra su franja: 7.17:1 sobre cualquier fondo.</figcaption></figure>
+      <figure class="guia-no"><p class="guia-veredicto">No · Línea sola sobre las manzanas</p>
+        <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-manzana-capa" width="240" height="110" fill="url(#guia-manzanas)"/><path class="g-lim-col" d="M20,100 L120,10 L220,95" stroke-width="1.5"/></svg>
+        <figcaption class="guia-pie">Donde cruza una calle blanca o una manzana gris, la línea se corta a la vista (GA).</figcaption></figure>
+    </div>
+
+    <div class="guia-par">
+      <figure class="guia-si"><p class="guia-veredicto">Sí · Lo elegido, solo con contorno y sobre franja blanca</p>
+        <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-manzana-capa" width="240" height="110" fill="url(#guia-manzanas)"/><polygon class="g-halo" points="40,20 200,12 210,96 30,100" stroke-width="8"/><polygon class="g-elegido" points="40,20 200,12 210,96 30,100" stroke-width="3"/></svg>
+        <figcaption class="guia-pie">Se sigue viendo lo que hay dentro, y la franja lo sostiene sobre la rampa (7.14:1).</figcaption></figure>
+      <figure class="guia-no"><p class="guia-veredicto">No · Lo elegido con relleno</p>
+        <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-manzana-capa" width="240" height="110" fill="url(#guia-manzanas)"/><polygon class="g-relleno-elegido" points="40,20 200,12 210,96 30,100"/></svg>
+        <figcaption class="guia-pie">GA v12: el relleno dibujaba una cuña falsa y tapaba las manzanas.</figcaption></figure>
+    </div>
+
+    <div class="guia-par">
+      <figure class="guia-si"><p class="guia-veredicto">Sí · Punto claro con aro oscuro</p>
+        <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-manzana" width="240" height="110"/><circle class="g-punto" cx="60" cy="55" r="11" stroke-width="2.5"/><circle class="g-punto" cx="120" cy="55" r="11" stroke-width="2.5"/><circle class="g-punto" cx="180" cy="55" r="11" stroke-width="2.5"/></svg>
+        <figcaption class="guia-pie">Aro contra manzana: 9.54:1.</figcaption></figure>
+      <figure class="guia-no"><p class="guia-veredicto">No · Punto claro con aro blanco</p>
+        <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-manzana" width="240" height="110"/><circle class="g-punto g-aro-blanco" cx="60" cy="55" r="11" stroke-width="2.5"/><circle class="g-punto g-aro-blanco" cx="120" cy="55" r="11" stroke-width="2.5"/><circle class="g-punto g-aro-blanco" cx="180" cy="55" r="11" stroke-width="2.5"/></svg>
+        <figcaption class="guia-pie">GA v28i: el aro blanco daba 2.3:1 sobre la manzana.</figcaption></figure>
+    </div>
+
+    <div class="guia-par">
+      <figure class="guia-si"><p class="guia-veredicto">Sí · Nombre en gris sólido</p>
+        <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-suelo" width="240" height="110"/><text class="g-nombre" x="30" y="62">Calle Durango</text></svg>
+        <figcaption class="guia-pie">El gris de formularios, sólido: 6.52:1 sobre el suelo.</figcaption></figure>
+      <figure class="guia-no"><p class="guia-veredicto">No · Nombre atenuado con transparencia</p>
+        <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-suelo" width="240" height="110"/><text class="g-nombre g-nombre-tenue" x="30" y="62">Calle Durango</text></svg>
+        <figcaption class="guia-pie">GA v28h: con transparencia daba 1.9:1; en gris sólido, 5.1:1.</figcaption></figure>
+    </div>
+
+    <div class="guia-par">
+      <figure class="guia-si"><p class="guia-veredicto">Sí · «Toda la ciudad» es una casa</p>
+        <div class="guia-iconos"><svg class="guia-icono-grande g-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7M5 10v10h5v-6h4v6h5V10"/></svg></div>
+        <figcaption class="guia-pie">Volver al inicio, como en cualquier aplicación.</figcaption></figure>
+      <figure class="guia-no"><p class="guia-veredicto">No · Un marco de cuatro esquinas</p>
+        <div class="guia-iconos"><svg class="guia-icono-grande g-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></div>
+        <figcaption class="guia-pie">CP: se leía como «pantalla completa».</figcaption></figure>
+    </div>
+
+    <div class="guia-par">
+      <figure class="guia-si"><p class="guia-veredicto">Sí · El estado cambia también la forma</p>
+        <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-suelo" width="240" height="110"/><circle class="g-punto" cx="80" cy="55" r="11" stroke-width="2"/><circle class="g-punto" cx="160" cy="55" r="11" stroke-width="2"/><circle class="g-anillo" cx="160" cy="55" r="17" stroke-width="2"/></svg>
+        <figcaption class="guia-pie">PL D166: «lejos» lleva un anillo de más; no depende del color.</figcaption></figure>
+      <figure class="guia-no"><p class="guia-veredicto">No · El estado solo por el color</p>
+        <svg class="guia-mini" viewBox="0 0 240 110" aria-hidden="true" focusable="false"><rect class="g-suelo" width="240" height="110"/><circle class="g-punto" cx="80" cy="55" r="11" stroke-width="2"/><circle class="g-punto-b" cx="160" cy="55" r="11" stroke-width="2"/></svg>
+        <figcaption class="guia-pie">Quien no distingue esos tonos ve dos puntos iguales.</figcaption></figure>
+    </div>
+
+    <div class="guia-par">
+      <figure class="guia-si"><p class="guia-veredicto">Sí · Foco de dos tonos sobre lo oscuro</p>
+        <div class="guia-fondo" data-fondo="rampa-5"><button type="button" class="btn btn-secundario" data-demo-foco>Con foco</button></div>
+        <figcaption class="guia-pie">El blanco del anillo da 10.06:1 sobre la clase 5 de la prioridad (MN19).</figcaption></figure>
+      <figure class="guia-no"><p class="guia-veredicto">No · Foco de un solo tono</p>
+        <div class="guia-fondo" data-fondo="rampa-5"><button type="button" class="btn btn-secundario guia-un-tono" data-demo-foco>Con foco</button></div>
+        <figcaption class="guia-pie">El azul solo da 2.07:1 sobre la clase 5 (MI10).</figcaption></figure>
+    </div>
+
+    <div class="guia-par">
+      <figure class="guia-si"><p class="guia-veredicto">Sí · Ficha de tema clara, con la marca en la franja</p>
+        <div class="guia-tema" data-tema="hoja"><div class="guia-tema-ficha"><strong class="guia-tema-ficha-titulo">Fresno 1024</strong><span>Lo cuidan 3 guardianes.</span><a class="guia-tema-enlace" href="#temas">Ver en el mapa</a></div></div>
+        <figcaption class="guia-pie">El enlace azul da 6.40:1 sobre la ficha del tema hoja (MC27; D11).</figcaption></figure>
+      <figure class="guia-no"><p class="guia-veredicto">No · Ficha oscura con lo tocable en azul</p>
+        <div class="guia-ficha-oscura"><strong>Fresno 1024</strong><span>Lo cuidan 3 guardianes.</span><a class="guia-tema-enlace" href="#temas">Ver en el mapa</a></div>
+        <figcaption class="guia-pie">GA: sobre su ficha verde noche (#173B2E), el enlace azul daba 1.73:1; en esta muestra, sobre el gris oscuro del texto, da 1.94:1. La Secretaría decidió fichas de tema siempre claras (D11).</figcaption></figure>
+    </div>
+  </section>
+</main>
+
+<footer class="pie"><div class="pie-int"><p>Guía visual del estándar de geovisores del SIA · SEDEMA · <span id="guia-version">fase 1</span>.</p></div></footer>
+
+<script src="pares.js"></script>
+<script src="guia.js"></script>
+</body>
+</html>

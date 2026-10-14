@@ -1,0 +1,17 @@
+* text=auto eol=lf
+*.woff2 binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.bin binary
+*.gz binary
+
+# Bibliotecas y licencias de terceros: se guardan tal cual llegan (sus huellas
+# se calcularon sobre esos bytes; Leaflet trae CRLF).
+**/vendor/** -text
+*-OFL.txt -text

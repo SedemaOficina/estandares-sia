@@ -1,0 +1,64 @@
+/* =========================================================
+   portada.css · Portada común de la guía de los estándares del SIA
+
+   Solo ordena la portada. Colores, letra, botones, avisos y foco son los de
+   formularios (y el halo del foco, de geovisores): esta hoja no redefine
+   ninguno. Sigue las reglas de hoja de los dos estándares: sin colores ni
+   medidas literales, :hover solo con (hover: hover), cortes solo con
+   min-width. La audita herramientas/auditor-css.mjs de geovisores.
+
+   Bloques: estructura → componentes → adaptaciones.
+   ========================================================= */
+
+/* @bloque estructura */
+
+.portada-seccion{margin-bottom:var(--e-8)}
+.portada-fila{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-3)}
+.portada-pie{margin-top:var(--e-3);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris)}
+
+/* @bloque componentes */
+
+/* Caminos: cada tarjeta entera es el enlace. */
+.portada-caminos{display:grid;grid-template-columns:1fr;gap:var(--e-4)}
+.portada-camino{display:flex}
+.portada-camino-enlace{display:flex;flex:1;flex-direction:column;gap:var(--e-2);padding:var(--e-5);background:var(--blanco);border:var(--b-1) solid var(--borde);border-radius:var(--r-caja);color:var(--texto);text-decoration:none}
+.portada-camino-titulo{font-family:var(--fuente-titulo);font-size:var(--t-lg);font-weight:var(--peso-fuerte);color:var(--guinda)}
+.portada-camino-texto{font-size:var(--t-md);line-height:var(--interlineado-compacto);color:var(--gris)}
+.portada-camino-ir{margin-top:auto;padding-top:var(--e-2);font-weight:var(--peso-medio);color:var(--azul);text-decoration:underline}
+
+/* Colores */
+.portada-colores{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--ancho-tarjeta-min),1fr));gap:var(--e-3)}
+.portada-color{display:flex;align-items:center;gap:var(--e-3);padding:var(--e-3);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl)}
+.portada-color-muestra{flex:none;width:var(--e-9);height:var(--e-9);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl)}
+.portada-color-texto{display:flex;flex-direction:column;min-width:0;font-size:var(--t-sm);line-height:var(--interlineado-compacto)}
+.portada-color-nombre{font-weight:var(--peso-fuerte)}
+.portada-color-valor{font-family:var(--fuente-mono);font-size:var(--t-xs);color:var(--gris)}
+
+/* Letra */
+.portada-letra{padding:var(--e-5);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.portada-letra-titulo{font-family:var(--fuente-titulo);font-size:var(--t-2xl);font-weight:var(--peso-fuerte);color:var(--guinda)}
+.portada-letra-cuerpo{max-width:var(--ancho-lectura);margin-top:var(--e-2)}
+
+/* Avisos */
+.portada-avisos{display:grid;gap:var(--e-3)}
+
+/* Foco */
+.portada-foco{padding:var(--e-5);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.portada-foco[data-fondo="tarjeta"]{background:var(--blanco)}
+.portada-foco[data-fondo="mapa"]{background:var(--mapa-manzana)}
+
+/* Tabla de anchos */
+.portada-tabla-caja{overflow-x:auto;background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.portada-tabla{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+.portada-tabla th{padding:var(--e-2) var(--e-3);background:var(--guinda);font-family:var(--fuente-titulo);text-align:left;color:var(--blanco)}
+.portada-tabla td{padding:var(--e-2) var(--e-3);border-bottom:var(--b-1) solid var(--linea);vertical-align:top}
+
+/* @bloque adaptaciones */
+
+@media (min-width:760px){
+  .portada-caminos{grid-template-columns:1fr 1fr}
+}
+
+@media (hover: hover){
+  .portada-camino-enlace:hover{background:var(--azul-cl);border-color:var(--azul)}
+}

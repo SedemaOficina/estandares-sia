@@ -1,0 +1,17 @@
+/* =========================================================
+   pendientes.css · Lista común de pendientes (portada y guía de formularios)
+
+   La dibuja pendientes.js. Usa los tokens de formularios y su rótulo
+   .pendiente del núcleo; aquí sólo va la disposición de la lista.
+   Mobile-first; valores sólo desde tokens; sin !important.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.pendientes-cuenta{margin:0 0 var(--e-3);font-size:var(--t-sm);color:var(--gris)}
+.pendientes-lista{display:grid;gap:var(--e-3);margin:0;padding:0;list-style:none}
+.pendientes-item{padding:var(--e-3) var(--e-4);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.pendientes-cab{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2);margin:0 0 var(--e-2)}
+.pendientes-de{font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
+.pendientes-texto{margin:0}
+.pendientes-nota{margin:var(--e-2) 0 0;font-size:var(--t-sm);color:var(--gris)}

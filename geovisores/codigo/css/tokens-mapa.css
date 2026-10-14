@@ -1,0 +1,143 @@
+/* =========================================================
+   tokens-mapa.css · Estándar de geovisores del SIA (SEDEMA)
+
+   Solo lo que el estándar de formularios no tiene. Se carga DESPUÉS de
+   tokens.css de formularios (../formularios/codigo/css/, en la misma
+   carpeta estandares-sia), que pone colores, letra, escala, espaciado,
+   radios, foco, duraciones y puntos de quiebre. Cuando
+   un papel del mapa puede usar un valor de formularios, aquí se nombra con
+   var() y no se copia el hexadecimal (GEO-65).
+
+   Cada valor nuevo viene de un proyecto que ya funciona; el comentario dice
+   de cuál. Los contrastes están medidos en herramientas/pares-contraste.json
+   y las rampas en herramientas/rampas.mjs (GEO-68, GEO-69).
+
+   Puntos de corte (no pueden ser variables), solo con min-width (D5, GEO-21):
+   los tres de formularios, --bp-sm 560px, --bp-md 760px y --bp-lg 1024px.
+   ========================================================= */
+
+/* @bloque variables */
+
+:root{
+  /* ---------- Fondo propio (GEO-74) ----------
+     Manzanas de Catastro, áreas verdes y agua sobre un suelo neutro. Valores
+     de GA (02_fuente/css/estilos.css:13); verde y agua son los mismos en PR
+     (01_variables.css:13). PR usa una manzana algo más clara (#E2DED6): se
+     tomó la de GA porque sobre ella se midieron los aros de los puntos. */
+  --mapa-suelo:#F5F4F1;      /* suelo dentro de la ciudad */
+  --mapa-manzana:#DAD6CD;    /* manzanas, desde zoom 13–14 */
+  --mapa-verde:#D9EAD0;      /* parques y áreas verdes */
+  --mapa-agua:#BCD7E6;       /* cuerpos de agua */
+  --mapa-calle:var(--blanco);/* calles: el blanco de formularios (PR --fondo-calle) */
+  --mapa-fuera:#BFC6C0;      /* fuera de la ciudad (GA --map-fuera) */
+
+  /* ---------- Líneas y nombres (GEO-77) ----------
+     Toda línea va sobre una franja del color de halo; por eso su contraste
+     se mide contra el halo y no contra el fondo. Los neutros son los de
+     formularios: el gris de PR para nombres (--map-label = #55585A) ya es
+     --gris. */
+  --mapa-halo:var(--blanco);              /* franja bajo límites y contorno de nombres */
+  /* Halo de todo lo que va sobre la satelital, en un solo filtro (GEO-79).
+     Valor exacto de CP (styles.css:2489). */
+  --mapa-halo-satelital:drop-shadow(0 0 1.2px rgba(255,255,255,.95)) drop-shadow(0 0 1px rgba(255,255,255,.7));
+  --mapa-limite-alcaldia:var(--texto);
+  --mapa-limite-colonia:var(--gris);
+  --mapa-nombre-fuerte:var(--texto);      /* alcaldías */
+  --mapa-nombre:var(--gris);              /* colonias y calles */
+
+  /* ---------- Lo elegido, lo señalado, la ubicación (GEO-66, D2) ---------- */
+  --mapa-elegido:var(--azul);             /* contorno de lo elegido: azul, como en formularios */
+  --mapa-resalte:var(--dorado);           /* al pasar el puntero: solo línea (GA, PR) */
+  --mapa-buscado:var(--guinda);           /* lugar buscado (CP, PR) */
+  --mapa-aro:var(--texto);                /* aro oscuro de los puntos claros (GEO-69) */
+  --mapa-ubicacion:#1A73E8;               /* punto azul convencional (GA --loc, PR --loc) */
+  --op-precision:.12;                     /* relleno del círculo de precisión (PL, CP) */
+  /* «Sin dato» en un mapa de color (GA --mapa-sin-dato, estilos.css:23).
+     Va con la rampa de verdor (aprobada por la Secretaría): queda a ΔE 19.9 o más
+     de las clases de las dos rampas en las cuatro visiones, y deja texto
+     oscuro encima (4.90:1). */
+  --mapa-sin-dato:#9A9A96;
+
+  /* ---------- Crédito del mapa (GEO-37) ----------
+     Fondo sólido, no transparente (GEO-69): GA y PR usaban blanco al 80–88 %. */
+  --mapa-credito-bg:var(--blanco);
+  --mapa-credito:var(--gris);
+
+  /* ---------- Rampas de datos (GEO-68) ----------
+     Solo entran rampas que pasan herramientas/rampas.mjs. Prioridad: PR
+     (01_variables.css:12) y PL (estilos.css:76), idénticas. Texto oscuro
+     sobre las clases 1 a 3 y blanco sobre la 4 y la 5 (pares MC10–MC14). */
+  --rampa-prioridad-1:#F9E7BF;
+  --rampa-prioridad-2:#F4C56E;
+  --rampa-prioridad-3:#E88A2E;
+  --rampa-prioridad-4:#C2421B;
+  --rampa-prioridad-5:#7F1D12;
+
+  /* Verdor: aprobada por la Secretaría; ver docs/02, sección 5. Es la
+     rampa «verde continuo» de GA (02_fuente/css/estilos.css, --verdor-1..5):
+     varía sobre todo la claridad, del verde pálido al verde bosque, y por eso
+     conserva el orden con daltonismo. Texto oscuro sobre las clases 1 a 3 y
+     blanco sobre la 4 y la 5 (pares MC15–MC19). */
+  --rampa-verdor-1:#EBF4E1;
+  --rampa-verdor-2:#B0D09C;
+  --rampa-verdor-3:#71A967;
+  --rampa-verdor-4:#3D7D47;
+  --rampa-verdor-5:#1A5030;
+
+  /* ---------- Tema por visor (D4, D11, GEO-70) ----------
+     Cuatro tokens, con los valores institucionales. Un visor los cambia en
+     un bloque [data-tema] (ejemplos reales en temas.css). Nunca cambian la
+     acción, lo tocable, el foco ni los colores de función. La ficha es
+     siempre clara (D11): sobre --tema-ficha, el azul de lo tocable llega a
+     4.5:1, y la marca va en el título y en la franja del borde. */
+  --tema-marca:var(--guinda);             /* títulos y marca */
+  --tema-marca-cl:var(--guinda-cl);       /* fondo tenue de marca */
+  --tema-ficha:var(--blanco);             /* superficie de la ficha */
+  --tema-ficha-texto:var(--texto);        /* texto de la ficha */
+
+  /* ---------- Medidas ---------- */
+  --ctrl-mapa:34px;           /* botón del mapa con ratón (PR, CP); con el dedo, --objetivo-min (GEO-27) */
+  --ctrl-mapa-icono:20px;     /* ícono de línea (GA) */
+  --ctrl-mapa-trazo:1.75;     /* grosor del trazo del ícono (GA) */
+  --panel-ancho:400px;        /* panel desde 1024 px (GA; PR 392) */
+  --panel-ancho-medio:320px;  /* panel de 760 a 1023 px (D5) */
+  --ficha-ancho:350px;        /* tarjeta de la ficha en computadora (GA; PR 300) */
+  --cajon-ancho:min(580px, 94vw); /* cajón lateral para fichas largas (CP) */
+  --simbologia-ancho-max:268px;   /* (PR) */
+  --deslizador-barra:8px;     /* opacidad: barra (PL) */
+  --deslizador-boton:28px;    /* opacidad: botón; el área táctil es --objetivo-min (PL) */
+
+  /* Alto real de la pantalla: el JS los reescribe con innerHeight y
+     visualViewport.height (GEO-23); el valor de aquí es solo el respaldo. */
+  --alto:100vh;
+  --vvh:100vh;
+
+  /* ---------- Nombres del mapa (GEO-71, GEO-78) ----------
+     Cabin 700 para alcaldías y Roboto 500 (--peso-medio de formularios)
+     para colonias y calles, como en GA y PR. Tamaños de GA (05_mapa.js:464,
+     452) y PR (04_mapa_capas.js:194). */
+  --mapa-nombre-alcaldia:14px;
+  --mapa-nombre-alcaldia-lejos:12px;   /* a zoom de ciudad */
+  --mapa-nombre-colonia:12px;
+  --mapa-nombre-calle:12px;
+  --mapa-nombre-contorno:2.4px;        /* ancho del contorno en pantalla (GA) */
+
+  /* ---------- Capas de apilamiento (GEO-72) ----------
+     El mapa va aislado (isolation:isolate): sus capas internas, de 200 a
+     1000 en Leaflet, no compiten con la página. Lo de encima usa estas, por
+     debajo de --z-lista (30) y --z-barra (40) de formularios. Las ventanas
+     son <dialog> nativo y no necesitan capa. Valores de GA y PR. */
+  --z-mapa-simbologia:5;      /* simbología, escala y crédito */
+  --z-mapa-control:6;         /* columna de botones y tarjeta del lugar */
+  --z-pantalla:7;             /* pantalla de información en el celular */
+  --z-cargando:8;
+  --z-ficha:9;
+  --z-aviso:10;
+
+  /* ---------- Movimiento ---------- */
+  --dur-pantalla:.25s;        /* cambio entre las dos pantallas del celular (GA, PR) */
+  --dur-vuelo:800ms;          /* vuelo del mapa; 0 con movimiento reducido (GA) */
+
+  /* ---------- Sombra ---------- */
+  --sombra-flotante:var(--sombra-lista); /* tarjetas sobre el mapa: la de formularios */
+}

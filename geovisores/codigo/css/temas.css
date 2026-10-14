@@ -1,0 +1,45 @@
+/* =========================================================
+   temas.css · Ejemplos de tema por visor (D4, D11, GEO-70)
+
+   Un tema cambia solo cuatro tokens: --tema-marca, --tema-marca-cl,
+   --tema-ficha y --tema-ficha-texto. Se activa con data-tema en <html>.
+   La acción principal (guinda), lo tocable (azul), el foco y los colores de
+   función no cambian nunca.
+
+   La ficha es siempre clara (D11): --tema-ficha es un fondo claro donde el
+   azul de lo tocable llega a 4.5:1, y --tema-ficha-texto es oscuro. El color
+   de marca va en el título y en la franja del borde de la ficha, donde su
+   contraste está medido.
+
+   Los tres son los de visores reales y están medidos en
+   herramientas/pares-contraste.json. Un visor nuevo copia el bloque que le
+   sirve o declara el suyo, y lo mide antes de usarlo.
+   ========================================================= */
+
+/* @bloque variables */
+
+/* Verde hoja · Guardianes de árboles (GA, 02_fuente/css/estilos.css:3 y 7).
+   Ficha en el verde tenue del tema y texto en el verde noche de GA
+   (--ficha-noche). */
+[data-tema="hoja"]{
+  --tema-marca:#1F5E46;
+  --tema-marca-cl:#EEF4EF;
+  --tema-ficha:#EEF4EF;
+  --tema-ficha-texto:#173B2E;
+}
+
+/* Jacarandá · Árboles patrimoniales (AP, fuente/estilos.css:35, 58 y 162). */
+[data-tema="jacaranda"]{
+  --tema-marca:#8D4992;
+  --tema-marca-cl:#FEF7E4;
+  --tema-ficha:#FEF7E4;
+  --tema-ficha-texto:#2A1630;
+}
+
+/* Crema · Categorías de protección ambiental (CP, styles.css:15 y 28). */
+[data-tema="crema"]{
+  --tema-marca:var(--guinda);
+  --tema-marca-cl:#FFFDF0;
+  --tema-ficha:#FFFDF0;
+  --tema-ficha-texto:var(--texto);
+}

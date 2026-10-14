@@ -1,54 +1,56 @@
 #!/usr/bin/env node
 /* =========================================================
-   verificar.mjs · Una sola orden para todas las comprobaciones
+   verificar.mjs · Una orden, una señal, para los dos estándares
 
-   Corre, de la más barata a la más cara, todo lo que el paquete sabe
-   comprobar por sí mismo, y resume al final (no se detiene en la primera
-   falla: se quiere ver todo lo que está mal de una vez):
-     1. auditor de CSS (A01–A16)            2. contraste de todos los pares
-     3. auditoría de campos                 4. bibliotecas contra su manifiesto
-     5. documentos generados al día         6. construcción reproducible (manifiesto, dist, esquemas)
-     7. pruebas en navegador (dos perfiles, siete anchos, axe-core) salvo --sin-pruebas
-   Lo que NO puede comprobar y queda para personas está al final de la
-   salida y en docs/08-verificacion-y-cierre.md.
-   Uso: node herramientas/verificar.mjs [--sin-pruebas]
+   Corre las comprobaciones de geovisores y las de formularios que no
+   necesitan instalar nada, más la portada común, y da un solo veredicto
+   por el código de salida. Lo que no corre cuenta como falla.
+
+   No corre la construcción de formularios (escribe archivos) ni sus
+   pruebas en navegador (necesitan npm install): esas se corren dentro de
+   formularios/ con npm run verificar.
+
+   Uso: node herramientas/verificar.mjs        (o npm run verificar)
    ========================================================= */
 import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const SIN_PRUEBAS = process.argv.includes('--sin-pruebas');
 const resultados = [];
-const paso = (nombre, ok, detalle = '') => { resultados.push({ nombre, ok }); console.log(`${ok ? '✓' : '✗'} ${nombre}${detalle ? ` · ${detalle}` : ''}`); };
 
-function externa(nombre, args, { ultimas = 25 } = {}) {
-  const inicio = Date.now();
-  const r = spawnSync(process.execPath, args, { cwd: RAIZ, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-  const salida = (r.stdout + r.stderr).trim().split('\n').filter(Boolean);
-  const conteo = salida.filter((l) => /^# (pass|fail) /.test(l)).map((l) => l.slice(2)).join(' · ');
-  paso(nombre, r.status === 0, `${conteo || (salida.at(-1) ?? '')} · ${((Date.now() - inicio) / 1000).toFixed(1)} s`);
-  if (r.status !== 0) console.log(salida.filter((l) => !/agent-proxy|^- |^For details/.test(l)).slice(-ultimas).map((l) => '    ' + l).join('\n'));
+function corre(nombre, carpeta, args) {
+  let ok = false; let detalle = '';
+  try {
+    const r = spawnSync(process.execPath, args, { cwd: resolve(RAIZ, carpeta), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+    if (r.error) throw r.error;
+    ok = r.status === 0;
+    detalle = (r.stdout.trim().split('\n').at(-1) || r.stderr.trim().split('\n').at(-1) || '').trim();
+    if (!ok) console.log((r.stdout + r.stderr).trim().split('\n').slice(-15).map((l) => '    ' + l).join('\n'));
+  } catch (e) { detalle = `no corrió: ${e.message}`; }
+  resultados.push({ nombre, ok });
+  console.log(`${ok ? '✓' : '✗'} ${nombre}${detalle ? ` · ${detalle}` : ''}`);
 }
 
-externa('Auditor de CSS (A01–A16)', ['herramientas/auditor-css.mjs']);
-externa('Contraste de todos los pares', ['herramientas/contraste.mjs']);
-externa('Auditoría de campos (uso, finalidad, autocomplete, sensible, teclado)', ['herramientas/auditar-campos.mjs']);
-externa('Bibliotecas coinciden con vendor/MANIFIESTO.json', ['herramientas/vendor.mjs', '--verificar']);
-externa('Documentos generados al día (01-reglas, tabla de contraste)', ['herramientas/generar-reglas.mjs', '--comprobar']);
-externa('Construcción (iconos, manifiesto, dist, esquemas, catálogo 04)', ['herramientas/construir.mjs']);
-if (!SIN_PRUEBAS) externa('Pruebas en navegador: flujos en dos perfiles, siete anchos, módulos, axe-core, servidor', ['pruebas/ejecutar.mjs'], { ultimas: 60 });
-else paso('Pruebas en navegador', true, 'omitidas (--sin-pruebas)');
+console.log('— Geovisores —');
+corre('Geovisores: verificación completa', 'geovisores', ['herramientas/verificar.mjs']);
 
-const fallas = resultados.filter((r) => !r.ok);
-console.log('');
-console.log(fallas.length ? `FALLA · ${fallas.length} comprobación(es) con problemas: ${fallas.map((f) => f.nombre).join('; ')}` : `CORRECTO · ${resultados.length} comprobaciones en verde`);
-console.log('');
-console.log('Lo que esta orden no puede comprobar y queda para personas (docs/08-verificacion-y-cierre.md):');
-console.log('  · recorrido completo con teclado y con lector de pantalla real (NVDA, VoiceOver, TalkBack);');
-console.log('  · un iPhone y un Android reales, con red limitada, en los formularios finales;');
-console.log('  · Firefox y Safari (aquí sólo Chromium);');
-console.log('  · el mapa base con el proveedor que se decida; el catálogo oficial de alcaldías y colonias;');
-console.log('  · las citas normativas del aviso de privacidad y la estructura de CURP y RFC con su emisor;');
-console.log('  · la casilla «Verificado en móvil y en escritorio» del cierre de bloque.');
-process.exit(fallas.length ? 1 : 0);
+console.log('— Formularios (sin construcción ni pruebas en navegador) —');
+corre('Formularios: auditor de CSS', 'formularios', ['herramientas/auditor-css.mjs']);
+corre('Formularios: contraste', 'formularios', ['herramientas/contraste.mjs']);
+corre('Formularios: auditoría de campos', 'formularios', ['herramientas/auditar-campos.mjs']);
+corre('Formularios: bibliotecas contra su manifiesto', 'formularios', ['herramientas/vendor.mjs', '--verificar']);
+corre('Formularios: documentos generados al día', 'formularios', ['herramientas/generar-reglas.mjs', '--comprobar']);
+
+console.log('— Portada común —');
+const faltan = ['guia-visual/index.html', 'guia-visual/portada.css', 'guia-visual/portada.js', 'guia-visual/pendientes.css', 'guia-visual/pendientes.js'].filter((f) => !existsSync(resolve(RAIZ, f)));
+resultados.push({ nombre: 'Portada: archivos', ok: !faltan.length });
+console.log(`${faltan.length ? '✗' : '✓'} Portada: archivos${faltan.length ? ` · faltan ${faltan.join(', ')}` : ''}`);
+corre('Portada: sintaxis del guion', '.', ['--check', 'guia-visual/portada.js']);
+corre('Pendientes: sintaxis de la lista', '.', ['--check', 'guia-visual/pendientes.js']);
+
+const fallan = resultados.filter((r) => !r.ok);
+console.log(`\n${fallan.length ? 'FALLA' : 'CORRECTO'} · ${resultados.length} comprobaciones, ${fallan.length} con falla`);
+console.log('Pendiente fuera de esta orden: en formularios/, «npm install» y «npm run verificar» (construcción y pruebas en navegador).');
+process.exit(fallan.length ? 1 : 0);

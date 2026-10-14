@@ -1,0 +1,16 @@
+/* =========================================================
+   armazon.css · Armazón de los geovisores del SIA
+
+   Fase 1: solo la regla de foco de dos tonos (D3, GEO-58), porque es parte
+   del estilo. El resto del armazón (panel, dos pantallas, controles, ficha)
+   se extrae en la fase 2 de proyectos que ya funcionan.
+   ========================================================= */
+
+/* @bloque estados */
+
+/* Foco de dos tonos. Formularios pone el anillo azul separado 2 px
+   (nucleo.css, «Foco»); aquí se llena esa separación con blanco. Sobre
+   lo claro se ve el azul; sobre lo oscuro (la satelital, las clases oscuras
+   de una rampa), el blanco. Sin !important (FRM-68): esta hoja se carga
+   después de la de formularios y la regla tiene la misma especificidad. */
+:focus-visible,[data-demo-foco]{box-shadow:0 0 0 var(--foco-sep) var(--blanco)}

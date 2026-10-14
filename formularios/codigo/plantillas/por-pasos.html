@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Solicitud de ejemplo · Plantilla por pasos</title>
+<meta name="description" content="Plantilla de formulario por pasos del estándar de formularios del SIA (SEDEMA). Contenido ficticio.">
+<link rel="icon" href="data:,">
+<!-- Núcleo (obligatorio) -->
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/nucleo.css">
+<!-- Módulos que esta plantilla usa: quita los que tu formulario no necesite -->
+<link rel="stylesheet" href="../modulos/opciones/opciones.css">
+<link rel="stylesheet" href="../modulos/combo/combo.css">
+<link rel="stylesheet" href="../modulos/cascadas/cascadas.css">
+<link rel="stylesheet" href="../modulos/fecha/fecha.css">
+<link rel="stylesheet" href="../modulos/pasos/pasos.css">
+<link rel="stylesheet" href="../modulos/archivos/archivos.css">
+<link rel="stylesheet" href="../../vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="../../vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.css">
+<link rel="stylesheet" href="../modulos/mapa/mapa.css">
+<link rel="stylesheet" href="../modulos/revision/revision.css">
+<link rel="stylesheet" href="../modulos/acuse/acuse.css">
+<link rel="stylesheet" href="../modulos/modal/modal.css">
+<link rel="stylesheet" href="../modulos/copiar/copiar.css">
+</head>
+<body>
+<a class="salto" href="#contenido">Ir al contenido</a>
+<aside class="entorno-pruebas" aria-label="Aviso de entorno">Entorno de pruebas · datos ficticios · nada de lo que captures se envía</aside>
+
+<header class="cabecera">
+  <div class="cabecera-int">
+    <a href="https://www.sedema.cdmx.gob.mx/" class="cabecera-enlace"><img class="cabecera-logo" src="../imagenes/logotipo-sedema.png" width="3829" height="771" alt="Gobierno de la Ciudad de México · Secretaría del Medio Ambiente. Ir al sitio de la Secretaría"></a>
+    <div class="cabecera-titulo"><h1 class="titulo-pagina">Solicitud de ejemplo</h1></div>
+  </div>
+</header>
+
+<main class="pagina" id="contenido">
+
+  <!-- Borrador recuperado: sólo aparece si hay uno vigente en este dispositivo. -->
+  <div class="franja" data-franja-borrador hidden>
+    <p class="franja-texto">Hay un borrador guardado el <span data-borrador-fecha></span>. Guardar el avance no es presentar la solicitud.</p>
+    <button type="button" class="btn btn-primario" data-borrador="recuperar">Recuperar borrador</button>
+    <button type="button" class="btn btn-secundario" data-borrador="descartar">Empezar de nuevo</button>
+    <div class="aviso aviso-advertencia" data-borrador-confirma hidden>
+      <svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg>
+      <div class="aviso-texto"><p><strong>¿Descartar el borrador?</strong> Se borra lo que capturaste en este dispositivo y no se puede deshacer.</p>
+        <div class="acciones"><button type="button" class="btn-enlace" data-borrador="conservar">Conservar</button><button type="button" class="btn btn-peligro" data-borrador="descartar-si">Sí, descartar</button></div></div>
+    </div>
+  </div>
+
+  <div class="barra-fija">
+    <div data-barra="Avance del formulario"></div>
+    <p class="recordatorio" data-recordatorio="tipo" hidden><svg class="icono" aria-hidden="true"><use href="#i-info"></use></svg><span class="recordatorio-texto">Estás solicitando: <strong data-recordatorio-texto></strong></span></p>
+  </div>
+  <p class="guardado" data-guardado aria-live="polite"></p>
+
+  <form id="formulario" data-formkit data-borrador="sia-plantilla-pasos" data-borrador-version="1" action="#" method="post">
+
+    <!-- Paso 1 · Qué solicitas -->
+    <section class="tarjeta" data-paso data-titulo="Solicitud" hidden>
+      <h2 class="titulo-paso">¿Qué quieres solicitar?</h2>
+      <p class="bajada">Con estos datos la Secretaría decide quién atiende la solicitud.</p>
+      <p class="leyenda-oblig">Los campos con <span aria-hidden="true">*</span> son obligatorios.</p>
+
+      <fieldset class="grupo" data-campo="tipo" data-requerido data-uso="Turnar la solicitud al área que corresponde.">
+        <legend class="etiqueta">Tipo de solicitud</legend>
+        <div class="opciones">
+          <label class="opcion"><input class="opcion-input" type="radio" name="tipo" value="informacion"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Información</span><span class="opcion-desc">Quiero conocer un dato o un trámite.</span></label>
+          <label class="opcion"><input class="opcion-input" type="radio" name="tipo" value="visita"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Visita técnica</span><span class="opcion-desc">Pido que personal revise un sitio.</span></label>
+          <label class="opcion"><input class="opcion-input" type="radio" name="tipo" value="otro"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Otro</span><span class="opcion-desc">Algo distinto.</span></label>
+        </div>
+      </fieldset>
+
+      <div class="campo" data-campo="tipo_otro" data-si="tipo=otro" data-otro-de="tipo" data-requerido data-uso="Clasificar una solicitud que no encaja en las opciones.">
+        <label class="etiqueta" for="tipo_otro">Especifica cuál</label>
+        <input class="control" id="tipo_otro" name="tipo_otro" type="text" maxlength="80" autocomplete="off">
+      </div>
+
+      <fieldset class="grupo" data-campo="urgente" data-requerido data-uso="Priorizar la atención.">
+        <legend class="etiqueta">¿Hay riesgo inmediato para personas o bienes?</legend>
+        <div class="opciones-cortas">
+          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="urgente" value="si"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Sí</span></label>
+          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="urgente" value="no"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>No</span></label>
+        </div>
+      </fieldset>
+
+      <div class="campo" data-campo="fecha_hechos" data-formato="fecha" data-no-futura data-requerido data-uso="Ubicar la solicitud en el tiempo.">
+        <label class="etiqueta" for="fecha_hechos">¿Cuándo ocurrió o cuándo lo necesitas?</label>
+        <p class="ayuda">Formato AAAA-MM-DD. Si fue hoy, usa el botón.</p>
+        <div class="fecha-grupo">
+          <input class="control" id="fecha_hechos" name="fecha_hechos" type="date" autocomplete="off">
+          <button type="button" class="btn btn-secundario fecha-hoy" data-hoy></button>
+        </div>
+      </div>
+
+      <div class="campo" data-campo="descripcion" data-requerido data-uso="Valorar el caso y decidir la atención.">
+        <label class="etiqueta" for="descripcion">Cuéntanos con tus palabras</label>
+        <p class="ayuda">Qué ocurre y desde cuándo. No incluyas datos de otras personas.</p>
+        <textarea class="control control-texto" id="descripcion" name="descripcion" rows="4" minlength="40" maxlength="600" data-legible autocomplete="off"></textarea>
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="btn btn-primario" data-accion="siguiente">Continuar</button>
+      </div>
+    </section>
+
+    <!-- Paso 2 · Dónde -->
+    <section class="tarjeta" data-paso data-titulo="Lugar" hidden>
+      <h2 class="titulo-paso">¿Dónde?</h2>
+      <p class="bajada">Escribe la dirección del sitio. El enlace de Google Maps y el mapa son opcionales: sirven para afinar el punto. Si no los tienes, la dirección basta.</p>
+      <p class="leyenda-oblig">Los campos con <span aria-hidden="true">*</span> son obligatorios.</p>
+
+      <!-- Domicilio: el bloque listo de la guía visual («Bloques listos»), sin el prefijo b_, para un sitio
+           dentro de la Ciudad. Va sin la casilla «Vivo fuera de la Ciudad de México», porque la Secretaría
+           atiende sitios de la Ciudad. autocomplete off en todos sus campos: es la dirección del sitio, no
+           el domicilio de quien llena (FRM-12). -->
+      <div class="campo" data-campo="calle" data-requerido data-uso="Localizar el sitio.">
+        <label class="etiqueta" for="calle">Calle</label>
+        <input class="control" id="calle" name="calle" type="text" maxlength="120" autocomplete="off">
+      </div>
+      <div class="fila">
+        <div class="campo" data-campo="num_ext" data-requerido data-uso="Localizar el sitio.">
+          <label class="etiqueta" for="num_ext">Número exterior</label>
+          <p class="ayuda">Si no tiene, escribe S/N.</p>
+          <input class="control" id="num_ext" name="num_ext" type="text" maxlength="20" autocomplete="off">
+        </div>
+        <div class="campo" data-campo="num_int" data-uso="Localizar el sitio.">
+          <label class="etiqueta" for="num_int">Número interior</label>
+          <input class="control" id="num_int" name="num_int" type="text" maxlength="20" autocomplete="off">
+        </div>
+      </div>
+      <fieldset class="grupo" data-campo="mzlt" data-uso="Mostrar manzana y lote sólo cuando el sitio se identifica así.">
+        <legend class="etiqueta">¿El sitio se identifica por manzana y lote?</legend>
+        <p class="ayuda">Es común donde las casas no tienen número. Por ejemplo: Mz. 3, Lt. 12.</p>
+        <div class="opciones-cortas">
+          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="mzlt" value="si"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Sí</span></label>
+          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="mzlt" value="no"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>No</span></label>
+        </div>
+      </fieldset>
+      <div class="fila" data-si="mzlt=si">
+        <div class="campo" data-campo="manzana" data-uso="Localizar el sitio.">
+          <label class="etiqueta" for="manzana">Manzana</label>
+          <input class="control control-corto" id="manzana" name="manzana" type="text" maxlength="10" autocomplete="off">
+        </div>
+        <div class="campo" data-campo="lote" data-uso="Localizar el sitio.">
+          <label class="etiqueta" for="lote">Lote</label>
+          <input class="control control-corto" id="lote" name="lote" type="text" maxlength="10" autocomplete="off">
+        </div>
+      </div>
+      <div class="campo" data-campo="entre_calles" data-uso="Facilitar que el personal encuentre el sitio.">
+        <label class="etiqueta" for="entre_calles">¿Entre qué calles?</label>
+        <p class="ayuda">Por ejemplo: entre Calle Pino y Calle Cedro.</p>
+        <input class="control" id="entre_calles" name="entre_calles" type="text" maxlength="120" autocomplete="off">
+      </div>
+
+      <div data-cascada data-catalogo="cdmx">
+        <div class="fila">
+          <div class="campo" data-campo="alcaldia" data-requerido data-uso="Turnar a la autoridad competente en el territorio.">
+            <label class="etiqueta" for="alcaldia">Alcaldía</label>
+            <p class="ayuda">La del sitio, no la de tu domicilio.</p>
+            <div class="select"><select class="control control-select" id="alcaldia" name="alcaldia" data-nivel="alcaldia" autocomplete="off"><option value="">Elige una opción</option></select></div>
+          </div>
+          <div class="campo" data-campo="colonia" data-requerido data-si="colonia_libre=" data-uso="Localizar el sitio.">
+            <label class="etiqueta" for="colonia">Colonia</label>
+            <p class="ayuda">Se habilita al elegir la alcaldía.</p>
+            <div class="select"><select class="control control-select" id="colonia" name="colonia" data-nivel="colonia" autocomplete="off" disabled><option value="">Elige una opción</option></select></div>
+          </div>
+        </div>
+        <div class="campo" data-campo="colonia_libre" data-uso="Escribir la colonia cuando no está en la lista.">
+          <label class="casilla"><input class="casilla-input" type="checkbox" id="colonia_libre" name="colonia_libre" value="si"><span class="casilla-texto">La colonia no aparece en la lista</span></label>
+        </div>
+        <div class="campo" data-campo="colonia_escrita" data-requerido data-si="colonia_libre=si" data-uso="Localizar el sitio.">
+          <label class="etiqueta" for="colonia_escrita">Colonia</label>
+          <p class="ayuda">Escríbela como la conoces.</p>
+          <input class="control" id="colonia_escrita" name="colonia_escrita" type="text" maxlength="80" autocomplete="off">
+        </div>
+        <div class="campo" data-campo="cp" data-formato="cp" data-requerido data-uso="Verificar que el sitio está en la Ciudad de México.">
+          <label class="etiqueta" for="cp">Código postal</label>
+          <p class="ayuda">Cinco dígitos. Si lo escribes primero, propone alcaldía y colonia.</p>
+          <input class="control control-corto" id="cp" name="cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="off">
+        </div>
+        <div class="cascada-manual" data-cascada-manual hidden>
+          <p class="texto-gris">La lista de colonias no está disponible. Escribe la alcaldía y la colonia.</p>
+          <div class="fila">
+            <div class="campo" data-campo="alcaldia_manual" data-uso="Localizar el sitio sin catálogo."><label class="etiqueta" for="alcaldia_manual">Alcaldía</label><input class="control" id="alcaldia_manual" name="alcaldia_manual" type="text" maxlength="60" autocomplete="off"></div>
+            <div class="campo" data-campo="colonia_manual" data-uso="Localizar el sitio sin catálogo."><label class="etiqueta" for="colonia_manual">Colonia</label><input class="control" id="colonia_manual" name="colonia_manual" type="text" maxlength="80" autocomplete="off"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="campo" data-enlace-mapa="coordenadas">
+        <label class="etiqueta" for="enlace">Enlace de Google Maps</label>
+        <p class="ayuda" id="enlace_ayuda">Si tienes el sitio en Google Maps, pega aquí su enlace y tomamos de ahí las coordenadas.</p>
+        <input class="control" id="enlace" type="text" inputmode="url" autocomplete="off" spellcheck="false" aria-describedby="enlace_ayuda">
+        <div data-enlace-mapa-estado></div>
+      </div>
+      <div class="campo" data-campo="coordenadas" data-formato="coordenadas" data-uso="Ubicar el sitio con precisión.">
+        <label class="etiqueta" for="coordenadas">Coordenadas (latitud, longitud)</label>
+        <p class="ayuda">Se llenan solas con el enlace; también puedes escribirlas. Por ejemplo: 19.4326, -99.1332.</p>
+        <input class="control" id="coordenadas" name="coordenadas" type="text" inputmode="decimal" autocomplete="off">
+      </div>
+
+      <div class="campo" data-campo="punto" data-uso="Afinar la ubicación cuando la dirección no basta.">
+        <span class="etiqueta" id="et-punto">Punto en el mapa (opcional)</span>
+        <p class="ayuda">Toca el sitio o arrastra el marcador. Con el mapa enfocado, Enter coloca el punto en el centro. Las coordenadas de arriba también lo mueven.</p>
+        <div class="mapa" data-mapa data-confirmar role="application" aria-labelledby="et-punto" tabindex="0"></div>
+        <p class="mapa-sin" data-mapa-sin hidden>El mapa no cargó. Puedes seguir: escribe la dirección o las coordenadas.</p>
+        <div class="mapa-barra">
+          <output class="coords" data-mapa-coords aria-live="polite">Sin punto marcado.</output>
+          <button type="button" class="btn btn-secundario" data-mapa-confirmar hidden>Confirmar punto</button>
+          <button type="button" class="btn btn-secundario" data-mapa-geolocalizar hidden>Usar mi ubicación</button>
+        </div>
+        <input type="hidden" name="lat" data-mapa-lat><input type="hidden" name="lon" data-mapa-lon>
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="btn-atras" data-accion="atras"><svg class="icono" aria-hidden="true"><use href="#i-flecha-izq"></use></svg>Atrás</button>
+        <button type="button" class="btn btn-primario" data-accion="siguiente">Continuar</button>
+      </div>
+    </section>
+
+    <!-- Paso 3 · Evidencia y contacto -->
+    <section class="tarjeta" data-paso data-titulo="Evidencia y contacto" hidden>
+      <h2 class="titulo-paso">Evidencia y contacto</h2>
+      <p class="bajada">Las fotografías ayudan; el contacto es opcional.</p>
+      <p class="leyenda-oblig">Los campos con <span aria-hidden="true">*</span> son obligatorios.</p>
+
+      <div class="campo" data-campo="fotos" data-uso="Documentar la solicitud." data-conservar-exif="false">
+        <span class="etiqueta" id="et-fotos">Fotografías o documentos</span>
+        <p class="ayuda" id="ay-fotos">Ayudan a valorar el caso. Puedes continuar sin adjuntar.</p>
+        <div data-archivos>
+          <button type="button" class="zona-carga" aria-describedby="ay-fotos">
+            <svg class="icono" aria-hidden="true"><use href="#i-adjunto"></use></svg>
+            <span class="zona-carga-texto">Elegir archivos o arrastrarlos aquí</span>
+            <span class="zona-carga-limite" data-limite-texto></span>
+          </button>
+          <button type="button" class="btn btn-secundario zona-camara" data-camara hidden>Tomar fotografía</button>
+          <input type="file" hidden>
+          <input type="file" accept="image/*" capture="environment" hidden data-entrada-camara>
+          <div data-rechazos></div>
+          <ul class="lista-arch"></ul>
+        </div>
+      </div>
+
+      <fieldset class="grupo" data-campo="contacto" data-requerido data-uso="Decidir si se piden datos de contacto.">
+        <legend class="etiqueta">¿Quieres que te contactemos?</legend>
+        <div class="opciones-cortas">
+          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="contacto" value="si"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Sí</span></label>
+          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="contacto" value="no"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>No, anónimo</span></label>
+        </div>
+      </fieldset>
+
+      <div data-si="contacto=si">
+        <!-- Nombre y apellidos del bloque listo «Datos de identificación», sin CURP ni fecha: este formulario no los usa. -->
+        <div class="campo" data-campo="nombre" data-formato="nombre" data-requerido data-sensible data-finalidad="Dirigirse a la persona al dar seguimiento." data-uso="Identificar a quien solicita.">
+          <label class="etiqueta" for="nombre">Nombre(s)</label>
+          <input class="control" id="nombre" name="nombre" type="text" maxlength="80" autocomplete="given-name">
+        </div>
+        <div class="fila">
+          <div class="campo" data-campo="apellido_paterno" data-formato="nombre" data-requerido data-sensible data-finalidad="Dirigirse a la persona al dar seguimiento." data-uso="Identificar a quien solicita.">
+            <label class="etiqueta" for="apellido_paterno">Apellido paterno</label>
+            <input class="control" id="apellido_paterno" name="apellido_paterno" type="text" maxlength="80" autocomplete="family-name">
+          </div>
+          <!-- autocomplete off: el navegador guarda los apellidos juntos en family-name y no tiene un valor para el segundo. -->
+          <div class="campo" data-campo="apellido_materno" data-formato="nombre" data-sensible data-finalidad="Dirigirse a la persona al dar seguimiento." data-uso="Completar el nombre de quien solicita.">
+            <label class="etiqueta" for="apellido_materno">Apellido materno</label>
+            <p class="ayuda">Si no tienes, déjalo vacío.</p>
+            <input class="control" id="apellido_materno" name="apellido_materno" type="text" maxlength="80" autocomplete="off">
+          </div>
+        </div>
+        <div class="fila">
+          <div class="campo" data-campo="correo" data-formato="correo" data-requerido data-sensible data-finalidad="Informar el avance de la solicitud." data-uso="Enviar el seguimiento.">
+            <label class="etiqueta" for="correo">Correo electrónico</label>
+            <input class="control" id="correo" name="correo" type="email" maxlength="120" autocomplete="email">
+          </div>
+          <div class="campo" data-campo="telefono" data-formato="telefono" data-sensible data-finalidad="Aclarar la solicitud por llamada, si la persona lo pidió." data-uso="Aclarar dudas.">
+            <label class="etiqueta" for="telefono">Teléfono</label>
+            <p class="ayuda">Diez dígitos. Sólo si prefieres una llamada.</p>
+            <input class="control" id="telefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel-national">
+          </div>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="btn-atras" data-accion="atras"><svg class="icono" aria-hidden="true"><use href="#i-flecha-izq"></use></svg>Atrás</button>
+        <button type="button" class="btn btn-primario" data-accion="siguiente">Continuar</button>
+      </div>
+    </section>
+
+    <!-- Paso 4 · Revisión y envío -->
+    <section class="tarjeta" data-paso data-revision data-titulo="Revisión" hidden>
+      <h2 class="titulo-paso">Revisa antes de enviar</h2>
+      <p class="bajada">Abre cada bloque para ver lo que capturaste. «Editar» te lleva al campo.</p>
+      <div data-revision-lista></div>
+
+      <div class="priv">
+        <p class="priv-parrafo">La Secretaría usa estos datos sólo para atender tu solicitud. Puedes leer el aviso completo antes de enviar.</p>
+        <button type="button" class="btn-enlace" data-abre-dialogo="dialogo-privacidad">Leer el aviso de privacidad</button>
+      </div>
+
+      <div class="destacado" data-campo="aviso" data-requerido data-uso="Dejar constancia de que se informó a la persona.">
+        <label class="casilla"><input class="casilla-input" type="checkbox" name="aviso" value="si"><span class="casilla-texto"><span class="etiqueta destacado-nombre">Leí el aviso de privacidad</span></span></label>
+      </div>
+      <div class="destacado" data-campo="humano" data-requerido data-uso="Distinguir personas de envíos automáticos.">
+        <label class="casilla"><input class="casilla-input" type="checkbox" name="humano" value="si"><span class="casilla-texto"><span class="etiqueta destacado-nombre">No soy un programa automático</span><span class="destacado-ayuda">Lo comprueba el sistema; no es una pregunta sobre tu solicitud.</span></span></label>
+      </div>
+      <!-- Trampa para programas automáticos: una persona no la ve ni la llena. -->
+      <div class="solo-lector" aria-hidden="true" data-trampa><label>No llenar <input type="text" name="sitio_web" tabindex="-1" autocomplete="off"></label></div>
+
+      <p class="aviso aviso-bloqueo estado-envio" data-estado-envio role="alert" tabindex="-1" hidden><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"></span></p>
+
+      <div class="acciones">
+        <button type="button" class="btn-atras" data-accion="atras"><svg class="icono" aria-hidden="true"><use href="#i-flecha-izq"></use></svg>Atrás</button>
+        <button type="submit" class="btn btn-primario" data-accion="enviar">Enviar solicitud</button>
+      </div>
+    </section>
+  </form>
+
+  <!-- Límite de envíos: dice que la captura no se perdió. -->
+  <section class="tarjeta" data-limite hidden>
+    <h2 class="titulo-paso" tabindex="-1">Por ahora no podemos recibir más envíos desde este dispositivo</h2>
+    <p class="bajada">Lo que capturaste no se perdió y sigue en el formulario. Intenta de nuevo más tarde.</p>
+    <div class="acciones"><button type="button" class="btn btn-primario" data-accion="reintentar">Volver a la revisión</button></div>
+  </section>
+
+  <!-- Acuse -->
+  <section class="tarjeta acuse" data-acuse hidden>
+    <div class="acuse-marca" aria-hidden="true"><svg class="icono"><use href="#i-palomita"></use></svg></div>
+    <h2 class="titulo-paso" tabindex="-1">Recibimos tu solicitud</h2>
+    <p class="bajada texto-centrado">Guarda tu folio: es la referencia para cualquier consulta.</p>
+    <div class="acuse-datos">
+      <div class="acuse-dato">
+        <span class="acuse-etq">Folio</span>
+        <div class="acuse-fila"><span class="acuse-valor" id="folio" data-acuse-folio></span><button type="button" class="btn-enlace" data-copiar="#folio"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-copiar"></use></svg>Copiar folio</button></div>
+      </div>
+      <div class="acuse-dato"><span class="acuse-etq">Recibido el</span><span data-acuse-fecha></span></div>
+    </div>
+    <div class="acuse-acciones">
+      <a class="btn btn-secundario descarga" data-acuse-descarga data-descarga data-formato="PDF" hidden download>Descargar acuse</a>
+      <button type="button" class="btn btn-secundario" data-compartir data-compartir-texto="Folio de mi solicitud"><svg class="icono" aria-hidden="true"><use href="#i-compartir"></use></svg>Compartir</button>
+    </div>
+    <ol class="secuencia">
+      <li class="secuencia-item">La Secretaría registra la solicitud y la turna al área competente.</li>
+      <li class="secuencia-item">El área valora el caso y define la atención. <span class="pendiente">Pendiente: plazo por definir</span></li>
+      <li class="secuencia-item">Si dejaste un medio de contacto, se te informa el resultado.</li>
+    </ol>
+  </section>
+</main>
+
+<footer class="pie"><div class="pie-int"><p>Secretaría del Medio Ambiente de la Ciudad de México · Sistema de Información Ambiental.</p></div></footer>
+
+<dialog class="dialogo" id="dialogo-privacidad" aria-labelledby="titulo-privacidad">
+  <h2 class="titulo-bloque dialogo-titulo" id="titulo-privacidad">Aviso de privacidad simplificado</h2>
+  <p class="priv-parrafo">La Secretaría del Medio Ambiente recaba los datos de este formulario para atender la solicitud y, si la persona lo pidió, informarle el resultado.</p>
+  <p class="priv-parrafo">No se transfieren a terceros salvo a la autoridad competente para atender la solicitud. El borrador y las sugerencias se guardan sólo en este dispositivo.</p>
+  <p class="priv-parrafo">Fundamento: <span class="pendiente">[Art. __, fracc. __]</span> de la ley aplicable. Pendiente de verificación por la Unidad de Transparencia.</p>
+  <div class="dialogo-cierre"><button type="button" class="btn btn-primario" data-cierra-dialogo>Cerrar</button></div>
+</dialog>
+
+<!-- Orden de carga: ajustes del formulario → configuración → iconos → núcleo → módulos → catálogos y bibliotecas.
+     El núcleo arranca solo al cargar la página (form[data-formkit]). -->
+<script src="configuracion-por-pasos.js"></script>
+<script src="../js/validaciones.config.js"></script>
+<script src="../js/iconos.js"></script>
+<script src="../js/formkit.core.js"></script>
+<script src="../modulos/otro/otro.js"></script>
+<script src="../modulos/combo/combo.js"></script>
+<script src="../modulos/cascadas/cascadas.js"></script>
+<script src="../modulos/fecha/fecha.js"></script>
+<script src="../modulos/pasos/pasos.js"></script>
+<script src="../modulos/archivos/archivos.js"></script>
+<script src="../../vendor/leaflet/leaflet.js"></script>
+<script src="../../vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.js"></script>
+<script src="../modulos/mapa/mapa.js"></script>
+<script src="../modulos/enlace-mapa/enlace-mapa.js"></script>
+<script src="../modulos/revision/revision.js"></script>
+<script src="../modulos/acuse/acuse.js"></script>
+<script src="../modulos/modal/modal.js"></script>
+<script src="../modulos/copiar/copiar.js"></script>
+<script src="../modulos/descarga/descarga.js"></script>
+<script src="../catalogos/cdmx-ejemplo.js"></script>
+</body>
+</html>

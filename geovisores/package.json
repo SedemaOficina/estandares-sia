@@ -1,0 +1,16 @@
+{
+  "name": "estandar-geovisores-sia",
+  "version": "0.1.2",
+  "private": true,
+  "description": "Estándar de geovisores del Sistema de Información Ambiental (SEDEMA CDMX). Vive en estandares-sia junto a ../formularios, del que toma colores, letra, medidas, puntos de quiebre y foco. Fase 1: reglas, estilo, tokens del mapa y guía visual. Sin dependencias.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "auditar": "node herramientas/auditor-css.mjs",
+    "contraste": "node herramientas/contraste.mjs",
+    "rampas": "node herramientas/rampas.mjs",
+    "generar": "node herramientas/generar-reglas.mjs",
+    "guia": "node herramientas/servir.mjs",
+    "verificar": "node herramientas/verificar.mjs"
+  }
+}

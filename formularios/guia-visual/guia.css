@@ -1,0 +1,184 @@
+/* =========================================================
+   guia.css · Estilos propios de la guía visual (NO viajan con el paquete)
+
+   La guía usa tokens.css, base.css, nucleo.css y los módulos tal cual;
+   esta hoja sólo añade la disposición de la propia guía (navegación,
+   fichas, probador, marcos de los ejemplos) sin redefinir nada del
+   estándar. Mobile-first; valores sólo desde tokens; sin !important.
+   Bloques: variables → estructura → componentes → estados → utilidades → adaptaciones.
+   ========================================================= */
+
+/* @bloque variables */
+
+:root{
+  /* Anchos de los marcos de ejemplo: los viewports que el estándar exige probar. */
+  --guia-ancho-320:320px; --guia-ancho-390:390px; --guia-ancho-768:768px; --guia-ancho-1280:1280px;
+  --guia-marco-alto:640px; --guia-marco-alto-movil:560px;
+  --guia-nav-ancho:240px; --guia-muestra:56px; --guia-pre-max:360px; --guia-caja-max:120px;
+  --guia-toast-ancho:360px; --guia-col-min:280px; --guia-tabla-max:480px;
+  /* Color de muestra y su fondo; cada muestra los redefine desde guia.js con los tokens reales. */
+  --guia-c:var(--guinda); --guia-f:var(--blanco);
+}
+
+/* @bloque estructura */
+
+.guia-cuerpo{width:100%;max-width:var(--ancho-pagina);margin:0 auto;padding:0 var(--e-pagina) var(--e-8)}
+.guia-nav{padding:var(--e-4) 0}
+.guia-nav-lista{display:none}
+/* Menú en tres niveles: sección (negritas), grupo (rótulo gris) y ficha (letra normal, con línea a la izquierda). */
+.guia-nav-sub{margin:var(--e-1) 0 var(--e-2);padding-left:var(--e-3);border-left:var(--b-1) solid var(--linea);font-size:var(--t-sm)}
+.guia-nav-sub .guia-nav-sub{margin:var(--e-1) 0 0;padding-left:0;border-left:0}
+.guia-nav-sub li{margin:var(--e-1) 0}
+.guia-main{min-width:0}
+.guia-seccion{padding:var(--e-seccion) 0;border-top:var(--b-1) solid var(--linea);scroll-margin-top:var(--e-4)}
+.guia-seccion:first-child{border-top:0}
+.guia-dos{display:grid;gap:var(--e-6)}
+.guia-ficha-cols{display:grid;gap:var(--e-4)}
+
+/* @bloque componentes */
+
+.guia-bajada{max-width:none}
+/* Árbol de decisión y resultado */
+.guia-arbol{min-width:0;display:grid;gap:var(--e-2);padding:var(--e-seccion);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.guia-resultado{min-width:0;padding:var(--e-seccion);background:var(--guinda-cl);border-radius:var(--r-caja)}
+.guia-piezas{margin:0 0 var(--e-4);padding-left:var(--e-5)}
+.guia-piezas li{margin:var(--e-1) 0}
+.guia-codigo{position:relative}
+.guia-pre{max-height:var(--guia-pre-max);margin:0;padding:var(--e-3);overflow:auto;background:var(--texto);border-radius:var(--r-ctrl);font-family:var(--fuente-mono);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--blanco);white-space:pre;tab-size:2}
+.guia-copiar{margin-top:var(--e-2)}
+.guia-pasos-uso{padding-left:var(--e-5)}
+.guia-pasos-uso li{margin:var(--e-2) 0}
+/* Nivel de exigencia */
+.guia-nivel-badge{display:inline-block;padding:0 var(--e-2);border-radius:var(--r-pill);font-family:var(--fuente-titulo);font-size:var(--t-xs);font-weight:var(--peso-fuerte);letter-spacing:var(--tracking-rotulo);line-height:var(--interlineado-cuerpo);color:var(--blanco);vertical-align:middle}
+/* Paleta y medidas */
+.guia-paleta{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--guia-col-min),1fr));gap:var(--e-3)}
+.guia-muestra{display:flex;gap:var(--e-3);align-items:flex-start;padding:var(--e-3);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl)}
+.guia-muestra-color{flex:0 0 var(--guia-muestra);height:var(--guia-muestra);background:var(--guia-c);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl)}
+.guia-muestra-nombre{display:block;font-family:var(--fuente-mono);font-size:var(--t-sm)}
+.guia-muestra-valor{display:block;font-family:var(--fuente-mono);font-size:var(--t-xs);color:var(--gris)}
+.guia-muestra-uso{display:block;margin-top:var(--e-1);font-size:var(--t-sm);color:var(--gris)}
+.guia-tabla-marco{max-height:var(--guia-tabla-max);overflow:auto}
+.guia-tabla code{white-space:nowrap}
+.guia-tabla{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+.guia-tabla th{padding:var(--e-2);background:var(--guinda);font-family:var(--fuente-titulo);text-align:left;color:var(--blanco)}
+.guia-tabla td{padding:var(--e-2);border-bottom:var(--b-1) solid var(--linea);vertical-align:top}
+.guia-tabla tr:nth-child(even){background:var(--guinda-cl)}
+.guia-contraste-muestra{display:inline-block;min-width:var(--e-11);padding:var(--e-1) var(--e-2);background:var(--guia-f);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl);color:var(--guia-c);white-space:nowrap}
+.guia-escala{display:grid;gap:var(--e-3)}
+.guia-escala-fila{display:grid;gap:var(--e-1);padding-bottom:var(--e-3);border-bottom:var(--b-1) solid var(--linea)}
+.guia-escala-meta{font-family:var(--fuente-mono);font-size:var(--t-xs);color:var(--gris)}
+.guia-jerarquia{display:grid;gap:var(--e-1)}
+.guia-nivel{margin:var(--e-4) 0 0;font-family:var(--fuente-mono);font-size:var(--t-xs);text-transform:uppercase;letter-spacing:var(--tracking-rotulo);color:var(--gris)}
+.guia-medidas{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--guia-col-min),1fr));gap:var(--e-3)}
+.guia-medida{padding:var(--e-3);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl)}
+.guia-medida-nombre{display:block;font-family:var(--fuente-mono);font-size:var(--t-sm)}
+.guia-medida-valor{display:block;font-family:var(--fuente-mono);font-size:var(--t-xs);color:var(--gris)}
+.guia-medida-uso{display:block;margin-top:var(--e-1);font-size:var(--t-sm);color:var(--gris)}
+.guia-caja-medida:not([hidden]){display:block;max-width:var(--guia-caja-max);height:var(--e-6);margin-top:var(--e-2);background:var(--guinda-cl);border:var(--b-1) solid var(--guinda)}
+.guia-iconos{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--e-11),1fr));gap:var(--e-2)}
+.guia-icono-item{display:grid;justify-items:center;gap:var(--e-1);padding:var(--e-3) var(--e-1);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl);font-family:var(--fuente-mono);font-size:var(--t-xs);text-align:center;color:var(--gris);overflow-wrap:anywhere}
+/* Fichas de núcleo y módulos */
+.guia-ficha{margin:var(--e-6) 0;padding:var(--e-seccion);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja);scroll-margin-top:var(--e-4)}
+.guia-ficha-cab{display:flex;flex-wrap:wrap;gap:var(--e-2) var(--e-3);align-items:center;margin-bottom:var(--e-2)}
+.guia-ficha-titulo{margin:0;font-family:var(--fuente-titulo);font-size:var(--t-xl);font-weight:var(--peso-semi);line-height:var(--interlineado-titulo);color:var(--guinda)}
+.guia-ficha-proposito{margin:0 0 var(--e-4);color:var(--texto)}
+.guia-ficha-meta{display:grid;grid-template-columns:auto 1fr;gap:var(--e-1) var(--e-3);margin:0 0 var(--e-4);font-size:var(--t-sm)}
+.guia-ficha-meta dt{font-weight:var(--peso-semi);color:var(--gris)}
+.guia-ficha-meta dd{margin:0}
+.guia-ficha-meta code{font-size:var(--t-xs)}
+.guia-tag{display:inline-block;margin:0 var(--e-1) var(--e-1) 0;padding:0 var(--e-2);background:var(--fondo);border-radius:var(--r-pill);font-family:var(--fuente-mono);font-size:var(--t-xs)}
+.guia-demo{padding:var(--e-4);background:var(--fondo);border:var(--b-1) dashed var(--borde);border-radius:var(--r-ctrl)}
+.guia-demo-rotulo{margin:0 0 var(--e-3);font-size:var(--t-xs);text-transform:uppercase;letter-spacing:var(--tracking-rotulo);color:var(--gris)}
+.guia-demo-form{margin:0;padding:var(--e-4);background:var(--blanco);border-radius:var(--r-ctrl)}
+/* Grupos de módulos: mismo rótulo que el menú, con aire antes de cada grupo. */
+.guia-grupo{margin-top:var(--e-8)}
+.guia-nav-grupo{display:block;margin-top:var(--e-3);font-size:var(--t-xs);letter-spacing:var(--tracking-rotulo);text-transform:uppercase;color:var(--gris)}
+.guia-detalles{margin-top:var(--e-3)}
+.guia-detalles summary{min-height:var(--objetivo-min);padding:var(--e-2) 0;font-weight:var(--peso-semi);color:var(--azul);cursor:pointer}
+.guia-errores{margin:0;padding-left:var(--e-5);font-size:var(--t-sm)}
+.guia-errores li{margin:var(--e-1) 0}
+.guia-col{min-width:0;padding:var(--e-3);background:var(--fondo);border-radius:var(--r-ctrl);font-size:var(--t-sm)}
+.guia-col-titulo{margin:0 0 var(--e-1);font-weight:var(--peso-semi);color:var(--gris)}
+.guia-fila-demo{display:flex;flex-wrap:wrap;gap:var(--e-2);align-items:center;margin:var(--e-3) 0}
+.guia-acciones-demo{margin-bottom:var(--e-4)}
+.guia-lista-resultados{min-height:var(--e-8);margin:0 0 var(--e-3);padding-left:var(--e-5);font-size:var(--t-sm)}
+/* Probador de validaciones */
+.guia-probador{display:grid;gap:var(--e-4)}
+.guia-probador-item{min-width:0;padding:var(--e-4);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.guia-probador-desc{margin:0 0 var(--e-2);font-size:var(--t-sm);color:var(--gris)}
+.guia-probador-salida{display:grid;grid-template-columns:auto 1fr;gap:var(--e-1) var(--e-3);margin:var(--e-2) 0 0;font-size:var(--t-sm)}
+.guia-probador-salida dt{color:var(--gris)}
+.guia-probador-salida dd{margin:0;overflow-wrap:anywhere}
+.guia-casos{display:flex;flex-wrap:wrap;gap:var(--e-2);margin-top:var(--e-3)}
+.guia-caso{min-height:var(--alto-opcion);padding:0 var(--e-3);background:var(--blanco);border:var(--b-1) solid var(--borde);border-radius:var(--r-pill);font:inherit;font-size:var(--t-sm);color:var(--texto);cursor:pointer}
+.guia-caso-estado{display:inline-block;margin-right:var(--e-1);font-weight:var(--peso-semi)}
+/* Sí y no */
+.guia-par{margin:var(--e-5) 0;padding:var(--e-4);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+.guia-par-titulo{margin:0 0 var(--e-3);font-family:var(--fuente-titulo);font-size:var(--t-lg);font-weight:var(--peso-semi);color:var(--texto)}
+.guia-par-lados{display:grid;gap:var(--e-3)}
+.guia-par-lado{min-width:0;padding:var(--e-3);border-radius:var(--r-ctrl);border-left:var(--foco-ancho) solid var(--guia-c)}
+.guia-par-rotulo{display:block;margin-bottom:var(--e-2);font-family:var(--fuente-titulo);font-size:var(--t-sm);font-weight:var(--peso-fuerte);text-transform:uppercase;letter-spacing:var(--tracking-rotulo);color:var(--guia-c)}
+.guia-par-muestra{margin-bottom:var(--e-2);padding:var(--e-3);background:var(--fondo);border-radius:var(--r-ctrl)}
+.guia-par-porque{margin:0;font-size:var(--t-sm);color:var(--gris)}
+/* Marcos de los formularios de ejemplo */
+.guia-ejemplos-barra{display:flex;flex-wrap:wrap;gap:var(--e-2);align-items:center;margin-bottom:var(--e-3)}
+/* Excepción deliberada a .btn{width:100%}: los selectores de ancho caben en una fila también en el teléfono. */
+.guia-ancho{width:auto;min-width:var(--ancho-boton-min)}
+.guia-marcos{display:grid;gap:var(--e-3);padding:var(--e-3);overflow-x:auto;background:var(--fondo);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl)}
+.guia-marco{display:block;width:100%;max-width:100%;height:var(--guia-marco-alto-movil);background:var(--blanco);border:var(--b-1) solid var(--borde);border-radius:var(--r-ctrl)}
+.guia-lista-verif{padding-left:var(--e-5)}
+.guia-lista-verif li{margin:var(--e-2) 0}
+/* Aviso flotante de la guía (resultado de un envío simulado) */
+.guia-toast:not([hidden]){display:block;position:fixed;right:var(--e-4);bottom:calc(var(--e-4) + var(--safe-inf));z-index:var(--z-barra);max-width:var(--guia-toast-ancho);padding:var(--e-3) var(--e-4);background:var(--texto);border-radius:var(--r-ctrl);box-shadow:var(--sombra-lista);font-size:var(--t-sm);color:var(--blanco)}
+
+/* @bloque estados */
+
+.guia-nivel-badge[data-nivel="BASE"]{background:var(--guinda)}
+.guia-nivel-badge[data-nivel="RECOMENDADO"]{background:var(--azul)}
+.guia-nivel-badge[data-nivel="OPCIONAL"]{background:var(--gris)}
+.guia-nav-lista a[aria-current="true"]{font-weight:var(--peso-fuerte);color:var(--guinda)}
+.guia-nav-sub a[aria-current="true"]{font-weight:var(--peso-semi)}
+.guia-ancho[aria-pressed="true"]{background:var(--guinda);border-color:var(--guinda);color:var(--blanco)}
+.guia-caso[data-estado="valido"] .guia-caso-estado{color:var(--ok)}
+.guia-caso[data-estado="invalido"] .guia-caso-estado{color:var(--error)}
+.guia-caso[data-estado="limite"] .guia-caso-estado{color:var(--pend)}
+.guia-probador-salida[data-resultado="valido"] .guia-probador-veredicto{color:var(--ok)}
+.guia-probador-salida[data-resultado="invalido"] .guia-probador-veredicto{color:var(--error)}
+.guia-tabla td[data-resultado="cumple"]{color:var(--ok)}
+.guia-tabla td[data-resultado="falla"]{color:var(--error);font-weight:var(--peso-semi)}
+/* Marcos: el ancho elegido lo fija el contenedor, no cada iframe. */
+.guia-marcos[data-ancho="320"] .guia-marco{width:var(--guia-ancho-320)}
+.guia-marcos[data-ancho="390"] .guia-marco{width:var(--guia-ancho-390)}
+.guia-marcos[data-ancho="768"] .guia-marco{width:var(--guia-ancho-768)}
+.guia-marcos[data-ancho="1280"] .guia-marco{width:var(--guia-ancho-1280)}
+.guia-marcos[data-ancho="lado"]{grid-template-columns:var(--guia-ancho-390) var(--guia-ancho-1280)}
+.guia-marcos[data-ancho="lado"] .guia-marco{width:100%}
+
+/* @bloque utilidades */
+
+.guia-si{--guia-c:var(--ok)}
+.guia-no{--guia-c:var(--error)}
+
+/* @bloque adaptaciones */
+
+@media (min-width:760px){
+  .guia-dos{grid-template-columns:1fr 1fr}
+  .guia-ficha-cols{grid-template-columns:1fr 1fr}
+  .guia-par-lados{grid-template-columns:1fr 1fr}
+  .guia-probador{grid-template-columns:1fr 1fr}
+  .guia-marco{height:var(--guia-marco-alto)}
+}
+@media (min-width:1024px){
+  .guia-cuerpo{display:grid;grid-template-columns:var(--guia-nav-ancho) minmax(0,1fr);gap:var(--e-8);align-items:start}
+  .guia-nav{position:sticky;top:0;max-height:100vh;overflow-y:auto;padding:var(--e-seccion) 0}
+  .guia-nav-select{display:none}
+  .guia-nav-lista{display:block;margin:0;font-size:var(--t-md)}
+  .guia-nav-lista > li{margin:var(--e-3) 0}
+  .guia-nav-lista a{font-weight:var(--peso-fuerte);color:var(--texto);text-decoration:none}
+  .guia-nav-sub a{font-weight:var(--peso-normal)}
+  .guia-nav-lista a:hover{text-decoration:underline}
+}
+@media print{
+  .guia-nav,.guia-ejemplos-barra,.guia-toast{display:none}
+  .guia-marco{height:auto}
+}
