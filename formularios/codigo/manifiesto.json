@@ -73,7 +73,7 @@
       "tokens.css": 8394,
       "base.css": 5841,
       "nucleo.css": 16940,
-      "validaciones.config.js": 26325,
+      "validaciones.config.js": 31865,
       "formkit.core.js": 46299,
       "iconos.js": 5845
     }
@@ -600,6 +600,33 @@
       }
     },
     {
+      "nombre": "version",
+      "titulo": "Distintivo de versión",
+      "nivel": "OPCIONAL",
+      "tipo": "navegacion",
+      "proposito": "Distintivo pequeño y siempre visible, fijo abajo a la izquierda, que dice qué versión del sitio se tiene enfrente: de prueba (dorado), instalada en el SIA (gris) o sin leer (guinda). Es la hoja de la plantilla de versión del SIA hecha con los tokens del estándar.",
+      "cuando": "Sitios que se prueban antes de instalarse en el SIA, o que deben mostrar su versión en pantalla.",
+      "cuandoNo": "Para avisos a la persona (usa los avisos del núcleo): el distintivo no recibe toques ni se anuncia como estado.",
+      "dependencias": [],
+      "js": false,
+      "accesibilidad": "Va dentro del pie (<footer>), para quedar en una región de la página; no recibe toques (pointer-events: none), así que nunca tapa un control; texto de 4.5:1 o más en sus tres estados.",
+      "movil": "Abajo a la izquierda, respetando el área segura de la pantalla.",
+      "escritorio": "Igual; al imprimir va en su lugar, sin flotar.",
+      "errores": [
+        "Ponerlo fuera del pie: axe lo marca como contenido fuera de una región.",
+        "Escribir colores o medidas a mano en lugar de los tokens (el auditor de CSS lo rechaza).",
+        "Usarlo para avisar algo a la persona."
+      ],
+      "archivos": {
+        "css": "codigo/modulos/version/version.css",
+        "js": null
+      },
+      "tamano": {
+        "css": 2244,
+        "js": 0
+      }
+    },
+    {
       "nombre": "tooltip",
       "titulo": "Ayuda desplegable",
       "nivel": "OPCIONAL",
@@ -792,5 +819,5 @@
       }
     }
   ],
-  "generado": "2026-10-16T14:27:22.310Z"
+  "generado": "2026-10-16T15:11:01.640Z"
 }

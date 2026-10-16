@@ -114,6 +114,21 @@ test('los errores que devuelve el servidor se pintan junto a su campo y en el re
   await p.context().close();
 });
 
+test('la CURP se compara con el nombre y los apellidos, y se revisa de nuevo al cambiarlos (P43)', async () => {
+  const p = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
+  await p.fill('#nombre', 'Juan'); await p.fill('#apellido_paterno', 'Pérez');
+  await p.fill('#curp', 'PEGJ900515HDFRRN09'); await p.keyboard.press('Tab');
+  assert.match(await error(p, 'curp'), /segundo apellido/, 'sin segundo apellido escrito, esta CURP (G en la posición 3) no corresponde');
+  await p.fill('#apellido_materno', 'García'); await p.keyboard.press('Tab');
+  assert.equal(await error(p, 'curp'), '', 'al escribir el segundo apellido, el error se va');
+  await p.fill('#nombre', 'Pedro'); await p.keyboard.press('Tab');
+  assert.match(await error(p, 'curp'), /no corresponde/, 'al cambiar el nombre, la CURP se vuelve a revisar');
+  await p.fill('#nombre', 'Juan'); await p.keyboard.press('Tab');
+  assert.equal(await error(p, 'curp'), '', 'y al corregirlo, se libera');
+  assert.deepEqual(p.registro, [], 'consola limpia');
+  await p.context().close();
+});
+
 /* ----- Segunda tanda: estilo de «Crea tu cuenta» ----- */
 
 test('ayuda de bloque: se dice una vez y cada campo de su sección la lee (S2-1), con los datos hermanos en una fila (S2-3)', async () => {

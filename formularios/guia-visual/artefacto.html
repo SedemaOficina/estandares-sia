@@ -1903,6 +1903,65 @@ a{color:var(--azul)}
 .chip[aria-pressed="true"]{background:var(--azul-cl);border-color:var(--azul);color:var(--azul);font-weight:var(--peso-semi)}
 
 </style>
+<style data-origen="codigo\modulos\version\version.css">
+/* =========================================================
+   version.css · Módulo «version» · nivel OPCIONAL
+
+   Distintivo de versión siempre visible: pequeño, fijo abajo a la
+   izquierda y sin recibir toques, para que quien prueba o atiende sepa qué
+   versión del sitio tiene enfrente. Es la hoja de la plantilla de versión
+   del SIA con los tokens del estándar, sin valores literales.
+
+   El distintivo va DENTRO del pie (<footer>): así queda en una región de la
+   página y axe no lo marca. El texto y la clase de estado los pone el sitio
+   (por ejemplo, con la plantilla de versión del SIA); el texto es de muestra:
+
+     <footer class="pie">
+       <div class="pie-int">…</div>
+       <p class="version-sia version-sia--prueba">Versión 1.4.0 · prueba</p>
+     </footer>
+
+   Estados: --prueba (sitio de prueba, en dorado: no se confunde con el
+   instalado), --sia (instalado en el SIA, gris sobrio) y --error (no se pudo
+   leer la versión: se nota). Al imprimir, va en su lugar, sin flotar.
+
+   Depende de: nucleo.css. JS: ninguno.
+   Bloques: componentes → estados → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.version-sia{
+  position:fixed;
+  left:max(var(--e-2),env(safe-area-inset-left));
+  bottom:max(var(--e-2),env(safe-area-inset-bottom));
+  z-index:var(--z-dialogo);
+  margin:0;
+  padding:var(--e-1) var(--e-3);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-pill);
+  box-shadow:var(--sombra-lista);
+  font:var(--peso-semi) var(--t-xs)/var(--interlineado-compacto) var(--fuente-cuerpo);
+  white-space:nowrap;
+  pointer-events:none;
+}
+
+/* @bloque estados */
+
+/* De prueba: dorado, imposible de confundir con el sitio instalado. */
+.version-sia--prueba{background:var(--beige);border-color:var(--dorado);color:var(--dorado-txt)}
+/* Instalado en el SIA: gris institucional. */
+.version-sia--sia{background:var(--blanco);border-color:var(--linea);color:var(--gris)}
+/* No se pudo leer la versión: se nota. */
+.version-sia--error{background:var(--error-bg);border-color:var(--guinda);color:var(--error-txt)}
+
+/* @bloque adaptaciones */
+
+@media print{
+  .version-sia{position:static;display:inline-block;box-shadow:none}
+}
+
+</style>
 <style data-origen="vendor\leaflet\leaflet.css">
 /* required styles */
 
@@ -2734,6 +2793,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .guia-demo{padding:var(--e-4);background:var(--fondo);border:var(--b-1) dashed var(--borde);border-radius:var(--r-ctrl)}
 .guia-demo-rotulo{margin:0 0 var(--e-3);font-size:var(--t-xs);text-transform:uppercase;letter-spacing:var(--tracking-rotulo);color:var(--gris)}
 .guia-demo-form{margin:0;padding:var(--e-4);background:var(--blanco);border-radius:var(--r-ctrl)}
+/* El distintivo de versión flota en la página; en su muestra se queda quieto, con sus tres estados juntos. */
+.guia-version-demo{display:flex;flex-wrap:wrap;gap:var(--e-3)}
+.guia-version-demo .version-sia{position:static}
 /* Grupos de módulos: mismo rótulo que el menú, con aire antes de cada grupo. */
 .guia-grupo{margin-top:var(--e-8)}
 .guia-nav-grupo{display:block;margin-top:var(--e-3);font-size:var(--t-xs);letter-spacing:var(--tracking-rotulo);text-transform:uppercase;color:var(--gris)}
@@ -2914,6 +2976,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           <label class="casilla"><input class="casilla-input" type="checkbox" name="repetibles" value="repetibles,modal"><span class="casilla-texto">tiene elementos repetibles («agregar otro»)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="escala" value="escala,opciones"><span class="casilla-texto">es una encuesta con escalas</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="interna" value="tabla,paginacion,pestanas,migas,chips,descarga,modal"><span class="casilla-texto">es una consulta o captura interna (tablas, paginación, pestañas, sugerencias)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="version" value="version"><span class="casilla-texto">muestra en pantalla qué versión del sitio es (distintivo de versión en el pie)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="terceros" value=""><span class="casilla-texto">captura datos de terceros (se desactiva el autocompletado en esos campos)</span></label>
         </form>
         <div class="guia-resultado" aria-live="polite">
@@ -5620,6 +5683,62 @@ window.FORMKIT_OPCIONES = {
     return String((10 - (suma % 10)) % 10);
   }
 
+  /* ---------- CURP contra nombre y apellidos ----------
+     Reglas de formación de las letras, simplificadas, A CONFIRMAR con el
+     instructivo del emisor (RENAPO) [Fuente: __]:
+       1 inicial del primer apellido · 2 su primera vocal interna ·
+       3 inicial del segundo apellido (X si no hay) · 4 inicial del nombre ·
+       14, 15 y 16 primera consonante interna del primer apellido, del segundo
+       (X si no hay) y del nombre.
+     Se omiten las partículas (DE, DEL, LA, LOS, Y, MC, VAN…); en un nombre
+     compuesto que empieza con MARÍA o JOSÉ cuenta el segundo; la Ñ cuenta
+     como X; si las cuatro primeras letras forman una palabra altisonante, la
+     segunda cambia por X.
+     Límite: comprueba que la CURP y el nombre sean coherentes entre sí, no
+     que la CURP exista ni que sea de quien la escribe. */
+  const CURP_NOMBRE = {
+    particulas: ['DA', 'DAS', 'DE', 'DEL', 'DER', 'DI', 'DIE', 'DD', 'EL', 'LA', 'LAS', 'LE', 'LES', 'LOS', 'MAC', 'MC', 'VAN', 'VON', 'Y'],
+    nombresComunes: ['MARIA', 'MA', 'MX', 'M', 'JOSE', 'J'],
+    altisonantes: ['BACA', 'BAKA', 'BUEI', 'BUEY', 'CACA', 'CACO', 'CAGA', 'CAGO', 'CAKA', 'CAKO', 'COGE', 'COGI',
+      'COJA', 'COJE', 'COJI', 'COJO', 'COLA', 'CULO', 'FALO', 'FETO', 'GETA', 'GUEI', 'GUEY', 'JETA', 'JOTO', 'KACA', 'KACO',
+      'KAGA', 'KAGO', 'KAKA', 'KAKO', 'KOGE', 'KOGI', 'KOJA', 'KOJE', 'KOJI', 'KOJO', 'KOLA', 'KULO', 'LILO', 'LOCA', 'LOCO',
+      'LOKA', 'LOKO', 'MAME', 'MAMO', 'MEAR', 'MEAS', 'MEON', 'MIAR', 'MION', 'MOCO', 'MOKO', 'MULA', 'MULO', 'NACA', 'NACO',
+      'PEDA', 'PEDO', 'PENE', 'PIPI', 'PITO', 'POPO', 'PUTA', 'PUTO', 'QULO', 'RATA', 'ROBA', 'ROBE', 'ROBO', 'RUIN', 'SENO',
+      'TETA', 'VACA', 'VAGA', 'VAGO', 'VAKA', 'VUEI', 'VUEY', 'WUEI', 'WUEY'],
+    vocales: 'AEIOU'
+  };
+  /* Mayúsculas y sin acentos (la Ñ se conserva para tratarla aparte); sólo letras y espacios. */
+  function letrasDeNombre(t) {
+    return String(t || '').toUpperCase()
+      .replace(/Ñ/g, '\u0001').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\u0001/g, 'Ñ')
+      .replace(/[^A-ZÑ ]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  /* La palabra que cuenta: la primera que no es partícula; en el nombre, la que sigue a MARÍA o JOSÉ. */
+  function palabraDeCurp(t, esNombre) {
+    let p = letrasDeNombre(t).split(' ').filter((w) => w &amp;&amp; !CURP_NOMBRE.particulas.includes(w));
+    if (esNombre &amp;&amp; p.length > 1 &amp;&amp; CURP_NOMBRE.nombresComunes.includes(p[0])) p = p.slice(1);
+    return p[0] || '';
+  }
+  const letraDeCurp = (c) => (!c || c === 'Ñ' ? 'X' : c);
+  const vocalInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => CURP_NOMBRE.vocales.includes(c)));
+  const consonanteInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => !CURP_NOMBRE.vocales.includes(c)));
+  /* Las letras que la CURP debe tener según el nombre; null si falta el nombre o el primer apellido. */
+  function letrasDeCurp({ nombre, primer, segundo }) {
+    const n = palabraDeCurp(nombre, true), a1 = palabraDeCurp(primer), a2 = palabraDeCurp(segundo);
+    if (!n || !a1) return null;
+    return {
+      p1: letraDeCurp(a1[0]), p2: vocalInterna(a1), p3: a2 ? letraDeCurp(a2[0]) : 'X', p4: letraDeCurp(n[0]),
+      p14: consonanteInterna(a1), p15: a2 ? consonanteInterna(a2) : 'X', p16: consonanteInterna(n)
+    };
+  }
+  /* Las 16 primeras posiciones de una CURP coherente con los datos (sin diferenciador ni dígito): para armar datos ficticios de prueba. */
+  function prefijoCurp(datos, fechaISO, sexo, entidad) {
+    const e = letrasDeCurp(datos);
+    let cuatro = e.p1 + e.p2 + e.p3 + e.p4;
+    if (CURP_NOMBRE.altisonantes.includes(cuatro)) cuatro = `${cuatro[0]}X${cuatro.slice(2)}`;
+    return cuatro + fechaISO.slice(2, 4) + fechaISO.slice(5, 7) + fechaISO.slice(8, 10) + sexo + entidad + e.p14 + e.p15 + e.p16;
+  }
+
   /* ---------- Formatos por tipo de dato ---------- */
   const FORMATOS = {
     nombre: {
@@ -5815,6 +5934,28 @@ window.FORMKIT_OPCIONES = {
       campos: ['curp', 'entidad'], bloquea: false,
       valida: ({ curp, entidad }) => (!entidad || curp.slice(11, 13) === String(entidad).toUpperCase() ? '' : 'La entidad de nacimiento no coincide con la de la CURP. Revisa ambos datos.')
     },
+    /* La CURP y el nombre son coherentes (no prueba que la CURP exista). */
+    'curp-nombre': {
+      descripcion: 'Las letras de la CURP corresponden al nombre y al primer apellido (posiciones 1, 2, 4, 14 y 16)',
+      campos: ['curp', 'nombre', 'primer'], bloquea: true,
+      valida: ({ curp, nombre, primer }) => {
+        const e = letrasDeCurp({ nombre, primer, segundo: '' });
+        if (!e) return '';
+        /* La posición 3 viene de la propia CURP: así se reconoce la palabra altisonante sin pedir el segundo apellido. */
+        const p2 = CURP_NOMBRE.altisonantes.includes(e.p1 + e.p2 + curp[2] + e.p4) ? 'X' : e.p2;
+        return curp[0] === e.p1 &amp;&amp; curp[1] === p2 &amp;&amp; curp[3] === e.p4 &amp;&amp; curp[13] === e.p14 &amp;&amp; curp[15] === e.p16 ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
+    /* El segundo apellido es opcional: sin él, la CURP lleva X en las posiciones 3 y 15. */
+    'curp-segundo-apellido': {
+      descripcion: 'Las letras de la CURP corresponden al segundo apellido (posiciones 3 y 15); sin segundo apellido, la CURP lleva X en las dos',
+      campos: ['curp', 'segundo'], opcionales: ['segundo'], bloquea: true,
+      valida: ({ curp, segundo }) => {
+        const a2 = palabraDeCurp(segundo);
+        if (!a2) return curp[2] === 'X' &amp;&amp; curp[14] === 'X' ? '' : CONFIG.mensajes.curpSinSegundo;
+        return curp[2] === letraDeCurp(a2[0]) &amp;&amp; curp[14] === consonanteInterna(a2) ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
     'rango-fechas': {
       descripcion: 'La fecha final no es anterior a la inicial',
       campos: ['inicio', 'fin'], bloquea: true,
@@ -5909,6 +6050,8 @@ window.FORMKIT_OPCIONES = {
       repiteOpcion: '«{texto}» ya está en la lista: elige esa opción.',
       edadMinima: 'Se requiere una edad mínima de {edad} años. Si la persona tiene menos, su madre, padre o tutor debe llenar el formulario.',
       edadMaxima: 'La edad máxima es de {edad} años.',
+      curpNombre: 'La CURP no corresponde con el nombre y los apellidos que escribiste. Escríbelos tal como aparecen en tu CURP.',
+      curpSinSegundo: 'Tu CURP indica que tienes segundo apellido. Escríbelo tal como aparece en tu CURP.',
       advertencia: 'Advertencia:',
       resumenUno: 'Falta revisar 1 campo para continuar.',
       resumenVarios: 'Faltan por revisar {n} campos para continuar.',
@@ -5975,7 +6118,7 @@ window.FORMKIT_OPCIONES = {
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 </script>
 <script>/* GENERADO por herramientas/construir.mjs desde codigo/iconos/sprite.svg. No se edita a mano.
@@ -9876,7 +10019,7 @@ a{color:var(--azul)}
       </div>
       <div class=&quot;fila&quot;>
         <!-- autocomplete off: el navegador no tiene un valor de autocompletado para la CURP; se escribe cada vez. -->
-        <div class=&quot;campo&quot; data-campo=&quot;curp&quot; data-formato=&quot;curp&quot; data-requerido data-sensible data-uso=&quot;Registro.&quot; data-finalidad=&quot;Identificar a la persona sin ambigüedad.&quot; data-deriva=&quot;fechaNacimiento=nacimiento&quot; data-enmascara>
+        <div class=&quot;campo&quot; data-campo=&quot;curp&quot; data-formato=&quot;curp&quot; data-requerido data-sensible data-uso=&quot;Registro.&quot; data-finalidad=&quot;Identificar a la persona sin ambigüedad.&quot; data-deriva=&quot;fechaNacimiento=nacimiento&quot; data-cruzada=&quot;curp-nombre curp-segundo-apellido&quot; data-cruzada-campos=&quot;curp=curp nombre=nombre primer=apellido_paterno segundo=apellido_materno&quot; data-enmascara>
           <label class=&quot;etiqueta&quot; for=&quot;curp&quot;>CURP</label>
           <p class=&quot;ayuda&quot;>Son 18 caracteres. Tu fecha de nacimiento se toma de ella.</p>
           <input class=&quot;control&quot; id=&quot;curp&quot; name=&quot;curp&quot; type=&quot;text&quot; maxlength=&quot;18&quot; autocomplete=&quot;off&quot; spellcheck=&quot;false&quot;>
@@ -10149,6 +10292,62 @@ window.FORMKIT_OPCIONES = {
     return String((10 - (suma % 10)) % 10);
   }
 
+  /* ---------- CURP contra nombre y apellidos ----------
+     Reglas de formación de las letras, simplificadas, A CONFIRMAR con el
+     instructivo del emisor (RENAPO) [Fuente: __]:
+       1 inicial del primer apellido · 2 su primera vocal interna ·
+       3 inicial del segundo apellido (X si no hay) · 4 inicial del nombre ·
+       14, 15 y 16 primera consonante interna del primer apellido, del segundo
+       (X si no hay) y del nombre.
+     Se omiten las partículas (DE, DEL, LA, LOS, Y, MC, VAN…); en un nombre
+     compuesto que empieza con MARÍA o JOSÉ cuenta el segundo; la Ñ cuenta
+     como X; si las cuatro primeras letras forman una palabra altisonante, la
+     segunda cambia por X.
+     Límite: comprueba que la CURP y el nombre sean coherentes entre sí, no
+     que la CURP exista ni que sea de quien la escribe. */
+  const CURP_NOMBRE = {
+    particulas: ['DA', 'DAS', 'DE', 'DEL', 'DER', 'DI', 'DIE', 'DD', 'EL', 'LA', 'LAS', 'LE', 'LES', 'LOS', 'MAC', 'MC', 'VAN', 'VON', 'Y'],
+    nombresComunes: ['MARIA', 'MA', 'MX', 'M', 'JOSE', 'J'],
+    altisonantes: ['BACA', 'BAKA', 'BUEI', 'BUEY', 'CACA', 'CACO', 'CAGA', 'CAGO', 'CAKA', 'CAKO', 'COGE', 'COGI',
+      'COJA', 'COJE', 'COJI', 'COJO', 'COLA', 'CULO', 'FALO', 'FETO', 'GETA', 'GUEI', 'GUEY', 'JETA', 'JOTO', 'KACA', 'KACO',
+      'KAGA', 'KAGO', 'KAKA', 'KAKO', 'KOGE', 'KOGI', 'KOJA', 'KOJE', 'KOJI', 'KOJO', 'KOLA', 'KULO', 'LILO', 'LOCA', 'LOCO',
+      'LOKA', 'LOKO', 'MAME', 'MAMO', 'MEAR', 'MEAS', 'MEON', 'MIAR', 'MION', 'MOCO', 'MOKO', 'MULA', 'MULO', 'NACA', 'NACO',
+      'PEDA', 'PEDO', 'PENE', 'PIPI', 'PITO', 'POPO', 'PUTA', 'PUTO', 'QULO', 'RATA', 'ROBA', 'ROBE', 'ROBO', 'RUIN', 'SENO',
+      'TETA', 'VACA', 'VAGA', 'VAGO', 'VAKA', 'VUEI', 'VUEY', 'WUEI', 'WUEY'],
+    vocales: 'AEIOU'
+  };
+  /* Mayúsculas y sin acentos (la Ñ se conserva para tratarla aparte); sólo letras y espacios. */
+  function letrasDeNombre(t) {
+    return String(t || '').toUpperCase()
+      .replace(/Ñ/g, '\u0001').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\u0001/g, 'Ñ')
+      .replace(/[^A-ZÑ ]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  /* La palabra que cuenta: la primera que no es partícula; en el nombre, la que sigue a MARÍA o JOSÉ. */
+  function palabraDeCurp(t, esNombre) {
+    let p = letrasDeNombre(t).split(' ').filter((w) => w &amp;&amp; !CURP_NOMBRE.particulas.includes(w));
+    if (esNombre &amp;&amp; p.length > 1 &amp;&amp; CURP_NOMBRE.nombresComunes.includes(p[0])) p = p.slice(1);
+    return p[0] || '';
+  }
+  const letraDeCurp = (c) => (!c || c === 'Ñ' ? 'X' : c);
+  const vocalInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => CURP_NOMBRE.vocales.includes(c)));
+  const consonanteInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => !CURP_NOMBRE.vocales.includes(c)));
+  /* Las letras que la CURP debe tener según el nombre; null si falta el nombre o el primer apellido. */
+  function letrasDeCurp({ nombre, primer, segundo }) {
+    const n = palabraDeCurp(nombre, true), a1 = palabraDeCurp(primer), a2 = palabraDeCurp(segundo);
+    if (!n || !a1) return null;
+    return {
+      p1: letraDeCurp(a1[0]), p2: vocalInterna(a1), p3: a2 ? letraDeCurp(a2[0]) : 'X', p4: letraDeCurp(n[0]),
+      p14: consonanteInterna(a1), p15: a2 ? consonanteInterna(a2) : 'X', p16: consonanteInterna(n)
+    };
+  }
+  /* Las 16 primeras posiciones de una CURP coherente con los datos (sin diferenciador ni dígito): para armar datos ficticios de prueba. */
+  function prefijoCurp(datos, fechaISO, sexo, entidad) {
+    const e = letrasDeCurp(datos);
+    let cuatro = e.p1 + e.p2 + e.p3 + e.p4;
+    if (CURP_NOMBRE.altisonantes.includes(cuatro)) cuatro = `${cuatro[0]}X${cuatro.slice(2)}`;
+    return cuatro + fechaISO.slice(2, 4) + fechaISO.slice(5, 7) + fechaISO.slice(8, 10) + sexo + entidad + e.p14 + e.p15 + e.p16;
+  }
+
   /* ---------- Formatos por tipo de dato ---------- */
   const FORMATOS = {
     nombre: {
@@ -10344,6 +10543,28 @@ window.FORMKIT_OPCIONES = {
       campos: ['curp', 'entidad'], bloquea: false,
       valida: ({ curp, entidad }) => (!entidad || curp.slice(11, 13) === String(entidad).toUpperCase() ? '' : 'La entidad de nacimiento no coincide con la de la CURP. Revisa ambos datos.')
     },
+    /* La CURP y el nombre son coherentes (no prueba que la CURP exista). */
+    'curp-nombre': {
+      descripcion: 'Las letras de la CURP corresponden al nombre y al primer apellido (posiciones 1, 2, 4, 14 y 16)',
+      campos: ['curp', 'nombre', 'primer'], bloquea: true,
+      valida: ({ curp, nombre, primer }) => {
+        const e = letrasDeCurp({ nombre, primer, segundo: '' });
+        if (!e) return '';
+        /* La posición 3 viene de la propia CURP: así se reconoce la palabra altisonante sin pedir el segundo apellido. */
+        const p2 = CURP_NOMBRE.altisonantes.includes(e.p1 + e.p2 + curp[2] + e.p4) ? 'X' : e.p2;
+        return curp[0] === e.p1 &amp;&amp; curp[1] === p2 &amp;&amp; curp[3] === e.p4 &amp;&amp; curp[13] === e.p14 &amp;&amp; curp[15] === e.p16 ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
+    /* El segundo apellido es opcional: sin él, la CURP lleva X en las posiciones 3 y 15. */
+    'curp-segundo-apellido': {
+      descripcion: 'Las letras de la CURP corresponden al segundo apellido (posiciones 3 y 15); sin segundo apellido, la CURP lleva X en las dos',
+      campos: ['curp', 'segundo'], opcionales: ['segundo'], bloquea: true,
+      valida: ({ curp, segundo }) => {
+        const a2 = palabraDeCurp(segundo);
+        if (!a2) return curp[2] === 'X' &amp;&amp; curp[14] === 'X' ? '' : CONFIG.mensajes.curpSinSegundo;
+        return curp[2] === letraDeCurp(a2[0]) &amp;&amp; curp[14] === consonanteInterna(a2) ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
     'rango-fechas': {
       descripcion: 'La fecha final no es anterior a la inicial',
       campos: ['inicio', 'fin'], bloquea: true,
@@ -10438,6 +10659,8 @@ window.FORMKIT_OPCIONES = {
       repiteOpcion: '«{texto}» ya está en la lista: elige esa opción.',
       edadMinima: 'Se requiere una edad mínima de {edad} años. Si la persona tiene menos, su madre, padre o tutor debe llenar el formulario.',
       edadMaxima: 'La edad máxima es de {edad} años.',
+      curpNombre: 'La CURP no corresponde con el nombre y los apellidos que escribiste. Escríbelos tal como aparecen en tu CURP.',
+      curpSinSegundo: 'Tu CURP indica que tienes segundo apellido. Escríbelo tal como aparece en tu CURP.',
       advertencia: 'Advertencia:',
       resumenUno: 'Falta revisar 1 campo para continuar.',
       resumenVarios: 'Faltan por revisar {n} campos para continuar.',
@@ -10504,7 +10727,7 @@ window.FORMKIT_OPCIONES = {
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 </script>
 <script>/* GENERADO por herramientas/construir.mjs desde codigo/iconos/sprite.svg. No se edita a mano.
@@ -13568,6 +13791,62 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
     return String((10 - (suma % 10)) % 10);
   }
 
+  /* ---------- CURP contra nombre y apellidos ----------
+     Reglas de formación de las letras, simplificadas, A CONFIRMAR con el
+     instructivo del emisor (RENAPO) [Fuente: __]:
+       1 inicial del primer apellido · 2 su primera vocal interna ·
+       3 inicial del segundo apellido (X si no hay) · 4 inicial del nombre ·
+       14, 15 y 16 primera consonante interna del primer apellido, del segundo
+       (X si no hay) y del nombre.
+     Se omiten las partículas (DE, DEL, LA, LOS, Y, MC, VAN…); en un nombre
+     compuesto que empieza con MARÍA o JOSÉ cuenta el segundo; la Ñ cuenta
+     como X; si las cuatro primeras letras forman una palabra altisonante, la
+     segunda cambia por X.
+     Límite: comprueba que la CURP y el nombre sean coherentes entre sí, no
+     que la CURP exista ni que sea de quien la escribe. */
+  const CURP_NOMBRE = {
+    particulas: ['DA', 'DAS', 'DE', 'DEL', 'DER', 'DI', 'DIE', 'DD', 'EL', 'LA', 'LAS', 'LE', 'LES', 'LOS', 'MAC', 'MC', 'VAN', 'VON', 'Y'],
+    nombresComunes: ['MARIA', 'MA', 'MX', 'M', 'JOSE', 'J'],
+    altisonantes: ['BACA', 'BAKA', 'BUEI', 'BUEY', 'CACA', 'CACO', 'CAGA', 'CAGO', 'CAKA', 'CAKO', 'COGE', 'COGI',
+      'COJA', 'COJE', 'COJI', 'COJO', 'COLA', 'CULO', 'FALO', 'FETO', 'GETA', 'GUEI', 'GUEY', 'JETA', 'JOTO', 'KACA', 'KACO',
+      'KAGA', 'KAGO', 'KAKA', 'KAKO', 'KOGE', 'KOGI', 'KOJA', 'KOJE', 'KOJI', 'KOJO', 'KOLA', 'KULO', 'LILO', 'LOCA', 'LOCO',
+      'LOKA', 'LOKO', 'MAME', 'MAMO', 'MEAR', 'MEAS', 'MEON', 'MIAR', 'MION', 'MOCO', 'MOKO', 'MULA', 'MULO', 'NACA', 'NACO',
+      'PEDA', 'PEDO', 'PENE', 'PIPI', 'PITO', 'POPO', 'PUTA', 'PUTO', 'QULO', 'RATA', 'ROBA', 'ROBE', 'ROBO', 'RUIN', 'SENO',
+      'TETA', 'VACA', 'VAGA', 'VAGO', 'VAKA', 'VUEI', 'VUEY', 'WUEI', 'WUEY'],
+    vocales: 'AEIOU'
+  };
+  /* Mayúsculas y sin acentos (la Ñ se conserva para tratarla aparte); sólo letras y espacios. */
+  function letrasDeNombre(t) {
+    return String(t || '').toUpperCase()
+      .replace(/Ñ/g, '\u0001').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\u0001/g, 'Ñ')
+      .replace(/[^A-ZÑ ]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  /* La palabra que cuenta: la primera que no es partícula; en el nombre, la que sigue a MARÍA o JOSÉ. */
+  function palabraDeCurp(t, esNombre) {
+    let p = letrasDeNombre(t).split(' ').filter((w) => w &amp;&amp; !CURP_NOMBRE.particulas.includes(w));
+    if (esNombre &amp;&amp; p.length > 1 &amp;&amp; CURP_NOMBRE.nombresComunes.includes(p[0])) p = p.slice(1);
+    return p[0] || '';
+  }
+  const letraDeCurp = (c) => (!c || c === 'Ñ' ? 'X' : c);
+  const vocalInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => CURP_NOMBRE.vocales.includes(c)));
+  const consonanteInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => !CURP_NOMBRE.vocales.includes(c)));
+  /* Las letras que la CURP debe tener según el nombre; null si falta el nombre o el primer apellido. */
+  function letrasDeCurp({ nombre, primer, segundo }) {
+    const n = palabraDeCurp(nombre, true), a1 = palabraDeCurp(primer), a2 = palabraDeCurp(segundo);
+    if (!n || !a1) return null;
+    return {
+      p1: letraDeCurp(a1[0]), p2: vocalInterna(a1), p3: a2 ? letraDeCurp(a2[0]) : 'X', p4: letraDeCurp(n[0]),
+      p14: consonanteInterna(a1), p15: a2 ? consonanteInterna(a2) : 'X', p16: consonanteInterna(n)
+    };
+  }
+  /* Las 16 primeras posiciones de una CURP coherente con los datos (sin diferenciador ni dígito): para armar datos ficticios de prueba. */
+  function prefijoCurp(datos, fechaISO, sexo, entidad) {
+    const e = letrasDeCurp(datos);
+    let cuatro = e.p1 + e.p2 + e.p3 + e.p4;
+    if (CURP_NOMBRE.altisonantes.includes(cuatro)) cuatro = `${cuatro[0]}X${cuatro.slice(2)}`;
+    return cuatro + fechaISO.slice(2, 4) + fechaISO.slice(5, 7) + fechaISO.slice(8, 10) + sexo + entidad + e.p14 + e.p15 + e.p16;
+  }
+
   /* ---------- Formatos por tipo de dato ---------- */
   const FORMATOS = {
     nombre: {
@@ -13763,6 +14042,28 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
       campos: ['curp', 'entidad'], bloquea: false,
       valida: ({ curp, entidad }) => (!entidad || curp.slice(11, 13) === String(entidad).toUpperCase() ? '' : 'La entidad de nacimiento no coincide con la de la CURP. Revisa ambos datos.')
     },
+    /* La CURP y el nombre son coherentes (no prueba que la CURP exista). */
+    'curp-nombre': {
+      descripcion: 'Las letras de la CURP corresponden al nombre y al primer apellido (posiciones 1, 2, 4, 14 y 16)',
+      campos: ['curp', 'nombre', 'primer'], bloquea: true,
+      valida: ({ curp, nombre, primer }) => {
+        const e = letrasDeCurp({ nombre, primer, segundo: '' });
+        if (!e) return '';
+        /* La posición 3 viene de la propia CURP: así se reconoce la palabra altisonante sin pedir el segundo apellido. */
+        const p2 = CURP_NOMBRE.altisonantes.includes(e.p1 + e.p2 + curp[2] + e.p4) ? 'X' : e.p2;
+        return curp[0] === e.p1 &amp;&amp; curp[1] === p2 &amp;&amp; curp[3] === e.p4 &amp;&amp; curp[13] === e.p14 &amp;&amp; curp[15] === e.p16 ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
+    /* El segundo apellido es opcional: sin él, la CURP lleva X en las posiciones 3 y 15. */
+    'curp-segundo-apellido': {
+      descripcion: 'Las letras de la CURP corresponden al segundo apellido (posiciones 3 y 15); sin segundo apellido, la CURP lleva X en las dos',
+      campos: ['curp', 'segundo'], opcionales: ['segundo'], bloquea: true,
+      valida: ({ curp, segundo }) => {
+        const a2 = palabraDeCurp(segundo);
+        if (!a2) return curp[2] === 'X' &amp;&amp; curp[14] === 'X' ? '' : CONFIG.mensajes.curpSinSegundo;
+        return curp[2] === letraDeCurp(a2[0]) &amp;&amp; curp[14] === consonanteInterna(a2) ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
     'rango-fechas': {
       descripcion: 'La fecha final no es anterior a la inicial',
       campos: ['inicio', 'fin'], bloquea: true,
@@ -13857,6 +14158,8 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
       repiteOpcion: '«{texto}» ya está en la lista: elige esa opción.',
       edadMinima: 'Se requiere una edad mínima de {edad} años. Si la persona tiene menos, su madre, padre o tutor debe llenar el formulario.',
       edadMaxima: 'La edad máxima es de {edad} años.',
+      curpNombre: 'La CURP no corresponde con el nombre y los apellidos que escribiste. Escríbelos tal como aparecen en tu CURP.',
+      curpSinSegundo: 'Tu CURP indica que tienes segundo apellido. Escríbelo tal como aparece en tu CURP.',
       advertencia: 'Advertencia:',
       resumenUno: 'Falta revisar 1 campo para continuar.',
       resumenVarios: 'Faltan por revisar {n} campos para continuar.',
@@ -13923,7 +14226,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 </script>
 <script>/* GENERADO por herramientas/construir.mjs desde codigo/iconos/sprite.svg. No se edita a mano.
@@ -16334,6 +16637,62 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
     return String((10 - (suma % 10)) % 10);
   }
 
+  /* ---------- CURP contra nombre y apellidos ----------
+     Reglas de formación de las letras, simplificadas, A CONFIRMAR con el
+     instructivo del emisor (RENAPO) [Fuente: __]:
+       1 inicial del primer apellido · 2 su primera vocal interna ·
+       3 inicial del segundo apellido (X si no hay) · 4 inicial del nombre ·
+       14, 15 y 16 primera consonante interna del primer apellido, del segundo
+       (X si no hay) y del nombre.
+     Se omiten las partículas (DE, DEL, LA, LOS, Y, MC, VAN…); en un nombre
+     compuesto que empieza con MARÍA o JOSÉ cuenta el segundo; la Ñ cuenta
+     como X; si las cuatro primeras letras forman una palabra altisonante, la
+     segunda cambia por X.
+     Límite: comprueba que la CURP y el nombre sean coherentes entre sí, no
+     que la CURP exista ni que sea de quien la escribe. */
+  const CURP_NOMBRE = {
+    particulas: ['DA', 'DAS', 'DE', 'DEL', 'DER', 'DI', 'DIE', 'DD', 'EL', 'LA', 'LAS', 'LE', 'LES', 'LOS', 'MAC', 'MC', 'VAN', 'VON', 'Y'],
+    nombresComunes: ['MARIA', 'MA', 'MX', 'M', 'JOSE', 'J'],
+    altisonantes: ['BACA', 'BAKA', 'BUEI', 'BUEY', 'CACA', 'CACO', 'CAGA', 'CAGO', 'CAKA', 'CAKO', 'COGE', 'COGI',
+      'COJA', 'COJE', 'COJI', 'COJO', 'COLA', 'CULO', 'FALO', 'FETO', 'GETA', 'GUEI', 'GUEY', 'JETA', 'JOTO', 'KACA', 'KACO',
+      'KAGA', 'KAGO', 'KAKA', 'KAKO', 'KOGE', 'KOGI', 'KOJA', 'KOJE', 'KOJI', 'KOJO', 'KOLA', 'KULO', 'LILO', 'LOCA', 'LOCO',
+      'LOKA', 'LOKO', 'MAME', 'MAMO', 'MEAR', 'MEAS', 'MEON', 'MIAR', 'MION', 'MOCO', 'MOKO', 'MULA', 'MULO', 'NACA', 'NACO',
+      'PEDA', 'PEDO', 'PENE', 'PIPI', 'PITO', 'POPO', 'PUTA', 'PUTO', 'QULO', 'RATA', 'ROBA', 'ROBE', 'ROBO', 'RUIN', 'SENO',
+      'TETA', 'VACA', 'VAGA', 'VAGO', 'VAKA', 'VUEI', 'VUEY', 'WUEI', 'WUEY'],
+    vocales: 'AEIOU'
+  };
+  /* Mayúsculas y sin acentos (la Ñ se conserva para tratarla aparte); sólo letras y espacios. */
+  function letrasDeNombre(t) {
+    return String(t || '').toUpperCase()
+      .replace(/Ñ/g, '\u0001').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\u0001/g, 'Ñ')
+      .replace(/[^A-ZÑ ]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  /* La palabra que cuenta: la primera que no es partícula; en el nombre, la que sigue a MARÍA o JOSÉ. */
+  function palabraDeCurp(t, esNombre) {
+    let p = letrasDeNombre(t).split(' ').filter((w) => w &amp;&amp; !CURP_NOMBRE.particulas.includes(w));
+    if (esNombre &amp;&amp; p.length > 1 &amp;&amp; CURP_NOMBRE.nombresComunes.includes(p[0])) p = p.slice(1);
+    return p[0] || '';
+  }
+  const letraDeCurp = (c) => (!c || c === 'Ñ' ? 'X' : c);
+  const vocalInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => CURP_NOMBRE.vocales.includes(c)));
+  const consonanteInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => !CURP_NOMBRE.vocales.includes(c)));
+  /* Las letras que la CURP debe tener según el nombre; null si falta el nombre o el primer apellido. */
+  function letrasDeCurp({ nombre, primer, segundo }) {
+    const n = palabraDeCurp(nombre, true), a1 = palabraDeCurp(primer), a2 = palabraDeCurp(segundo);
+    if (!n || !a1) return null;
+    return {
+      p1: letraDeCurp(a1[0]), p2: vocalInterna(a1), p3: a2 ? letraDeCurp(a2[0]) : 'X', p4: letraDeCurp(n[0]),
+      p14: consonanteInterna(a1), p15: a2 ? consonanteInterna(a2) : 'X', p16: consonanteInterna(n)
+    };
+  }
+  /* Las 16 primeras posiciones de una CURP coherente con los datos (sin diferenciador ni dígito): para armar datos ficticios de prueba. */
+  function prefijoCurp(datos, fechaISO, sexo, entidad) {
+    const e = letrasDeCurp(datos);
+    let cuatro = e.p1 + e.p2 + e.p3 + e.p4;
+    if (CURP_NOMBRE.altisonantes.includes(cuatro)) cuatro = `${cuatro[0]}X${cuatro.slice(2)}`;
+    return cuatro + fechaISO.slice(2, 4) + fechaISO.slice(5, 7) + fechaISO.slice(8, 10) + sexo + entidad + e.p14 + e.p15 + e.p16;
+  }
+
   /* ---------- Formatos por tipo de dato ---------- */
   const FORMATOS = {
     nombre: {
@@ -16529,6 +16888,28 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
       campos: ['curp', 'entidad'], bloquea: false,
       valida: ({ curp, entidad }) => (!entidad || curp.slice(11, 13) === String(entidad).toUpperCase() ? '' : 'La entidad de nacimiento no coincide con la de la CURP. Revisa ambos datos.')
     },
+    /* La CURP y el nombre son coherentes (no prueba que la CURP exista). */
+    'curp-nombre': {
+      descripcion: 'Las letras de la CURP corresponden al nombre y al primer apellido (posiciones 1, 2, 4, 14 y 16)',
+      campos: ['curp', 'nombre', 'primer'], bloquea: true,
+      valida: ({ curp, nombre, primer }) => {
+        const e = letrasDeCurp({ nombre, primer, segundo: '' });
+        if (!e) return '';
+        /* La posición 3 viene de la propia CURP: así se reconoce la palabra altisonante sin pedir el segundo apellido. */
+        const p2 = CURP_NOMBRE.altisonantes.includes(e.p1 + e.p2 + curp[2] + e.p4) ? 'X' : e.p2;
+        return curp[0] === e.p1 &amp;&amp; curp[1] === p2 &amp;&amp; curp[3] === e.p4 &amp;&amp; curp[13] === e.p14 &amp;&amp; curp[15] === e.p16 ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
+    /* El segundo apellido es opcional: sin él, la CURP lleva X en las posiciones 3 y 15. */
+    'curp-segundo-apellido': {
+      descripcion: 'Las letras de la CURP corresponden al segundo apellido (posiciones 3 y 15); sin segundo apellido, la CURP lleva X en las dos',
+      campos: ['curp', 'segundo'], opcionales: ['segundo'], bloquea: true,
+      valida: ({ curp, segundo }) => {
+        const a2 = palabraDeCurp(segundo);
+        if (!a2) return curp[2] === 'X' &amp;&amp; curp[14] === 'X' ? '' : CONFIG.mensajes.curpSinSegundo;
+        return curp[2] === letraDeCurp(a2[0]) &amp;&amp; curp[14] === consonanteInterna(a2) ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
     'rango-fechas': {
       descripcion: 'La fecha final no es anterior a la inicial',
       campos: ['inicio', 'fin'], bloquea: true,
@@ -16623,6 +17004,8 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
       repiteOpcion: '«{texto}» ya está en la lista: elige esa opción.',
       edadMinima: 'Se requiere una edad mínima de {edad} años. Si la persona tiene menos, su madre, padre o tutor debe llenar el formulario.',
       edadMaxima: 'La edad máxima es de {edad} años.',
+      curpNombre: 'La CURP no corresponde con el nombre y los apellidos que escribiste. Escríbelos tal como aparecen en tu CURP.',
+      curpSinSegundo: 'Tu CURP indica que tienes segundo apellido. Escríbelo tal como aparece en tu CURP.',
       advertencia: 'Advertencia:',
       resumenUno: 'Falta revisar 1 campo para continuar.',
       resumenVarios: 'Faltan por revisar {n} campos para continuar.',
@@ -16689,7 +17072,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 </script>
 <script>/* GENERADO por herramientas/construir.mjs desde codigo/iconos/sprite.svg. No se edita a mano.
@@ -18856,6 +19239,15 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 <nav class="paginacion" data-paginacion data-total="312" data-pagina="2" data-tamano="20" data-tamanos="10,20,50" data-lista="#m_resultados" aria-label="Páginas de resultados (muestra)"></nav>
 </template>
 
+<template data-demo="version">
+<!-- El distintivo va dentro del pie de la página (<footer class="pie">), fijo abajo a la izquierda. Aquí se ven los tres estados quietos, uno junto a otro; los textos son de muestra: el texto y el estado los pone el sitio. -->
+<footer class="guia-version-demo">
+  <p class="version-sia version-sia--prueba">Versión 1.4.0 · prueba</p>
+  <p class="version-sia version-sia--sia">Versión 1.4.0</p>
+  <p class="version-sia version-sia--error">Versión sin leer</p>
+</footer>
+</template>
+
 <template data-demo="tooltip">
 <div class="campo" data-campo="m_tt" data-uso="Muestra."><label class="etiqueta" for="m_tt">Folio anterior <span class="tooltip" data-tooltip><button type="button" class="btn-icono tooltip-btn" aria-expanded="false" aria-label="Ayuda sobre el folio"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-ayuda"></use></svg></button><span class="tooltip-texto" role="tooltip" hidden>El folio aparece en la esquina superior de tu acuse anterior.</span></span></label><input class="control" id="m_tt" name="m_tt" type="text" autocomplete="off"></div>
 </template>
@@ -18944,7 +19336,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
   </div>
   <div class="fila">
     <!-- autocomplete off: el navegador no tiene un valor de autocompletado para la CURP; se escribe cada vez. -->
-    <div class="campo" data-campo="b_curp" data-formato="curp" data-requerido data-sensible data-uso="Identificar a quien llena el formulario sin ambigüedad." data-finalidad="Identificar a la persona sin ambigüedad." data-deriva="fechaNacimiento=b_nacimiento" data-enmascara>
+    <div class="campo" data-campo="b_curp" data-formato="curp" data-requerido data-sensible data-uso="Identificar a quien llena el formulario sin ambigüedad." data-finalidad="Identificar a la persona sin ambigüedad." data-deriva="fechaNacimiento=b_nacimiento" data-cruzada="curp-nombre curp-segundo-apellido" data-cruzada-campos="curp=b_curp nombre=b_nombre primer=b_apellido_paterno segundo=b_apellido_materno" data-enmascara>
       <label class="etiqueta" for="b_curp">CURP</label>
       <p class="ayuda">Son 18 caracteres. Tu fecha de nacimiento se toma de ella.</p>
       <input class="control" id="b_curp" name="b_curp" type="text" maxlength="18" autocomplete="off" spellcheck="false">
@@ -19233,6 +19625,62 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     return String((10 - (suma % 10)) % 10);
   }
 
+  /* ---------- CURP contra nombre y apellidos ----------
+     Reglas de formación de las letras, simplificadas, A CONFIRMAR con el
+     instructivo del emisor (RENAPO) [Fuente: __]:
+       1 inicial del primer apellido · 2 su primera vocal interna ·
+       3 inicial del segundo apellido (X si no hay) · 4 inicial del nombre ·
+       14, 15 y 16 primera consonante interna del primer apellido, del segundo
+       (X si no hay) y del nombre.
+     Se omiten las partículas (DE, DEL, LA, LOS, Y, MC, VAN…); en un nombre
+     compuesto que empieza con MARÍA o JOSÉ cuenta el segundo; la Ñ cuenta
+     como X; si las cuatro primeras letras forman una palabra altisonante, la
+     segunda cambia por X.
+     Límite: comprueba que la CURP y el nombre sean coherentes entre sí, no
+     que la CURP exista ni que sea de quien la escribe. */
+  const CURP_NOMBRE = {
+    particulas: ['DA', 'DAS', 'DE', 'DEL', 'DER', 'DI', 'DIE', 'DD', 'EL', 'LA', 'LAS', 'LE', 'LES', 'LOS', 'MAC', 'MC', 'VAN', 'VON', 'Y'],
+    nombresComunes: ['MARIA', 'MA', 'MX', 'M', 'JOSE', 'J'],
+    altisonantes: ['BACA', 'BAKA', 'BUEI', 'BUEY', 'CACA', 'CACO', 'CAGA', 'CAGO', 'CAKA', 'CAKO', 'COGE', 'COGI',
+      'COJA', 'COJE', 'COJI', 'COJO', 'COLA', 'CULO', 'FALO', 'FETO', 'GETA', 'GUEI', 'GUEY', 'JETA', 'JOTO', 'KACA', 'KACO',
+      'KAGA', 'KAGO', 'KAKA', 'KAKO', 'KOGE', 'KOGI', 'KOJA', 'KOJE', 'KOJI', 'KOJO', 'KOLA', 'KULO', 'LILO', 'LOCA', 'LOCO',
+      'LOKA', 'LOKO', 'MAME', 'MAMO', 'MEAR', 'MEAS', 'MEON', 'MIAR', 'MION', 'MOCO', 'MOKO', 'MULA', 'MULO', 'NACA', 'NACO',
+      'PEDA', 'PEDO', 'PENE', 'PIPI', 'PITO', 'POPO', 'PUTA', 'PUTO', 'QULO', 'RATA', 'ROBA', 'ROBE', 'ROBO', 'RUIN', 'SENO',
+      'TETA', 'VACA', 'VAGA', 'VAGO', 'VAKA', 'VUEI', 'VUEY', 'WUEI', 'WUEY'],
+    vocales: 'AEIOU'
+  };
+  /* Mayúsculas y sin acentos (la Ñ se conserva para tratarla aparte); sólo letras y espacios. */
+  function letrasDeNombre(t) {
+    return String(t || '').toUpperCase()
+      .replace(/Ñ/g, '\u0001').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\u0001/g, 'Ñ')
+      .replace(/[^A-ZÑ ]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  /* La palabra que cuenta: la primera que no es partícula; en el nombre, la que sigue a MARÍA o JOSÉ. */
+  function palabraDeCurp(t, esNombre) {
+    let p = letrasDeNombre(t).split(' ').filter((w) => w && !CURP_NOMBRE.particulas.includes(w));
+    if (esNombre && p.length > 1 && CURP_NOMBRE.nombresComunes.includes(p[0])) p = p.slice(1);
+    return p[0] || '';
+  }
+  const letraDeCurp = (c) => (!c || c === 'Ñ' ? 'X' : c);
+  const vocalInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => CURP_NOMBRE.vocales.includes(c)));
+  const consonanteInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => !CURP_NOMBRE.vocales.includes(c)));
+  /* Las letras que la CURP debe tener según el nombre; null si falta el nombre o el primer apellido. */
+  function letrasDeCurp({ nombre, primer, segundo }) {
+    const n = palabraDeCurp(nombre, true), a1 = palabraDeCurp(primer), a2 = palabraDeCurp(segundo);
+    if (!n || !a1) return null;
+    return {
+      p1: letraDeCurp(a1[0]), p2: vocalInterna(a1), p3: a2 ? letraDeCurp(a2[0]) : 'X', p4: letraDeCurp(n[0]),
+      p14: consonanteInterna(a1), p15: a2 ? consonanteInterna(a2) : 'X', p16: consonanteInterna(n)
+    };
+  }
+  /* Las 16 primeras posiciones de una CURP coherente con los datos (sin diferenciador ni dígito): para armar datos ficticios de prueba. */
+  function prefijoCurp(datos, fechaISO, sexo, entidad) {
+    const e = letrasDeCurp(datos);
+    let cuatro = e.p1 + e.p2 + e.p3 + e.p4;
+    if (CURP_NOMBRE.altisonantes.includes(cuatro)) cuatro = `${cuatro[0]}X${cuatro.slice(2)}`;
+    return cuatro + fechaISO.slice(2, 4) + fechaISO.slice(5, 7) + fechaISO.slice(8, 10) + sexo + entidad + e.p14 + e.p15 + e.p16;
+  }
+
   /* ---------- Formatos por tipo de dato ---------- */
   const FORMATOS = {
     nombre: {
@@ -19428,6 +19876,28 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       campos: ['curp', 'entidad'], bloquea: false,
       valida: ({ curp, entidad }) => (!entidad || curp.slice(11, 13) === String(entidad).toUpperCase() ? '' : 'La entidad de nacimiento no coincide con la de la CURP. Revisa ambos datos.')
     },
+    /* La CURP y el nombre son coherentes (no prueba que la CURP exista). */
+    'curp-nombre': {
+      descripcion: 'Las letras de la CURP corresponden al nombre y al primer apellido (posiciones 1, 2, 4, 14 y 16)',
+      campos: ['curp', 'nombre', 'primer'], bloquea: true,
+      valida: ({ curp, nombre, primer }) => {
+        const e = letrasDeCurp({ nombre, primer, segundo: '' });
+        if (!e) return '';
+        /* La posición 3 viene de la propia CURP: así se reconoce la palabra altisonante sin pedir el segundo apellido. */
+        const p2 = CURP_NOMBRE.altisonantes.includes(e.p1 + e.p2 + curp[2] + e.p4) ? 'X' : e.p2;
+        return curp[0] === e.p1 && curp[1] === p2 && curp[3] === e.p4 && curp[13] === e.p14 && curp[15] === e.p16 ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
+    /* El segundo apellido es opcional: sin él, la CURP lleva X en las posiciones 3 y 15. */
+    'curp-segundo-apellido': {
+      descripcion: 'Las letras de la CURP corresponden al segundo apellido (posiciones 3 y 15); sin segundo apellido, la CURP lleva X en las dos',
+      campos: ['curp', 'segundo'], opcionales: ['segundo'], bloquea: true,
+      valida: ({ curp, segundo }) => {
+        const a2 = palabraDeCurp(segundo);
+        if (!a2) return curp[2] === 'X' && curp[14] === 'X' ? '' : CONFIG.mensajes.curpSinSegundo;
+        return curp[2] === letraDeCurp(a2[0]) && curp[14] === consonanteInterna(a2) ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
     'rango-fechas': {
       descripcion: 'La fecha final no es anterior a la inicial',
       campos: ['inicio', 'fin'], bloquea: true,
@@ -19522,6 +19992,8 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       repiteOpcion: '«{texto}» ya está en la lista: elige esa opción.',
       edadMinima: 'Se requiere una edad mínima de {edad} años. Si la persona tiene menos, su madre, padre o tutor debe llenar el formulario.',
       edadMaxima: 'La edad máxima es de {edad} años.',
+      curpNombre: 'La CURP no corresponde con el nombre y los apellidos que escribiste. Escríbelos tal como aparecen en tu CURP.',
+      curpSinSegundo: 'Tu CURP indica que tienes segundo apellido. Escríbelo tal como aparece en tu CURP.',
       advertencia: 'Advertencia:',
       resumenUno: 'Falta revisar 1 campo para continuar.',
       resumenVarios: 'Faltan por revisar {n} campos para continuar.',
@@ -19588,7 +20060,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 
 </script>
@@ -20052,13 +20524,20 @@ window.GUIA_PARES = [
   "fondo": "--beige",
   "minimo": 3,
   "donde": "Borde de los enlaces a redes sociales en el pie"
+ },
+ {
+  "id": "C40",
+  "texto": "--dorado-txt",
+  "fondo": "--beige",
+  "minimo": 4.5,
+  "donde": "Distintivo de versión de un sitio de prueba"
  }
 ];
 
 </script>
 <script data-origen="guia-visual\manifiesto.js">
 /* GENERADO por herramientas/construir.mjs desde codigo/manifiesto.json. No se edita a mano. */
-window.GUIA_MANIFIESTO = {"_nota":"Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).","version":"1.1.0","nucleo":{"archivos":["codigo/css/tokens.css","codigo/css/base.css","codigo/css/nucleo.css","codigo/js/validaciones.config.js","codigo/js/formkit.core.js","codigo/js/iconos.js"],"orden":"tokens.css → base.css → nucleo.css → (CSS de módulos) … validaciones.config.js → iconos.js → formkit.core.js → (JS de módulos)","incluye":[{"pieza":"Campo (etiqueta, ayuda, control, error)","nivel":"BASE"},{"pieza":"Texto corto, correo, teléfono, numérico, texto largo con contador","nivel":"BASE"},{"pieza":"Lista desplegable simple (select)","nivel":"BASE"},{"pieza":"Casilla de declaración o consentimiento","nivel":"BASE"},{"pieza":"Solo lectura frente a deshabilitado","nivel":"BASE"},{"pieza":"Pregunta condicional (data-si)","nivel":"BASE"},{"pieza":"Autocompletado, inputmode y enterkeyhint","nivel":"BASE"},{"pieza":"Validación individual, cruzada y resumen de errores con foco","nivel":"BASE"},{"pieza":"Botones (principal, secundario, peligro, atrás, enlace, icono)","nivel":"BASE"},{"pieza":"Avisos (neutro, advertencia, bloqueo, éxito) y pendiente visible","nivel":"BASE"},{"pieza":"Iconografía (sprite SVG)","nivel":"BASE"},{"pieza":"Estados de envío (enviando, error, plazo, límite) sin duplicados","nivel":"BASE"},{"pieza":"Borrador local versionado","nivel":"RECOMENDADO"},{"pieza":"Encabezado y pie institucionales, enlace de salto","nivel":"BASE"}],"tamano":{"tokens.css":8394,"base.css":5841,"nucleo.css":16940,"validaciones.config.js":26325,"formkit.core.js":46299,"iconos.js":5845}},"modulos":[{"nombre":"opciones","titulo":"Opciones elegibles","nivel":"BASE","tipo":"pregunta","proposito":"Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con descripción y la variante corta Sí/No, sobre controles nativos. Para una sola respuesta, la lista (.opciones-lista, una por renglón con el círculo visible) es la forma por omisión; dos o tres opciones cortas sin descripción (Sí/No) van en línea (.opciones-en-linea). La opción deshabilitada se ve atenuada.","cuando":"Elegir una o varias respuestas entre 2 y 7 opciones conocidas.","cuandoNo":"Más de 7 opciones (usa combo); ajustes inmediatos (usa toggle); escalas (usa escala).","dependencias":[],"js":false,"accesibilidad":"Input nativo cubriendo la tarjeta: flechas, espacio, anuncio «botón de opción 1 de 3»; lo elegido se marca con fondo, sombra interior y palomita.","movil":"Una columna, también la lista en línea; Sí/No con botones a 48 px con puntero grueso.","escritorio":"Lista con el círculo visible; en línea, una columna por opción con el hueco de las filas de campos; Sí/No con botones a 40 px con ratón.","errores":["Usar div con onclick en lugar de radio.","Marcar lo elegido sólo con color.","Premarcar una opción.","Más de siete tarjetas.","Tarjetas en rejilla para una sola respuesta: en escritorio no se ve que hay que elegir una.","Sí/No apilado a todo lo ancho: dos o tres opciones cortas van en línea."],"archivos":{"css":"codigo/modulos/opciones/opciones.css","js":null},"tamano":{"css":5175,"js":0}},{"nombre":"otro","titulo":"Opción «Otro» con especificación","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Campo de texto que aparece al elegir «Otro» en radios, casillas, select o tarjetas; obligatorio sólo mientras exista; conserva lo escrito.","cuando":"La lista puede no cubrir el caso de la persona.","cuandoNo":"El detalle no se va a usar (usa «Otro» simple, que es una opción más).","dependencias":["opciones"],"js":true,"accesibilidad":"aria-expanded y aria-controls en el control que gobierna; sin mover el foco; mensaje propio de obligatorio.","movil":"Igual que el campo de texto.","escritorio":"Igual.","errores":["Poner «Otro» al inicio de la lista.","Enviar el texto aunque «Otro» no esté elegida.","Borrar lo escrito al desmarcar."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/otro/otro.js"},"tamano":{"css":0,"js":4313}},{"nombre":"combo","titulo":"Lista desplegable con búsqueda","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, anuncia resultados; cerrado por omisión, libre con data-libre.","cuando":"Catálogos de 8 o más valores (alcaldías, giros, especies).","cuandoNo":"Listas cortas (usa select u opciones).","dependencias":[],"js":true,"accesibilidad":"role=combobox, aria-expanded, aria-activedescendant, flechas, Inicio/Fin, Enter, Escape; no abre al recibir foco para no tapar el error.","movil":"Lista bajo el campo, 44 px por opción.","escritorio":"Igual, 8 resultados máximo.","errores":["Mezclar select nativo y combo en el mismo formulario.","Escribir el catálogo a mano en el código.","Aceptar valor libre sin decirlo."],"archivos":{"css":"codigo/modulos/combo/combo.css","js":"codigo/modulos/combo/combo.js"},"tamano":{"css":1466,"js":7871}},{"nombre":"fecha","titulo":"Fecha y hora con «Hoy» y atajos","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria de la Ciudad de México, límites por atributo, atajos de rango y edad calculada desde la fecha de nacimiento (data-deriva=\"edad=…\"), que nunca se escribe a mano.","cuando":"Cualquier fecha u hora.","cuandoNo":"Fecha de nacimiento cuando ya se pide CURP (se deriva).","dependencias":[],"js":true,"accesibilidad":"Botón con texto; el valor nuevo se anuncia; la validación cruzada de rango se declara sola.","movil":"Botón bajo el campo a todo lo ancho; rueda nativa del sistema.","escritorio":"Botón al lado del campo.","errores":["Tomar «hoy» del reloj del dispositivo sin zona horaria.","Permitir fecha de hechos futura.","Rango sin validación cruzada.","Pedir la edad escrita además de la fecha de nacimiento."],"archivos":{"css":"codigo/modulos/fecha/fecha.css","js":"codigo/modulos/fecha/fecha.js"},"tamano":{"css":1003,"js":6042}},{"nombre":"identificadores","titulo":"CURP, RFC y folios","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Campos con formato cerrado: mayúsculas al escribir, validación por capas desde la configuración, derivación de fecha de nacimiento y sexo desde la CURP a campos de solo lectura, enmascarado en revisión.","cuando":"El formulario necesita identificar a la persona.","cuandoNo":"Cuando el dato no tiene uso declarado: la CURP es dato personal.","dependencias":[],"js":true,"accesibilidad":"Los derivados se anuncian («tomado de la CURP»); el mensaje dice qué posición falló.","movil":"autocapitalize=characters; teclado de texto.","escritorio":"Igual.","errores":["Pedir fecha de nacimiento y CURP por separado sin cruzarlas.","Registrar la CURP en bitácoras o en la URL.","Dar por verificada la existencia con el formato."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/identificadores/identificadores.js"},"tamano":{"css":0,"js":3908}},{"nombre":"repetibles","titulo":"Grupos repetibles («Agregar otro»)","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos.","cuando":"La cantidad de elementos la decide la persona.","cuandoNo":"Siempre son exactamente N (ponlos fijos).","dependencias":["modal"],"js":true,"accesibilidad":"Cada fila tiene título numerado y botón «Quitar fila N»; el foco va al primer campo al agregar y a un lugar sensato al quitar.","movil":"Filas apiladas como tarjetas.","escritorio":"Igual; en tabla de captura, por renglones.","errores":["Nombres de campo repetidos entre filas.","Quitar sin confirmar una fila con datos.","Sin máximo."],"archivos":{"css":"codigo/modulos/repetibles/repetibles.css","js":"codigo/modulos/repetibles/repetibles.js"},"tamano":{"css":929,"js":6960}},{"nombre":"toggle","titulo":"Interruptor","nivel":"OPCIONAL","tipo":"pregunta","proposito":"role=switch para ajustes que surten efecto de inmediato.","cuando":"Activar o desactivar algo al momento (mostrar mapa, recibir avisos).","cuandoNo":"Una respuesta del formulario (usa casilla o Sí/No).","dependencias":[],"js":true,"accesibilidad":"aria-checked es el estado; texto «Sí/No» visible; 44 px.","movil":"Igual.","escritorio":"Igual.","errores":["Usarlo como consentimiento.","Estado sólo por color."],"archivos":{"css":"codigo/modulos/toggle/toggle.css","js":"codigo/modulos/toggle/toggle.js"},"tamano":{"css":1458,"js":2633}},{"nombre":"escala","titulo":"Escala o valoración","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Radios en fila (1 a 5) con extremos rotulados.","cuando":"Encuestas y valoraciones.","cuandoNo":"Más de 7 puntos; respuestas con descripción (usa opciones).","dependencias":["opciones"],"js":false,"accesibilidad":"fieldset/legend; extremos en texto oculto en el primer y último radio.","movil":"Puntos a 48 px repartidos a lo ancho.","escritorio":"Igual.","errores":["Escala sin extremos rotulados.","Puntos menores de 44 px."],"archivos":{"css":"codigo/modulos/escala/escala.css","js":null},"tamano":{"css":2215,"js":0}},{"nombre":"pasos","titulo":"Formulario por pasos y barra de avance","nivel":"RECOMENDADO","tipo":"navegacion","proposito":"Pasos con barra fija navegable que valida igual que «Continuar»; estados completado, actual, pendiente y con error; «Paso X de N» en teléfono; recordatorio; barra de acciones fija opcional.","cuando":"Más de una pantalla de preguntas.","cuandoNo":"Formularios de 5 campos o menos (una página).","dependencias":[],"js":true,"accesibilidad":"Botones con aria-current=step y nombre «Paso N de M: título, completado»; el foco va al título al cambiar; Enter avanza, no envía.","movil":"Círculos sin etiqueta + «Paso X de N · Título»; acciones en columna, principal arriba. Opcional: la clase acciones-fijas en el bloque de acciones del paso lo deja fijo al pie, respetando las áreas seguras del teléfono.","escritorio":"Etiquetas bajo cada círculo; acciones en fila.","errores":["Deshabilitar los pasos futuros (el teclado no puede inspeccionarlos).","Barra que deja saltar sobre errores.","Mover el foco en cada cambio de campo."],"archivos":{"css":"codigo/modulos/pasos/pasos.css","js":"codigo/modulos/pasos/pasos.js"},"tamano":{"css":4892,"js":8949}},{"nombre":"revision","titulo":"Pantalla de revisión","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el campo y enmascarado de identificadores.","cuando":"Siempre que haya más de un paso o datos personales.","cuandoNo":"Formularios de una pregunta.","dependencias":["pasos"],"js":true,"accesibilidad":"details/summary nativos; «Editar» con el nombre del campo para el lector.","movil":"Etiqueta y valor apilados.","escritorio":"Dos columnas.","errores":["«Editar» que lleva al inicio del paso.","Mostrar campos ocultos por condicional."],"archivos":{"css":"codigo/modulos/revision/revision.css","js":"codigo/modulos/revision/revision.js"},"tamano":{"css":2164,"js":3292}},{"nombre":"acuse","titulo":"Acuse y «qué sigue»","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descarga opcional y pantalla de límite de envíos.","cuando":"Todo envío que genere folio.","cuandoNo":"Capturas internas sin acuse.","dependencias":["copiar"],"js":true,"accesibilidad":"Foco al título del acuse; folio en tarjeta, no en botón; la secuencia es una lista ordenada.","movil":"Acciones en columna.","escritorio":"Acciones en fila centradas.","errores":["Prometer plazos que el sistema no controla.","Folio con aspecto de botón.","No borrar el borrador al recibir."],"archivos":{"css":"codigo/modulos/acuse/acuse.css","js":"codigo/modulos/acuse/acuse.js"},"tamano":{"css":2839,"js":3482}},{"nombre":"modal","titulo":"Diálogo y confirmación","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"<dialog> nativo para contenido que hay que leer y FormKit.confirma() para acciones irreversibles; hoja inferior en teléfono.","cuando":"Aviso de privacidad; confirmar descartar, quitar o enviar sin vuelta atrás.","cuandoNo":"Errores de campo; avisos sin decisión; acciones recuperables.","dependencias":[],"js":true,"accesibilidad":"Trampa de foco nativa, Escape cierra, el foco vuelve a quien abrió; foco inicial en la opción segura.","movil":"Hoja inferior a todo lo ancho con dvh y franja segura.","escritorio":"Caja centrada de 560 px.","errores":["confirm()/alert() nativos.","Foco inicial en la acción destructiva.","Diálogo para instrucciones que deberían estar en pantalla."],"archivos":{"css":"codigo/modulos/modal/modal.css","js":"codigo/modulos/modal/modal.js"},"tamano":{"css":1731,"js":4090}},{"nombre":"copiar","titulo":"Copiar y compartir","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Botones de copiar (folio, campo de solo lectura) y compartir, con confirmación visible y anunciada y alternativa sin portapapeles.","cuando":"Todo dato que la persona deba transcribir.","cuandoNo":"Datos sensibles que no deban salir de la pantalla.","dependencias":[],"js":true,"accesibilidad":"El botón cambia su texto a «Copiado» y se anuncia; sin portapapeles selecciona el texto.","movil":"navigator.share cuando existe.","escritorio":"Copia el enlace.","errores":["Confirmar sólo con un color.","Icono solo sin texto."],"archivos":{"css":"codigo/modulos/copiar/copiar.css","js":"codigo/modulos/copiar/copiar.js"},"tamano":{"css":542,"js":4052}},{"nombre":"descarga","titulo":"Botón de descarga","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Enlace o botón de descarga con icono, acción, formato y peso; estado de preparación; aviso de otra pestaña.","cuando":"Acuse en PDF, plantillas, resultados.","cuandoNo":"Abrir un sitio (es un enlace normal).","dependencias":[],"js":true,"accesibilidad":"Texto dice formato y peso; «se abre en otra pestaña» para el lector; aria-busy mientras se genera.","movil":"Igual.","escritorio":"Igual.","errores":["Nombre de archivo con datos personales.","Icono sin texto."],"archivos":{"css":"codigo/modulos/descarga/descarga.css","js":"codigo/modulos/descarga/descarga.js"},"tamano":{"css":434,"js":3337}},{"nombre":"acordeon","titulo":"Acordeón y secciones plegables","nivel":"OPCIONAL","tipo":"navegacion","proposito":"details/summary para datos accesorios y preguntas frecuentes.","cuando":"Información de apoyo que no todos necesitan.","cuandoNo":"Campos obligatorios o contenido necesario para decidir.","dependencias":[],"js":false,"accesibilidad":"Nativo: Enter/espacio, estado expandido anunciado.","movil":"Igual.","escritorio":"Igual.","errores":["Plegar lo obligatorio.","Flecha con imagen (color fuera de :root)."],"archivos":{"css":"codigo/modulos/acordeon/acordeon.css","js":null},"tamano":{"css":2029,"js":0}},{"nombre":"pestanas","titulo":"Pestañas","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Vistas alternativas del mismo contenido con patrón ARIA tabs y teclado completo.","cuando":"Consulta interna con varias vistas.","cuandoNo":"Dividir un formulario que debe llenarse completo (usa pasos).","dependencias":[],"js":true,"accesibilidad":"role=tab/tabpanel, aria-selected, tabindex rotatorio, flechas e Inicio/Fin.","movil":"Lista con desplazamiento horizontal.","escritorio":"Igual.","errores":["Pestañas con campos obligatorios ocultos.","Más de 5 pestañas."],"archivos":{"css":"codigo/modulos/pestanas/pestanas.css","js":"codigo/modulos/pestanas/pestanas.js"},"tamano":{"css":1101,"js":2941}},{"nombre":"migas","titulo":"Migas de pan","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Ubicación dentro del sitio o del sistema.","cuando":"Consulta interna con niveles.","cuandoNo":"Dentro de un formulario por pasos.","dependencias":[],"js":false,"accesibilidad":"nav con aria-label; aria-current=page; separadores dibujados, no leídos.","movil":"Sólo el nivel anterior con flecha.","escritorio":"Ruta completa.","errores":["Separador con carácter que el lector lee.","Último nivel como enlace a sí mismo."],"archivos":{"css":"codigo/modulos/migas/migas.css","js":null},"tamano":{"css":2540,"js":0}},{"nombre":"progreso","titulo":"Barra de progreso","nivel":"OPCIONAL","tipo":"navegacion","proposito":"<progress> nativo con porcentaje en texto; indeterminado dice «Cargando…».","cuando":"Cargas y formularios largos de una página.","cuandoNo":"Formularios por pasos.","dependencias":[],"js":true,"accesibilidad":"Etiqueta asociada; aria-valuetext con el porcentaje.","movil":"Igual.","escritorio":"Igual.","errores":["Porcentaje sólo visual.","Barra que nunca termina sin mensaje."],"archivos":{"css":"codigo/modulos/progreso/progreso.css","js":"codigo/modulos/progreso/progreso.js"},"tamano":{"css":1126,"js":1810}},{"nombre":"paginacion","titulo":"Paginación de resultados","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Paginación numerada o «Cargar más» con rango visible, tamaño de página, anuncio y foco al inicio de la lista.","cuando":"Listas y tablas de más de una pantalla.","cuandoNo":"Menos de 20 resultados.","dependencias":[],"js":true,"accesibilidad":"nav con etiqueta; aria-current=page; Anterior/Siguiente con aria-disabled; anuncio «Página N de M».","movil":"Anterior · «Página X de N» · Siguiente.","escritorio":"Números, rango y selector.","errores":["Desplazamiento infinito.","Perder filtros al cambiar de página.","Foco que se queda en el botón pulsado."],"archivos":{"css":"codigo/modulos/paginacion/paginacion.css","js":"codigo/modulos/paginacion/paginacion.js"},"tamano":{"css":2189,"js":6129}},{"nombre":"tooltip","titulo":"Ayuda desplegable","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Botón «?» que muestra un texto corto, por clic y teclado, con Escape.","cuando":"Aclaración breve junto a una etiqueta.","cuandoNo":"Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay ícono).","dependencias":[],"js":true,"accesibilidad":"aria-expanded, aria-describedby mientras está abierto, role=tooltip; no depende de hover.","movil":"Texto bajo la etiqueta, dentro del ancho del campo (no se sale de la pantalla aunque el «?» esté al borde), no flotante sobre otros controles.","escritorio":"Igual.","errores":["Sólo con hover.","Texto largo.","Repetir la ayuda visible del mismo campo (auditar-campos D5)."],"archivos":{"css":"codigo/modulos/tooltip/tooltip.css","js":"codigo/modulos/tooltip/tooltip.js"},"tamano":{"css":1511,"js":2737}},{"nombre":"tabla","titulo":"Tabla de consulta y de captura","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Tabla con caption, orden por columna accesible, estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.","cuando":"Consulta interna de registros.","cuandoNo":"Maquetar.","dependencias":["repetibles"],"js":true,"accesibilidad":"th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123».","movil":"Cada fila es una tarjeta.","escritorio":"Tabla con desplazamiento controlado.","errores":["Tabla sin encabezados.","«Eliminar» sin decir qué.","Desplazamiento horizontal libre en teléfono."],"archivos":{"css":"codigo/modulos/tabla/tabla.css","js":"codigo/modulos/tabla/tabla.js"},"tamano":{"css":2845,"js":4714}},{"nombre":"archivos","titulo":"Carga de archivos y fotografías","nivel":"RECOMENDADO","tipo":"archivos","proposito":"Zona de carga (botón real + arrastre), cámara en móvil, validación por extensión, firma, peso, total, duplicados y dimensiones; optimización; huella SHA-256; EXIF configurable; estado, vista previa, quitar y reintentar por archivo.","cuando":"Evidencia, documentos, fotografías.","cuandoNo":"Un solo archivo pequeño sin optimizar (basta el input nativo con ayuda).","dependencias":[],"js":true,"accesibilidad":"La zona es un botón con nombre; cada archivo dice su estado; rechazos con role=alert que nombran el archivo y el motivo.","movil":"Botón de cámara con capture (environment para evidencias; user para una fotografía de frente); vista previa de 96 px; con un solo archivo, los textos en singular.","escritorio":"Arrastrar y soltar; guardia global de drop.","errores":["Validar sólo por extensión.","Medir el peso antes de optimizar.","Enviar la ubicación de la foto sin que la persona lo sepa."],"archivos":{"css":"codigo/modulos/archivos/archivos.css","js":"codigo/modulos/archivos/archivos.js"},"tamano":{"css":2637,"js":19102}},{"nombre":"mapa","titulo":"Mapa con selección de punto","nivel":"OPCIONAL","tipo":"archivos","proposito":"Leaflet autoalojado con gestos que no atrapan la página, marcador propio, ámbito acotado, confirmación del punto, alternativa manual y sin mapa base.","cuando":"Se necesita un punto además de la dirección.","cuandoNo":"Basta la dirección escrita; coordenadas exactas que identifiquen un domicilio sin uso declarado.","dependencias":[],"js":true,"accesibilidad":"role=application con nombre; coordenadas en texto con aria-live; Enter coloca el punto; alternativa de coordenadas manuales.","movil":"Un dedo desplaza la página, dos el mapa; alto fluido.","escritorio":"Clic y arrastre.","errores":["Mapa como único camino.","Teselas con clave escrita en el código.","Punto fuera del ámbito aceptado hasta el envío."],"archivos":{"css":"codigo/modulos/mapa/mapa.css","js":"codigo/modulos/mapa/mapa.js"},"tamano":{"css":2754,"js":9846}},{"nombre":"enlace-mapa","titulo":"Coordenadas desde un enlace de Google Maps","nivel":"OPCIONAL","tipo":"archivos","proposito":"La persona pega el enlace de Google Maps del lugar y el módulo escribe sus coordenadas en el campo de coordenadas, que valida el núcleo. También acomoda lo que se escribe directo: latitud y longitud al revés, grados-minutos-segundos, coma decimal o la longitud sin signo menos. El enlace no se envía; sólo viajan las coordenadas.","cuando":"Se pide la ubicación exacta de un domicilio o de un sitio y la persona puede tenerla en Google Maps (por ejemplo, la que le llegó por WhatsApp).","cuandoNo":"Como única vía para dar la ubicación: la dirección va primero (FRM-46). Tampoco para resolver enlaces cortos, que obligarían a la página a consultar a Google (FRM-77).","dependencias":[],"js":true,"accesibilidad":"Lo que se toma del enlace o se corrige se dice con palabras y se anuncia («Coordenadas tomadas del enlace: …»); los avisos llevan icono y texto, no sólo color.","movil":"Lee el enlace en cuanto se pega, sin salir del campo. Agrega el signo menos que el teclado numérico del iPhone no trae.","escritorio":"Igual; también al salir del campo.","errores":["Tomar el centro de la pantalla (@) como si fuera el lugar: el punto puede caer a cientos de metros.","Tomar el primer punto del enlace en lugar del último.","Rechazar coordenadas que vienen al revés o sin el signo menos.","Pedirle a Google desde la página que resuelva un enlace corto."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/enlace-mapa/enlace-mapa.js"},"tamano":{"css":0,"js":8196}},{"nombre":"cascadas","titulo":"Campos dependientes en cascada","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Alcaldía → colonia → código postal desde un catálogo oficial versionado; relación inversa desde el código postal; captura manual si el catálogo no carga.","cuando":"Domicilio dentro de un ámbito con catálogo.","cuandoNo":"Sin catálogo oficial disponible (captura libre).","dependencias":[],"js":true,"accesibilidad":"El hijo deshabilitado explica por qué; cada reinicio y cada autocompletado se anuncian.","movil":"Selects nativos (rueda del sistema).","escritorio":"Selects.","errores":["Catálogo escrito a mano.","Reiniciar al hijo sin anunciarlo.","Bloquear si el cp no coincide (es advertencia)."],"archivos":{"css":"codigo/modulos/cascadas/cascadas.css","js":"codigo/modulos/cascadas/cascadas.js"},"tamano":{"css":539,"js":7583}},{"nombre":"chips","titulo":"Chips de uso frecuente","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Sugerencias de un toque desde el historial del dispositivo; nunca al servidor; quitar y borrar historial; se niega en datos personales.","cuando":"Captura por personal con respuestas repetidas.","cuandoNo":"Formularios ciudadanos de una sola vez; datos personales.","dependencias":[],"js":true,"accesibilidad":"Botones con aria-pressed; «Quitar X de las sugerencias»; grupo con nombre.","movil":"Chips de 44 px que se envuelven.","escritorio":"Igual.","errores":["Guardar historial de nombre o correo.","Chips sin forma de borrarlos."],"archivos":{"css":"codigo/modulos/chips/chips.css","js":"codigo/modulos/chips/chips.js"},"tamano":{"css":1459,"js":4836}}],"generado":"2026-10-16T14:27:22.310Z"};
+window.GUIA_MANIFIESTO = {"_nota":"Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).","version":"1.1.0","nucleo":{"archivos":["codigo/css/tokens.css","codigo/css/base.css","codigo/css/nucleo.css","codigo/js/validaciones.config.js","codigo/js/formkit.core.js","codigo/js/iconos.js"],"orden":"tokens.css → base.css → nucleo.css → (CSS de módulos) … validaciones.config.js → iconos.js → formkit.core.js → (JS de módulos)","incluye":[{"pieza":"Campo (etiqueta, ayuda, control, error)","nivel":"BASE"},{"pieza":"Texto corto, correo, teléfono, numérico, texto largo con contador","nivel":"BASE"},{"pieza":"Lista desplegable simple (select)","nivel":"BASE"},{"pieza":"Casilla de declaración o consentimiento","nivel":"BASE"},{"pieza":"Solo lectura frente a deshabilitado","nivel":"BASE"},{"pieza":"Pregunta condicional (data-si)","nivel":"BASE"},{"pieza":"Autocompletado, inputmode y enterkeyhint","nivel":"BASE"},{"pieza":"Validación individual, cruzada y resumen de errores con foco","nivel":"BASE"},{"pieza":"Botones (principal, secundario, peligro, atrás, enlace, icono)","nivel":"BASE"},{"pieza":"Avisos (neutro, advertencia, bloqueo, éxito) y pendiente visible","nivel":"BASE"},{"pieza":"Iconografía (sprite SVG)","nivel":"BASE"},{"pieza":"Estados de envío (enviando, error, plazo, límite) sin duplicados","nivel":"BASE"},{"pieza":"Borrador local versionado","nivel":"RECOMENDADO"},{"pieza":"Encabezado y pie institucionales, enlace de salto","nivel":"BASE"}],"tamano":{"tokens.css":8394,"base.css":5841,"nucleo.css":16940,"validaciones.config.js":31865,"formkit.core.js":46299,"iconos.js":5845}},"modulos":[{"nombre":"opciones","titulo":"Opciones elegibles","nivel":"BASE","tipo":"pregunta","proposito":"Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con descripción y la variante corta Sí/No, sobre controles nativos. Para una sola respuesta, la lista (.opciones-lista, una por renglón con el círculo visible) es la forma por omisión; dos o tres opciones cortas sin descripción (Sí/No) van en línea (.opciones-en-linea). La opción deshabilitada se ve atenuada.","cuando":"Elegir una o varias respuestas entre 2 y 7 opciones conocidas.","cuandoNo":"Más de 7 opciones (usa combo); ajustes inmediatos (usa toggle); escalas (usa escala).","dependencias":[],"js":false,"accesibilidad":"Input nativo cubriendo la tarjeta: flechas, espacio, anuncio «botón de opción 1 de 3»; lo elegido se marca con fondo, sombra interior y palomita.","movil":"Una columna, también la lista en línea; Sí/No con botones a 48 px con puntero grueso.","escritorio":"Lista con el círculo visible; en línea, una columna por opción con el hueco de las filas de campos; Sí/No con botones a 40 px con ratón.","errores":["Usar div con onclick en lugar de radio.","Marcar lo elegido sólo con color.","Premarcar una opción.","Más de siete tarjetas.","Tarjetas en rejilla para una sola respuesta: en escritorio no se ve que hay que elegir una.","Sí/No apilado a todo lo ancho: dos o tres opciones cortas van en línea."],"archivos":{"css":"codigo/modulos/opciones/opciones.css","js":null},"tamano":{"css":5175,"js":0}},{"nombre":"otro","titulo":"Opción «Otro» con especificación","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Campo de texto que aparece al elegir «Otro» en radios, casillas, select o tarjetas; obligatorio sólo mientras exista; conserva lo escrito.","cuando":"La lista puede no cubrir el caso de la persona.","cuandoNo":"El detalle no se va a usar (usa «Otro» simple, que es una opción más).","dependencias":["opciones"],"js":true,"accesibilidad":"aria-expanded y aria-controls en el control que gobierna; sin mover el foco; mensaje propio de obligatorio.","movil":"Igual que el campo de texto.","escritorio":"Igual.","errores":["Poner «Otro» al inicio de la lista.","Enviar el texto aunque «Otro» no esté elegida.","Borrar lo escrito al desmarcar."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/otro/otro.js"},"tamano":{"css":0,"js":4313}},{"nombre":"combo","titulo":"Lista desplegable con búsqueda","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, anuncia resultados; cerrado por omisión, libre con data-libre.","cuando":"Catálogos de 8 o más valores (alcaldías, giros, especies).","cuandoNo":"Listas cortas (usa select u opciones).","dependencias":[],"js":true,"accesibilidad":"role=combobox, aria-expanded, aria-activedescendant, flechas, Inicio/Fin, Enter, Escape; no abre al recibir foco para no tapar el error.","movil":"Lista bajo el campo, 44 px por opción.","escritorio":"Igual, 8 resultados máximo.","errores":["Mezclar select nativo y combo en el mismo formulario.","Escribir el catálogo a mano en el código.","Aceptar valor libre sin decirlo."],"archivos":{"css":"codigo/modulos/combo/combo.css","js":"codigo/modulos/combo/combo.js"},"tamano":{"css":1466,"js":7871}},{"nombre":"fecha","titulo":"Fecha y hora con «Hoy» y atajos","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria de la Ciudad de México, límites por atributo, atajos de rango y edad calculada desde la fecha de nacimiento (data-deriva=\"edad=…\"), que nunca se escribe a mano.","cuando":"Cualquier fecha u hora.","cuandoNo":"Fecha de nacimiento cuando ya se pide CURP (se deriva).","dependencias":[],"js":true,"accesibilidad":"Botón con texto; el valor nuevo se anuncia; la validación cruzada de rango se declara sola.","movil":"Botón bajo el campo a todo lo ancho; rueda nativa del sistema.","escritorio":"Botón al lado del campo.","errores":["Tomar «hoy» del reloj del dispositivo sin zona horaria.","Permitir fecha de hechos futura.","Rango sin validación cruzada.","Pedir la edad escrita además de la fecha de nacimiento."],"archivos":{"css":"codigo/modulos/fecha/fecha.css","js":"codigo/modulos/fecha/fecha.js"},"tamano":{"css":1003,"js":6042}},{"nombre":"identificadores","titulo":"CURP, RFC y folios","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Campos con formato cerrado: mayúsculas al escribir, validación por capas desde la configuración, derivación de fecha de nacimiento y sexo desde la CURP a campos de solo lectura, enmascarado en revisión.","cuando":"El formulario necesita identificar a la persona.","cuandoNo":"Cuando el dato no tiene uso declarado: la CURP es dato personal.","dependencias":[],"js":true,"accesibilidad":"Los derivados se anuncian («tomado de la CURP»); el mensaje dice qué posición falló.","movil":"autocapitalize=characters; teclado de texto.","escritorio":"Igual.","errores":["Pedir fecha de nacimiento y CURP por separado sin cruzarlas.","Registrar la CURP en bitácoras o en la URL.","Dar por verificada la existencia con el formato."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/identificadores/identificadores.js"},"tamano":{"css":0,"js":3908}},{"nombre":"repetibles","titulo":"Grupos repetibles («Agregar otro»)","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos.","cuando":"La cantidad de elementos la decide la persona.","cuandoNo":"Siempre son exactamente N (ponlos fijos).","dependencias":["modal"],"js":true,"accesibilidad":"Cada fila tiene título numerado y botón «Quitar fila N»; el foco va al primer campo al agregar y a un lugar sensato al quitar.","movil":"Filas apiladas como tarjetas.","escritorio":"Igual; en tabla de captura, por renglones.","errores":["Nombres de campo repetidos entre filas.","Quitar sin confirmar una fila con datos.","Sin máximo."],"archivos":{"css":"codigo/modulos/repetibles/repetibles.css","js":"codigo/modulos/repetibles/repetibles.js"},"tamano":{"css":929,"js":6960}},{"nombre":"toggle","titulo":"Interruptor","nivel":"OPCIONAL","tipo":"pregunta","proposito":"role=switch para ajustes que surten efecto de inmediato.","cuando":"Activar o desactivar algo al momento (mostrar mapa, recibir avisos).","cuandoNo":"Una respuesta del formulario (usa casilla o Sí/No).","dependencias":[],"js":true,"accesibilidad":"aria-checked es el estado; texto «Sí/No» visible; 44 px.","movil":"Igual.","escritorio":"Igual.","errores":["Usarlo como consentimiento.","Estado sólo por color."],"archivos":{"css":"codigo/modulos/toggle/toggle.css","js":"codigo/modulos/toggle/toggle.js"},"tamano":{"css":1458,"js":2633}},{"nombre":"escala","titulo":"Escala o valoración","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Radios en fila (1 a 5) con extremos rotulados.","cuando":"Encuestas y valoraciones.","cuandoNo":"Más de 7 puntos; respuestas con descripción (usa opciones).","dependencias":["opciones"],"js":false,"accesibilidad":"fieldset/legend; extremos en texto oculto en el primer y último radio.","movil":"Puntos a 48 px repartidos a lo ancho.","escritorio":"Igual.","errores":["Escala sin extremos rotulados.","Puntos menores de 44 px."],"archivos":{"css":"codigo/modulos/escala/escala.css","js":null},"tamano":{"css":2215,"js":0}},{"nombre":"pasos","titulo":"Formulario por pasos y barra de avance","nivel":"RECOMENDADO","tipo":"navegacion","proposito":"Pasos con barra fija navegable que valida igual que «Continuar»; estados completado, actual, pendiente y con error; «Paso X de N» en teléfono; recordatorio; barra de acciones fija opcional.","cuando":"Más de una pantalla de preguntas.","cuandoNo":"Formularios de 5 campos o menos (una página).","dependencias":[],"js":true,"accesibilidad":"Botones con aria-current=step y nombre «Paso N de M: título, completado»; el foco va al título al cambiar; Enter avanza, no envía.","movil":"Círculos sin etiqueta + «Paso X de N · Título»; acciones en columna, principal arriba. Opcional: la clase acciones-fijas en el bloque de acciones del paso lo deja fijo al pie, respetando las áreas seguras del teléfono.","escritorio":"Etiquetas bajo cada círculo; acciones en fila.","errores":["Deshabilitar los pasos futuros (el teclado no puede inspeccionarlos).","Barra que deja saltar sobre errores.","Mover el foco en cada cambio de campo."],"archivos":{"css":"codigo/modulos/pasos/pasos.css","js":"codigo/modulos/pasos/pasos.js"},"tamano":{"css":4892,"js":8949}},{"nombre":"revision","titulo":"Pantalla de revisión","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el campo y enmascarado de identificadores.","cuando":"Siempre que haya más de un paso o datos personales.","cuandoNo":"Formularios de una pregunta.","dependencias":["pasos"],"js":true,"accesibilidad":"details/summary nativos; «Editar» con el nombre del campo para el lector.","movil":"Etiqueta y valor apilados.","escritorio":"Dos columnas.","errores":["«Editar» que lleva al inicio del paso.","Mostrar campos ocultos por condicional."],"archivos":{"css":"codigo/modulos/revision/revision.css","js":"codigo/modulos/revision/revision.js"},"tamano":{"css":2164,"js":3292}},{"nombre":"acuse","titulo":"Acuse y «qué sigue»","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descarga opcional y pantalla de límite de envíos.","cuando":"Todo envío que genere folio.","cuandoNo":"Capturas internas sin acuse.","dependencias":["copiar"],"js":true,"accesibilidad":"Foco al título del acuse; folio en tarjeta, no en botón; la secuencia es una lista ordenada.","movil":"Acciones en columna.","escritorio":"Acciones en fila centradas.","errores":["Prometer plazos que el sistema no controla.","Folio con aspecto de botón.","No borrar el borrador al recibir."],"archivos":{"css":"codigo/modulos/acuse/acuse.css","js":"codigo/modulos/acuse/acuse.js"},"tamano":{"css":2839,"js":3482}},{"nombre":"modal","titulo":"Diálogo y confirmación","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"<dialog> nativo para contenido que hay que leer y FormKit.confirma() para acciones irreversibles; hoja inferior en teléfono.","cuando":"Aviso de privacidad; confirmar descartar, quitar o enviar sin vuelta atrás.","cuandoNo":"Errores de campo; avisos sin decisión; acciones recuperables.","dependencias":[],"js":true,"accesibilidad":"Trampa de foco nativa, Escape cierra, el foco vuelve a quien abrió; foco inicial en la opción segura.","movil":"Hoja inferior a todo lo ancho con dvh y franja segura.","escritorio":"Caja centrada de 560 px.","errores":["confirm()/alert() nativos.","Foco inicial en la acción destructiva.","Diálogo para instrucciones que deberían estar en pantalla."],"archivos":{"css":"codigo/modulos/modal/modal.css","js":"codigo/modulos/modal/modal.js"},"tamano":{"css":1731,"js":4090}},{"nombre":"copiar","titulo":"Copiar y compartir","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Botones de copiar (folio, campo de solo lectura) y compartir, con confirmación visible y anunciada y alternativa sin portapapeles.","cuando":"Todo dato que la persona deba transcribir.","cuandoNo":"Datos sensibles que no deban salir de la pantalla.","dependencias":[],"js":true,"accesibilidad":"El botón cambia su texto a «Copiado» y se anuncia; sin portapapeles selecciona el texto.","movil":"navigator.share cuando existe.","escritorio":"Copia el enlace.","errores":["Confirmar sólo con un color.","Icono solo sin texto."],"archivos":{"css":"codigo/modulos/copiar/copiar.css","js":"codigo/modulos/copiar/copiar.js"},"tamano":{"css":542,"js":4052}},{"nombre":"descarga","titulo":"Botón de descarga","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Enlace o botón de descarga con icono, acción, formato y peso; estado de preparación; aviso de otra pestaña.","cuando":"Acuse en PDF, plantillas, resultados.","cuandoNo":"Abrir un sitio (es un enlace normal).","dependencias":[],"js":true,"accesibilidad":"Texto dice formato y peso; «se abre en otra pestaña» para el lector; aria-busy mientras se genera.","movil":"Igual.","escritorio":"Igual.","errores":["Nombre de archivo con datos personales.","Icono sin texto."],"archivos":{"css":"codigo/modulos/descarga/descarga.css","js":"codigo/modulos/descarga/descarga.js"},"tamano":{"css":434,"js":3337}},{"nombre":"acordeon","titulo":"Acordeón y secciones plegables","nivel":"OPCIONAL","tipo":"navegacion","proposito":"details/summary para datos accesorios y preguntas frecuentes.","cuando":"Información de apoyo que no todos necesitan.","cuandoNo":"Campos obligatorios o contenido necesario para decidir.","dependencias":[],"js":false,"accesibilidad":"Nativo: Enter/espacio, estado expandido anunciado.","movil":"Igual.","escritorio":"Igual.","errores":["Plegar lo obligatorio.","Flecha con imagen (color fuera de :root)."],"archivos":{"css":"codigo/modulos/acordeon/acordeon.css","js":null},"tamano":{"css":2029,"js":0}},{"nombre":"pestanas","titulo":"Pestañas","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Vistas alternativas del mismo contenido con patrón ARIA tabs y teclado completo.","cuando":"Consulta interna con varias vistas.","cuandoNo":"Dividir un formulario que debe llenarse completo (usa pasos).","dependencias":[],"js":true,"accesibilidad":"role=tab/tabpanel, aria-selected, tabindex rotatorio, flechas e Inicio/Fin.","movil":"Lista con desplazamiento horizontal.","escritorio":"Igual.","errores":["Pestañas con campos obligatorios ocultos.","Más de 5 pestañas."],"archivos":{"css":"codigo/modulos/pestanas/pestanas.css","js":"codigo/modulos/pestanas/pestanas.js"},"tamano":{"css":1101,"js":2941}},{"nombre":"migas","titulo":"Migas de pan","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Ubicación dentro del sitio o del sistema.","cuando":"Consulta interna con niveles.","cuandoNo":"Dentro de un formulario por pasos.","dependencias":[],"js":false,"accesibilidad":"nav con aria-label; aria-current=page; separadores dibujados, no leídos.","movil":"Sólo el nivel anterior con flecha.","escritorio":"Ruta completa.","errores":["Separador con carácter que el lector lee.","Último nivel como enlace a sí mismo."],"archivos":{"css":"codigo/modulos/migas/migas.css","js":null},"tamano":{"css":2540,"js":0}},{"nombre":"progreso","titulo":"Barra de progreso","nivel":"OPCIONAL","tipo":"navegacion","proposito":"<progress> nativo con porcentaje en texto; indeterminado dice «Cargando…».","cuando":"Cargas y formularios largos de una página.","cuandoNo":"Formularios por pasos.","dependencias":[],"js":true,"accesibilidad":"Etiqueta asociada; aria-valuetext con el porcentaje.","movil":"Igual.","escritorio":"Igual.","errores":["Porcentaje sólo visual.","Barra que nunca termina sin mensaje."],"archivos":{"css":"codigo/modulos/progreso/progreso.css","js":"codigo/modulos/progreso/progreso.js"},"tamano":{"css":1126,"js":1810}},{"nombre":"paginacion","titulo":"Paginación de resultados","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Paginación numerada o «Cargar más» con rango visible, tamaño de página, anuncio y foco al inicio de la lista.","cuando":"Listas y tablas de más de una pantalla.","cuandoNo":"Menos de 20 resultados.","dependencias":[],"js":true,"accesibilidad":"nav con etiqueta; aria-current=page; Anterior/Siguiente con aria-disabled; anuncio «Página N de M».","movil":"Anterior · «Página X de N» · Siguiente.","escritorio":"Números, rango y selector.","errores":["Desplazamiento infinito.","Perder filtros al cambiar de página.","Foco que se queda en el botón pulsado."],"archivos":{"css":"codigo/modulos/paginacion/paginacion.css","js":"codigo/modulos/paginacion/paginacion.js"},"tamano":{"css":2189,"js":6129}},{"nombre":"version","titulo":"Distintivo de versión","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Distintivo pequeño y siempre visible, fijo abajo a la izquierda, que dice qué versión del sitio se tiene enfrente: de prueba (dorado), instalada en el SIA (gris) o sin leer (guinda). Es la hoja de la plantilla de versión del SIA hecha con los tokens del estándar.","cuando":"Sitios que se prueban antes de instalarse en el SIA, o que deben mostrar su versión en pantalla.","cuandoNo":"Para avisos a la persona (usa los avisos del núcleo): el distintivo no recibe toques ni se anuncia como estado.","dependencias":[],"js":false,"accesibilidad":"Va dentro del pie (<footer>), para quedar en una región de la página; no recibe toques (pointer-events: none), así que nunca tapa un control; texto de 4.5:1 o más en sus tres estados.","movil":"Abajo a la izquierda, respetando el área segura de la pantalla.","escritorio":"Igual; al imprimir va en su lugar, sin flotar.","errores":["Ponerlo fuera del pie: axe lo marca como contenido fuera de una región.","Escribir colores o medidas a mano en lugar de los tokens (el auditor de CSS lo rechaza).","Usarlo para avisar algo a la persona."],"archivos":{"css":"codigo/modulos/version/version.css","js":null},"tamano":{"css":2244,"js":0}},{"nombre":"tooltip","titulo":"Ayuda desplegable","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Botón «?» que muestra un texto corto, por clic y teclado, con Escape.","cuando":"Aclaración breve junto a una etiqueta.","cuandoNo":"Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay ícono).","dependencias":[],"js":true,"accesibilidad":"aria-expanded, aria-describedby mientras está abierto, role=tooltip; no depende de hover.","movil":"Texto bajo la etiqueta, dentro del ancho del campo (no se sale de la pantalla aunque el «?» esté al borde), no flotante sobre otros controles.","escritorio":"Igual.","errores":["Sólo con hover.","Texto largo.","Repetir la ayuda visible del mismo campo (auditar-campos D5)."],"archivos":{"css":"codigo/modulos/tooltip/tooltip.css","js":"codigo/modulos/tooltip/tooltip.js"},"tamano":{"css":1511,"js":2737}},{"nombre":"tabla","titulo":"Tabla de consulta y de captura","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Tabla con caption, orden por columna accesible, estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.","cuando":"Consulta interna de registros.","cuandoNo":"Maquetar.","dependencias":["repetibles"],"js":true,"accesibilidad":"th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123».","movil":"Cada fila es una tarjeta.","escritorio":"Tabla con desplazamiento controlado.","errores":["Tabla sin encabezados.","«Eliminar» sin decir qué.","Desplazamiento horizontal libre en teléfono."],"archivos":{"css":"codigo/modulos/tabla/tabla.css","js":"codigo/modulos/tabla/tabla.js"},"tamano":{"css":2845,"js":4714}},{"nombre":"archivos","titulo":"Carga de archivos y fotografías","nivel":"RECOMENDADO","tipo":"archivos","proposito":"Zona de carga (botón real + arrastre), cámara en móvil, validación por extensión, firma, peso, total, duplicados y dimensiones; optimización; huella SHA-256; EXIF configurable; estado, vista previa, quitar y reintentar por archivo.","cuando":"Evidencia, documentos, fotografías.","cuandoNo":"Un solo archivo pequeño sin optimizar (basta el input nativo con ayuda).","dependencias":[],"js":true,"accesibilidad":"La zona es un botón con nombre; cada archivo dice su estado; rechazos con role=alert que nombran el archivo y el motivo.","movil":"Botón de cámara con capture (environment para evidencias; user para una fotografía de frente); vista previa de 96 px; con un solo archivo, los textos en singular.","escritorio":"Arrastrar y soltar; guardia global de drop.","errores":["Validar sólo por extensión.","Medir el peso antes de optimizar.","Enviar la ubicación de la foto sin que la persona lo sepa."],"archivos":{"css":"codigo/modulos/archivos/archivos.css","js":"codigo/modulos/archivos/archivos.js"},"tamano":{"css":2637,"js":19102}},{"nombre":"mapa","titulo":"Mapa con selección de punto","nivel":"OPCIONAL","tipo":"archivos","proposito":"Leaflet autoalojado con gestos que no atrapan la página, marcador propio, ámbito acotado, confirmación del punto, alternativa manual y sin mapa base.","cuando":"Se necesita un punto además de la dirección.","cuandoNo":"Basta la dirección escrita; coordenadas exactas que identifiquen un domicilio sin uso declarado.","dependencias":[],"js":true,"accesibilidad":"role=application con nombre; coordenadas en texto con aria-live; Enter coloca el punto; alternativa de coordenadas manuales.","movil":"Un dedo desplaza la página, dos el mapa; alto fluido.","escritorio":"Clic y arrastre.","errores":["Mapa como único camino.","Teselas con clave escrita en el código.","Punto fuera del ámbito aceptado hasta el envío."],"archivos":{"css":"codigo/modulos/mapa/mapa.css","js":"codigo/modulos/mapa/mapa.js"},"tamano":{"css":2754,"js":9846}},{"nombre":"enlace-mapa","titulo":"Coordenadas desde un enlace de Google Maps","nivel":"OPCIONAL","tipo":"archivos","proposito":"La persona pega el enlace de Google Maps del lugar y el módulo escribe sus coordenadas en el campo de coordenadas, que valida el núcleo. También acomoda lo que se escribe directo: latitud y longitud al revés, grados-minutos-segundos, coma decimal o la longitud sin signo menos. El enlace no se envía; sólo viajan las coordenadas.","cuando":"Se pide la ubicación exacta de un domicilio o de un sitio y la persona puede tenerla en Google Maps (por ejemplo, la que le llegó por WhatsApp).","cuandoNo":"Como única vía para dar la ubicación: la dirección va primero (FRM-46). Tampoco para resolver enlaces cortos, que obligarían a la página a consultar a Google (FRM-77).","dependencias":[],"js":true,"accesibilidad":"Lo que se toma del enlace o se corrige se dice con palabras y se anuncia («Coordenadas tomadas del enlace: …»); los avisos llevan icono y texto, no sólo color.","movil":"Lee el enlace en cuanto se pega, sin salir del campo. Agrega el signo menos que el teclado numérico del iPhone no trae.","escritorio":"Igual; también al salir del campo.","errores":["Tomar el centro de la pantalla (@) como si fuera el lugar: el punto puede caer a cientos de metros.","Tomar el primer punto del enlace en lugar del último.","Rechazar coordenadas que vienen al revés o sin el signo menos.","Pedirle a Google desde la página que resuelva un enlace corto."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/enlace-mapa/enlace-mapa.js"},"tamano":{"css":0,"js":8196}},{"nombre":"cascadas","titulo":"Campos dependientes en cascada","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Alcaldía → colonia → código postal desde un catálogo oficial versionado; relación inversa desde el código postal; captura manual si el catálogo no carga.","cuando":"Domicilio dentro de un ámbito con catálogo.","cuandoNo":"Sin catálogo oficial disponible (captura libre).","dependencias":[],"js":true,"accesibilidad":"El hijo deshabilitado explica por qué; cada reinicio y cada autocompletado se anuncian.","movil":"Selects nativos (rueda del sistema).","escritorio":"Selects.","errores":["Catálogo escrito a mano.","Reiniciar al hijo sin anunciarlo.","Bloquear si el cp no coincide (es advertencia)."],"archivos":{"css":"codigo/modulos/cascadas/cascadas.css","js":"codigo/modulos/cascadas/cascadas.js"},"tamano":{"css":539,"js":7583}},{"nombre":"chips","titulo":"Chips de uso frecuente","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Sugerencias de un toque desde el historial del dispositivo; nunca al servidor; quitar y borrar historial; se niega en datos personales.","cuando":"Captura por personal con respuestas repetidas.","cuandoNo":"Formularios ciudadanos de una sola vez; datos personales.","dependencias":[],"js":true,"accesibilidad":"Botones con aria-pressed; «Quitar X de las sugerencias»; grupo con nombre.","movil":"Chips de 44 px que se envuelven.","escritorio":"Igual.","errores":["Guardar historial de nombre o correo.","Chips sin forma de borrarlos."],"archivos":{"css":"codigo/modulos/chips/chips.css","js":"codigo/modulos/chips/chips.js"},"tamano":{"css":1459,"js":4836}}],"generado":"2026-10-16T15:11:01.640Z"};
 
 </script>
 <script data-origen="guia-visual\guia-config.js">
@@ -23281,10 +23760,6 @@ window.FORMKIT_OPCIONES = {
       que: 'Elegir la licencia del código y la de la documentación, con apoyo jurídico; el logotipo institucional y las marcas de redes sociales quedan fuera de ella.' },
     { de: 'Los dos', tema: 'Repositorio nuevo en GitHub', quien: 'Lo hace la Secretaría',
       que: 'El historial de la carpeta ya está limpio, sin la firma de la herramienta de trabajo ni el correo personal. El repositorio de GitHub todavía guarda los guardados viejos: hay que borrarlo y crearlo de nuevo vacío antes de subir esta carpeta.' },
-    { de: 'Formularios', tema: 'CURP contra nombre y apellidos', quien: 'Lo entrega el proyecto de acreditaciones',
-      que: 'Traer al estándar las tres comprobaciones de la CURP contra el nombre y los apellidos que ya funcionan en el sistema de acreditaciones, para que no se pueda usar la CURP de otra persona nacida el mismo día. Falta el archivo curp-nombre.js de ese proyecto.' },
-    { de: 'Formularios', tema: 'Distintivo de versión', quien: 'Lo entrega el proyecto de acreditaciones',
-      que: 'Incluir la hoja del distintivo de versión hecha con los colores y medidas del estándar, y decir que el distintivo va dentro del pie. Falta el archivo version-visible.formkit.css de ese proyecto.' },
     { de: 'Formularios', tema: 'Avisos de privacidad', quien: 'Lo resuelve la Unidad de Transparencia',
       que: 'Completar el fundamento legal de los avisos de privacidad de las plantillas y enlazar el aviso integral antes de usar un formulario en producción.' },
     { de: 'Los dos', tema: 'Trato de tú o de usted', quien: 'Decide la Secretaría',
@@ -23594,7 +24069,7 @@ window.FORMKIT_OPCIONES = {
   const GRUPOS = [['pregunta', 'Preguntas'], ['archivos', 'Ubicación y archivos'], ['navegacion', 'Recorrido de la página'], ['retroalimentacion', 'Respuesta a la persona']];
   const ORDEN = ['opciones', 'otro', 'combo', 'fecha', 'cascadas', 'identificadores', 'repetibles', 'chips', 'toggle', 'escala',
     'archivos', 'mapa', 'enlace-mapa',
-    'pasos', 'progreso', 'acordeon', 'pestanas', 'migas', 'paginacion',
+    'pasos', 'progreso', 'acordeon', 'pestanas', 'migas', 'paginacion', 'version',
     'revision', 'modal', 'acuse', 'copiar', 'descarga', 'tooltip', 'tabla'];
   const posicion = (n) => { const i = ORDEN.indexOf(n); return i < 0 ? ORDEN.length : i; };
   const nombreTipo = Object.fromEntries(GRUPOS);
@@ -23625,8 +24100,8 @@ window.FORMKIT_OPCIONES = {
      y de los módulos, tomadas de proyectos que ya funcionan. */
   const FICHAS_BLOQUES = [
     { id: 'b-identificacion', titulo: 'Datos de identificación de una persona', nivel: 'OPCIONAL', demo: { nombre: 'bloque-identificacion' },
-      proposito: 'Nombre(s), apellido paterno, apellido materno (opcional), CURP, fecha de nacimiento y edad. Los apellidos van en campos separados. La fecha de nacimiento se toma de la CURP y la edad, de la fecha, en campos de solo lectura: nada se escribe dos veces ni puede contradecir a la CURP. Si no necesitas la edad, quita ese campo. Para probar: CURP ficticia PEGJ900515HDFRRN09.',
-      meta: [['Usa', 'núcleo + identificadores + fecha'], ['Sin CURP', 'Quita la CURP y su fecha, y usa el bloque «Fecha de nacimiento y edad». Si basta el grupo de edad, usa «Rango de edad».'], ['Datos personales', 'Cada campo declara data-uso, data-finalidad y data-sensible, así que nada queda en el borrador del dispositivo (FRM-55). Cambia los textos de uso y finalidad por los de tu formulario.'], ['Si los datos son de otra persona', 'autocomplete="off" en cada campo, con el motivo en un comentario (FRM-12).']],
+      proposito: 'Nombre(s), apellido paterno, apellido materno (opcional), CURP, fecha de nacimiento y edad. Los apellidos van en campos separados. La fecha de nacimiento se toma de la CURP y la edad, de la fecha, en campos de solo lectura: nada se escribe dos veces ni puede contradecir a la CURP. Si no necesitas la edad, quita ese campo. La CURP se compara con el nombre y los apellidos: si no corresponden, lo dice. Para probar: Juan Pérez García con la CURP ficticia PEGJ900515HDFRRN09.',
+      meta: [['Usa', 'núcleo + identificadores + fecha'], ['CURP y nombre', 'Las cruzadas curp-nombre y curp-segundo-apellido comparan las letras de la CURP con el nombre y los apellidos (sin segundo apellido, la CURP lleva X). Comprueban que los datos sean coherentes entre sí, no que la CURP exista ni que sea de quien la escribe.'], ['Sin CURP', 'Quita la CURP y su fecha, y usa el bloque «Fecha de nacimiento y edad». Si basta el grupo de edad, usa «Rango de edad».'], ['Datos personales', 'Cada campo declara data-uso, data-finalidad y data-sensible, así que nada queda en el borrador del dispositivo (FRM-55). Cambia los textos de uso y finalidad por los de tu formulario.'], ['Si los datos son de otra persona', 'autocomplete="off" en cada campo, con el motivo en un comentario (FRM-12).']],
       movil: 'Una columna; la CURP pasa a mayúsculas mientras se escribe y la fecha y la edad aparecen solas.', escritorio: 'La ayuda común va una sola vez, arriba; nombre y apellidos en tres columnas alineadas aunque sólo uno lleve ayuda; la CURP y la fecha que sale de ella, en otra fila.',
       errores: ['Pedir «Apellido(s)» en un solo campo (FRM-13).', 'Hacer obligatorio el apellido materno: hay personas con un solo apellido.', 'Repetir «como aparece en tu identificación» en cada campo: va una vez, como ayuda de bloque.', 'Pedir la fecha de nacimiento y la CURP por separado sin cruzarlas.', 'Guardar la CURP en el borrador del dispositivo.', 'Pedir la edad escrita: se calcula con la fecha.'] },
     { id: 'b-nacimiento', titulo: 'Fecha de nacimiento y edad', nivel: 'OPCIONAL', demo: { nombre: 'bloque-nacimiento' },

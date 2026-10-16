@@ -1,6 +1,6 @@
 {
   "formulario": "una-pagina.html",
-  "generado": "2026-10-16T13:56:34.059Z",
+  "generado": "2026-10-16T15:09:05.647Z",
   "campos": {
     "nombre": {
       "etiqueta": "Nombre(s)",
@@ -54,7 +54,29 @@
         "deriva": "fechaNacimiento=nacimiento",
         "enmascara": ""
       },
-      "autocomplete": "off"
+      "autocomplete": "off",
+      "cruzadas": [
+        {
+          "clave": "curp-nombre",
+          "mapa": {
+            "curp": "curp",
+            "nombre": "nombre",
+            "primer": "apellido_paterno",
+            "segundo": "apellido_materno"
+          },
+          "nivel": "error"
+        },
+        {
+          "clave": "curp-segundo-apellido",
+          "mapa": {
+            "curp": "curp",
+            "nombre": "nombre",
+            "primer": "apellido_paterno",
+            "segundo": "apellido_materno"
+          },
+          "nivel": "error"
+        }
+      ]
     },
     "nacimiento": {
       "etiqueta": "Fecha de nacimiento",

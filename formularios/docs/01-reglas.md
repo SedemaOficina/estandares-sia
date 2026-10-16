@@ -234,15 +234,15 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Verificación.** 02-una-pagina: rango y atajos; 06-servidor: max «hoy»
 
-### FRM-21 · CURP de 18 caracteres con derivados en solo lectura y cruzada con la fecha de nacimiento
+### FRM-21 · CURP de 18 caracteres con derivados en solo lectura y cruzada con la fecha de nacimiento y con el nombre
 
-**Regla.** La CURP se normaliza a mayúsculas, exige 18 caracteres, estructura, fecha real, entidad y dígito verificador (estructura a confirmar con RENAPO: [Fuente: __]). De ella se derivan fecha de nacimiento y sexo a campos de solo lectura (data-deriva). Si además se pide la fecha, debe coincidir (cruzada curp-fecha, bloqueante por omisión).
+**Regla.** La CURP se normaliza a mayúsculas, exige 18 caracteres, estructura, fecha real, entidad y dígito verificador (estructura a confirmar con RENAPO: [Fuente: __]). De ella se derivan fecha de nacimiento y sexo a campos de solo lectura (data-deriva). Si además se pide la fecha, debe coincidir (cruzada curp-fecha, bloqueante por omisión). Si se piden nombre y apellidos, las letras de la CURP deben corresponderles (cruzadas curp-nombre y curp-segundo-apellido; sin segundo apellido, la CURP lleva X en las posiciones 3 y 15). Estas cruzadas comprueban que los datos sean coherentes entre sí, no que la CURP exista ni que sea de quien la escribe.
 
-**Por qué.** Pedir lo que la CURP ya contiene es doble captura y doble error; una CURP de 17 caracteres pasa desapercibida sin regla.
+**Por qué.** Pedir lo que la CURP ya contiene es doble captura y doble error; una CURP de 17 caracteres pasa desapercibida sin regla; sin la cruzada con el nombre se acepta la CURP de otra persona nacida el mismo día.
 
-**Nivel.** OPCIONAL · **Origen.** encargo 5.5 · *decisión del encargo*
+**Nivel.** OPCIONAL · **Origen.** encargo 5.5; P43 (proyecto de acreditaciones, 15 oct 2026) · *decisión del encargo*
 
-**Verificación.** 04-modulos.prueba.mjs: CURP (18, estructura, fecha, entidad, dígito) y cruzada
+**Verificación.** 04-modulos.prueba.mjs: CURP (18, estructura, fecha, entidad, dígito) y cruzada; 06 y 07: CURP contra nombre y apellidos
 
 ### FRM-22 · Grupos repetibles con mínimo, máximo y confirmación para quitar
 

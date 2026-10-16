@@ -29,7 +29,7 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Dar una fecha | `type=date` + botón «Hoy» (`fecha`); `data-no-futura` si aplica | RECOMENDADO | — |
 | Dar un rango de fechas | `data-rango` + `data-atajos` (`fecha`) | OPCIONAL | — |
 | Dar una hora | `type=time` + «Ahora» (`fecha`) | OPCIONAL | — |
-| Dar su CURP o RFC | `identificadores`: mayúsculas, 18/13 caracteres, derivados en solo lectura | OPCIONAL | No hay uso declarado para la CURP: no se pide. |
+| Dar su CURP o RFC | `identificadores`: mayúsculas, 18/13 caracteres, derivados en solo lectura; con nombre y apellidos, las cruzadas `curp-nombre` y `curp-segundo-apellido` (coherencia, no existencia) | OPCIONAL | No hay uso declarado para la CURP: no se pide. |
 | Dar su fecha de nacimiento sin CURP | **Bloque listo «Fecha de nacimiento y edad»**: fecha con `data-no-futura` y edad calculada en solo lectura (`data-deriva="edad=…"`, módulo `fecha`) | OPCIONAL | Se pide la CURP: la fecha y la edad salen de ella. |
 | Saber la edad | Siempre calculada de una fecha, nunca escrita; si basta el grupo de edad, **bloque listo «Rango de edad»** (una opción, sin huecos ni encimados) | RECOMENDADO | — |
 | Confirmar un dato (correo, contraseña) | Dos campos + `data-cruzada="igual"` | RECOMENDADO | — |
@@ -59,6 +59,7 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Explicar un campo con un texto corto que no todos necesitan | `tooltip` (botón «?»); nunca repite la ayuda visible: si la ayuda visible basta, no hay ícono (`auditar-campos` D5) | OPCIONAL |
 | Plegar lo opcional de uso raro | `acordeon` (`details`) | OPCIONAL |
 | Ubicar a la persona en un sitio interno | `migas` | OPCIONAL |
+| Mostrar en pantalla qué versión del sitio es (de prueba, instalada en el SIA o sin leer) | `version`: distintivo fijo abajo a la izquierda, dentro del pie | OPCIONAL |
 | Mostrar avance de una tarea | `progreso` | OPCIONAL |
 | Listas largas de resultados | `tabla` + `paginacion` | OPCIONAL |
 | Sugerir lo que la persona ya escribió antes | `chips` (sólo campos sin datos personales) | OPCIONAL |

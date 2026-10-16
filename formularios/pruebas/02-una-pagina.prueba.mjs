@@ -22,7 +22,8 @@ for (const perfil of Object.values(PERFILES)) {
   test(`una página · ${perfil.nombre}: recorrido completo hasta el acuse`, async () => {
     const p = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: perfil.contexto });
 
-    await p.fill('#nombre', 'Fulana'); await p.fill('#apellido_paterno', 'de Tal');
+    /* Nombre coherente con la CURP ficticia (cruzadas curp-nombre y curp-segundo-apellido). */
+    await p.fill('#nombre', 'Juan'); await p.fill('#apellido_paterno', 'Pérez'); await p.fill('#apellido_materno', 'García');
     /* CURP: mayúsculas al escribir, 18 caracteres, deriva la fecha de nacimiento a un campo de solo lectura. */
     await p.fill('#curp', 'pegj900515hdfrrn09'); await p.keyboard.press('Tab');
     assert.equal(await p.inputValue('#curp'), 'PEGJ900515HDFRRN09', 'la CURP se normaliza a mayúsculas');

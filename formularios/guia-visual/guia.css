@@ -90,6 +90,9 @@
 .guia-demo{padding:var(--e-4);background:var(--fondo);border:var(--b-1) dashed var(--borde);border-radius:var(--r-ctrl)}
 .guia-demo-rotulo{margin:0 0 var(--e-3);font-size:var(--t-xs);text-transform:uppercase;letter-spacing:var(--tracking-rotulo);color:var(--gris)}
 .guia-demo-form{margin:0;padding:var(--e-4);background:var(--blanco);border-radius:var(--r-ctrl)}
+/* El distintivo de versión flota en la página; en su muestra se queda quieto, con sus tres estados juntos. */
+.guia-version-demo{display:flex;flex-wrap:wrap;gap:var(--e-3)}
+.guia-version-demo .version-sia{position:static}
 /* Grupos de módulos: mismo rótulo que el menú, con aire antes de cada grupo. */
 .guia-grupo{margin-top:var(--e-8)}
 .guia-nav-grupo{display:block;margin-top:var(--e-3);font-size:var(--t-xs);letter-spacing:var(--tracking-rotulo);text-transform:uppercase;color:var(--gris)}

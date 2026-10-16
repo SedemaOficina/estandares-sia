@@ -76,7 +76,7 @@ test('servidor · un campo condicional cuya condición no se cumple se descarta 
 test('servidor · esquema de una página: CURP y su cruzada con la fecha de nacimiento', () => {
   const e = esquema('una-pagina');
   assert.equal(e.campos.curp.formato, 'curp');
-  const base = { datos: { nombre: 'Fulana', apellido_paterno: 'de Tal', curp: 'pegj900515hdfrrn09', correo: 'a@ejemplo.local', correo2: 'a@ejemplo.local', aviso: 'si' }, archivos: [], meta: {} };
+  const base = { datos: { nombre: 'Juan', apellido_paterno: 'Pérez', apellido_materno: 'García', curp: 'pegj900515hdfrrn09', correo: 'a@ejemplo.local', correo2: 'a@ejemplo.local', aviso: 'si' }, archivos: [], meta: {} };
   const r1 = validaPayload(structuredClone(base), e, { catalogos: CAT });
   assert.equal(r1.datos.curp, 'PEGJ900515HDFRRN09');
   assert.ok(!r1.errores.some((x) => x.campo === 'curp'), JSON.stringify(r1.errores));
@@ -87,7 +87,7 @@ test('servidor · esquema de una página: CURP y su cruzada con la fecha de naci
 });
 
 /* Un registro de una página completo y correcto, tal como lo manda el navegador. */
-const REGISTRO = { datos: { nombre: 'Fulana', apellido_paterno: 'de Tal', curp: 'PEGJ900515HDFRRN09', nacimiento: '1990-05-15', edad: '36', correo: 'a@ejemplo.local', correo2: 'a@ejemplo.local', personas: '3', alcaldia: 'Coyoacán', intereses: ['reforestacion'], desde: '2026-10-20', hasta: '2026-10-27', interes: '4', aviso: 'si' }, archivos: [], meta: { idempotencia: 'abc' } };
+const REGISTRO = { datos: { nombre: 'Juan', apellido_paterno: 'Pérez', apellido_materno: 'García', curp: 'PEGJ900515HDFRRN09', nacimiento: '1990-05-15', edad: '36', correo: 'a@ejemplo.local', correo2: 'a@ejemplo.local', personas: '3', alcaldia: 'Coyoacán', intereses: ['reforestacion'], desde: '2026-10-20', hasta: '2026-10-27', interes: '4', aviso: 'si' }, archivos: [], meta: { idempotencia: 'abc' } };
 
 test('servidor · grupos repetibles: cada fila se valida con su patrón, con mínimo y máximo de filas', () => {
   const e = esquema('una-pagina');
@@ -216,6 +216,34 @@ test('servidor · combo con el catálogo documentado {filas}, y mensajes de arch
   const dos = v({ especie: 'Fresno' }, [{ campo: 'retrato', nombre: 'a.jpg', size: 10, sha256_original: 'a' }, { campo: 'retrato', nombre: 'b.jpg', size: 10, sha256_original: 'b' }]);
   assert.ok(dos.errores.some((x) => /sólo se admite un archivo/.test(x.mensaje)), `singular cuando el máximo es 1: ${JSON.stringify(dos.errores)}`);
   assert.equal(globalThis.FORMKIT_VALIDACIONES.formatosArchivo(['jpg', 'jpeg', 'png']), 'JPEG, PNG', 'JPEG una sola vez');
+});
+
+test('CURP contra nombre y apellidos: letras, partículas, MARÍA y JOSÉ, Ñ, palabra altisonante y sin segundo apellido (P43)', () => {
+  const V = globalThis.FORMKIT_VALIDACIONES;
+  const nombre = (curp, n, primer) => V.cruzadas['curp-nombre'].valida({ curp, nombre: n, primer });
+  const segundo = (curp, s) => V.cruzadas['curp-segundo-apellido'].valida({ curp, segundo: s });
+  /* CURP ficticia completa, con su dígito verificador, para unos datos dados. */
+  const curpDe = (datos, fecha = '1985-02-03', sexo = 'M') => { const c = `${V.prefijoCurp(datos, fecha, sexo, 'DF')}0`; return c + V.digitoCurp(`${c}0`); };
+  assert.equal(nombre('PEGJ900515HDFRRN09', 'Juan', 'Pérez'), '', 'la CURP de prueba corresponde a Juan Pérez');
+  assert.equal(segundo('PEGJ900515HDFRRN09', 'García'), '', 'y a García como segundo apellido');
+  assert.match(nombre('PEGJ900515HDFRRN09', 'Pedro', 'Pérez'), /no corresponde/, 'otro nombre no corresponde');
+  assert.match(segundo('PEGJ900515HDFRRN09', 'López'), /no corresponde/, 'otro segundo apellido no corresponde');
+  assert.match(segundo('PEGJ900515HDFRRN09', ''), /segundo apellido/, 'sin segundo apellido, la CURP debe llevar X en 3 y 15');
+  const maria = { nombre: 'María de los Ángeles', primer: 'de la Peña', segundo: '' };
+  const c1 = curpDe(maria);
+  assert.equal(c1.slice(0, 4) + c1.slice(13, 16), 'PEXAXXN', `partículas fuera, MARÍA se salta, la Ñ cuenta como X: ${c1}`);
+  assert.equal(V.formatos.curp.valida(c1), '', 'la CURP armada es válida por sí misma');
+  assert.equal(nombre(c1, maria.nombre, maria.primer) + segundo(c1, ''), '', 'una sola persona con un apellido pasa');
+  const yolanda = { nombre: 'Yolanda', primer: 'Buendía', segundo: 'Espinoza' };
+  const c2 = curpDe(yolanda);
+  assert.equal(c2.slice(0, 4), 'BXEY', 'la palabra altisonante cambia su segunda letra por X');
+  assert.equal(nombre(c2, yolanda.nombre, yolanda.primer) + segundo(c2, yolanda.segundo), '', 'y la cruzada la reconoce');
+  /* En el servidor, con el esquema de la plantilla de una página. */
+  const e = esquema('una-pagina');
+  const con = (datos) => validaPayload({ ...structuredClone(REGISTRO), datos: { ...REGISTRO.datos, ...datos } }, e, { catalogos: CAT });
+  assert.deepEqual(con({}).errores, [], 'el registro coherente se acepta');
+  assert.ok(con({ nombre: 'Pedro' }).errores.some((x) => x.campo === 'curp' && /no corresponde/.test(x.mensaje)), 'el servidor rechaza un nombre que no corresponde');
+  assert.ok(con({ apellido_materno: '' }).errores.some((x) => x.campo === 'curp' && /segundo apellido/.test(x.mensaje)), 'y un segundo apellido que falta');
 });
 
 const herramienta = (nombre, args) => test(`herramientas · ${nombre}`, () => {

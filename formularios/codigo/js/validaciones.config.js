@@ -97,6 +97,62 @@
     return String((10 - (suma % 10)) % 10);
   }
 
+  /* ---------- CURP contra nombre y apellidos ----------
+     Reglas de formación de las letras, simplificadas, A CONFIRMAR con el
+     instructivo del emisor (RENAPO) [Fuente: __]:
+       1 inicial del primer apellido · 2 su primera vocal interna ·
+       3 inicial del segundo apellido (X si no hay) · 4 inicial del nombre ·
+       14, 15 y 16 primera consonante interna del primer apellido, del segundo
+       (X si no hay) y del nombre.
+     Se omiten las partículas (DE, DEL, LA, LOS, Y, MC, VAN…); en un nombre
+     compuesto que empieza con MARÍA o JOSÉ cuenta el segundo; la Ñ cuenta
+     como X; si las cuatro primeras letras forman una palabra altisonante, la
+     segunda cambia por X.
+     Límite: comprueba que la CURP y el nombre sean coherentes entre sí, no
+     que la CURP exista ni que sea de quien la escribe. */
+  const CURP_NOMBRE = {
+    particulas: ['DA', 'DAS', 'DE', 'DEL', 'DER', 'DI', 'DIE', 'DD', 'EL', 'LA', 'LAS', 'LE', 'LES', 'LOS', 'MAC', 'MC', 'VAN', 'VON', 'Y'],
+    nombresComunes: ['MARIA', 'MA', 'MX', 'M', 'JOSE', 'J'],
+    altisonantes: ['BACA', 'BAKA', 'BUEI', 'BUEY', 'CACA', 'CACO', 'CAGA', 'CAGO', 'CAKA', 'CAKO', 'COGE', 'COGI',
+      'COJA', 'COJE', 'COJI', 'COJO', 'COLA', 'CULO', 'FALO', 'FETO', 'GETA', 'GUEI', 'GUEY', 'JETA', 'JOTO', 'KACA', 'KACO',
+      'KAGA', 'KAGO', 'KAKA', 'KAKO', 'KOGE', 'KOGI', 'KOJA', 'KOJE', 'KOJI', 'KOJO', 'KOLA', 'KULO', 'LILO', 'LOCA', 'LOCO',
+      'LOKA', 'LOKO', 'MAME', 'MAMO', 'MEAR', 'MEAS', 'MEON', 'MIAR', 'MION', 'MOCO', 'MOKO', 'MULA', 'MULO', 'NACA', 'NACO',
+      'PEDA', 'PEDO', 'PENE', 'PIPI', 'PITO', 'POPO', 'PUTA', 'PUTO', 'QULO', 'RATA', 'ROBA', 'ROBE', 'ROBO', 'RUIN', 'SENO',
+      'TETA', 'VACA', 'VAGA', 'VAGO', 'VAKA', 'VUEI', 'VUEY', 'WUEI', 'WUEY'],
+    vocales: 'AEIOU'
+  };
+  /* Mayúsculas y sin acentos (la Ñ se conserva para tratarla aparte); sólo letras y espacios. */
+  function letrasDeNombre(t) {
+    return String(t || '').toUpperCase()
+      .replace(/Ñ/g, '\u0001').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\u0001/g, 'Ñ')
+      .replace(/[^A-ZÑ ]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  /* La palabra que cuenta: la primera que no es partícula; en el nombre, la que sigue a MARÍA o JOSÉ. */
+  function palabraDeCurp(t, esNombre) {
+    let p = letrasDeNombre(t).split(' ').filter((w) => w && !CURP_NOMBRE.particulas.includes(w));
+    if (esNombre && p.length > 1 && CURP_NOMBRE.nombresComunes.includes(p[0])) p = p.slice(1);
+    return p[0] || '';
+  }
+  const letraDeCurp = (c) => (!c || c === 'Ñ' ? 'X' : c);
+  const vocalInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => CURP_NOMBRE.vocales.includes(c)));
+  const consonanteInterna = (p) => letraDeCurp([...p.slice(1)].find((c) => !CURP_NOMBRE.vocales.includes(c)));
+  /* Las letras que la CURP debe tener según el nombre; null si falta el nombre o el primer apellido. */
+  function letrasDeCurp({ nombre, primer, segundo }) {
+    const n = palabraDeCurp(nombre, true), a1 = palabraDeCurp(primer), a2 = palabraDeCurp(segundo);
+    if (!n || !a1) return null;
+    return {
+      p1: letraDeCurp(a1[0]), p2: vocalInterna(a1), p3: a2 ? letraDeCurp(a2[0]) : 'X', p4: letraDeCurp(n[0]),
+      p14: consonanteInterna(a1), p15: a2 ? consonanteInterna(a2) : 'X', p16: consonanteInterna(n)
+    };
+  }
+  /* Las 16 primeras posiciones de una CURP coherente con los datos (sin diferenciador ni dígito): para armar datos ficticios de prueba. */
+  function prefijoCurp(datos, fechaISO, sexo, entidad) {
+    const e = letrasDeCurp(datos);
+    let cuatro = e.p1 + e.p2 + e.p3 + e.p4;
+    if (CURP_NOMBRE.altisonantes.includes(cuatro)) cuatro = `${cuatro[0]}X${cuatro.slice(2)}`;
+    return cuatro + fechaISO.slice(2, 4) + fechaISO.slice(5, 7) + fechaISO.slice(8, 10) + sexo + entidad + e.p14 + e.p15 + e.p16;
+  }
+
   /* ---------- Formatos por tipo de dato ---------- */
   const FORMATOS = {
     nombre: {
@@ -292,6 +348,28 @@
       campos: ['curp', 'entidad'], bloquea: false,
       valida: ({ curp, entidad }) => (!entidad || curp.slice(11, 13) === String(entidad).toUpperCase() ? '' : 'La entidad de nacimiento no coincide con la de la CURP. Revisa ambos datos.')
     },
+    /* La CURP y el nombre son coherentes (no prueba que la CURP exista). */
+    'curp-nombre': {
+      descripcion: 'Las letras de la CURP corresponden al nombre y al primer apellido (posiciones 1, 2, 4, 14 y 16)',
+      campos: ['curp', 'nombre', 'primer'], bloquea: true,
+      valida: ({ curp, nombre, primer }) => {
+        const e = letrasDeCurp({ nombre, primer, segundo: '' });
+        if (!e) return '';
+        /* La posición 3 viene de la propia CURP: así se reconoce la palabra altisonante sin pedir el segundo apellido. */
+        const p2 = CURP_NOMBRE.altisonantes.includes(e.p1 + e.p2 + curp[2] + e.p4) ? 'X' : e.p2;
+        return curp[0] === e.p1 && curp[1] === p2 && curp[3] === e.p4 && curp[13] === e.p14 && curp[15] === e.p16 ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
+    /* El segundo apellido es opcional: sin él, la CURP lleva X en las posiciones 3 y 15. */
+    'curp-segundo-apellido': {
+      descripcion: 'Las letras de la CURP corresponden al segundo apellido (posiciones 3 y 15); sin segundo apellido, la CURP lleva X en las dos',
+      campos: ['curp', 'segundo'], opcionales: ['segundo'], bloquea: true,
+      valida: ({ curp, segundo }) => {
+        const a2 = palabraDeCurp(segundo);
+        if (!a2) return curp[2] === 'X' && curp[14] === 'X' ? '' : CONFIG.mensajes.curpSinSegundo;
+        return curp[2] === letraDeCurp(a2[0]) && curp[14] === consonanteInterna(a2) ? '' : CONFIG.mensajes.curpNombre;
+      }
+    },
     'rango-fechas': {
       descripcion: 'La fecha final no es anterior a la inicial',
       campos: ['inicio', 'fin'], bloquea: true,
@@ -386,6 +464,8 @@
       repiteOpcion: '«{texto}» ya está en la lista: elige esa opción.',
       edadMinima: 'Se requiere una edad mínima de {edad} años. Si la persona tiene menos, su madre, padre o tutor debe llenar el formulario.',
       edadMaxima: 'La edad máxima es de {edad} años.',
+      curpNombre: 'La CURP no corresponde con el nombre y los apellidos que escribiste. Escríbelos tal como aparecen en tu CURP.',
+      curpSinSegundo: 'Tu CURP indica que tienes segundo apellido. Escríbelo tal como aparece en tu CURP.',
       advertencia: 'Advertencia:',
       resumenUno: 'Falta revisar 1 campo para continuar.',
       resumenVarios: 'Faltan por revisar {n} campos para continuar.',
@@ -452,5 +532,5 @@
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));

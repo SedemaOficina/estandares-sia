@@ -31,6 +31,7 @@
 <link rel="stylesheet" href="../codigo/modulos/descarga/descarga.css">
 <link rel="stylesheet" href="../codigo/modulos/archivos/archivos.css">
 <link rel="stylesheet" href="../codigo/modulos/chips/chips.css">
+<link rel="stylesheet" href="../codigo/modulos/version/version.css">
 <link rel="stylesheet" href="../vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="../vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.css">
 <link rel="stylesheet" href="../codigo/modulos/mapa/mapa.css">
@@ -102,6 +103,7 @@
           <label class="casilla"><input class="casilla-input" type="checkbox" name="repetibles" value="repetibles,modal"><span class="casilla-texto">tiene elementos repetibles («agregar otro»)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="escala" value="escala,opciones"><span class="casilla-texto">es una encuesta con escalas</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="interna" value="tabla,paginacion,pestanas,migas,chips,descarga,modal"><span class="casilla-texto">es una consulta o captura interna (tablas, paginación, pestañas, sugerencias)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="version" value="version"><span class="casilla-texto">muestra en pantalla qué versión del sitio es (distintivo de versión en el pie)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="terceros" value=""><span class="casilla-texto">captura datos de terceros (se desactiva el autocompletado en esos campos)</span></label>
         </form>
         <div class="guia-resultado" aria-live="polite">
@@ -605,6 +607,15 @@
 <nav class="paginacion" data-paginacion data-total="312" data-pagina="2" data-tamano="20" data-tamanos="10,20,50" data-lista="#m_resultados" aria-label="Páginas de resultados (muestra)"></nav>
 </template>
 
+<template data-demo="version">
+<!-- El distintivo va dentro del pie de la página (<footer class="pie">), fijo abajo a la izquierda. Aquí se ven los tres estados quietos, uno junto a otro; los textos son de muestra: el texto y el estado los pone el sitio. -->
+<footer class="guia-version-demo">
+  <p class="version-sia version-sia--prueba">Versión 1.4.0 · prueba</p>
+  <p class="version-sia version-sia--sia">Versión 1.4.0</p>
+  <p class="version-sia version-sia--error">Versión sin leer</p>
+</footer>
+</template>
+
 <template data-demo="tooltip">
 <div class="campo" data-campo="m_tt" data-uso="Muestra."><label class="etiqueta" for="m_tt">Folio anterior <span class="tooltip" data-tooltip><button type="button" class="btn-icono tooltip-btn" aria-expanded="false" aria-label="Ayuda sobre el folio"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-ayuda"></use></svg></button><span class="tooltip-texto" role="tooltip" hidden>El folio aparece en la esquina superior de tu acuse anterior.</span></span></label><input class="control" id="m_tt" name="m_tt" type="text" autocomplete="off"></div>
 </template>
@@ -693,7 +704,7 @@
   </div>
   <div class="fila">
     <!-- autocomplete off: el navegador no tiene un valor de autocompletado para la CURP; se escribe cada vez. -->
-    <div class="campo" data-campo="b_curp" data-formato="curp" data-requerido data-sensible data-uso="Identificar a quien llena el formulario sin ambigüedad." data-finalidad="Identificar a la persona sin ambigüedad." data-deriva="fechaNacimiento=b_nacimiento" data-enmascara>
+    <div class="campo" data-campo="b_curp" data-formato="curp" data-requerido data-sensible data-uso="Identificar a quien llena el formulario sin ambigüedad." data-finalidad="Identificar a la persona sin ambigüedad." data-deriva="fechaNacimiento=b_nacimiento" data-cruzada="curp-nombre curp-segundo-apellido" data-cruzada-campos="curp=b_curp nombre=b_nombre primer=b_apellido_paterno segundo=b_apellido_materno" data-enmascara>
       <label class="etiqueta" for="b_curp">CURP</label>
       <p class="ayuda">Son 18 caracteres. Tu fecha de nacimiento se toma de ella.</p>
       <input class="control" id="b_curp" name="b_curp" type="text" maxlength="18" autocomplete="off" spellcheck="false">

@@ -11,7 +11,7 @@ codigo/
   fuentes/    Cabin 600/700, Roboto 400/500/700 (woff2) + licencias OFL
   iconos/     sprite.svg (29 símbolos; iconos.js se genera de aquí)
   imagenes/   logotipo-sedema.png
-  modulos/    <nombre>/<nombre>.css · <nombre>.js      (26 módulos, cada uno se copia solo)
+  modulos/    <nombre>/<nombre>.css · <nombre>.js      (27 módulos, cada uno se copia solo)
   catalogos/  cdmx-ejemplo.js (ficticio) · LEEME.md
   plantillas/ por-pasos.html + configuracion-por-pasos.js · una-pagina.html + configuracion-una-pagina.js
   servidor/   validar.mjs · esquemas/*.json (generados)

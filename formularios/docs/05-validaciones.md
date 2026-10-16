@@ -40,6 +40,8 @@ Se evalúan cuando todos sus campos tienen valor; marcan el campo que las lleva 
 | `curp-fecha` | `curp`, `fecha` | sí | La fecha de nacimiento coincide con la contenida en la CURP (posiciones 5–10). |
 | `curp-sexo` | `curp`, `sexo` | no | El sexo declarado coincide con la posición 11. |
 | `curp-entidad` | `curp`, `entidad` | no | La entidad de nacimiento coincide con las posiciones 12–13. |
+| `curp-nombre` | `curp`, `nombre`, `primer` | sí | Las letras 1, 2, 4, 14 y 16 corresponden al nombre y al primer apellido: sin partículas (DE, DEL, LA, LOS, Y, MC, VAN…), con el segundo nombre si el primero es MARÍA o JOSÉ, la Ñ como X y la segunda letra en X si las cuatro primeras forman una palabra altisonante *[reglas de formación de RENAPO, simplificadas; a confirmar: Fuente: __]*. |
+| `curp-segundo-apellido` | `curp`, `segundo` (opcional) | sí | Las letras 3 y 15 corresponden al segundo apellido; sin segundo apellido, la CURP lleva X en las dos. |
 | `rango-fechas` | `inicio`, `fin` | sí | La fecha final no es anterior a la inicial. |
 | `rango-horas` | `inicio`, `fin` | sí | La hora final es posterior a la inicial el mismo día. |
 | `igual` | `original`, `confirmacion` | sí | Confirmación idéntica (correo, contraseña). |
@@ -47,6 +49,8 @@ Se evalúan cuando todos sus campos tienen valor; marcan el campo que las lleva 
 | `cp-colonia` | `cp`, `colonia` (+ `data-catalogo`) | **no** | El CP pertenece a la colonia según el catálogo. El módulo `cascadas` la declara sola. |
 
 Ejemplo: `<div class="campo" data-campo="nac" data-formato="fecha" data-cruzada="curp-fecha" data-cruzada-campos="curp=curp fecha=nac">`.
+
+La CURP contra el nombre se declara en el campo de la CURP: `data-cruzada="curp-nombre curp-segundo-apellido" data-cruzada-campos="curp=curp nombre=nombre primer=apellido_paterno segundo=apellido_materno"` (así lo trae el bloque listo «Datos de identificación»). Comprueba que la CURP y el nombre sean coherentes entre sí, no que la CURP exista ni que sea de quien la escribe. `FORMKIT_VALIDACIONES.prefijoCurp(datos, fecha, sexo, entidad)` arma las primeras 16 posiciones de una CURP coherente, para datos ficticios de prueba.
 
 Al cambiar cualquiera de sus campos (al salir de él o al elegir una opción), la cruzada se vuelve a revisar en los dos: corregir la fecha quita o pone el error de la CURP sin volver a tocarla.
 
@@ -71,7 +75,7 @@ Lo que se sabe sin leer el archivo se rechaza en el acto (`.arch-rechazo`); lo q
 
 ## 5. Mensajes
 
-Los 72 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc. Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo. Registro: tuteo, frase corta, qué hacer primero.
+Los 77 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc. Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo. Registro: tuteo, frase corta, qué hacer primero.
 
 ## 6. Configuración por formulario (`FORMKIT_CONFIG`)
 
@@ -89,7 +93,7 @@ Los 72 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.j
 | `limitesSegun` | vacío | Funciones `(datos) => número` para `data-min-segun`/`data-max-segun`. |
 | `chips` | 5, `sia-chips` | Máximo de chips y clave del almacén local. |
 | `mapa` | sin teselas | Proveedor, atribución, centro, zoom. |
-| `mensajes` | 72 textos | Cualquier mensaje. |
+| `mensajes` | 77 textos | Cualquier mensaje. |
 
 ## 7. En el servidor
 

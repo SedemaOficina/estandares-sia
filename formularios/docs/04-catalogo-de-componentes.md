@@ -2,7 +2,7 @@
 
 > Este documento se **genera** de `codigo/manifiesto.json` (`node herramientas/construir.mjs`). No se edita a mano: se corrige el manifiesto y se vuelve a construir. La versión interactiva, con muestras vivas y HTML para copiar, es `guia-visual/index.html`.
 
-El paquete tiene un **núcleo** obligatorio y **26 módulos** que se copian sólo si el formulario los usa. Niveles: **BASE** obligatorio en todo formulario; **RECOMENDADO** salvo justificación escrita; **OPCIONAL** si el formulario necesita la pieza. Quien programa elige los módulos, no el nivel.
+El paquete tiene un **núcleo** obligatorio y **27 módulos** que se copian sólo si el formulario los usa. Niveles: **BASE** obligatorio en todo formulario; **RECOMENDADO** salvo justificación escrita; **OPCIONAL** si el formulario necesita la pieza. Quien programa elige los módulos, no el nivel.
 
 ## Núcleo (BASE)
 
@@ -48,6 +48,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `migas` | Migas de pan | OPCIONAL | navegacion | — | 2.5 KB | — |
 | `progreso` | Barra de progreso | OPCIONAL | navegacion | — | 1.1 KB | 1.8 KB |
 | `paginacion` | Paginación de resultados | OPCIONAL | navegacion | — | 2.1 KB | 6.0 KB |
+| `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
 | `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 2.8 KB | 4.6 KB |
 | `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 2.6 KB | 18.7 KB |
@@ -449,6 +450,27 @@ Paginación numerada o «Cargar más» con rango visible, tamaño de página, an
 - Desplazamiento infinito.
 - Perder filtros al cambiar de página.
 - Foco que se queda en el botón pulsado.
+
+### Distintivo de versión (`version`) · OPCIONAL
+
+Distintivo pequeño y siempre visible, fijo abajo a la izquierda, que dice qué versión del sitio se tiene enfrente: de prueba (dorado), instalada en el SIA (gris) o sin leer (guinda). Es la hoja de la plantilla de versión del SIA hecha con los tokens del estándar.
+
+**Cuándo.** Sitios que se prueban antes de instalarse en el SIA, o que deben mostrar su versión en pantalla.
+
+**Cuándo no.** Para avisos a la persona (usa los avisos del núcleo): el distintivo no recibe toques ni se anuncia como estado.
+
+**Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/version/version.css`
+
+**Accesibilidad.** Va dentro del pie (<footer>), para quedar en una región de la página; no recibe toques (pointer-events: none), así que nunca tapa un control; texto de 4.5:1 o más en sus tres estados.
+
+**En teléfono.** Abajo a la izquierda, respetando el área segura de la pantalla.
+
+**En escritorio.** Igual; al imprimir va en su lugar, sin flotar.
+
+**Errores frecuentes que evita.**
+- Ponerlo fuera del pie: axe lo marca como contenido fuera de una región.
+- Escribir colores o medidas a mano en lugar de los tokens (el auditor de CSS lo rechaza).
+- Usarlo para avisar algo a la persona.
 
 ### Ayuda desplegable (`tooltip`) · OPCIONAL
 

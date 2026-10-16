@@ -27,9 +27,12 @@ Primera versión corregida con lo que encontró un proyecto real: el sistema de 
 - **Cámara frontal**: `capture="user"` documentado para una fotografía de la persona («Fotografía de frente»); `capture="environment"` sigue para las evidencias.
 - **P56 · Una sola respuesta va en lista** (FRM-16): la lista con el círculo visible es la forma por omisión en la guía de decisión, el manifiesto, la guía visual y la plantilla por pasos («Tipo de solicitud»). La opción deshabilitada de la lista se ve atenuada. Las tarjetas quedan como variante.
 
-**Mejora**
+- **P45 · Distintivo de versión con tokens**: módulo nuevo `version` (OPCIONAL, sólo CSS; 27 módulos): la hoja de la plantilla de versión del SIA rehecha con los tokens del estándar, que pasa el auditor de CSS. Fijo abajo a la izquierda, sin recibir toques, con tres estados (de prueba en dorado, instalado en el SIA en gris, sin leer en guinda) y en su lugar al imprimir. Va dentro del pie (`<footer>`), para que axe no lo marque fuera de una región. Ficha y muestra en la guía, casilla en «¿Qué necesito?», `docs/03`; par de contraste nuevo C40 (dorado legible sobre beige, 4.80:1).
+
+**Mejoras**
 
 - **P42 · «Mostrar contraseña»**: todo campo de contraseña trae el botón, con `aria-pressed`; `data-sin-mostrar` lo quita. Muestra en la guía visual («El campo»).
+- **P43 · La CURP contra el nombre y los apellidos** (FRM-21, `docs/05`): dos cruzadas nuevas, traídas del sistema de acreditaciones. `curp-nombre` compara las letras 1, 2, 4, 14 y 16 con el nombre y el primer apellido: sin partículas, con el segundo nombre si el primero es MARÍA o JOSÉ, la Ñ como X y la palabra altisonante. `curp-segundo-apellido` compara las letras 3 y 15 con el segundo apellido y, si no lo hay, exige X en las dos. La segunda usa el rol opcional de esta versión, en lugar del dato calculado que usaba el proyecto. Comprueban que la CURP y el nombre sean coherentes, no que la CURP exista ni que sea de quien la escribe; las reglas de formación quedan marcadas por confirmar con RENAPO. Las usan el bloque «Datos de identificación» y la plantilla de una página; para probar, Juan Pérez García con la CURP ficticia de siempre. `prefijoCurp` arma CURP ficticias coherentes para las pruebas.
 
 **Segunda revisión: estilo de «Crea tu cuenta» (16 oct 2026)**
 
@@ -40,9 +43,7 @@ Primera versión corregida con lo que encontró un proyecto real: el sistema de 
 - Cuatro pares nuevos en «Sí y no» de la guía visual, uno por mejora.
 - **Ayuda desplegable que se salía de la pantalla** (`tooltip.css`): con el «?» cerca del borde derecho de un teléfono de 320 px, el texto abierto se salía 8 px y la página se desplazaba de lado (FRM-61). Junto a una etiqueta, el texto ahora se ancla a la etiqueta, con el ancho del campo como máximo. Lo encontró la prueba de anchos con el par nuevo de «Sí y no».
 
-**Sin resolver todavía**: P43 (cruzadas de la CURP contra nombre y apellidos) y P45 (hoja de la plantilla de versión con tokens) necesitan los archivos del proyecto; quedan en Pendientes.
-
-**Pruebas**: `07-correcciones` (nueva: nueve casos en navegador sobre `pruebas/paginas/correcciones.html` y las plantillas) y seis casos nuevos de servidor y herramientas en `06`.
+**Pruebas**: `07-correcciones` (nueva: diez casos en navegador sobre `pruebas/paginas/correcciones.html` y las plantillas) y siete casos nuevos de servidor y herramientas en `06`. Los datos de prueba de la plantilla de una página pasan a Juan Pérez García, coherentes con la CURP ficticia.
 
 ### Cambios del 14 de octubre de 2026
 

@@ -21,7 +21,7 @@ Si prefieres no elegir módulos, `dist/formkit.css` y `dist/formkit.js` traen to
 
 | Carpeta | Qué contiene |
 |---|---|
-| `codigo/` | Núcleo (tokens, base, núcleo, validaciones, iconos, core), 26 módulos, tipografías, plantillas, catálogo de ejemplo, validador para el servidor, `manifiesto.json` |
+| `codigo/` | Núcleo (tokens, base, núcleo, validaciones, iconos, core), 27 módulos, tipografías, plantillas, catálogo de ejemplo, validador para el servidor, `manifiesto.json` |
 | `guia-visual/` | Guía interactiva: árbol de decisión, fundamentos, fichas vivas con HTML para copiar, probador de validaciones, pares «sí y no», cuatro formularios de ejemplo a distintos anchos. `artefacto.html` es la misma guía autocontenida |
 | `docs/` | 01 reglas (81, generado) · 02 guía de estilo · 03 guía de decisión · 04 catálogo de componentes (generado) · 05 validaciones · 06 código y contrato HTML · 07 bibliotecas y tipografías · 08 verificación y cierre · 09 trazabilidad y decisiones |
 | `reglas/reglas.json` | Fuente única de las reglas FRM-01 a FRM-81 con nivel BASE / RECOMENDADO / OPCIONAL |

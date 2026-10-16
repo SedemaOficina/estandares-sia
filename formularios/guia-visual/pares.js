@@ -412,5 +412,12 @@ window.GUIA_PARES = [
   "fondo": "--beige",
   "minimo": 3,
   "donde": "Borde de los enlaces a redes sociales en el pie"
+ },
+ {
+  "id": "C40",
+  "texto": "--dorado-txt",
+  "fondo": "--beige",
+  "minimo": 4.5,
+  "donde": "Distintivo de versión de un sitio de prueba"
  }
 ];

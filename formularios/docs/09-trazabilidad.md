@@ -92,6 +92,8 @@ Leyenda: **A** tomado del paquete A · **B** tomado del paquete B · **A+B** fus
 | mapa (Leaflet, gestos, confirmación, ámbito) | A (reglas, vendor) + B (JS mínimo) · Nuevo (módulo) | |
 | cascadas | Nuevo | |
 | chips | Nuevo | |
+| enlace-mapa | PR, CP, PL y Denuncias Ambientales | Agregado el 14 oct 2026 |
+| version (distintivo de versión) | Plantilla de versión del SIA, rehecha con tokens en el proyecto de acreditaciones (P45) | Agregado en 1.1.0 |
 
 ### Herramientas y verificación
 
