@@ -1,6 +1,6 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -72,9 +72,9 @@
     "tamano": {
       "tokens.css": 8394,
       "base.css": 5841,
-      "nucleo.css": 16425,
-      "validaciones.config.js": 25544,
-      "formkit.core.js": 39050,
+      "nucleo.css": 16940,
+      "validaciones.config.js": 26325,
+      "formkit.core.js": 46299,
       "iconos.js": 5845
     }
   },
@@ -84,26 +84,28 @@
       "titulo": "Opciones elegibles",
       "nivel": "BASE",
       "tipo": "pregunta",
-      "proposito": "Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con descripción y la variante corta Sí/No, sobre controles nativos.",
+      "proposito": "Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con descripción y la variante corta Sí/No, sobre controles nativos. Para una sola respuesta, la lista (.opciones-lista, una por renglón con el círculo visible) es la forma por omisión; dos o tres opciones cortas sin descripción (Sí/No) van en línea (.opciones-en-linea). La opción deshabilitada se ve atenuada.",
       "cuando": "Elegir una o varias respuestas entre 2 y 7 opciones conocidas.",
       "cuandoNo": "Más de 7 opciones (usa combo); ajustes inmediatos (usa toggle); escalas (usa escala).",
       "dependencias": [],
       "js": false,
       "accesibilidad": "Input nativo cubriendo la tarjeta: flechas, espacio, anuncio «botón de opción 1 de 3»; lo elegido se marca con fondo, sombra interior y palomita.",
-      "movil": "Una columna; Sí/No a 48 px con puntero grueso.",
-      "escritorio": "Rejilla de tarjetas; Sí/No a 40 px con ratón.",
+      "movil": "Una columna, también la lista en línea; Sí/No con botones a 48 px con puntero grueso.",
+      "escritorio": "Lista con el círculo visible; en línea, una columna por opción con el hueco de las filas de campos; Sí/No con botones a 40 px con ratón.",
       "errores": [
         "Usar div con onclick en lugar de radio.",
         "Marcar lo elegido sólo con color.",
         "Premarcar una opción.",
-        "Más de siete tarjetas."
+        "Más de siete tarjetas.",
+        "Tarjetas en rejilla para una sola respuesta: en escritorio no se ve que hay que elegir una.",
+        "Sí/No apilado a todo lo ancho: dos o tres opciones cortas van en línea."
       ],
       "archivos": {
         "css": "codigo/modulos/opciones/opciones.css",
         "js": null
       },
       "tamano": {
-        "css": 4794,
+        "css": 5175,
         "js": 0
       }
     },
@@ -161,7 +163,7 @@
       },
       "tamano": {
         "css": 1466,
-        "js": 7587
+        "js": 7871
       }
     },
     {
@@ -327,7 +329,7 @@
       },
       "tamano": {
         "css": 4892,
-        "js": 8442
+        "js": 8949
       }
     },
     {
@@ -604,23 +606,24 @@
       "tipo": "retroalimentacion",
       "proposito": "Botón «?» que muestra un texto corto, por clic y teclado, con Escape.",
       "cuando": "Aclaración breve junto a una etiqueta.",
-      "cuandoNo": "Instrucciones necesarias para llenar el campo (van en la ayuda visible).",
+      "cuandoNo": "Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay ícono).",
       "dependencias": [],
       "js": true,
       "accesibilidad": "aria-expanded, aria-describedby mientras está abierto, role=tooltip; no depende de hover.",
-      "movil": "Texto bajo el botón, no flotante sobre otros controles.",
+      "movil": "Texto bajo la etiqueta, dentro del ancho del campo (no se sale de la pantalla aunque el «?» esté al borde), no flotante sobre otros controles.",
       "escritorio": "Igual.",
       "errores": [
         "Sólo con hover.",
-        "Texto largo."
+        "Texto largo.",
+        "Repetir la ayuda visible del mismo campo (auditar-campos D5)."
       ],
       "archivos": {
         "css": "codigo/modulos/tooltip/tooltip.css",
         "js": "codigo/modulos/tooltip/tooltip.js"
       },
       "tamano": {
-        "css": 1160,
-        "js": 2640
+        "css": 1511,
+        "js": 2737
       }
     },
     {
@@ -663,7 +666,7 @@
       "dependencias": [],
       "js": true,
       "accesibilidad": "La zona es un botón con nombre; cada archivo dice su estado; rechazos con role=alert que nombran el archivo y el motivo.",
-      "movil": "Botón de cámara con capture; vista previa de 96 px.",
+      "movil": "Botón de cámara con capture (environment para evidencias; user para una fotografía de frente); vista previa de 96 px; con un solo archivo, los textos en singular.",
       "escritorio": "Arrastrar y soltar; guardia global de drop.",
       "errores": [
         "Validar sólo por extensión.",
@@ -676,7 +679,7 @@
       },
       "tamano": {
         "css": 2637,
-        "js": 18890
+        "js": 19102
       }
     },
     {
@@ -789,5 +792,5 @@
       }
     }
   ],
-  "generado": "2026-10-14T18:42:01.414Z"
+  "generado": "2026-10-16T14:27:22.310Z"
 }

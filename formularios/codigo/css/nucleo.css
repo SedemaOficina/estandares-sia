@@ -38,6 +38,9 @@
 .marca-oblig{margin-left:var(--e-1);font-weight:var(--peso-fuerte);color:var(--guinda)}
 .ayuda{margin-bottom:var(--e-2);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
 .ayuda:empty{margin:0}
+/* Ayuda de bloque: va una vez bajo el título de la sección cuando vale igual
+   para todos sus campos; la ayuda de cada campo queda para lo propio de él. */
+.ayuda-bloque{max-width:var(--ancho-lectura);margin-bottom:var(--e-4);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
 .contador{margin-top:var(--e-1);font-size:var(--t-xs);text-align:right;color:var(--gris-cl)}
 
 /* Error del campo: icono + palabra «Error» + qué hacer. No depende del rojo. */
@@ -289,12 +292,16 @@
 /* Anuncio de estado de envío (error de red, plazo vencido): recibe el foco. */
 .estado-envio{margin-top:var(--e-4)}
 
+/* «Mostrar contraseña»: debajo del control; aria-pressed dice si se ve lo escrito. */
+.contrasena-ver{margin-top:var(--e-1)}
+
 /* Redes sociales de la Secretaría: íconos de 44 px con nombre accesible, la
    única fila de íconos sin texto del paquete (FRM-72). */
 .redes{display:flex;flex-wrap:wrap;gap:var(--e-2)}
 .redes-enlace{display:inline-flex;align-items:center;justify-content:center;width:var(--objetivo-min);height:var(--objetivo-min);border:var(--b-1) solid var(--borde);border-radius:var(--r-ctrl);color:var(--gris)}
 
 /* @bloque estados */
+.contrasena-ver[aria-pressed="true"]{font-weight:var(--peso-fuerte)}
 
 /* Foco: el MISMO anillo en todo el paquete y sobre cualquier fondo. Es la
    única regla de foco; los componentes no declaran la suya. [data-demo-foco]

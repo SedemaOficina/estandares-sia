@@ -29,15 +29,15 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 
 | Módulo | Título | Nivel | Tipo | Depende de | CSS | JS |
 |---|---|---|---|---|---|---|
-| `opciones` | Opciones elegibles | BASE | pregunta | — | 4.7 KB | — |
+| `opciones` | Opciones elegibles | BASE | pregunta | — | 5.1 KB | — |
 | `otro` | Opción «Otro» con especificación | RECOMENDADO | pregunta | opciones | — | 4.2 KB |
-| `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 7.4 KB |
+| `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 7.7 KB |
 | `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 5.9 KB |
 | `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 3.8 KB |
 | `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 929 B | 6.8 KB |
 | `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.6 KB |
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
-| `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.2 KB |
+| `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.7 KB |
 | `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.1 KB | 3.2 KB |
 | `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.8 KB | 3.4 KB |
 | `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 1.7 KB | 4.0 KB |
@@ -48,9 +48,9 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `migas` | Migas de pan | OPCIONAL | navegacion | — | 2.5 KB | — |
 | `progreso` | Barra de progreso | OPCIONAL | navegacion | — | 1.1 KB | 1.8 KB |
 | `paginacion` | Paginación de resultados | OPCIONAL | navegacion | — | 2.1 KB | 6.0 KB |
-| `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.1 KB | 2.6 KB |
+| `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
 | `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 2.8 KB | 4.6 KB |
-| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 2.6 KB | 18.4 KB |
+| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 2.6 KB | 18.7 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
 | `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 7.4 KB |
@@ -58,7 +58,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 
 ### Opciones elegibles (`opciones`) · BASE
 
-Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con descripción y la variante corta Sí/No, sobre controles nativos.
+Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con descripción y la variante corta Sí/No, sobre controles nativos. Para una sola respuesta, la lista (.opciones-lista, una por renglón con el círculo visible) es la forma por omisión; dos o tres opciones cortas sin descripción (Sí/No) van en línea (.opciones-en-linea). La opción deshabilitada se ve atenuada.
 
 **Cuándo.** Elegir una o varias respuestas entre 2 y 7 opciones conocidas.
 
@@ -68,15 +68,17 @@ Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con
 
 **Accesibilidad.** Input nativo cubriendo la tarjeta: flechas, espacio, anuncio «botón de opción 1 de 3»; lo elegido se marca con fondo, sombra interior y palomita.
 
-**En teléfono.** Una columna; Sí/No a 48 px con puntero grueso.
+**En teléfono.** Una columna, también la lista en línea; Sí/No con botones a 48 px con puntero grueso.
 
-**En escritorio.** Rejilla de tarjetas; Sí/No a 40 px con ratón.
+**En escritorio.** Lista con el círculo visible; en línea, una columna por opción con el hueco de las filas de campos; Sí/No con botones a 40 px con ratón.
 
 **Errores frecuentes que evita.**
 - Usar div con onclick en lugar de radio.
 - Marcar lo elegido sólo con color.
 - Premarcar una opción.
 - Más de siete tarjetas.
+- Tarjetas en rejilla para una sola respuesta: en escritorio no se ve que hay que elegir una.
+- Sí/No apilado a todo lo ancho: dos o tres opciones cortas van en línea.
 
 ### Opción «Otro» con especificación (`otro`) · RECOMENDADO
 
@@ -454,19 +456,20 @@ Botón «?» que muestra un texto corto, por clic y teclado, con Escape.
 
 **Cuándo.** Aclaración breve junto a una etiqueta.
 
-**Cuándo no.** Instrucciones necesarias para llenar el campo (van en la ayuda visible).
+**Cuándo no.** Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay ícono).
 
 **Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/tooltip/tooltip.css`, `codigo/modulos/tooltip/tooltip.js`
 
 **Accesibilidad.** aria-expanded, aria-describedby mientras está abierto, role=tooltip; no depende de hover.
 
-**En teléfono.** Texto bajo el botón, no flotante sobre otros controles.
+**En teléfono.** Texto bajo la etiqueta, dentro del ancho del campo (no se sale de la pantalla aunque el «?» esté al borde), no flotante sobre otros controles.
 
 **En escritorio.** Igual.
 
 **Errores frecuentes que evita.**
 - Sólo con hover.
 - Texto largo.
+- Repetir la ayuda visible del mismo campo (auditar-campos D5).
 
 ### Tabla de consulta y de captura (`tabla`) · OPCIONAL
 
@@ -501,7 +504,7 @@ Zona de carga (botón real + arrastre), cámara en móvil, validación por exten
 
 **Accesibilidad.** La zona es un botón con nombre; cada archivo dice su estado; rechazos con role=alert que nombran el archivo y el motivo.
 
-**En teléfono.** Botón de cámara con capture; vista previa de 96 px.
+**En teléfono.** Botón de cámara con capture (environment para evidencias; user para una fotografía de frente); vista previa de 96 px; con un solo archivo, los textos en singular.
 
 **En escritorio.** Arrastrar y soltar; guardia global de drop.
 

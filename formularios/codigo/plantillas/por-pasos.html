@@ -66,10 +66,10 @@
 
       <fieldset class="grupo" data-campo="tipo" data-requerido data-uso="Turnar la solicitud al área que corresponde.">
         <legend class="etiqueta">Tipo de solicitud</legend>
-        <div class="opciones">
-          <label class="opcion"><input class="opcion-input" type="radio" name="tipo" value="informacion"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Información</span><span class="opcion-desc">Quiero conocer un dato o un trámite.</span></label>
-          <label class="opcion"><input class="opcion-input" type="radio" name="tipo" value="visita"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Visita técnica</span><span class="opcion-desc">Pido que personal revise un sitio.</span></label>
-          <label class="opcion"><input class="opcion-input" type="radio" name="tipo" value="otro"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Otro</span><span class="opcion-desc">Algo distinto.</span></label>
+        <div class="opciones-lista">
+          <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="tipo" value="informacion"><span><span class="opcion-nombre">Información</span><span class="opcion-desc">Quiero conocer un dato o un trámite.</span></span></label>
+          <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="tipo" value="visita"><span><span class="opcion-nombre">Visita técnica</span><span class="opcion-desc">Pido que personal revise un sitio.</span></span></label>
+          <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="tipo" value="otro"><span><span class="opcion-nombre">Otro</span><span class="opcion-desc">Algo distinto.</span></span></label>
         </div>
       </fieldset>
 
@@ -80,9 +80,9 @@
 
       <fieldset class="grupo" data-campo="urgente" data-requerido data-uso="Priorizar la atención.">
         <legend class="etiqueta">¿Hay riesgo inmediato para personas o bienes?</legend>
-        <div class="opciones-cortas">
-          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="urgente" value="si"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Sí</span></label>
-          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="urgente" value="no"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>No</span></label>
+        <div class="opciones-lista opciones-en-linea">
+          <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="urgente" value="si"><span><span class="opcion-nombre">Sí</span></span></label>
+          <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="urgente" value="no"><span><span class="opcion-nombre">No</span></span></label>
         </div>
       </fieldset>
 
@@ -134,9 +134,9 @@
       <fieldset class="grupo" data-campo="mzlt" data-uso="Mostrar manzana y lote sólo cuando el sitio se identifica así.">
         <legend class="etiqueta">¿El sitio se identifica por manzana y lote?</legend>
         <p class="ayuda">Es común donde las casas no tienen número. Por ejemplo: Mz. 3, Lt. 12.</p>
-        <div class="opciones-cortas">
-          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="mzlt" value="si"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Sí</span></label>
-          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="mzlt" value="no"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>No</span></label>
+        <div class="opciones-lista opciones-en-linea">
+          <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="mzlt" value="si"><span><span class="opcion-nombre">Sí</span></span></label>
+          <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="mzlt" value="no"><span><span class="opcion-nombre">No</span></span></label>
         </div>
       </fieldset>
       <div class="fila" data-si="mzlt=si">
@@ -246,19 +246,19 @@
 
       <fieldset class="grupo" data-campo="contacto" data-requerido data-uso="Decidir si se piden datos de contacto.">
         <legend class="etiqueta">¿Quieres que te contactemos?</legend>
-        <div class="opciones-cortas">
-          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="contacto" value="si"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>Sí</span></label>
-          <label class="opcion opcion-corta"><input class="opcion-input" type="radio" name="contacto" value="no"><span class="opcion-nombre"><svg class="icono opcion-marca" aria-hidden="true"><use href="#i-palomita"></use></svg>No, anónimo</span></label>
+        <div class="opciones-lista opciones-en-linea">
+          <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="contacto" value="si"><span><span class="opcion-nombre">Sí</span></span></label>
+          <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="contacto" value="no"><span><span class="opcion-nombre">No, anónimo</span></span></label>
         </div>
       </fieldset>
 
       <div data-si="contacto=si">
-        <!-- Nombre y apellidos del bloque listo «Datos de identificación», sin CURP ni fecha: este formulario no los usa. -->
-        <div class="campo" data-campo="nombre" data-formato="nombre" data-requerido data-sensible data-finalidad="Dirigirse a la persona al dar seguimiento." data-uso="Identificar a quien solicita.">
-          <label class="etiqueta" for="nombre">Nombre(s)</label>
-          <input class="control" id="nombre" name="nombre" type="text" maxlength="80" autocomplete="given-name">
-        </div>
-        <div class="fila">
+        <!-- Nombre y apellidos del bloque listo «Datos de identificación», sin CURP ni fecha: este formulario no los usa. Son datos hermanos: van en una fila. -->
+        <div class="fila-3">
+          <div class="campo" data-campo="nombre" data-formato="nombre" data-requerido data-sensible data-finalidad="Dirigirse a la persona al dar seguimiento." data-uso="Identificar a quien solicita.">
+            <label class="etiqueta" for="nombre">Nombre(s)</label>
+            <input class="control" id="nombre" name="nombre" type="text" maxlength="80" autocomplete="given-name">
+          </div>
           <div class="campo" data-campo="apellido_paterno" data-formato="nombre" data-requerido data-sensible data-finalidad="Dirigirse a la persona al dar seguimiento." data-uso="Identificar a quien solicita.">
             <label class="etiqueta" for="apellido_paterno">Apellido paterno</label>
             <input class="control" id="apellido_paterno" name="apellido_paterno" type="text" maxlength="80" autocomplete="family-name">
@@ -270,16 +270,15 @@
             <input class="control" id="apellido_materno" name="apellido_materno" type="text" maxlength="80" autocomplete="off">
           </div>
         </div>
-        <div class="fila">
-          <div class="campo" data-campo="correo" data-formato="correo" data-requerido data-sensible data-finalidad="Informar el avance de la solicitud." data-uso="Enviar el seguimiento.">
-            <label class="etiqueta" for="correo">Correo electrónico</label>
-            <input class="control" id="correo" name="correo" type="email" maxlength="120" autocomplete="email">
-          </div>
-          <div class="campo" data-campo="telefono" data-formato="telefono" data-sensible data-finalidad="Aclarar la solicitud por llamada, si la persona lo pidió." data-uso="Aclarar dudas.">
-            <label class="etiqueta" for="telefono">Teléfono</label>
-            <p class="ayuda">Diez dígitos. Sólo si prefieres una llamada.</p>
-            <input class="control" id="telefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel-national">
-          </div>
+        <!-- Correo y teléfono no son datos hermanos (ni partes de un dato ni su confirmación): cada uno en su renglón. -->
+        <div class="campo" data-campo="correo" data-formato="correo" data-requerido data-sensible data-finalidad="Informar el avance de la solicitud." data-uso="Enviar el seguimiento.">
+          <label class="etiqueta" for="correo">Correo electrónico</label>
+          <input class="control" id="correo" name="correo" type="email" maxlength="120" autocomplete="email">
+        </div>
+        <div class="campo" data-campo="telefono" data-formato="telefono" data-sensible data-finalidad="Aclarar la solicitud por llamada, si la persona lo pidió." data-uso="Aclarar dudas.">
+          <label class="etiqueta" for="telefono">Teléfono</label>
+          <p class="ayuda">Diez dígitos. Sólo si prefieres una llamada.</p>
+          <input class="control" id="telefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel-national">
         </div>
       </div>
 

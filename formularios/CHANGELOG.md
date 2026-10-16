@@ -1,6 +1,50 @@
 # Historial de cambios
 
-## Sin publicar · 2026-10-14
+## 1.1.0 · 2026-10-16
+
+Primera versión corregida con lo que encontró un proyecto real: el sistema de acreditaciones de poda y dictaminación, construido con la 1.0.0. Tres fallas impedían que un formulario funcionara tal como viene (P46, P38, P37). Se corrigen junto con las de validación, accesibilidad y textos, y con cuatro mejoras de estilo de una segunda revisión (S2-1 a S2-4). Al pasar a esta versión, el proyecto puede quitar sus soluciones provisionales. Incluye también los cambios del 14 de octubre (más abajo).
+
+**Fallas que impedían el funcionamiento**
+
+- **P46 · El servidor rechazaba los archivos obligatorios** (`validar.mjs`): los buscaba en `datos`, donde el navegador no los manda. Ahora la revisión de datos salta los campos de archivos y los datos calculados, y los archivos obligatorios se buscan en `payload.archivos`. Prueba nueva con el envío tal como lo arma el navegador.
+- **P38 · El esquema perdía las condiciones anidadas** (`esquema-desde-html.mjs`): tomaba sólo el bloque `data-si` más cercano. Ahora guarda todas, de afuera hacia adentro (`condiciones`; `si` sigue siendo la más cercana), y `validar.mjs` exige todas. Además, ya no toma como campos los que están dentro de un comentario HTML.
+- **P37 · La lista con búsqueda no aceptaba el catálogo documentado** `{filas, fuente, corte, es_ficticio}` (`combo.js` y el servidor): ahora acepta el arreglo o el objeto y quita los nombres repetidos.
+
+**Validación y núcleo**
+
+- **Dato calculado por la página** (`data-auxiliar`): un `<input type="hidden">` que llena el código de la página cuenta en condiciones y cruzadas, pero no se valida, no entra al borrador y no se envía. El servidor lo vuelve a calcular (`opciones.auxiliares`) y rechaza el envío que lo traiga.
+- **Cruzadas con un rol opcional**: `opcionales: ['rol']` en la definición deja correr la cruzada con ese rol vacío (por ejemplo, exigir X en la CURP cuando no hay segundo apellido). Igual en el servidor.
+- **P44 · Las cruzadas se repiten al cambiar el otro dato**: al salir de cualquier campo de una cruzada, o al elegir una opción, se revisa también el campo que la declara, si ya tiene valor.
+- **P41 · Errores del servidor junto a su campo**: `FormKit.marcaError(campo, mensaje)` (y `instancia.marcaError`). Un rechazo con `{errores: [{campo, mensaje}]}`, la forma que devuelve `validar.mjs`, se pinta en cada campo y en el resumen; por pasos, se abre el primer paso con error (gancho `erroresServidor`).
+- **P40 · Paso decimal**: `step="0.5"` ya rechaza 2.3 («Usa múltiplos de 0.5»), contando desde el mínimo como en HTML y con tolerancia de redondeo; `step="1"` dice «Escribe un número entero, sin decimales». El servidor usa el mismo archivo.
+- **P52 · Condiciones encadenadas en el navegador**: una condición que mira un campo oculto lo toma como vacío, y las condiciones se aplican hasta que nada cambie. Navegador y servidor piden lo mismo.
+- **P61 · Mínimo o máximo según otra respuesta**: `data-min-segun="clave"` y `data-max-segun` con la función `FORMKIT_CONFIG.limitesSegun.clave(datos)`. El campo se revisa de nuevo al cambiar la respuesta de la que depende, y el servidor recibe la misma función (`opciones.limitesSegun`; si falta, lo anota en `senales`).
+
+**Accesibilidad, textos y plantillas**
+
+- **P47 · `aria-required` sólo en `input`, `select` y `textarea`**: ya no se pone en el botón de la zona de carga (axe `aria-allowed-attr`).
+- **P39 · Textos de archivos en singular** cuando se admite uno solo («Un archivo de hasta 5 MB», «sólo se admite un archivo»), y JPEG una sola vez en la lista de formatos (`formatosArchivo`).
+- **Cámara frontal**: `capture="user"` documentado para una fotografía de la persona («Fotografía de frente»); `capture="environment"` sigue para las evidencias.
+- **P56 · Una sola respuesta va en lista** (FRM-16): la lista con el círculo visible es la forma por omisión en la guía de decisión, el manifiesto, la guía visual y la plantilla por pasos («Tipo de solicitud»). La opción deshabilitada de la lista se ve atenuada. Las tarjetas quedan como variante.
+
+**Mejora**
+
+- **P42 · «Mostrar contraseña»**: todo campo de contraseña trae el botón, con `aria-pressed`; `data-sin-mostrar` lo quita. Muestra en la guía visual («El campo»).
+
+**Segunda revisión: estilo de «Crea tu cuenta» (16 oct 2026)**
+
+- **S2-1 · Ayuda de bloque** (FRM-09): `.ayuda-bloque` bajo el título de una sección dice una sola vez lo que vale para todos sus campos; el núcleo la enlaza a cada campo que le sigue, hasta el siguiente título. `auditar-campos` (D6) avisa si dos campos seguidos repiten la misma ayuda.
+- **S2-2 · Opciones en línea** (FRM-16): `.opciones-lista.opciones-en-linea` para dos o tres opciones cortas sin descripción (Sí/No): una columna por opción desde 760 px y una por renglón en teléfono. La usan los Sí/No de la plantilla por pasos, del bloque «Domicilio» y de la muestra de pregunta condicional. Los botones Sí/No (`.opciones-cortas`) siguen admitidos.
+- **S2-3 · Datos hermanos en una fila** (FRM-13, `docs/03`): nombre y apellidos en `.fila-3`; CURP y fecha de nacimiento, correo y su confirmación, contraseña y su confirmación en `.fila`; lo demás, en una columna. Aplicado en las dos plantillas, en el bloque «Datos de identificación» y en la muestra «El campo». En la plantilla de una página el alto queda casi igual (en escritorio, de 2332 a 2346 px): junta nombre y apellidos en un renglón, pero separa el teléfono y «Personas en tu hogar», que no son hermanos.
+- **S2-4 · El ícono de ayuda no repite la ayuda visible** (FRM-24): si la ayuda visible basta, no hay ícono. `auditar-campos` (D5) lo comprueba.
+- Cuatro pares nuevos en «Sí y no» de la guía visual, uno por mejora.
+- **Ayuda desplegable que se salía de la pantalla** (`tooltip.css`): con el «?» cerca del borde derecho de un teléfono de 320 px, el texto abierto se salía 8 px y la página se desplazaba de lado (FRM-61). Junto a una etiqueta, el texto ahora se ancla a la etiqueta, con el ancho del campo como máximo. Lo encontró la prueba de anchos con el par nuevo de «Sí y no».
+
+**Sin resolver todavía**: P43 (cruzadas de la CURP contra nombre y apellidos) y P45 (hoja de la plantilla de versión con tokens) necesitan los archivos del proyecto; quedan en Pendientes.
+
+**Pruebas**: `07-correcciones` (nueva: nueve casos en navegador sobre `pruebas/paginas/correcciones.html` y las plantillas) y seis casos nuevos de servidor y herramientas en `06`.
+
+### Cambios del 14 de octubre de 2026
 
 - **Validador del servidor corregido** (auditoría del 14 oct 2026): el punto del mapa viaja como `{type: "Point", coordinates}`, como esperan el servidor y `docs/06` (antes `tipo`, y el servidor rechazaba todo envío con punto); cada fila de un grupo repetible se valida con su patrón y con el mínimo y máximo de filas, que ahora guarda el esquema (`limitesRepetibles`) (antes el servidor exigía un campo con «#» y rechazaba todo registro de la plantilla de una página); un envío mal formado se rechaza sin detener el proceso; las claves `__proto__`, `constructor` y `prototype` no cuentan como campos; cada dato debe tener su tipo (texto, lista sólo en opción múltiple sin repetidas, punto con números dentro del ámbito, interruptor sólo «si»); los archivos sólo se aceptan en campos de archivos activos. Cuatro pruebas nuevas en `06-servidor` y, en `01-por-pasos` y `02-una-pagina`, el servidor valida lo que el navegador realmente envía.
 - El estándar pasa a la carpeta común `estandares-sia/formularios`, junto a `geovisores/` y una portada de guía común (decisión de la Secretaría). Nada se publica en GitHub todavía.

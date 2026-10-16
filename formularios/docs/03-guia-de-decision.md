@@ -19,10 +19,11 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Escribir un relato o descripción | Texto largo con `maxlength`, `minlength` y `data-legible` | BASE | Basta una frase corta: usa texto corto. |
 | Dar correo, teléfono, CP | Campo con `data-formato` (`correo`, `telefono` o `cp`) y `autocomplete` | BASE | — |
 | Dar un número con unidad | `data-formato="numero"` + `.control-grupo` con la unidad; `min`, `max`, `step` | BASE | El número es un código (folio, CP): es texto. |
-| Elegir una de 2 a 7 opciones | Radios (`opciones`): lista, tarjetas con descripción o Sí/No corto | BASE | Más de 7: combo. Un ajuste inmediato: toggle. |
+| Elegir una de 2 a 7 opciones | Radios (`opciones`): **lista por omisión** (`.opciones-lista`: una por renglón, con el círculo visible y su descripción si hace falta). Las tarjetas en rejilla no se usan para una sola respuesta: en escritorio no se ve que hay que elegir una | BASE | Más de 7: combo. Un ajuste inmediato: toggle. |
+| Contestar Sí/No u otras dos o tres opciones cortas sin descripción | **Lista en línea** (`.opciones-lista.opciones-en-linea`): una columna por opción desde tableta, una por renglón en teléfono. La variante de botones (`.opciones-cortas`) sigue admitida | BASE | Las opciones llevan descripción: una por renglón. |
 | Elegir varias | Casillas (`opciones`) con `data-min-opciones`/`data-max-opciones` | BASE | — |
 | Elegir de un catálogo largo (≥ 8) | `combo` (cerrado) · `data-libre` si se admite lo no listado | RECOMENDADO | Menos de 8: radios o select nativo. |
-| Elegir de una lista corta sin descripciones | `select` nativo del núcleo con «Elige una opción» | BASE | Las opciones necesitan explicación: tarjetas. |
+| Elegir de una lista corta sin descripciones | `select` nativo del núcleo con «Elige una opción» | BASE | Las opciones necesitan explicación: lista con descripción. |
 | Decir «ninguna de las anteriores» | Opción **Otro** (`otro`): con especificación (`data-otro-de`) o simple | RECOMENDADO | El detalle no se usa: «Otro» simple. |
 | Dar alcaldía, colonia y CP | `cascadas` con catálogo versionado; CP propone alcaldía y colonia | OPCIONAL | Sólo se pide la alcaldía: select o combo. |
 | Dar una fecha | `type=date` + botón «Hoy» (`fecha`); `data-no-futura` si aplica | RECOMENDADO | — |
@@ -43,6 +44,8 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Dar sus datos de identificación | **Bloque listo «Datos de identificación»** (guía visual, «Bloques listos»): nombre(s), apellido paterno, apellido materno opcional, CURP y fecha de nacimiento derivada | OPCIONAL | No hay uso declarado para la CURP: quita CURP y fecha. |
 | Dar un domicilio | **Bloque listo «Domicilio»**: calle, número exterior («S/N») e interior, manzana y lote sólo con «Sí», entre calles, alcaldía → colonia → CP y ubicación por enlace o coordenadas | OPCIONAL | Basta la alcaldía: select o combo. |
 | Ver un dato que no debe cambiar | `readonly` + `data-copiable` | BASE | Lo que no aplica todavía: `disabled`. |
+| Dar datos hermanos | **Una fila**: nombre y apellidos en `.fila-3`; CURP y fecha de nacimiento, correo y su confirmación, contraseña y su confirmación en `.fila` (también calle y número, manzana y lote). En teléfono, una columna | BASE | No son partes de un dato ni su confirmación: cada uno en su renglón, aunque sea corto. |
+| Leer una indicación que vale para toda una sección | **Ayuda de bloque** (`.ayuda-bloque`) bajo el título de la sección; el núcleo la enlaza a cada campo que le sigue, hasta el siguiente título | BASE | La indicación es propia de un campo: va en su ayuda. |
 
 ## 3. Por necesidad de navegación o retroalimentación
 
@@ -53,7 +56,7 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Cerrar con folio y «qué sigue» | `acuse` (+ `copiar`, `descarga`) | RECOMENDADO |
 | Avisar que hay un borrador | Franja del núcleo (`data-borrador`) | RECOMENDADO |
 | Pedir confirmación | `modal` (`FormKit.confirma`) · diálogo de contenido (`data-abre-dialogo`) | RECOMENDADO |
-| Explicar un campo con un texto corto que no todos necesitan | `tooltip` (botón «?») | OPCIONAL |
+| Explicar un campo con un texto corto que no todos necesitan | `tooltip` (botón «?»); nunca repite la ayuda visible: si la ayuda visible basta, no hay ícono (`auditar-campos` D5) | OPCIONAL |
 | Plegar lo opcional de uso raro | `acordeon` (`details`) | OPCIONAL |
 | Ubicar a la persona en un sitio interno | `migas` | OPCIONAL |
 | Mostrar avance de una tarea | `progreso` | OPCIONAL |

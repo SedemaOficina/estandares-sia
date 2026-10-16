@@ -37,6 +37,8 @@
          <ul class="lista-arch"></ul>
        </div>
      </div>
+   Para una fotografía de la persona (retrato) se usa la cámara frontal:
+   capture="user" en lugar de capture="environment" (campo «Fotografía de frente»).
    Configuración por campo (opcional): data-extensiones="jpg,png", data-mb,
    data-max, data-total-mb. Lo demás viene de validaciones.config.js.
    ========================================================= */
@@ -78,7 +80,7 @@
         };
       }
       const ext = (nombre) => String(nombre || '').split('.').pop().toLowerCase();
-      const formatosTxt = (c) => c.extensiones.map((e) => e.toUpperCase()).join(', ');
+      const formatosTxt = (c) => cfg.formatosArchivo(c.extensiones);
       /* Nombre saneado: sin rutas, sin caracteres de control, acotado. */
       const saneaNombre = (n) => String(n || 'archivo').split(/[\\/]/).pop().replace(/[\u0000-\u001F\u007F]/g, '').replace(/\s+/g, ' ').trim().slice(0, A.nombreMax) || 'archivo';
       const hexDe = (buf) => Array.from(new Uint8Array(buf), (x) => x.toString(16).padStart(2, '0')).join('');
@@ -192,7 +194,7 @@
         const rechazos = [];
         for (const f of archivos) {
           const nombre = saneaNombre(f.name);
-          if (lista.filter((x) => x.estado !== 'error').length >= c.max) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoMax, { max: c.max }) }); continue; }
+          if (lista.filter((x) => x.estado !== 'error').length >= c.max) { rechazos.push({ nombre, motivo: plantilla(c.max === 1 ? M.archRechazoMaxUno : M.archRechazoMax, { max: c.max }) }); continue; }
           if (!c.extensiones.includes(ext(f.name))) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoTipo, { formatos: formatosTxt(c) }) }); continue; }
           if (f.size < A.minBytes) { rechazos.push({ nombre, motivo: M.archRechazoVacio }); continue; }
           const esFoto = A.optimiza.tipos.includes(ext(f.name));
@@ -259,7 +261,7 @@
         const lim = $('[data-limite-texto]', cont);
         entrada.accept = c.extensiones.map((e) => `.${e}`).join(',');
         entrada.multiple = c.max > 1;
-        if (lim) lim.textContent = plantilla(M.archLimite, { formatos: formatosTxt(c), max: c.max, mb: c.mb });
+        if (lim) lim.textContent = plantilla(c.max === 1 ? M.archLimiteUno : M.archLimite, { formatos: formatosTxt(c), max: c.max, mb: c.mb });
         const etq = $('.etiqueta', el);
         if (etq) { etq.id = etq.id || ctx.idUnico(`et-${el.dataset.campo}`); const zt = $('.zona-carga-texto', zona); if (zt) zt.id = zt.id || ctx.idUnico(`zt-${el.dataset.campo}`); zona.setAttribute('aria-labelledby', `${etq.id}${zt ? ` ${zt.id}` : ''}`); }
         /* La cámara se ofrece sólo donde existe: teléfonos y tabletas con puntero grueso. */

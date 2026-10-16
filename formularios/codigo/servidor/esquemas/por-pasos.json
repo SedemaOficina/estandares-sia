@@ -1,6 +1,6 @@
 {
   "formulario": "por-pasos.html",
-  "generado": "2026-10-14T19:08:07.699Z",
+  "generado": "2026-10-16T13:56:33.959Z",
   "campos": {
     "tipo": {
       "etiqueta": "Tipo de solicitud",
@@ -31,7 +31,15 @@
         "valores": [
           "otro"
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "tipo",
+          "valores": [
+            "otro"
+          ]
+        }
+      ]
     },
     "urgente": {
       "etiqueta": "¿Hay riesgo inmediato para personas o bienes?",
@@ -132,7 +140,15 @@
         "valores": [
           "si"
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "mzlt",
+          "valores": [
+            "si"
+          ]
+        }
+      ]
     },
     "lote": {
       "etiqueta": "Lote",
@@ -149,7 +165,15 @@
         "valores": [
           "si"
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "mzlt",
+          "valores": [
+            "si"
+          ]
+        }
+      ]
     },
     "entre_calles": {
       "etiqueta": "¿Entre qué calles?",
@@ -186,7 +210,15 @@
         "valores": [
           ""
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "colonia_libre",
+          "valores": [
+            ""
+          ]
+        }
+      ]
     },
     "colonia_libre": {
       "etiqueta": "colonia_libre",
@@ -211,7 +243,15 @@
         "valores": [
           "si"
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "colonia_libre",
+          "valores": [
+            "si"
+          ]
+        }
+      ]
     },
     "cp": {
       "etiqueta": "Código postal",
@@ -315,7 +355,15 @@
         "valores": [
           "si"
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "contacto",
+          "valores": [
+            "si"
+          ]
+        }
+      ]
     },
     "apellido_paterno": {
       "etiqueta": "Apellido paterno",
@@ -334,7 +382,15 @@
         "valores": [
           "si"
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "contacto",
+          "valores": [
+            "si"
+          ]
+        }
+      ]
     },
     "apellido_materno": {
       "etiqueta": "Apellido materno",
@@ -353,7 +409,15 @@
         "valores": [
           "si"
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "contacto",
+          "valores": [
+            "si"
+          ]
+        }
+      ]
     },
     "correo": {
       "etiqueta": "Correo electrónico",
@@ -372,7 +436,15 @@
         "valores": [
           "si"
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "contacto",
+          "valores": [
+            "si"
+          ]
+        }
+      ]
     },
     "telefono": {
       "etiqueta": "Teléfono",
@@ -389,7 +461,15 @@
         "valores": [
           "si"
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "contacto",
+          "valores": [
+            "si"
+          ]
+        }
+      ]
     },
     "aviso": {
       "etiqueta": "Leí el aviso de privacidad",

@@ -13,8 +13,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { RAIZ } from './ayudas.mjs';
 
@@ -23,6 +24,15 @@ const { validaPayload } = await import(pathToFileURL(resolve(RAIZ, 'codigo/servi
 await import(pathToFileURL(resolve(RAIZ, 'codigo/catalogos/cdmx-ejemplo.js')).href);
 const CAT = { cdmx: globalThis.FORMKIT_CATALOGOS.cdmx.filas, alcaldias: globalThis.FORMKIT_CATALOGOS.alcaldias };
 const esquema = (n) => JSON.parse(execFileSync(process.execPath, [resolve(RAIZ, 'herramientas/esquema-desde-html.mjs'), resolve(RAIZ, `codigo/plantillas/${n}.html`)], { encoding: 'utf8' }));
+/* Esquema de un formulario de prueba escrito en la prueba misma. */
+const TEMPORAL = mkdtempSync(join(tmpdir(), 'formkit-esquema-'));
+let cuentaTemporal = 0;
+const esquemaDe = (cuerpo) => {
+  const archivo = join(TEMPORAL, `prueba-${++cuentaTemporal}.html`);
+  writeFileSync(archivo, `<form data-formkit>\n${cuerpo}\n</form>\n`);
+  return JSON.parse(execFileSync(process.execPath, [resolve(RAIZ, 'herramientas/esquema-desde-html.mjs'), archivo], { encoding: 'utf8' }));
+};
+const META = { idempotencia: 'abc' };
 
 const BUENO = {
   datos: { tipo: 'otro', tipo_otro: 'Una situación no prevista', urgente: 'no', fecha_hechos: '2026-01-10', descripcion: 'El árbol frente a la escuela tiene una grieta grande en el tronco desde hace dos semanas.', alcaldia: 'Coyoacán', colonia: 'Villa de Prueba', cp: '04010', calle: 'Calle de Prueba', num_ext: '1', contacto: 'si', nombre: 'Fulana', apellido_paterno: 'de Tal', correo: 'Fulana@Ejemplo.local ', telefono: '+52 55 0000 0000', aviso: 'si', humano: 'si' },
@@ -132,13 +142,104 @@ test('servidor · el tipo de cada dato: listas u objetos donde va texto se recha
   assert.ok(toggle.errores.some((x) => x.campo === 'avisos'), 'el interruptor sólo acepta «si»');
 });
 
-const herramienta =(nombre, args) => test(`herramientas · ${nombre}`, () => {
+test('servidor · un archivo obligatorio se busca en payload.archivos, que es donde lo manda el navegador (P46)', () => {
+  const e = esquema('por-pasos');
+  e.campos.fotos.requerido = true;
+  const con = validaPayload({ ...structuredClone(BUENO), archivos: [{ campo: 'fotos', nombre: 'foto.jpg', size: 1000, sha256_original: 'a' }] }, e, { catalogos: CAT });
+  assert.deepEqual(con.errores, [], `con el archivo se acepta: ${JSON.stringify(con.errores)}`);
+  const sin = validaPayload(structuredClone(BUENO), e, { catalogos: CAT });
+  assert.equal(sin.errores.filter((x) => x.campo === 'fotos').length, 1, 'sin el archivo hay un solo error, no dos');
+});
+
+test('servidor · condiciones anidadas: un campo exige las de todos sus ancestros (P38) y lo comentado no cuenta', () => {
+  const e = esquemaDe(`
+    <fieldset class="grupo" data-campo="modalidad" data-uso="Prueba."><legend class="etiqueta">Modalidad</legend>
+      <label><input type="radio" name="modalidad" value="nueva">Nueva</label><label><input type="radio" name="modalidad" value="renovacion">Renovación</label></fieldset>
+    <div data-si="modalidad=nueva">
+      <fieldset class="grupo" data-campo="tipo" data-uso="Prueba."><legend class="etiqueta">Tipo</legend>
+        <label><input type="radio" name="tipo" value="poda">Poda</label><label><input type="radio" name="tipo" value="dictamen">Dictamen</label></fieldset>
+      <section data-si="tipo=poda">
+        <div class="campo" data-campo="experiencia" data-requerido data-uso="Prueba."><label class="etiqueta" for="experiencia">Experiencia</label><input id="experiencia" name="experiencia" type="text"></div>
+      </section>
+    </div>
+    <!-- <div class="campo" data-campo="viejo" data-requerido data-uso="Prueba."><input name="viejo"></div> -->`);
+  assert.equal(e.campos.experiencia.condiciones.length, 2, 'guarda las dos condiciones');
+  assert.equal(e.campos.viejo, undefined, 'un campo comentado no se declara');
+  const v = (datos) => validaPayload({ datos, archivos: [], meta: META }, e);
+  assert.ok(v({ modalidad: 'nueva', tipo: 'poda' }).errores.some((x) => x.campo === 'experiencia'), 'visible y vacío: se exige');
+  assert.deepEqual(v({ modalidad: 'renovacion', tipo: 'poda' }).errores, [], 'con el ancestro de afuera oculto no se exige');
+  const r = v({ modalidad: 'renovacion', tipo: 'poda', experiencia: '3' });
+  assert.equal(r.datos.experiencia, undefined, 'y lo que llegue se descarta');
+});
+
+test('servidor · datos calculados (data-auxiliar) y cruzadas con un rol opcional vacío', () => {
+  const e = esquemaDe(`
+    <div class="campo" data-campo="paterno" data-requerido data-uso="Prueba."><label class="etiqueta" for="paterno">Paterno</label><input id="paterno" name="paterno"></div>
+    <div class="campo" data-campo="materno" data-uso="Prueba."><label class="etiqueta" for="materno">Materno</label><input id="materno" name="materno"></div>
+    <input type="hidden" data-campo="sin_materno" data-auxiliar>
+    <div class="campo" data-campo="motivo" data-requerido data-si="sin_materno=si" data-uso="Prueba." data-cruzada="opcional" data-cruzada-campos="motivo=motivo materno=materno"><label class="etiqueta" for="motivo">Motivo</label><input id="motivo" name="motivo"></div>`);
+  assert.equal(e.campos.sin_materno.tipo, 'auxiliar');
+  const CFG = globalThis.FORMKIT_VALIDACIONES;
+  const config = { ...CFG, cruzadas: { ...CFG.cruzadas, opcional: { campos: ['motivo', 'materno'], opcionales: ['materno'], valida: ({ motivo, materno }) => (!materno && motivo === 'no tengo' ? '' : 'Sin apellido materno, escribe «no tengo».') } } };
+  const auxiliares = { sin_materno: (d) => (d.materno ? '' : 'si') };
+  const v = (datos) => validaPayload({ datos, archivos: [], meta: META }, e, { config, auxiliares });
+  assert.ok(v({ paterno: 'Tal' }).errores.some((x) => x.campo === 'motivo'), 'el servidor calcula el dato y su condición exige «motivo»');
+  assert.deepEqual(v({ paterno: 'Tal', materno: 'Cual' }).errores, [], 'con materno, el dato calculado apaga la condición');
+  assert.ok(v({ paterno: 'Tal', motivo: 'otro' }).errores.some((x) => x.campo === 'motivo' && /no tengo/.test(x.mensaje)), 'la cruzada corre con el rol opcional vacío');
+  const bien = v({ paterno: 'Tal', motivo: 'no tengo' });
+  assert.deepEqual(bien.errores, []);
+  assert.equal(Object.hasOwn(bien.datos, 'sin_materno'), false, 'el dato calculado no se devuelve');
+  assert.ok(v({ paterno: 'Tal', materno: 'Cual', sin_materno: 'si' }).errores.some((x) => x.campo === 'sin_materno'), 'el dato calculado no se acepta del navegador');
+});
+
+test('servidor · mínimo que depende de otra respuesta (data-min-segun) y paso decimal (P61, P40)', () => {
+  const e = esquemaDe(`
+    <div class="campo" data-campo="nivel" data-requerido data-uso="Prueba."><label class="etiqueta" for="nivel">Nivel</label><select id="nivel" name="nivel"><option value="">Elige</option><option value="basico">Básico</option><option value="avanzado">Avanzado</option></select></div>
+    <div class="campo" data-campo="anios" data-formato="numero" data-requerido data-min-segun="experiencia" data-uso="Prueba."><label class="etiqueta" for="anios">Años</label><input id="anios" name="anios" min="0" step="0.5"></div>`);
+  const limitesSegun = { experiencia: (d) => (d.nivel === 'avanzado' ? 5 : 2) };
+  const v = (datos, op = { limitesSegun }) => validaPayload({ datos, archivos: [], meta: META }, e, op);
+  assert.deepEqual(v({ nivel: 'basico', anios: '3' }).errores, [], 'básico: 3 años bastan');
+  assert.ok(v({ nivel: 'avanzado', anios: '3' }).errores.some((x) => x.campo === 'anios' && /mínimo es 5/.test(x.mensaje)), 'avanzado: el mínimo es 5');
+  assert.ok(v({ nivel: 'basico', anios: '2.3' }).errores.some((x) => x.campo === 'anios' && /múltiplos de 0.5/.test(x.mensaje)), 'el paso de 0.5 rechaza 2.3');
+  assert.deepEqual(v({ nivel: 'basico', anios: '2.5' }).errores, [], 'y acepta 2.5');
+  assert.ok(v({ nivel: 'avanzado', anios: '6' }, {}).senales.some((s) => /limitesSegun/.test(s)), 'sin la función, el servidor lo señala');
+});
+
+test('servidor · combo con el catálogo documentado {filas}, y mensajes de archivos en singular (P37, P39)', () => {
+  const e = esquemaDe(`
+    <div class="campo" data-campo="especie" data-requerido data-uso="Prueba."><label class="etiqueta" for="especie">Especie</label><div class="combo" data-combo data-catalogo="especies"><input id="especie" name="especie"><ul class="combo-lista" hidden></ul></div></div>
+    <div class="campo" data-campo="retrato" data-requerido data-max="1" data-uso="Prueba."><span class="etiqueta">Fotografía de frente</span><div data-archivos><button type="button" class="zona-carga">Elegir</button><input type="file" hidden></div></div>`);
+  const catalogos = { especies: { filas: ['Fresno', { nombre: 'Jacaranda' }], fuente: 'prueba', corte: '2026-10-16', es_ficticio: true } };
+  const v = (datos, archivos = [{ campo: 'retrato', nombre: 'a.jpg', size: 10, sha256_original: 'a' }]) => validaPayload({ datos, archivos, meta: META }, e, { catalogos });
+  assert.deepEqual(v({ especie: 'Jacaranda' }).errores, [], 'el objeto {filas} se acepta');
+  assert.ok(v({ especie: 'Pino' }).errores.some((x) => x.campo === 'especie'), 'y sigue cerrado al catálogo');
+  const dos = v({ especie: 'Fresno' }, [{ campo: 'retrato', nombre: 'a.jpg', size: 10, sha256_original: 'a' }, { campo: 'retrato', nombre: 'b.jpg', size: 10, sha256_original: 'b' }]);
+  assert.ok(dos.errores.some((x) => /sólo se admite un archivo/.test(x.mensaje)), `singular cuando el máximo es 1: ${JSON.stringify(dos.errores)}`);
+  assert.equal(globalThis.FORMKIT_VALIDACIONES.formatosArchivo(['jpg', 'jpeg', 'png']), 'JPEG, PNG', 'JPEG una sola vez');
+});
+
+const herramienta = (nombre, args) => test(`herramientas · ${nombre}`, () => {
   const r = spawnSync(process.execPath, args, { cwd: RAIZ, encoding: 'utf8' });
   assert.equal(r.status, 0, (r.stdout + r.stderr).split('\n').slice(-30).join('\n'));
 });
 herramienta('auditor de CSS en verde', ['herramientas/auditor-css.mjs']);
 herramienta('contraste de todos los pares', ['herramientas/contraste.mjs']);
-herramienta('auditoría de campos (uso, finalidad, autocomplete, sensible, inputmode)', ['herramientas/auditar-campos.mjs']);
+herramienta('auditoría de campos (uso, finalidad, autocomplete, sensible, inputmode, ayudas sin repetir)', ['herramientas/auditar-campos.mjs']);
+
+test('auditoría de campos · el «?» que repite la ayuda visible y la misma ayuda en campos seguidos (S2-4, S2-1)', () => {
+  const archivo = join(TEMPORAL, `prueba-${++cuentaTemporal}.html`);
+  writeFileSync(archivo, [
+    '<div class="campo" data-campo="a" data-uso="x."><label class="etiqueta" for="a">A <span class="tooltip" data-tooltip><button type="button" aria-label="Ayuda">?</button><span class="tooltip-texto" role="tooltip" hidden>Son 18 caracteres, como en tu acta.</span></span></label><p class="ayuda">Son 18 caracteres, como aparecen en tu acta.</p><input class="control" id="a" name="a"></div>',
+    '<div class="campo" data-campo="b" data-uso="x."><label class="etiqueta" for="b">B</label><p class="ayuda">Escríbelo como aparece en tu identificación.</p><input class="control" id="b" name="b"></div>',
+    '<div class="campo" data-campo="c" data-uso="x."><label class="etiqueta" for="c">C</label><p class="ayuda">Escríbelo como aparece en tu identificación.</p><input class="control" id="c" name="c"></div>',
+    '<div class="campo" data-campo="d" data-uso="x."><label class="etiqueta" for="d">D <span class="tooltip" data-tooltip><button type="button" aria-label="Ayuda">?</button><span class="tooltip-texto" role="tooltip" hidden>Está en la esquina superior de tu acuse.</span></span></label><p class="ayuda">Letras y números, sin espacios.</p><input class="control" id="d" name="d"></div>'
+  ].join('\n'));
+  const r = spawnSync(process.execPath, [resolve(RAIZ, 'herramientas/auditar-campos.mjs'), archivo], { encoding: 'utf8' });
+  assert.equal(r.status, 1, 'sale con 1');
+  assert.match(r.stderr, /D5 .*«a»/, 'el «?» de «a» repite su ayuda');
+  assert.match(r.stderr, /D6 .*«c».*«b»/, '«c» repite la ayuda de «b»');
+  assert.doesNotMatch(r.stderr, /«d»/, 'un «?» que dice algo nuevo pasa');
+});
 herramienta('bibliotecas coinciden con el manifiesto', ['herramientas/vendor.mjs', '--verificar']);
 herramienta('documentos generados al día', ['herramientas/generar-reglas.mjs', '--comprobar']);
 

@@ -14,7 +14,13 @@
      · que cada dato esté declarado (las claves __proto__, constructor y
        prototype nunca lo están) y tenga el tipo esperado: texto donde va
        texto, lista sólo en opción múltiple, punto con números válidos;
-     · obligatoriedad (respetando condicionales data-si y «Otro»);
+     · obligatoriedad, respetando todas las condiciones data-si del campo y
+       de sus ancestros, y «Otro»; los archivos obligatorios se buscan en
+       payload.archivos, que es donde los manda el navegador;
+     · datos que calcula la página (data-auxiliar): el navegador no los manda
+       y el servidor los calcula con opciones.auxiliares[campo](datos);
+     · límites que dependen de otras respuestas (data-min-segun,
+       data-max-segun), con opciones.limitesSegun[clave](datos);
      · formato y normalización por tipo de dato;
      · pertenencia al catálogo en opciones, selects y combos cerrados;
      · mínimo y máximo de opciones, sin contar repetidas;
@@ -29,7 +35,7 @@
    Uso:
      import { validaPayload } from './validar.mjs';
      const esquema = JSON.parse(fs.readFileSync('esquema.json'));
-     const r = validaPayload(payload, esquema, { catalogos });
+     const r = validaPayload(payload, esquema, { catalogos, auxiliares, limitesSegun });
    El esquema de cada plantilla se genera con:
      node herramientas/esquema-desde-html.mjs codigo/plantillas/por-pasos.html > esquema.json
    ========================================================= */
@@ -81,21 +87,33 @@ export function validaPayload(payload, esquema, opciones = {}) {
     const lista = Array.isArray(v) ? v : [v];
     return activo(si.campo) && lista.some((x) => si.valores.includes(x));
   };
-  /* Un campo con su propia condición dentro de un bloque condicional exige
-     las dos (siPadre), como en pantalla. */
-  const activoDef = (c) => !c.si || (cumple(c.si) && (!c.siPadre || cumple(c.siPadre)));
+  /* Un campo exige todas sus condiciones: la propia y las de sus ancestros,
+     como en pantalla. (siPadre: esquemas anteriores a «condiciones».) */
+  const activoDef = (c) => (c.condiciones || [c.si, c.siPadre].filter(Boolean)).every(cumple);
   const activo = (n) => declarado(n) && activoDef(campos[n]);
   const vacio = (v) => v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length);
   const noAdmitido = (n, c) => errores.push({ campo: n, mensaje: `Formato de dato no admitido en «${c.etiqueta}».` });
+
+  /* 0b. Datos que calcula la página: no se reciben del navegador; el servidor
+     los calcula por su cuenta y sólo los usa para condiciones y cruzadas. */
+  const auxiliares = Object.entries(campos).filter(([, c]) => c.tipo === 'auxiliar').map(([n]) => n);
+  for (const n of auxiliares) {
+    if (Object.hasOwn(datos, n)) { errores.push({ campo: n, mensaje: 'Dato calculado: no se recibe del navegador.' }); delete datos[n]; }
+    const fn = opciones.auxiliares && opciones.auxiliares[n];
+    if (typeof fn === 'function') { const v = fn(Object.fromEntries(Object.entries(datos))); if (v !== undefined && v !== null && v !== '') datos[n] = String(v); }
+    else senales.push(`«${n}» es un dato calculado y el servidor no recibió su función en opciones.auxiliares.`);
+  }
 
   /* 1. Campos desconocidos: no se aceptan (un campo «por si acaso» es un dato personal sin uso). */
   for (const n of Object.keys(datos)) {
     if (declarado(n) ? esPatron(n) : !filaDe(n)) errores.push({ campo: n, mensaje: 'Campo no declarado en el formulario.' });
   }
 
-  /* 2. Campo por campo; las filas de los grupos repetibles, con su patrón. */
+  /* 2. Campo por campo; las filas de los grupos repetibles, con su patrón.
+     Los archivos se validan en el paso 6, con payload.archivos; los datos
+     calculados no se validan. */
   for (const [n, c] of Object.entries(campos)) {
-    if (esPatron(n)) continue;
+    if (esPatron(n) || c.tipo === 'archivos' || c.tipo === 'auxiliar') continue;
     if (!activo(n)) { if (!vacio(datos[n])) { delete datos[n]; senales.push(`«${n}» venía con valor aunque su condición no se cumple; se descartó.`); } continue; }
     validaUno(n, c);
   }
@@ -107,7 +125,7 @@ export function validaPayload(payload, esquema, opciones = {}) {
     if (lim.max && filas.length > lim.max) errores.push({ campo: grupo, mensaje: plantilla(M.repetibleMax, { max: lim.max, etiqueta: lim.etiqueta || grupo }) });
     if (lim.min && filas.length < lim.min) errores.push({ campo: grupo, mensaje: plantilla(M.repetibleMin, { min: lim.min, etiqueta: lim.etiqueta || grupo }) });
     for (const [patron, c] of Object.entries(campos)) {
-      if (!patron.startsWith(`${grupo}.#.`) || !activoDef(c)) continue;
+      if (!patron.startsWith(`${grupo}.#.`) || c.tipo === 'archivos' || c.tipo === 'auxiliar' || !activoDef(c)) continue;
       for (const fila of filas) validaUno(patron.replace('.#.', `.${fila}.`), c);
     }
   }
@@ -138,8 +156,10 @@ export function validaPayload(payload, esquema, opciones = {}) {
       return;
     }
     if (c.tipo === 'combo' && c.cerrado && c.catalogo) {
-      const cat = (opciones.catalogos || {})[c.catalogo] || [];
-      const nombres = (cat.filas ? [...new Set(cat.filas.map((f) => f.alcaldia))] : cat).map((o) => (typeof o === 'string' ? o : o.nombre));
+      /* El catálogo es un arreglo o el objeto documentado {filas, fuente, corte}; una fila de cascada aporta su alcaldía. */
+      const cat = (opciones.catalogos || {})[c.catalogo];
+      const lista = Array.isArray(cat) ? cat : (cat && Array.isArray(cat.filas) ? cat.filas : []);
+      const nombres = lista.map((o) => (typeof o === 'string' ? o : o && (o.nombre ?? o.alcaldia))).filter(Boolean);
       if (!nombres.some((o) => normaliza(o) === normaliza(v))) errores.push({ campo: n, mensaje: plantilla(M.soloLista, { etiqueta: c.etiqueta }) });
     }
     /* Texto con formato: normalizar, validar y conservar lo normalizado. */
@@ -150,6 +170,14 @@ export function validaPayload(payload, esquema, opciones = {}) {
       const atr = { ...(c.atributos || {}) };
       if (atr.max === 'hoy') atr.max = cfg.hoyISO();
       if (atr.min === 'hoy') atr.min = cfg.hoyISO();
+      /* Límites que dependen de otras respuestas: la misma función que usa el navegador. */
+      for (const [lim, clave] of [['min', atr.minSegun], ['max', atr.maxSegun]]) {
+        if (!clave) continue;
+        const fn = opciones.limitesSegun && opciones.limitesSegun[clave];
+        if (typeof fn !== 'function') { senales.push(`«${n}» declara un ${lim === 'min' ? 'mínimo' : 'máximo'} según «${clave}», pero el servidor no recibió esa función en opciones.limitesSegun.`); continue; }
+        const r = fn(Object.fromEntries(Object.entries(datos)));
+        if (r !== undefined && r !== null && r !== '') atr[lim] = String(r);
+      }
       const msg = f.valida(v, atr);
       if (msg) errores.push({ campo: n, mensaje: msg });
     } else {
@@ -180,7 +208,15 @@ export function validaPayload(payload, esquema, opciones = {}) {
       if (!def) continue;
       const valores = {};
       let listo = true;
-      for (const rol of def.campos) { const campo = cz.mapa[rol] || rol; const v = datos[campo]; if (vacio(v) || errores.some((e) => e.campo === campo)) { listo = false; break; } const ff = cfg.formatos[declarado(campo) ? campos[campo].formato : '']; valores[rol] = ff ? ff.normaliza(String(v)) : v; }
+      /* Un rol de def.opcionales corre vacío, como en el navegador. */
+      const opcionalesCz = def.opcionales || [];
+      for (const rol of def.campos) {
+        const campo = cz.mapa[rol] || rol;
+        const v = activo(campo) ? datos[campo] : undefined;
+        if (vacio(v) && opcionalesCz.includes(rol)) { valores[rol] = ''; continue; }
+        if (vacio(v) || errores.some((e) => e.campo === campo)) { listo = false; break; }
+        const ff = cfg.formatos[campos[campo].formato]; valores[rol] = ff ? ff.normaliza(String(v)) : v;
+      }
       if (!listo) continue;
       const extra = { ...(c.atributos || {}) };
       if (cz.catalogo) { const cat = (opciones.catalogos || {})[cz.catalogo]; extra.catalogo = Array.isArray(cat) ? cat : (cat && cat.filas) || []; }
@@ -206,7 +242,7 @@ export function validaPayload(payload, esquema, opciones = {}) {
     (porCampo[a.campo] = porCampo[a.campo] || []).push(a);
     const ext = a.nombre.split('.').pop().toLowerCase();
     const extensiones = campos[a.campo].atributos?.extensiones?.split(',') || A.extensiones;
-    if (!extensiones.includes(ext)) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoTipo, { formatos: extensiones.join(', ').toUpperCase() })}` });
+    if (!extensiones.includes(ext)) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoTipo, { formatos: cfg.formatosArchivo(extensiones) })}` });
     if (!(a.size > 0)) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${M.archRechazoVacio}` });
     const mb = Number(campos[a.campo].atributos?.mb || A.mb);
     if (a.size > mb * 1048576) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoPeso, { peso: `${(a.size / 1048576).toFixed(1)} MB`, mb })}` });
@@ -214,7 +250,7 @@ export function validaPayload(payload, esquema, opciones = {}) {
   }
   for (const [campo, lista] of Object.entries(porCampo)) {
     const max = Number(campos[campo].atributos?.max || A.max);
-    if (lista.length > max) errores.push({ campo, mensaje: plantilla(M.archRechazoMax, { max }) });
+    if (lista.length > max) errores.push({ campo, mensaje: plantilla(max === 1 ? M.archRechazoMaxUno : M.archRechazoMax, { max }) });
     const total = lista.reduce((s, a) => s + a.size, 0);
     if (total > A.mbTotal * 1048576) errores.push({ campo, mensaje: plantilla(M.archRechazoTotal, { mb: A.mbTotal }) });
     const huellas = lista.map((a) => a.sha256_original).filter(Boolean);
@@ -222,8 +258,8 @@ export function validaPayload(payload, esquema, opciones = {}) {
   }
   for (const [n, c] of Object.entries(campos)) if (c.tipo === 'archivos' && c.requerido && activo(n) && !(porCampo[n] || []).length) errores.push({ campo: n, mensaje: plantilla(M.obligatorioArchivos, { etiqueta: c.etiqueta }) });
 
-  /* Se devuelve un objeto común, sin las claves prohibidas. */
-  for (const k of CLAVES_PROHIBIDAS) delete datos[k];
+  /* Se devuelve un objeto común, sin las claves prohibidas ni los datos calculados. */
+  for (const k of [...CLAVES_PROHIBIDAS, ...auxiliares]) delete datos[k];
   return { ok: errores.length === 0, datos: Object.fromEntries(Object.entries(datos)), errores, senales };
 }
 

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de las correcciones 1.1</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../codigo/css/tokens.css">
+<link rel="stylesheet" href="../../codigo/css/base.css">
+<link rel="stylesheet" href="../../codigo/css/nucleo.css">
+<link rel="stylesheet" href="../../codigo/modulos/opciones/opciones.css">
+<link rel="stylesheet" href="../../codigo/modulos/combo/combo.css">
+<link rel="stylesheet" href="../../codigo/modulos/archivos/archivos.css">
+</head>
+<body>
+<main class="pagina" id="contenido">
+  <h1 class="titulo-pagina">Prueba de las correcciones 1.1</h1>
+  <!-- Página sólo para pruebas automáticas: un caso por corrección del estándar. Datos ficticios. -->
+  <form id="formulario" class="tarjeta" data-formkit action="#" method="post">
+
+    <!-- Condiciones encadenadas (P52) y lista de opciones con una deshabilitada (P56). -->
+    <fieldset class="grupo" data-campo="tiene" data-uso="Prueba.">
+      <legend class="etiqueta">¿Tienes experiencia en poda?</legend>
+      <div class="opciones-lista">
+        <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="tiene" value="si"><span><span class="opcion-nombre">Sí</span></span></label>
+        <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="tiene" value="no"><span><span class="opcion-nombre">No</span></span></label>
+        <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="tiene" value="pronto" disabled><span><span class="opcion-nombre">Muy pronto</span></span></label>
+      </div>
+    </fieldset>
+    <div class="campo" data-campo="tipo" data-si="tiene=si" data-uso="Prueba.">
+      <label class="etiqueta" for="tipo">Tipo de trabajo</label>
+      <div class="select"><select class="control control-select" id="tipo" name="tipo"><option value="">Elige una opción</option><option value="poda">Poda</option><option value="dictamen">Dictamen</option></select></div>
+    </div>
+    <div class="campo" data-campo="nivel" data-uso="Prueba.">
+      <label class="etiqueta" for="nivel">Nivel</label>
+      <div class="select"><select class="control control-select" id="nivel" name="nivel"><option value="basico">Básico</option><option value="avanzado">Avanzado</option></select></div>
+    </div>
+    <!-- Mínimo que depende de otra respuesta (P61) y paso decimal (P40). -->
+    <div class="campo" data-campo="anios" data-si="tipo=poda" data-formato="numero" data-requerido data-min-segun="experiencia" data-uso="Prueba.">
+      <label class="etiqueta" for="anios">Años de experiencia</label>
+      <input class="control control-corto" id="anios" name="anios" type="text" inputmode="decimal" min="0" step="0.5" autocomplete="off">
+    </div>
+
+    <!-- La cruzada se repite al cambiar el otro dato (P44). CURP ficticia. -->
+    <div class="campo" data-campo="curp" data-formato="curp" data-cruzada="curp-fecha" data-cruzada-campos="curp=curp fecha=nacimiento" data-uso="Prueba.">
+      <label class="etiqueta" for="curp">CURP</label>
+      <input class="control" id="curp" name="curp" type="text" maxlength="18" autocomplete="off">
+    </div>
+    <div class="campo" data-campo="nacimiento" data-formato="fecha" data-uso="Prueba.">
+      <label class="etiqueta" for="nacimiento">Fecha de nacimiento</label>
+      <input class="control" id="nacimiento" name="nacimiento" type="date" autocomplete="off">
+    </div>
+
+    <!-- Dato calculado por la página (data-auxiliar). -->
+    <div class="campo" data-campo="materno" data-uso="Prueba.">
+      <label class="etiqueta" for="materno">Apellido materno</label>
+      <input class="control" id="materno" name="materno" type="text" autocomplete="off">
+    </div>
+    <input type="hidden" id="sin_materno" data-campo="sin_materno" data-auxiliar>
+    <p class="ayuda" id="aviso-materno" data-si="sin_materno=si">Sin apellido materno, la CURP lleva X en esa posición.</p>
+
+    <!-- «Mostrar contraseña» (P42). -->
+    <div class="campo" data-campo="clave" data-formato="contrasena" data-uso="Prueba.">
+      <label class="etiqueta" for="clave">Contraseña</label>
+      <input class="control" id="clave" name="clave" type="password" autocomplete="new-password">
+    </div>
+
+    <!-- Lista con búsqueda con el catálogo documentado {filas} (P37). -->
+    <div class="campo" data-campo="especie" data-uso="Prueba.">
+      <label class="etiqueta" for="especie">Especie</label>
+      <div class="combo" data-combo data-catalogo="especies"><input class="control" id="especie" name="especie" type="text" autocomplete="off"><ul class="combo-lista" hidden></ul></div>
+    </div>
+
+    <!-- Archivo obligatorio visible (P47), un solo archivo (P39) y cámara frontal. -->
+    <div class="campo" data-campo="retrato" data-requerido data-max="1" data-extensiones="jpg,jpeg,png" data-uso="Prueba.">
+      <span class="etiqueta" id="et-retrato">Fotografía de frente</span>
+      <div data-archivos>
+        <button type="button" class="zona-carga" aria-labelledby="et-retrato"><span class="zona-carga-texto">Elegir archivo</span><span class="zona-carga-limite" data-limite-texto></span></button>
+        <input type="file" hidden>
+        <input type="file" accept="image/*" capture="user" hidden data-entrada-camara>
+        <div data-rechazos></div>
+        <ul class="lista-arch"></ul>
+      </div>
+    </div>
+
+    <div class="acciones"><button type="submit" class="btn btn-primario" data-accion="enviar">Enviar</button></div>
+  </form>
+</main>
+<script src="correcciones-config.js"></script>
+<script src="../../codigo/js/validaciones.config.js"></script>
+<script src="../../codigo/js/iconos.js"></script>
+<script src="../../codigo/js/formkit.core.js"></script>
+<script src="../../codigo/modulos/combo/combo.js"></script>
+<script src="../../codigo/modulos/archivos/archivos.js"></script>
+<script src="correcciones-pagina.js"></script>
+</body>
+</html>

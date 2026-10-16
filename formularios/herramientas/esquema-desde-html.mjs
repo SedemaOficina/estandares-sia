@@ -20,7 +20,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 const [, , entrada, salida] = process.argv;
 if (!entrada) { console.error('Uso: node herramientas/esquema-desde-html.mjs <formulario.html> [salida.json]'); process.exit(2); }
-const html = readFileSync(entrada, 'utf8');
+/* Lo comentado no es parte del formulario: un campo dentro de <!-- --> no se declara. */
+const html = readFileSync(entrada, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+/* Etiquetas sin cierre: no abren un ancestro. */
+const VACIOS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
 
 const atributos = (tag) => {
   const a = {};
@@ -52,7 +55,9 @@ posiciones.forEach((p, i) => {
   const casillas = controles.filter((c) => c.a.type === 'checkbox');
   const opcionesSelect = [...bloque.matchAll(/<option value="([^"]*)"/g)].map((o) => o[1]).filter(Boolean);
   let tipo = 'texto';
-  if (/data-archivos/.test(bloque)) tipo = 'archivos';
+  /* Dato que calcula la página: no viaja; el servidor lo calcula con opciones.auxiliares. */
+  if (d['data-auxiliar'] !== undefined) tipo = 'auxiliar';
+  else if (/data-archivos/.test(bloque)) tipo = 'archivos';
   else if (/data-combo/.test(bloque)) tipo = 'combo';
   else if (/data-mapa\b/.test(bloque)) tipo = 'mapa';
   else if (/data-toggle\b/.test(bloque)) tipo = 'toggle';
@@ -82,13 +87,13 @@ posiciones.forEach((p, i) => {
     catalogo: tipo === 'combo' ? (bloque.match(/data-catalogo="([^"]+)"/) || [])[1] : undefined,
     autocomplete: principal.a.autocomplete
   };
-  /* Condición: el propio campo o un ancestro con data-si (se busca hacia atrás un div[data-si] abierto).
-     Si hay las dos, la del ancestro va en siPadre y el servidor exige ambas. */
+  /* Condiciones: las de todos los ancestros con data-si (de afuera hacia
+     adentro) y la del propio campo. El servidor exige todas, como el
+     navegador, que oculta el campo si cualquiera de sus ancestros está oculto.
+     «si» guarda la más cercana para quien lee el esquema. */
   const condicion = (texto) => { const [c, lista] = texto.split('='); return { campo: c.trim(), valores: (lista || '').split('|') }; };
-  const padre = ancestroSi(html, p.inicio);
-  const si = d['data-si'] || padre;
-  if (si) campo.si = condicion(si);
-  if (d['data-si'] && padre) campo.siPadre = condicion(padre);
+  const condiciones = [...ancestrosSi(html, p.inicio), ...(d['data-si'] ? [d['data-si']] : [])].map(condicion);
+  if (condiciones.length) { campo.si = condiciones.at(-1); campo.condiciones = condiciones; }
   if (d['data-cruzada']) {
     campo.cruzadas = d['data-cruzada'].split(/\s+/).filter(Boolean).map((clave) => {
       const mapa = {}; for (const par of (d['data-cruzada-campos'] || '').split(/\s+/).filter(Boolean)) { const [rol, c] = par.split('='); mapa[rol] = c || rol; }
@@ -100,18 +105,18 @@ posiciones.forEach((p, i) => {
   campos[p.nombre] = campo;
 });
 
-/* Un div[data-si] que envuelve varios campos: se busca el último abierto antes del campo sin cerrar. */
-function ancestroSi(texto, pos) {
-  const antes = texto.slice(0, pos);
-  const aperturas = [...antes.matchAll(/<div[^>]*\sdata-si="([^"]+)"[^>]*>/g)];
-  for (let i = aperturas.length - 1; i >= 0; i--) {
-    const desde = aperturas[i].index + aperturas[i][0].length;
-    const tramo = antes.slice(desde);
-    let prof = 1;
-    for (const t of tramo.matchAll(/<div\b|<\/div>/g)) { prof += t[0] === '</div>' ? -1 : 1; if (prof === 0) break; }
-    if (prof > 0) return aperturas[i][1];
+/* Las condiciones data-si de todos los elementos que siguen abiertos en pos
+   (cualquier etiqueta: div, section, fieldset…), de afuera hacia adentro. */
+function ancestrosSi(texto, pos) {
+  const pila = [];
+  for (const m of texto.slice(0, pos).matchAll(/<(\/?)([a-zA-Z][\w-]*)\b([^>]*)>/g)) {
+    const [, cierra, etiqueta, resto] = m;
+    const t = etiqueta.toLowerCase();
+    if (cierra) { const i = pila.map((x) => x.t).lastIndexOf(t); if (i >= 0) pila.length = i; continue; }
+    if (VACIOS.has(t) || /\/\s*$/.test(resto)) continue;
+    pila.push({ t, si: (resto.match(/\sdata-si="([^"]*)"/) || [])[1] });
   }
-  return '';
+  return pila.filter((x) => x.si !== undefined).map((x) => x.si);
 }
 
 /* Cascadas: el módulo declara en tiempo de ejecución la cruzada cp ↔ colonia

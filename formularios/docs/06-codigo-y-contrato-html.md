@@ -60,7 +60,10 @@ const instancia = FormKit.iniciar(form, {
 instancia.payload();     // {datos, meta} que se enviaría ahora
 instancia.valida();      // [{campo, mensaje}] de lo visible y activo
 instancia.inventario();  // datos personales: campo, uso, finalidad, sensible, autocomplete
+instancia.marcaError('curp', 'Ya hay una cuenta con esta CURP.');  // error que viene de fuera, junto a su campo
 ```
+
+**Errores que devuelve el servidor.** Si el envío falla con un cuerpo `{errores: [{campo, mensaje}]}` (la misma forma que devuelve `validar.mjs`), cada mensaje se pinta junto a su campo y en el resumen de errores; por pasos, se abre el primer paso con error. El envío por omisión lo lee de una respuesta que no es 2xx; una función `enviar` propia rechaza con un error que lleve la propiedad `errores`. `FormKit.marcaError(campo, mensaje)` hace lo mismo desde cualquier código de la página, en el formulario que tenga ese campo.
 
 `FORMKIT_CONFIG` se fusiona en profundidad con la configuración base (sólo se escribe lo que cambia). `FORMKIT_CATALOGOS.<nombre>` alimenta combos (`data-catalogo`) y cascadas; acepta un arreglo de cadenas, de `{nombre, detalle}` o un objeto `{filas, fuente, corte, es_ficticio}`.
 
@@ -93,6 +96,9 @@ Toda pregunta es una **envoltura** con `data-campo` que contiene etiqueta, ayuda
 | `data-legible` (en el textarea) | Exige forma de texto, no tecleo al azar. |
 | `data-copiable` | Añade «Copiar» a un control `readonly` (módulo copiar). |
 | `data-edad-min` / `data-edad-max` | Para la cruzada `edad`. |
+| `data-min-segun="clave"` / `data-max-segun="clave"` | Mínimo o máximo que depende de otras respuestas (ver abajo). |
+| `data-auxiliar` | Dato que calcula la página, no la persona (ver abajo). |
+| `data-sin-mostrar` | En un campo de contraseña, quita el botón «Mostrar contraseña». |
 | `min`, `max`, `step`, `minlength`, `maxlength`, `inputmode`, `autocomplete`, `enterkeyhint` (en el control) | Límites y teclado; el esquema del servidor los lee. |
 
 En el `<form>`: `data-formkit` (arranque automático), `data-borrador="clave"` y `data-borrador-version="n"` (borrador local), `action`/`method` (envío por omisión), `novalidate` lo pone el núcleo. Piezas del formulario: `[data-estado-envio]` (aviso de fallo de envío), `[data-franja-borrador]` con `[data-borrador="recuperar|descartar|descartar-si|conservar"]`, `[data-trampa]` (campo señuelo), `[data-accion="enviar|siguiente|atras"]`.
@@ -101,9 +107,25 @@ Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({
 
 **Módulo `enlace-mapa`.** Un contenedor `[data-enlace-mapa="<data-campo destino>"]` con su `label`, un `input` (sin `data-campo` ni `name`: el enlace no viaja) y un `[data-enlace-mapa-estado]` para el aviso. Al pegar o al salir, escribe `lat, lon` con 6 decimales en el campo destino (`data-formato="coordenadas"`), que valida el núcleo y, si hay `mapa`, mueve el punto. Toma el último lugar marcado del enlace (`!3d…!4d…`), luego `q=`/`ll=`/`/place/`, y sólo al final el centro de la pantalla (`@`), con aviso. Acomoda en el campo destino coordenadas al revés, en grados-minutos-segundos, con coma decimal o con la longitud sin signo menos. `FormKit.leeCoordenadas(texto)` es la función pura.
 
-**Condiciones con valor vacío.** `data-si="campo="` se cumple mientras el campo esté vacío o la casilla sin marcar; el servidor lo evalúa igual, porque lo que no viene en los datos cuenta como vacío. Un campo con su propia condición dentro de un bloque `data-si` exige las dos (el esquema las guarda en `si` y `siPadre`).
+**Condiciones con valor vacío.** `data-si="campo="` se cumple mientras el campo esté vacío o la casilla sin marcar; el servidor lo evalúa igual, porque lo que no viene en los datos cuenta como vacío. Un campo con su propia condición dentro de uno o varios bloques `data-si` exige todas (el esquema las guarda en `condiciones`, de afuera hacia adentro; `si` es la más cercana).
+
+**Condiciones encadenadas.** Una condición que mira un campo oculto lo toma como vacío: si «¿Tiene experiencia?» = «No» oculta el tipo, también se oculta lo que dependía del tipo, aunque el tipo conserve su respuesta anterior. El servidor aplica la misma regla.
+
+**Dato calculado por la página.** `<input type="hidden" data-campo="sin_materno" data-auxiliar>` guarda un dato que calcula el código de la página (no lo escribe la persona): cuenta en las condiciones `data-si` y en las validaciones cruzadas, pero no se valida, no entra al borrador y **no se envía**. La página escribe su valor y avisa con `campo.dispatchEvent(new Event('input', { bubbles: true }))`. El servidor no confía en él: lo vuelve a calcular con `validaPayload(…, { auxiliares: { sin_materno: (datos) => … } })` y rechaza el envío que lo traiga.
+
+**Mínimo o máximo según otra respuesta.** `data-min-segun="experiencia"` en la envoltura de un número toma el mínimo de `FORMKIT_CONFIG.limitesSegun.experiencia(datos)`, que recibe las respuestas activas y devuelve un número (o nada, para dejar el `min` del control). Al cambiar la respuesta de la que depende, el campo se vuelve a revisar. El servidor recibe la misma función en `validaPayload(…, { limitesSegun: { experiencia } })`; si falta, lo anota en `senales`.
+
+**Mostrar contraseña.** Todo campo `type="password"` recibe un botón «Mostrar contraseña» con `aria-pressed` que alterna entre ver y ocultar lo escrito. `data-sin-mostrar` en la envoltura lo quita (por ejemplo, en la confirmación de una contraseña ya visible).
+
+**Fotografía de frente.** En el módulo `archivos`, `capture="user"` en el `input` abre la cámara frontal del teléfono (retrato, fotografía de la persona); `capture="environment"` abre la trasera (evidencias). Con `data-max="1"`, los textos van en singular: «Un archivo de hasta 5 MB».
 
 **Edad calculada.** `data-deriva="edad=destino"` en un campo `data-formato="fecha"` (módulo `fecha`) escribe la edad cumplida, con la fecha de hoy en la Ciudad de México, en un `[data-campo]` con `<input readonly>`. Se recalcula cada vez que cambia la fecha, también cuando la escribe la CURP; con una fecha vacía, incompleta o futura queda vacía. La edad mínima o máxima que exija el formulario se pide sobre la fecha, con la cruzada `edad`.
+
+**Ayuda de bloque.** `<p class="ayuda-bloque">` bajo el título de una sección dice una sola vez lo que vale para todos sus campos («Escríbelos como aparecen en tu identificación oficial»). El núcleo la enlaza con `aria-describedby`, antes de la ayuda propia, a cada campo que le sigue dentro de su contenedor, hasta el siguiente título (`h1`–`h6`) o la siguiente ayuda de bloque; si vale sólo para una parte, se envuelve esa parte con su ayuda en un `div`. `auditar-campos` (D6) avisa cuando dos campos seguidos repiten la misma ayuda.
+
+**Filas para datos hermanos.** `.fila` (dos columnas), `.fila-3` (tres) y `.fila-2-1` (la primera al doble) sólo para datos hermanos: nombre y apellidos en `.fila-3`; CURP y fecha de nacimiento, correo y su confirmación, contraseña y su confirmación, calle y número, manzana y lote, en `.fila`. Lo demás, en una columna. Desde 760 px se alinean con subcuadrícula; en teléfono, una columna.
+
+**Opciones en línea.** `.opciones-lista.opciones-en-linea` pone dos o tres opciones cortas sin descripción (Sí/No) una por columna desde 760 px, con el mismo hueco que las filas; en teléfono, una por renglón.
 
 **Código postal de todo el país.** `data-ambito="nacional"` en un campo `data-formato="cp"` acepta cualquier código de cinco dígitos; sin él, sólo los del ámbito configurado (la Ciudad).
 
@@ -147,7 +169,7 @@ Reglas del módulo: su CSS declara bloques `componentes → estados → adaptaci
 | `node herramientas/construir.mjs [--artefacto] [--zip] [--todo]` | Genera `iconos.js`, tamaños del manifiesto, `guia-visual/manifiesto.js`, `docs/04`, `dist/`, esquemas de las plantillas; con `--artefacto` la guía autocontenida; con `--zip` el paquete. |
 | `node herramientas/auditor-css.mjs` | Reglas A01–A16 sobre todas las hojas (ver `docs/02` y `auditor-css.config.json`). |
 | `node herramientas/contraste.mjs [--md\|--guia]` | Mide los pares de `pares-contraste.json`; genera la tabla de `docs/02` y `guia-visual/pares.js`. |
-| `node herramientas/auditar-campos.mjs [html…]` | `data-uso`, `data-finalidad` → `autocomplete`, `data-sensible`, `inputmode`. |
+| `node herramientas/auditar-campos.mjs [html…]` | `data-uso`, `data-finalidad` → `autocomplete`, `data-sensible`, `inputmode`; ayudas sin repetir (D5, D6). |
 | `node herramientas/esquema-desde-html.mjs <html> [salida.json]` | Esquema para el servidor. |
 | `node herramientas/generar-reglas.mjs [--comprobar]` | `docs/01` desde `reglas/reglas.json`; tabla de contraste de `docs/02`. |
 | `node herramientas/vendor.mjs [--verificar]` | Descarga/verifica Leaflet, gestos y axe-core con sumas. |

@@ -21,7 +21,7 @@ Qué se valida, cuándo, con qué mensaje y dónde vive la regla. Fuente única:
 | `cp` | 5 dígitos; si hay ámbito configurado, dentro del rango | Sólo dígitos; **se conserva como texto** | El código postal lleva 5 dígitos. Ejemplo: 01000 · Ese código postal no es de la Ciudad de México: van del 01000 al 16999 | numeric |
 | `curp` | 18 caracteres; estructura `AAAA######HAAAAA##`; fecha real en posiciones 5–10 y no futura; entidad válida en 12–13; dígito verificador (activable) *[estructura y algoritmo a confirmar con RENAPO: Fuente: __]* | Mayúsculas, sin acentos ni espacios | La CURP tiene 18 caracteres; escribiste 17 · La fecha dentro de la CURP no es una fecha real · El último carácter no coincide con el resto | text |
 | `rfc` | 12 (moral) o 13 (física) caracteres; fecha real *[estructura a confirmar con el SAT: Fuente: __]* | Mayúsculas, sin guiones | El RFC lleva 3 o 4 letras, 6 dígitos de fecha y 3 caracteres finales. Ejemplo: XAXX010101000 | text |
-| `numero` | Número entero o decimal; `min`, `max`, `step` del campo | Coma → punto | Escribe sólo números; para decimales usa punto · El valor máximo es 20 | decimal |
+| `numero` | Número entero o decimal; `min`, `max`, `step` del campo (el paso cuenta desde el mínimo y admite decimales: `step="0.5"`); `data-min-segun`/`data-max-segun` para un límite que depende de otra respuesta | Coma → punto | Escribe sólo números; para decimales usa punto · El valor máximo es 20 · Usa múltiplos de 0.5 · Escribe un número entero, sin decimales | decimal |
 | `fecha` | AAAA-MM-DD existente; `min`/`max`; `data-no-futura` = máximo hoy | Recorta | Escribe una fecha real… Ejemplo: 2026-03-15 · La fecha no puede ser posterior a hoy | numeric |
 | `hora` | HH:MM de 24 horas | Recorta | Escribe la hora en formato de 24 horas, HH:MM. Ejemplo: 14:30 | numeric |
 | `texto` | `minlength`/`maxlength`; con `data-legible`, forma de texto (vocales, palabras, sin tecleo al azar) | Quita caracteres de control, colapsa espacios | Escribe al menos 40 caracteres; van 12 · Descríbelo con tus palabras, en una o dos frases completas | text |
@@ -48,6 +48,10 @@ Se evalúan cuando todos sus campos tienen valor; marcan el campo que las lleva 
 
 Ejemplo: `<div class="campo" data-campo="nac" data-formato="fecha" data-cruzada="curp-fecha" data-cruzada-campos="curp=curp fecha=nac">`.
 
+Al cambiar cualquiera de sus campos (al salir de él o al elegir una opción), la cruzada se vuelve a revisar en los dos: corregir la fecha quita o pone el error de la CURP sin volver a tocarla.
+
+Un formulario agrega cruzadas propias en `FORMKIT_CONFIG.cruzadas.<clave> = { campos: ['rol1', 'rol2'], valida(valores, atributos) { return '' /* o el mensaje */; } }`. Un rol listado en `opcionales: ['rol2']` corre aunque esté vacío (llega como `''`): sirve para exigir algo justo cuando ese dato falta, por ejemplo un motivo cuando no hay apellido materno. El servidor recibe la misma configuración.
+
 ## 4. Archivos (`ARCHIVOS` en la configuración)
 
 | Regla | Valor por omisión | Cuándo se aplica | Mensaje |
@@ -55,7 +59,7 @@ Ejemplo: `<div class="campo" data-campo="nac" data-formato="fecha" data-cruzada=
 | Extensiones | jpg, jpeg, png, pdf | Al elegir | ese tipo de archivo no se admite. Los formatos son … |
 | Peso por archivo | 8 MB (después de optimizar) | Al elegir / tras optimizar | pesa 12.3 MB y el máximo es 8 MB |
 | Peso total | 25 MB | Al elegir | con él se superan los 25 MB en total |
-| Número | 5 (`data-max` lo baja) | Al elegir | sólo se admiten 3 archivos |
+| Número | 5 (`data-max` lo baja) | Al elegir | sólo se admiten 3 archivos · con `data-max="1"`, en singular: sólo se admite un archivo |
 | Vacío | mínimo 1 byte | Al elegir | el archivo está vacío |
 | Duplicado | SHA-256 igual | Tras leer | ya adjuntaste ese mismo archivo |
 | Firma real | primeros bytes por tipo | Tras leer | el contenido del archivo no corresponde a su extensión |
@@ -81,6 +85,8 @@ Los 72 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.j
 | `borrador` | 14 días, 600 ms, 2.5 s visible | Caducidad, retardo de guardado, duración de «Guardado». |
 | `envio.timeoutMs` | 15 000 | Plazo del envío. |
 | `combo.maxResultados` | 8 | Opciones visibles en el combo. |
+| `cruzadas` | las de la sección 3 | Cruzadas propias del formulario. |
+| `limitesSegun` | vacío | Funciones `(datos) => número` para `data-min-segun`/`data-max-segun`. |
 | `chips` | 5, `sia-chips` | Máximo de chips y clave del almacén local. |
 | `mapa` | sin teselas | Proveedor, atribución, centro, zoom. |
 | `mensajes` | 72 textos | Cualquier mensaje. |
@@ -92,7 +98,7 @@ node herramientas/esquema-desde-html.mjs codigo/plantillas/por-pasos.html esquem
 node codigo/servidor/validar.mjs esquema.json payload.json
 ```
 
-`validaPayload(payload, esquema, { catalogos })` devuelve `{ ok, datos (normalizados), errores: [{campo, mensaje}], senales: [] }`. Rechaza un envío mal formado (sin detener el proceso), los campos no declarados (las claves `__proto__`, `constructor` y `prototype` nunca lo están) y los datos de un tipo distinto al esperado: texto donde va texto, lista sólo en opción múltiple (sin contar repetidas) y el punto del mapa como `{type: "Point", coordinates: [lon, lat]}` con números dentro del ámbito. Aplica obligatoriedad, formato, opciones, condiciones y cruzadas; valida cada fila de un grupo repetible (`grupo.N.campo`) con su patrón y su mínimo y máximo de filas; acepta archivos sólo en campos de archivos activos; resuelve `max: 'hoy'` con su propio reloj; degrada a señal las cruzadas de advertencia y los bloques condicionales que llegan con valor. La prueba `04-modulos` comprueba que el esquema coincide con lo que el navegador expone; `06-servidor-y-herramientas` que acepta lo bueno y rechaza lo malo; `01-por-pasos` y `02-una-pagina` pasan por el servidor lo que el navegador realmente envía.
+`validaPayload(payload, esquema, { catalogos, auxiliares, limitesSegun, config })` devuelve `{ ok, datos (normalizados), errores: [{campo, mensaje}], senales: [] }`. `catalogos` acepta, como el navegador, un arreglo o un objeto `{filas}`; `auxiliares` calcula los datos `data-auxiliar` (el que llega del navegador se rechaza) y `limitesSegun` los límites `data-min-segun`/`data-max-segun`; si falta una función, el servidor lo anota en `senales`. `errores` tiene la forma que el navegador pinta junto a cada campo cuando el servidor rechaza el envío. Rechaza un envío mal formado (sin detener el proceso), los campos no declarados (las claves `__proto__`, `constructor` y `prototype` nunca lo están) y los datos de un tipo distinto al esperado: texto donde va texto, lista sólo en opción múltiple (sin contar repetidas) y el punto del mapa como `{type: "Point", coordinates: [lon, lat]}` con números dentro del ámbito. Aplica obligatoriedad, formato, opciones, condiciones y cruzadas; valida cada fila de un grupo repetible (`grupo.N.campo`) con su patrón y su mínimo y máximo de filas; acepta archivos sólo en campos de archivos activos y busca los obligatorios en `payload.archivos` (no en `datos`, donde no viajan); evalúa las condiciones de todos los bloques que rodean a un campo y toma como vacío lo que está oculto; resuelve `max: 'hoy'` con su propio reloj; degrada a señal las cruzadas de advertencia y los bloques condicionales que llegan con valor. La prueba `04-modulos` comprueba que el esquema coincide con lo que el navegador expone; `06-servidor-y-herramientas` que acepta lo bueno y rechaza lo malo; `01-por-pasos` y `02-una-pagina` pasan por el servidor lo que el navegador realmente envía.
 
 ## 8. Lo que estas reglas no resuelven
 

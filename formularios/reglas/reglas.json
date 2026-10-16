@@ -172,15 +172,16 @@
    "id": "FRM-09",
    "seccion": 2,
    "titulo": "Cada control tiene su etiqueta visible y asociada",
-   "regla": "Toda entrada lleva label[for] o legend visible. El placeholder nunca sustituye a la etiqueta; la ayuda va en un párrafo propio antes del control, enlazado con aria-describedby.",
-   "porque": "Un texto encima no es etiqueta; el placeholder desaparece al escribir y el lector no siempre lo lee.",
+   "regla": "Toda entrada lleva label[for] o legend visible. El placeholder nunca sustituye a la etiqueta; la ayuda va en un párrafo propio antes del control, enlazado con aria-describedby. Si la misma ayuda vale para todos los campos de una sección (nombre y apellidos), va una sola vez bajo su título como ayuda de bloque (.ayuda-bloque), que el núcleo enlaza a cada campo; la ayuda de cada campo queda para lo propio de él.",
+   "porque": "Un texto encima no es etiqueta; el placeholder desaparece al escribir y el lector no siempre lo lee. La misma ayuda repetida en cada campo se lee varias veces y descuadra las columnas.",
    "nivel": "BASE",
    "origen": [
     "A FRM-20",
-    "B FRM-CMP-01"
+    "B FRM-CMP-01",
+    "S2-1 (proyecto de acreditaciones, 16 oct 2026)"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "05-accesibilidad.prueba.mjs (axe label); guía: sí y no"
+   "verificacion": "05-accesibilidad.prueba.mjs (axe label); auditar-campos D6; guía: sí y no"
   },
   {
    "id": "FRM-10",
@@ -230,15 +231,16 @@
    "id": "FRM-13",
    "seccion": 2,
    "titulo": "Un dato, un campo; campos alineados por renglón",
-   "regla": "Lo que se usa por separado se pide por separado (nombre y apellidos; calle y número). En escritorio los campos de una fila se alinean con subcuadrícula para que los controles queden a la misma altura aunque una etiqueta ocupe dos líneas; en teléfono van en una columna.",
-   "porque": "Un dato compuesto no se puede validar ni consultar; controles desalineados parecen descuido y confunden la lectura por filas.",
+   "regla": "Lo que se usa por separado se pide por separado (nombre y apellidos; calle y número). Los datos hermanos van en una fila: las partes de un mismo dato (nombre y apellidos en .fila-3; calle y número; manzana y lote), un dato y su confirmación (correo, contraseña) y un dato y el que sale de él (CURP y fecha de nacimiento), en .fila. Lo demás va en una columna, aunque sea corto. En escritorio los campos de una fila se alinean con subcuadrícula para que los controles queden a la misma altura aunque una etiqueta ocupe dos líneas; en teléfono van en una columna.",
+   "porque": "Un dato compuesto no se puede validar ni consultar; controles desalineados parecen descuido y confunden la lectura por filas. Los datos hermanos se leen juntos; en una sola columna, los campos cortos a todo lo ancho alargan el formulario.",
    "nivel": "BASE",
    "origen": [
     "A FRM-22",
-    "A FRM-32"
+    "A FRM-32",
+    "S2-3 (proyecto de acreditaciones, 16 oct 2026)"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "base.css .fila (subgrid); guía: núcleo"
+   "verificacion": "base.css .fila (subgrid); plantillas; guía: núcleo, bloques listos, sí y no"
   },
   {
    "id": "FRM-14",
@@ -271,15 +273,17 @@
   {
    "id": "FRM-16",
    "seccion": 3,
-   "titulo": "Las opciones son controles nativos cubiertos por su tarjeta",
-   "regla": "Opción única y múltiple se construyen con input radio o checkbox dentro de label, agrupados en fieldset con legend. La tarjeta seleccionable y la variante corta Sí/No son el mismo control con otra piel: lo elegido se marca con fondo, sombra interior y palomita, nunca sólo con color.",
-   "porque": "Un div con onclick no recibe foco ni se anuncia; marcar sólo con color excluye a quien no lo distingue.",
+   "titulo": "Las opciones son controles nativos; una sola respuesta va en lista",
+   "regla": "Opción única y múltiple se construyen con input radio o checkbox dentro de label, agrupados en fieldset con legend. La tarjeta seleccionable y la variante corta Sí/No son el mismo control con otra piel: lo elegido se marca con fondo, sombra interior y palomita, nunca sólo con color. Para una sola respuesta, la forma por omisión es la lista (.opciones-lista): una opción por renglón y el círculo visible, también en escritorio; la opción deshabilitada se ve atenuada. Dos o tres opciones cortas sin descripción (Sí/No) van en línea (.opciones-lista.opciones-en-linea): una columna por opción desde tableta y una por renglón en teléfono; con descripción, una por renglón.",
+   "porque": "Un div con onclick no recibe foco ni se anuncia; marcar sólo con color excluye a quien no lo distingue. Un Sí/No apilado a todo lo ancho ocupa dos renglones sin decir más.",
    "nivel": "BASE",
    "origen": [
     "A FRM-26",
     "B FRM-CMP-05",
     "B FRM-CMP-06",
-    "C3"
+    "C3",
+    "P56 (proyecto de acreditaciones, 15 oct 2026)",
+    "S2-2 (proyecto de acreditaciones, 16 oct 2026)"
    ],
    "tipo": "decisión heredada",
    "verificacion": "04-modulos; 05-accesibilidad; manifiesto «opciones»"
@@ -384,15 +388,16 @@
    "id": "FRM-24",
    "seccion": 3,
    "titulo": "Pestañas, acordeón, migas, progreso, paginación, ayuda desplegable y tabla son módulos con teclado completo",
-   "regla": "Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape; tabla ordenable con aria-sort y acciones por fila con nombre completo, que en teléfono se vuelve tarjetas.",
-   "porque": "Un componente a medias (sólo ratón, sólo escritorio) excluye a una parte de las personas y obliga a rehacerlo después.",
+   "regla": "Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que en teléfono se vuelve tarjetas.",
+   "porque": "Un componente a medias (sólo ratón, sólo escritorio) excluye a una parte de las personas y obliga a rehacerlo después. Un ícono que repite lo que ya se lee obliga a abrirlo para nada.",
    "nivel": "OPCIONAL",
    "origen": [
     "encargo 5.1",
-    "encargo 5.4"
+    "encargo 5.4",
+    "S2-4 (proyecto de acreditaciones, 16 oct 2026)"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos"
+   "verificacion": "04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos; auditar-campos D5"
   },
   {
    "id": "FRM-25",

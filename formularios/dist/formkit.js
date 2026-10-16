@@ -31,6 +31,8 @@
   /* ---------- Utilidades compartidas ---------- */
   const recorta = (v) => String(v ?? '').replace(/\s+/g, ' ').trim();
   const soloDigitos = (v) => String(v ?? '').replace(/\D/g, '');
+  /* Formatos de archivo para leerlos: en mayúsculas y sin repetir JPEG (jpg y jpeg son el mismo). */
+  const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
   const esFechaReal = (a, m, d) => { const f = new Date(Date.UTC(a, m - 1, d)); return f.getUTCFullYear() === a && f.getUTCMonth() === m - 1 && f.getUTCDate() === d; };
   const hoyISO = () => {
@@ -185,7 +187,12 @@
       valida: (v, a = {}) => {
         if (!/^-?\d+(\.\d+)?$/.test(v)) return 'Escribe sólo números; para decimales usa punto. Ejemplo: 12.5';
         const n = Number(v);
-        if (a.step && a.step !== 'any' && Number(a.step) >= 1 && !Number.isInteger(n)) return 'Escribe un número entero, sin decimales.';
+        /* El paso cuenta desde el mínimo, como en HTML; con tolerancia de redondeo para pasos decimales. */
+        const paso = a.step && a.step !== 'any' ? Number(a.step) : 0;
+        if (paso > 0) {
+          const k = (n - (a.min !== undefined && a.min !== '' ? Number(a.min) : 0)) / paso;
+          if (Math.abs(k - Math.round(k)) > 1e-9) return paso === 1 ? 'Escribe un número entero, sin decimales.' : `Usa múltiplos de ${a.step}.`;
+        }
         if (a.min !== undefined && a.min !== '' && n < Number(a.min)) return `El valor mínimo es ${a.min}.`;
         if (a.max !== undefined && a.max !== '' && n > Number(a.max)) return `El valor máximo es ${a.max}.`;
         return '';
@@ -349,7 +356,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.0.0',
+    version: '1.1.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -389,6 +396,7 @@
       pasoHecho: 'completado',
       pasoError: 'con errores',
       palabraObligatorio: 'obligatorio',
+      contrasenaMostrar: 'Mostrar contraseña',
       palabraSi: 'Sí',
       palabraNo: 'No',
       sinValor: 'No indicado',
@@ -409,6 +417,7 @@
       archQuitar: 'Quitar archivo {nombre}',
       archRechazoTitulo: 'No se agregó «{nombre}»:',
       archRechazoMax: 'sólo se admiten {max} archivos.',
+      archRechazoMaxUno: 'sólo se admite un archivo.',
       archRechazoTipo: 'ese tipo de archivo no se admite. Los formatos son {formatos}.',
       archRechazoFirma: 'el contenido del archivo no corresponde a su extensión. Elige el archivo original.',
       archRechazoPeso: 'pesa {peso} y el máximo es {mb} MB. Reduce su tamaño o elige otro.',
@@ -418,6 +427,7 @@
       archRechazoDimension: 'la imagen es demasiado pequeña (mínimo {ancho} × {alto} píxeles).',
       archRechazoOptimizada: 'aun optimizada pesa {peso} y el máximo es {mb} MB.',
       archLimite: 'Formatos admitidos: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
+      archLimiteUno: 'Formatos admitidos: {formatos}. Un archivo de hasta {mb} MB.',
       archAgregado: 'Se agregó {nombre}.',
       archQuitado: 'Se quitó {nombre}.',
       archReintentar: 'Reintentar',
@@ -444,7 +454,7 @@
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 
 
@@ -457,7 +467,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.0.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.1.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -585,7 +595,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     const envoltura = (n) => $(`[data-campo="${n}"]`, form);
     const nombres = () => envolturas().map((el) => el.dataset.campo);
 
+    /* Un dato que calcula la página (data-auxiliar): no tiene controles, no
+       se envía ni va al borrador, pero cuenta en condiciones y cruzadas. Su
+       valor es el del input oculto (la envoltura misma o el que lleva dentro). */
+    const valorAuxiliar = (el) => { const c = el.matches('input') ? el : $('input', el); return c ? String(c.value).trim() : String(el.dataset.valor || '').trim(); };
+
     function tipoDe(el) {
+      if (el.hasAttribute('data-auxiliar')) return 'auxiliar';
       for (const [t, def] of tipos) if (def.detecta(el)) return t;
       if (el.matches('fieldset') || $$('input[type="radio"]', el).length > 1) return $$('input[type="checkbox"]', el).length > 1 ? 'multiple' : 'opcion';
       const c = $('input,select,textarea', el);
@@ -597,6 +613,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     function controlesDe(n) {
       const el = envoltura(n);
       const t = tipoDe(el);
+      if (t === 'auxiliar') return [];
       if (tipos.has(t)) return tipos.get(t).controles(el);
       if (t === 'opcion') return $$('input[type="radio"]', el);
       if (t === 'multiple') return $$('input[type="checkbox"]', el);
@@ -607,6 +624,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     function valorDe(n) {
       const el = envoltura(n);
       const t = tipoDe(el);
+      if (t === 'auxiliar') return valorAuxiliar(el);
       if (tipos.has(t)) return tipos.get(t).valorDe(el);
       if (t === 'opcion') { const r = $('input[type="radio"]:checked', el); return r ? r.value : ''; }
       if (t === 'multiple') return $$('input[type="checkbox"]:checked', el).map((c) => c.value);
@@ -618,6 +636,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     function textoDeValor(n) {
       const el = envoltura(n);
       const t = tipoDe(el);
+      if (t === 'auxiliar') return valorAuxiliar(el);
       if (tipos.has(t)) return tipos.get(t).textoDe(el);
       if (t === 'opcion') { const r = $('input[type="radio"]:checked', el); return r ? (textoDeOpcion(r)) : ''; }
       if (t === 'multiple') return $$('input[type="checkbox"]:checked', el).map(textoDeOpcion).join(', ');
@@ -663,13 +682,41 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       for (const k of ['min', 'max', 'step', 'minlength', 'maxlength']) if (c.hasAttribute(k)) a[k] = c.getAttribute(k);
       if (c.hasAttribute('data-legible')) a.legible = true;
       for (const [k, v] of Object.entries(envoltura(n).dataset)) a[k] = v;
+      /* Mínimo o máximo que dependen de otras respuestas: data-min-segun="clave"
+         usa la función FORMKIT_CONFIG.limitesSegun[clave](datos); el servidor
+         recibe la misma función en opciones.limitesSegun. */
+      for (const [lim, clave] of [['min', a.minSegun], ['max', a.maxSegun]]) {
+        const fn = clave && cfg.limitesSegun && cfg.limitesSegun[clave];
+        if (typeof fn !== 'function') continue;
+        const r = fn(datosActuales());
+        if (r !== undefined && r !== null && r !== '') a[lim] = String(r);
+      }
       return a;
+    }
+    /* Valores de los campos activos, para las funciones que dependen de otras respuestas. */
+    const datosActuales = () => Object.fromEntries(nombres().filter((m) => activo(m)).map((m) => [m, valorDe(m)]));
+
+    /* Ayuda de bloque (.ayuda-bloque): una sola ayuda bajo el título de una
+       sección que vale igual para todos sus campos (nombre y apellidos). Cubre
+       los campos que le siguen dentro de su contenedor, hasta el siguiente
+       título o la siguiente ayuda de bloque, y se enlaza a cada uno. */
+    function ayudasDeBloque(el) {
+      const ids = [];
+      for (const ab of $$('.ayuda-bloque', form)) {
+        if (!ab.textContent.trim()) continue;
+        for (let s = ab.nextElementSibling; s; s = s.nextElementSibling) {
+          if (/^H[1-6]$/.test(s.tagName) || s.classList.contains('ayuda-bloque')) break;
+          if (s === el || s.contains(el)) { ab.id = ab.id || idUnico('ayuda-bloque'); ids.push(ab.id); break; }
+        }
+      }
+      return ids;
     }
 
     /* ----- Preparación de cada campo ----- */
     function preparaCampo(n) {
       const el = envoltura(n);
       const t = tipoDe(el);
+      if (t === 'auxiliar') return;
       const etq = $('.etiqueta', el);
       if (etq && esObligatorio(n) && !$('.marca-oblig', etq)) {
         const ast = document.createElement('span');
@@ -695,10 +742,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       }
       err.id = err.id || idUnico(`err-${n}`);
 
+      const deBloque = ayudasDeBloque(el);
       for (const c of controlesDe(n)) {
-        const ids = [ayuda && ayuda.textContent.trim() ? ayuda.id : '', err.id].filter(Boolean).join(' ');
+        const ids = [...deBloque, ayuda && ayuda.textContent.trim() ? ayuda.id : '', err.id].filter(Boolean).join(' ');
         c.setAttribute('aria-describedby', ids);
-        if (esObligatorio(n) && c.type !== 'radio' && c.type !== 'checkbox') c.setAttribute('aria-required', 'true');
+        /* aria-required sólo en controles de formulario: un botón (la zona de
+           carga de archivos) no lo admite; ahí lo dicen el asterisco y el error. */
+        if (esObligatorio(n) && /^(INPUT|SELECT|TEXTAREA)$/.test(c.tagName) && c.type !== 'radio' && c.type !== 'checkbox') c.setAttribute('aria-required', 'true');
         const f = cfg.formatos[el.dataset.formato];
         if (f && f.inputmode && !c.hasAttribute('inputmode') && c.tagName === 'INPUT') c.setAttribute('inputmode', f.inputmode);
         if (c.tagName === 'INPUT' && !c.hasAttribute('enterkeyhint') && c.type !== 'radio' && c.type !== 'checkbox' && c.type !== 'file') c.setAttribute('enterkeyhint', 'next');
@@ -707,6 +757,20 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       /* Fecha y hora: límites por omisión (hoy) cuando el campo lo declara. */
       const ctl = controlPrincipal(n);
       if (ctl && el.dataset.formato === 'fecha' && el.hasAttribute('data-no-futura') && !ctl.max) ctl.max = cfg.hoyISO();
+
+      /* Contraseña: botón «Mostrar contraseña» (aria-pressed) para ver lo
+         escrito; se omite con data-sin-mostrar en el campo. */
+      if (ctl && ctl.type === 'password' && !el.hasAttribute('data-sin-mostrar') && !$('[data-ver-contrasena]', el)) {
+        if (!ctl.id) ctl.id = idUnico(`c-${n}`);
+        const ver = document.createElement('button');
+        ver.type = 'button';
+        ver.className = 'btn-enlace contrasena-ver';
+        ver.dataset.verContrasena = '';
+        ver.setAttribute('aria-pressed', 'false');
+        ver.setAttribute('aria-controls', ctl.id);
+        ver.textContent = M.contrasenaMostrar;
+        ctl.insertAdjacentElement('afterend', ver);
+      }
 
       /* Texto largo: contador y crecimiento automático. */
       const area = t === 'texto' ? $('textarea', el) : null;
@@ -744,6 +808,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       if (!activo(n)) return '';
       const el = envoltura(n);
       const t = tipoDe(el);
+      if (t === 'auxiliar') return '';
       const v = valorDe(n);
       const vacio = Array.isArray(v) ? v.length === 0 : !v;
       const datos = { etiqueta: etiquetaDe(n) };
@@ -781,6 +846,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     function marca(n, mensaje, nivel = 'error') {
       const el = envoltura(n);
       const err = $('.err', el);
+      if (!err) return;
       if (nivel === 'error') for (const c of controlesDe(n)) c.setAttribute('aria-invalid', 'true');
       err.dataset.nivel = nivel;
       err.lastElementChild.textContent = `${nivel === 'error' ? M.prefijoError : M.advertencia} ${mensaje}`;
@@ -819,6 +885,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       out.delete(n);
       return [...out];
     }
+    /* Campos que declaran una cruzada en la que participa n. */
+    function declarantesDe(n) {
+      return nombres().filter((m) => m !== n && cruzadasDe(m).some((c) => Object.values(c.mapa).includes(n)));
+    }
     function validaCruzadas(n) {
       const resultados = [];
       for (const c of cruzadasDe(n)) {
@@ -826,10 +896,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (!def) continue;
         const valores = {};
         let listo = true;
+        /* Un rol declarado en def.opcionales corre vacío: así se puede exigir
+           algo justo cuando ese dato falta (sin segundo apellido, X en la CURP). */
+        const opcionales = def.opcionales || [];
         for (const rol of def.campos) {
           const campo = c.mapa[rol] || rol;
-          if (!envoltura(campo) || !activo(campo)) { listo = false; break; }
-          const v = valorDe(campo);
+          const v = envoltura(campo) && activo(campo) ? valorDe(campo) : '';
+          if (!v && opcionales.includes(rol)) { valores[rol] = ''; continue; }
           if (!v || validaCampo(campo)) { listo = false; break; }
           const f = cfg.formatos[envoltura(campo).dataset.formato];
           valores[rol] = f ? f.normaliza(v) : v;
@@ -933,23 +1006,30 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
        data-si="campo=valor|valor2" en cualquier elemento. El valor de un grupo
        de casillas cuenta si alguna marcada coincide. Oculto = inactivo, y lo
        escrito dentro se conserva (la opción «Otro» recupera su texto). */
+    /* Un campo oculto no tiene valor para las condiciones: lo que dependía de
+       él también se oculta (condiciones encadenadas, igual que en el servidor). */
     function valorParaCondicion(nombre) {
-      if (envoltura(nombre)) { const v = valorDe(nombre); return Array.isArray(v) ? v : [v]; }
+      if (envoltura(nombre)) { if (!activo(nombre)) return []; const v = valorDe(nombre); return Array.isArray(v) ? v : [v]; }
       const ctls = $$(`[name="${nombre}"]`, form);
       const marcados = ctls.filter((c) => (c.type === 'radio' || c.type === 'checkbox') ? c.checked : true);
       return marcados.map((c) => c.value);
     }
     function aplicaCondicionales() {
-      for (const el of $$('[data-si]', form)) {
-        const [campo, lista] = el.dataset.si.split('=');
-        const admitidos = (lista || '').split('|');
-        const actuales = valorParaCondicion(campo.trim());
-        const visible = actuales.some((v) => admitidos.includes(v));
-        if (el.hidden === visible) {
-          el.hidden = !visible;
-          /* Un campo que se oculta pierde su error: ya no cuenta. */
-          if (!visible) for (const c of $$('[data-campo]', el)) limpia(c.dataset.campo);
-          if (el.hasAttribute('data-campo') && !visible) limpia(el.dataset.campo);
+      /* Se repite hasta que nada cambie: ocultar un campo puede ocultar lo que dependía de él. */
+      for (let vuelta = 0, cambio = true; cambio && vuelta < 20; vuelta++) {
+        cambio = false;
+        for (const el of $$('[data-si]', form)) {
+          const [campo, lista] = el.dataset.si.split('=');
+          const admitidos = (lista || '').split('|');
+          const actuales = valorParaCondicion(campo.trim());
+          const visible = actuales.some((v) => admitidos.includes(v));
+          if (el.hidden === visible) {
+            el.hidden = !visible;
+            cambio = true;
+            /* Un campo que se oculta pierde su error: ya no cuenta. */
+            if (!visible) for (const c of $$('[data-campo]', el)) limpia(c.dataset.campo);
+            if (el.hasAttribute('data-campo') && !visible) limpia(el.dataset.campo);
+          }
         }
       }
     }
@@ -975,7 +1055,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       const datos = {};
       for (const n of nombres()) {
         const el = envoltura(n);
-        if (el.hasAttribute('data-sensible') || tipos.has(tipoDe(el)) && !tipos.get(tipoDe(el)).enBorrador) continue;
+        if (el.hasAttribute('data-sensible') || tipoDe(el) === 'auxiliar' || tipos.has(tipoDe(el)) && !tipos.get(tipoDe(el)).enBorrador) continue;
         datos[n] = valorDe(n);
       }
       return datos;
@@ -1041,7 +1121,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (!activo(n)) continue;
         const el = envoltura(n);
         const t = tipoDe(el);
-        if (tipos.has(t) && tipos.get(t).fueraDeDatos) continue;
+        if (t === 'auxiliar' || (tipos.has(t) && tipos.get(t).fueraDeDatos)) continue;
         normalizaCampo(n);
         const v = valorDe(n);
         if (Array.isArray(v) ? v.length : v) datos[n] = v;
@@ -1060,7 +1140,27 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       const destino = form.getAttribute('action');
       if (!destino || destino === '#') return Promise.reject(new Error('FormKit: el formulario no declara action ni opciones.enviar'));
       return fetch(destino, { method: form.getAttribute('method') || 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': payload.meta.idempotencia }, body: JSON.stringify(payload), signal })
-        .then((r) => { if (r.status === 429) { const e = new Error('limite'); e.limite = true; throw e; } if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); });
+        .then(async (r) => {
+          if (r.status === 429) { const e = new Error('limite'); e.limite = true; throw e; }
+          if (!r.ok) {
+            /* Un rechazo con {errores: [{campo, mensaje}]}, la misma forma que devuelve validar.mjs, se pinta en cada campo. */
+            const e = new Error(`HTTP ${r.status}`);
+            const cuerpo = await r.json().catch(() => null);
+            if (cuerpo && Array.isArray(cuerpo.errores)) e.errores = cuerpo.errores;
+            throw e;
+          }
+          return r.json();
+        });
+    }
+
+    /* Marca un campo con un error que viene de fuera (por ejemplo, del
+       servidor: «Ya hay una cuenta con esta CURP»). Devuelve false si el
+       campo no existe en este formulario. */
+    function marcaError(n, mensaje) {
+      if (!envoltura(n)) return false;
+      estadoDe(n).tocado = true;
+      marca(n, mensaje);
+      return true;
     }
 
     function botonEnviar() { return $('[data-accion="enviar"],button[type="submit"]', form); }
@@ -1087,6 +1187,14 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (opciones.alEnviar) opciones.alEnviar(respuesta, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: respuesta }));
         return true;
       } catch (e) {
+        /* Errores por campo devueltos por el servidor: junto a cada campo y en el resumen. */
+        const porCampo = e && Array.isArray(e.errores) ? e.errores.filter((x) => x && marcaError(x.campo, x.mensaje)) : [];
+        if (porCampo.length) {
+          const fallos = porCampo.map((x) => ({ campo: x.campo, mensaje: x.mensaje }));
+          if (!(FormKit.ganchos.erroresServidor && FormKit.ganchos.erroresServidor(form, fallos))) muestraResumen(form, fallos);
+          if (opciones.alFallar) opciones.alFallar(e, form);
+          return false;
+        }
         const texto = e && e.limite ? M.envioLimite : control.signal.aborted ? M.envioTimeout : M.envioError;
         if (avisoEnvio) { $('.aviso-texto', avisoEnvio).textContent = texto; avisoEnvio.hidden = false; avisoEnvio.focus(); } else anuncia(texto, true);
         if (opciones.alFallar) opciones.alFallar(e, form);
@@ -1100,7 +1208,25 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     /* ----- Eventos (todos aquí; ninguno en el HTML) ----- */
     form.addEventListener('submit', (e) => { e.preventDefault(); if (!(FormKit.ganchos.submit && FormKit.ganchos.submit(form, enviar))) enviar(); });
 
+    /* Después de validar n: las cruzadas que otro campo declara con n se
+       repiten si ese campo ya tiene valor (la CURP escrita y luego otra
+       fecha), y los límites que dependen de otras respuestas se recalculan
+       en los campos ya tocados. */
+    function revalidaDependientes(n) {
+      for (const d of declarantesDe(n)) if (activo(d) && valorDe(d)) validaYPinta(d);
+      for (const el of $$('[data-min-segun],[data-max-segun]', form)) {
+        const m = el.dataset.campo;
+        if (m && m !== n && activo(m) && estadoDe(m).tocado && valorDe(m)) validaYPinta(m);
+      }
+    }
+
     form.addEventListener('click', (e) => {
+      const ver = e.target.closest('[data-ver-contrasena]');
+      if (ver && form.contains(ver)) {
+        const c = document.getElementById(ver.getAttribute('aria-controls'));
+        if (c) { const mostrar = c.type === 'password'; c.type = mostrar ? 'text' : 'password'; ver.setAttribute('aria-pressed', String(mostrar)); }
+        return;
+      }
       const b = e.target.closest('[data-ir-campo],[data-accion="enviar"],[aria-disabled="true"]');
       if (!b || !form.contains(b)) return;
       if (b.getAttribute('aria-disabled') === 'true') { e.preventDefault(); e.stopImmediatePropagation(); return; }
@@ -1122,6 +1248,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const err = $('.err', el);
         if (err && err.dataset.nivel === 'error') { const msg = validaCampo(n); if (!msg) { limpia(n); const cruz = validaCruzadas(n).find((c) => c.nivel === 'error'); if (cruz) marca(n, cruz.mensaje); } else marca(n, msg); revisaResumen(); }
         for (const otro of camposCruzadosCon(n)) { const e2 = $('.err', envoltura(otro)); if (e2 && e2.dataset.cruzada) validaYPinta(otro); }
+        /* Un dato calculado por la página no tiene «salir del campo»: lo que depende de él se revisa al cambiar. */
+        if (tipoDe(el) === 'auxiliar') { revalidaDependientes(n); revisaResumen(); }
       }
       programaBorrador();
     });
@@ -1132,8 +1260,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const n = el.dataset.campo;
         estadoDe(n).dirty = true;
         /* Las opciones, casillas, selects y fechas se validan al cambiar: no hay «salir del campo» útil. */
-        if (e.target.matches('input[type="radio"],input[type="checkbox"],select,input[type="date"],input[type="time"],input[type="file"]')) { if (estadoDe(n).tocado || $('.err', el).dataset.nivel) validaYPinta(n); revisaResumen(); }
-        else if ($('.err', el).dataset.nivel) { validaYPinta(n); revisaResumen(); }
+        const err = $('.err', el);
+        if (e.target.matches('input[type="radio"],input[type="checkbox"],select,input[type="date"],input[type="time"],input[type="file"]')) { if (estadoDe(n).tocado || (err && err.dataset.nivel)) validaYPinta(n); revalidaDependientes(n); revisaResumen(); }
+        else if (err && err.dataset.nivel) { validaYPinta(n); revisaResumen(); }
       }
       programaBorrador();
     });
@@ -1150,6 +1279,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       if (e.target.matches('textarea')) actualizaContador(n);
       const msg = validaYPinta(n);
       if (msg) anuncia(`${M.prefijoError} ${msg}`);
+      revalidaDependientes(n);
       revisaResumen();
     });
 
@@ -1162,8 +1292,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       form, cfg, M, opciones, tipos, sugerencias: [],
       $, $$, plantilla, icono, anuncia, almacen, idUnico, pesoTxt, normalizaBusqueda,
       envoltura, envolturas, nombres, tipoDe, controlesDe, controlPrincipal, valorDe, textoDeValor, etiquetaDe, esObligatorio, activo, atributosDe,
-      validaCampo, validaYPinta, validaContenedor, marca, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
-      aplicaCondicionales, programaBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe
+      validaCampo, validaYPinta, validaContenedor, marca, marcaError, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
+      aplicaCondicionales, programaBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
     };
 
     /* ----- Arranque ----- */
@@ -1183,23 +1313,33 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     arrancado = true;
     form.dataset.formkit = 'listo';
 
-    return {
+    const instancia = {
       ctx,
       modulos: activos.map(([n]) => n),
       payload: arma,
       valida: () => validaContenedor(form),
       enviar,
+      marcaError,
       /* Inventario de datos personales: qué se pide, para qué y con qué finalidad (FRM-55). */
       inventario: () => nombres().map((n) => { const d = envoltura(n).dataset; return { campo: n, etiqueta: etiquetaDe(n), obligatorio: esObligatorio(n), uso: d.uso || '', datoPersonal: d.finalidad !== undefined, finalidad: d.finalidad || '', sensible: d.sensible !== undefined, formato: d.formato || '', autocomplete: controlPrincipal(n) ? controlPrincipal(n).getAttribute('autocomplete') || '' : '' }; })
     };
+    instancias.push(instancia);
+    return instancia;
   }
+
+  /* Formularios iniciados en la página, para marcar un error desde fuera
+     sin tener a mano la instancia. */
+  const instancias = [];
+  const marcaErrorGlobal = (campo, mensaje) => instancias.some((i) => i.marcaError(campo, mensaje));
 
   const FormKit = {
     version: BASE.version,
     config: fusiona(BASE, global.FORMKIT_CONFIG || {}),
     registra, iniciar, anuncia, icono, almacen,
+    /* FormKit.marcaError(campo, mensaje): pinta el error junto al campo, en el formulario que lo tenga. */
+    marcaError: marcaErrorGlobal,
     utilidades: { $, $$, plantilla, pesoTxt, normalizaBusqueda, idUnico, fusiona },
-    /* Ganchos que un módulo puede ocupar: validaTodo (pasos), submit, estadoBorrador, restauraBorrador. */
+    /* Ganchos que un módulo puede ocupar: validaTodo (pasos), submit, estadoBorrador, restauraBorrador, erroresServidor. */
     ganchos: {}
   };
   global.FormKit = FormKit;
@@ -1315,7 +1455,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
        <ul class="combo-lista" hidden></ul>
      </div>
    El catálogo se toma de window.FORMKIT_CATALOGOS[nombre]: un arreglo de
-   cadenas o de objetos {nombre, detalle, valor}. Nunca se escribe a mano en
+   cadenas o de objetos {nombre, detalle, valor}, o el objeto documentado
+   {filas, fuente, corte, es_ficticio} con ese arreglo en filas. Nunca se escribe a mano en
    el código: viene de la fuente oficial que declara codigo/catalogos.
 
    Modo (decisión C4): cerrado por omisión (sólo valores del catálogo; la
@@ -1426,8 +1567,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   });
 
   function catalogo(wrap) {
-    const fuente = (window.FORMKIT_CATALOGOS || {})[wrap.dataset.catalogo] || [];
-    return fuente.map((o) => (typeof o === 'string' ? { nombre: o } : o));
+    const cat = (window.FORMKIT_CATALOGOS || {})[wrap.dataset.catalogo];
+    const lista = Array.isArray(cat) ? cat : (cat && Array.isArray(cat.filas) ? cat.filas : []);
+    const vistos = new Set();
+    return lista.map((o) => (typeof o === 'string' ? { nombre: o } : o)).filter((o) => o && o.nombre && !vistos.has(o.nombre) && vistos.add(o.nombre));
   }
 }());
 
@@ -1939,6 +2082,14 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           conError.delete(i);
         }
         return [];
+      };
+      /* Errores que devuelve el servidor: se abre el primer paso que tiene uno y ahí va el resumen. */
+      FormKit.ganchos.erroresServidor = (f, fallos) => {
+        if (f !== form) return false;
+        const i = pasos.findIndex((p) => fallos.some((x) => p.contains(envoltura(x.campo))));
+        if (i < 0) return false;
+        conError.add(i); ir(i, { foco: false }); muestraResumen(pasos[i], fallos.filter((x) => pasos[i].contains(envoltura(x.campo)))); pintaBarra();
+        return true;
       };
       /* Enter en un campo intermedio avanza; sólo en el último paso envía. */
       FormKit.ganchos.submit = (f, enviar) => { if (f !== form) return false; if (actual < pasos.length - 1) $('[data-accion="siguiente"]', pasos[actual])?.click(); else enviar(); return true; };
@@ -2531,7 +2682,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    con Enter/espacio (no sólo al pasar el cursor, que el dedo no tiene);
    Escape lo cierra; el texto queda enlazado al botón con aria-describedby
    mientras está abierto. CUÁNDO NO: para instrucciones necesarias para
-   llenar el campo (van en la ayuda visible) ni para textos largos.
+   llenar el campo (van en la ayuda visible), para repetir lo que la ayuda
+   visible ya dice (si basta, no hay ícono; auditar-campos D5) ni para
+   textos largos.
 
      <span class="tooltip" data-tooltip>
        <button type="button" class="btn-icono tooltip-btn" aria-expanded="false" aria-label="Ayuda sobre el folio">
@@ -2697,6 +2850,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
          <ul class="lista-arch"></ul>
        </div>
      </div>
+   Para una fotografía de la persona (retrato) se usa la cámara frontal:
+   capture="user" en lugar de capture="environment" (campo «Fotografía de frente»).
    Configuración por campo (opcional): data-extensiones="jpg,png", data-mb,
    data-max, data-total-mb. Lo demás viene de validaciones.config.js.
    ========================================================= */
@@ -2738,7 +2893,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         };
       }
       const ext = (nombre) => String(nombre || '').split('.').pop().toLowerCase();
-      const formatosTxt = (c) => c.extensiones.map((e) => e.toUpperCase()).join(', ');
+      const formatosTxt = (c) => cfg.formatosArchivo(c.extensiones);
       /* Nombre saneado: sin rutas, sin caracteres de control, acotado. */
       const saneaNombre = (n) => String(n || 'archivo').split(/[\\/]/).pop().replace(/[\u0000-\u001F\u007F]/g, '').replace(/\s+/g, ' ').trim().slice(0, A.nombreMax) || 'archivo';
       const hexDe = (buf) => Array.from(new Uint8Array(buf), (x) => x.toString(16).padStart(2, '0')).join('');
@@ -2852,7 +3007,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const rechazos = [];
         for (const f of archivos) {
           const nombre = saneaNombre(f.name);
-          if (lista.filter((x) => x.estado !== 'error').length >= c.max) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoMax, { max: c.max }) }); continue; }
+          if (lista.filter((x) => x.estado !== 'error').length >= c.max) { rechazos.push({ nombre, motivo: plantilla(c.max === 1 ? M.archRechazoMaxUno : M.archRechazoMax, { max: c.max }) }); continue; }
           if (!c.extensiones.includes(ext(f.name))) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoTipo, { formatos: formatosTxt(c) }) }); continue; }
           if (f.size < A.minBytes) { rechazos.push({ nombre, motivo: M.archRechazoVacio }); continue; }
           const esFoto = A.optimiza.tipos.includes(ext(f.name));
@@ -2919,7 +3074,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const lim = $('[data-limite-texto]', cont);
         entrada.accept = c.extensiones.map((e) => `.${e}`).join(',');
         entrada.multiple = c.max > 1;
-        if (lim) lim.textContent = plantilla(M.archLimite, { formatos: formatosTxt(c), max: c.max, mb: c.mb });
+        if (lim) lim.textContent = plantilla(c.max === 1 ? M.archLimiteUno : M.archLimite, { formatos: formatosTxt(c), max: c.max, mb: c.mb });
         const etq = $('.etiqueta', el);
         if (etq) { etq.id = etq.id || ctx.idUnico(`et-${el.dataset.campo}`); const zt = $('.zona-carga-texto', zona); if (zt) zt.id = zt.id || ctx.idUnico(`zt-${el.dataset.campo}`); zona.setAttribute('aria-labelledby', `${etq.id}${zt ? ` ${zt.id}` : ''}`); }
         /* La cámara se ofrece sólo donde existe: teléfonos y tabletas con puntero grueso. */

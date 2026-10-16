@@ -29,6 +29,8 @@
   /* ---------- Utilidades compartidas ---------- */
   const recorta = (v) => String(v ?? '').replace(/\s+/g, ' ').trim();
   const soloDigitos = (v) => String(v ?? '').replace(/\D/g, '');
+  /* Formatos de archivo para leerlos: en mayúsculas y sin repetir JPEG (jpg y jpeg son el mismo). */
+  const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
   const esFechaReal = (a, m, d) => { const f = new Date(Date.UTC(a, m - 1, d)); return f.getUTCFullYear() === a && f.getUTCMonth() === m - 1 && f.getUTCDate() === d; };
   const hoyISO = () => {
@@ -183,7 +185,12 @@
       valida: (v, a = {}) => {
         if (!/^-?\d+(\.\d+)?$/.test(v)) return 'Escribe sólo números; para decimales usa punto. Ejemplo: 12.5';
         const n = Number(v);
-        if (a.step && a.step !== 'any' && Number(a.step) >= 1 && !Number.isInteger(n)) return 'Escribe un número entero, sin decimales.';
+        /* El paso cuenta desde el mínimo, como en HTML; con tolerancia de redondeo para pasos decimales. */
+        const paso = a.step && a.step !== 'any' ? Number(a.step) : 0;
+        if (paso > 0) {
+          const k = (n - (a.min !== undefined && a.min !== '' ? Number(a.min) : 0)) / paso;
+          if (Math.abs(k - Math.round(k)) > 1e-9) return paso === 1 ? 'Escribe un número entero, sin decimales.' : `Usa múltiplos de ${a.step}.`;
+        }
         if (a.min !== undefined && a.min !== '' && n < Number(a.min)) return `El valor mínimo es ${a.min}.`;
         if (a.max !== undefined && a.max !== '' && n > Number(a.max)) return `El valor máximo es ${a.max}.`;
         return '';
@@ -347,7 +354,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.0.0',
+    version: '1.1.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -387,6 +394,7 @@
       pasoHecho: 'completado',
       pasoError: 'con errores',
       palabraObligatorio: 'obligatorio',
+      contrasenaMostrar: 'Mostrar contraseña',
       palabraSi: 'Sí',
       palabraNo: 'No',
       sinValor: 'No indicado',
@@ -407,6 +415,7 @@
       archQuitar: 'Quitar archivo {nombre}',
       archRechazoTitulo: 'No se agregó «{nombre}»:',
       archRechazoMax: 'sólo se admiten {max} archivos.',
+      archRechazoMaxUno: 'sólo se admite un archivo.',
       archRechazoTipo: 'ese tipo de archivo no se admite. Los formatos son {formatos}.',
       archRechazoFirma: 'el contenido del archivo no corresponde a su extensión. Elige el archivo original.',
       archRechazoPeso: 'pesa {peso} y el máximo es {mb} MB. Reduce su tamaño o elige otro.',
@@ -416,6 +425,7 @@
       archRechazoDimension: 'la imagen es demasiado pequeña (mínimo {ancho} × {alto} píxeles).',
       archRechazoOptimizada: 'aun optimizada pesa {peso} y el máximo es {mb} MB.',
       archLimite: 'Formatos admitidos: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
+      archLimiteUno: 'Formatos admitidos: {formatos}. Un archivo de hasta {mb} MB.',
       archAgregado: 'Se agregó {nombre}.',
       archQuitado: 'Se quitó {nombre}.',
       archReintentar: 'Reintentar',
@@ -442,5 +452,5 @@
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));

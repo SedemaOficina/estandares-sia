@@ -14,6 +14,10 @@
           lo justifique (texto «no sensible:»).
      D4 · el control principal lleva inputmode cuando el formato lo define
           (numeric, tel, email, decimal) o el type ya lo aporta.
+     D5 · el ícono de ayuda («?», .tooltip-texto) no repite la ayuda visible
+          del mismo campo: si la ayuda visible basta, no lleva ícono.
+     D6 · dos campos seguidos no repiten la misma ayuda: si vale para toda
+          la sección, va una vez como ayuda de bloque (.ayuda-bloque).
    Uso: node herramientas/auditar-campos.mjs [archivo.html …]
         (sin argumentos revisa codigo/plantillas, guia-visual/ejemplos y guia-visual/index.html)
    Sale con 1 si hay hallazgos. No modifica nada.
@@ -38,6 +42,21 @@ const archivos = argumentos.length ? argumentos.map((a) => resolve(a)) : [
 const atributos = (tag) => { const a = {}; for (const m of tag.matchAll(/\s([a-zA-Z][\w-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g)) a[m[1]] = m[2] ?? m[3] ?? m[4] ?? ''; return a; };
 const hallazgos = [];
 let campos = 0;
+
+/* Texto comparable: sin etiquetas, acentos, signos ni mayúsculas. */
+const plano = (t) => t.replace(/<[^>]+>/g, ' ').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9ñ]+/g, ' ').trim();
+const textoDe = (bloque, re) => { const m = bloque.match(re); return m ? plano(m[1]) : ''; };
+const AYUDA = /<p class="ayuda"[^>]*>([\s\S]*?)<\/p>/;
+const TOOLTIP = /<span class="tooltip-texto"[^>]*>([\s\S]*?)<\/span>/;
+/* Dos textos dicen lo mismo si uno contiene al otro o si comparten la mayoría de sus palabras con contenido. */
+function repite(a, b) {
+  if (!a || !b) return false;
+  if (a === b || a.includes(b) || b.includes(a)) return true;
+  const pal = (t) => new Set(t.split(' ').filter((w) => w.length > 3));
+  const A = pal(a), B = pal(b);
+  const comunes = [...A].filter((w) => B.has(w)).length;
+  return comunes / Math.min(A.size, B.size || 1) >= 0.6 && Math.min(A.size, B.size) >= 3;
+}
 
 for (const ruta of archivos) {
   const html = readFileSync(ruta, 'utf8');
@@ -65,8 +84,12 @@ for (const ruta of archivos) {
     if (personal && esIdentidad && d['data-sensible'] === undefined && !/<!--[^>]*no sensible:[^>]*-->/i.test(bloque) && !/<!--[^>]*no sensible:[^>]*-->/i.test(html.slice(Math.max(0, p.inicio - 300), p.inicio))) falla('D3', 'dato personal de identidad o contacto sin data-sensible (quedaría en el borrador local); si es deliberado, comentario «no sensible: motivo»');
     const esperado = INPUTMODE_POR_FORMATO[d['data-formato']];
     if (principal && principal.tag === 'input' && esperado && principal.a.inputmode === undefined && TYPES_CON_TECLADO[principal.a.type] !== esperado && !principal.a.readonly) falla('D4', `formato ${d['data-formato']} sin inputmode="${esperado}" (teclado adecuado en el teléfono)`);
+    p.ayuda = textoDe(bloque, AYUDA);
+    if (repite(p.ayuda, textoDe(bloque, TOOLTIP))) falla('D5', 'el ícono de ayuda («?») repite la ayuda visible; si la ayuda visible basta, quita el ícono');
+    const previo = posiciones[i - 1];
+    if (previo && p.ayuda && previo.ayuda === p.ayuda) falla('D6', `repite la ayuda de «${previo.nombre}»; si vale para toda la sección, ponla una vez como ayuda de bloque (.ayuda-bloque)`);
   });
 }
 
 if (hallazgos.length) { console.error(hallazgos.join('\n')); console.error(`\nFALLA · ${hallazgos.length} hallazgo(s) en ${campos} campos de ${archivos.length} archivo(s)`); process.exit(1); }
-console.log(`CORRECTO · ${campos} campos en ${archivos.length} archivo(s): todos declaran uso; los personales, autocompletado y sensibilidad; los formatos, su teclado`);
+console.log(`CORRECTO · ${campos} campos en ${archivos.length} archivo(s): todos declaran uso; los personales, autocompletado y sensibilidad; los formatos, su teclado; ninguna ayuda se repite`);

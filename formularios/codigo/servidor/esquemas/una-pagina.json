@@ -1,6 +1,6 @@
 {
   "formulario": "una-pagina.html",
-  "generado": "2026-10-14T19:08:07.783Z",
+  "generado": "2026-10-16T13:56:34.059Z",
   "campos": {
     "nombre": {
       "etiqueta": "Nombre(s)",
@@ -189,7 +189,15 @@
         "valores": [
           "otro"
         ]
-      }
+      },
+      "condiciones": [
+        {
+          "campo": "intereses",
+          "valores": [
+            "otro"
+          ]
+        }
+      ]
     },
     "desde": {
       "etiqueta": "Desde",
