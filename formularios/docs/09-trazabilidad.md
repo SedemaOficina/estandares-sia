@@ -109,9 +109,9 @@ Leyenda: **A** tomado del paquete A · **B** tomado del paquete B · **A+B** fus
 | `construir.mjs` (iconos, manifiesto, dist, esquemas, catálogo, artefacto, ZIP) | Nuevo |
 | Guía visual con árbol de decisión, fichas vivas, probador, sí y no, ejemplos con selector de ancho | Nuevo (la guía de A y la de B eran estáticas) |
 
-## 3. Qué quedó fuera de la versión 1.0 (para 1.1)
+## 3. Qué quedó fuera de la versión 1.0
 
-Confirmado por la persona responsable: los huecos adicionales de la sección 8 de la fase 0 se difieren.
+Confirmado por la persona responsable: los huecos adicionales de la sección 8 de la fase 0 se difieren. La 1.1.0 fue de correcciones de un proyecto real y no los incluye; cada pieza se agrega cuando un proyecto la necesite.
 
 | Pieza | Nivel propuesto | Nota |
 |---|---|---|
