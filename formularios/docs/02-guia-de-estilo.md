@@ -96,6 +96,7 @@ Cada par de la tabla es un uso real del estándar: el texto sobre el fondo donde
 | C39 | `--guinda` #9D2148 | `--guinda-cl` #F7F1F3 | 6.86:1 | 4.5:1 | cumple | Asterisco dentro de la leyenda de obligatorios |
 | N18 | `--borde` #878B8E | `--beige` #FFFEF8 | 3.40:1 | 3:1 | cumple | Borde de los enlaces a redes sociales en el pie |
 | C40 | `--dorado-txt` #8C6C3E | `--beige` #FFFEF8 | 4.80:1 | 4.5:1 | cumple | Distintivo de versión de un sitio de prueba |
+| C41 | `--texto` #2B2D2E | `--ok-bg` #F1F8F4 | 12.83:1 | 4.5:1 | cumple | Nombre de un archivo listo (su estado va en --ok-txt, C27) |
 <!-- contraste:fin -->
 
 ## 3. Tipografía

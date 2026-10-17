@@ -64,7 +64,7 @@ Un formulario agrega cruzadas propias en `FORMKIT_CONFIG.cruzadas.<clave> = { ca
 | Extensiones | jpg, jpeg, png, pdf | Al elegir | ese tipo de archivo no se admite. Los formatos son … |
 | Peso por archivo | 8 MB (después de optimizar) | Al elegir / tras optimizar | pesa 12.3 MB y el máximo es 8 MB |
 | Peso total | 25 MB | Al elegir | con él se superan los 25 MB en total |
-| Número | 5 (`data-max` lo baja) | Al elegir | sólo se admiten 3 archivos · con `data-max="1"`, en singular: sólo se admite un archivo |
+| Número | 5 (`data-max` lo baja) | Al elegir | sólo se admiten 3 archivos · con `data-max="1"`, en singular: sólo se admite un archivo. Con el máximo cargado, «Elegir archivo» se oculta hasta quitar uno |
 | Vacío | mínimo 1 byte | Al elegir | el archivo está vacío |
 | Duplicado | SHA-256 igual | Tras leer | ya adjuntaste ese mismo archivo |
 | Firma real | primeros bytes por tipo | Tras leer | el contenido del archivo no corresponde a su extensión |
@@ -76,7 +76,7 @@ Lo que se sabe sin leer el archivo se rechaza en el acto (`.arch-rechazo`); lo q
 
 ## 5. Mensajes
 
-Los 83 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc. Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo. Registro: tuteo, frase corta, qué hacer primero.
+Los 89 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc. Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo. Registro: tuteo, frase corta, qué hacer primero.
 
 ## 6. Configuración por formulario (`FORMKIT_CONFIG`)
 
@@ -95,7 +95,7 @@ Los 83 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.j
 | `chips` | 5, `sia-chips` | Máximo de chips del historial y clave del almacén local (la lista fija no guarda nada). |
 | `visor` | pdf.js junto al paquete; fijo desde 1024 px | Dónde está pdf.js (`pdfjs`), desde qué ancho el visor queda fijo junto a la revisión (`fijoDesde`) y la espera para repintar (`retardoMs`). |
 | `mapa` | sin teselas | Proveedor, atribución, centro, zoom. |
-| `mensajes` | 83 textos | Cualquier mensaje. |
+| `mensajes` | 89 textos | Cualquier mensaje. |
 
 ## 7. En el servidor
 

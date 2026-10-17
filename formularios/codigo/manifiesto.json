@@ -1,6 +1,6 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -72,9 +72,9 @@
     "tamano": {
       "tokens.css": 8394,
       "base.css": 5841,
-      "nucleo.css": 16940,
-      "validaciones.config.js": 36165,
-      "formkit.core.js": 46299,
+      "nucleo.css": 17413,
+      "validaciones.config.js": 36456,
+      "formkit.core.js": 47315,
       "iconos.js": 5845
     }
   },
@@ -350,14 +350,15 @@
       "escritorio": "Dos columnas.",
       "errores": [
         "«Editar» que lleva al inicio del paso.",
-        "Mostrar campos ocultos por condicional."
+        "Mostrar campos ocultos por condicional.",
+        "«Editar» que baja de renglón con un valor largo."
       ],
       "archivos": {
         "css": "codigo/modulos/revision/revision.css",
         "js": "codigo/modulos/revision/revision.js"
       },
       "tamano": {
-        "css": 2164,
+        "css": 2342,
         "js": 3292
       }
     },
@@ -366,7 +367,7 @@
       "titulo": "Acuse y «qué sigue»",
       "nivel": "RECOMENDADO",
       "tipo": "retroalimentacion",
-      "proposito": "Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descarga opcional y pantalla de límite de envíos.",
+      "proposito": "Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones).",
       "cuando": "Todo envío que genere folio.",
       "cuandoNo": "Capturas internas sin acuse.",
       "dependencias": [
@@ -379,14 +380,16 @@
       "errores": [
         "Prometer plazos que el sistema no controla.",
         "Folio con aspecto de botón.",
-        "No borrar el borrador al recibir."
+        "No borrar el borrador al recibir.",
+        "Acuse sin una acción para seguir.",
+        "Quitarle el relleno lateral a la tarjeta del acuse: en teléfono los botones quedan pegados a la orilla."
       ],
       "archivos": {
         "css": "codigo/modulos/acuse/acuse.css",
         "js": "codigo/modulos/acuse/acuse.js"
       },
       "tamano": {
-        "css": 2839,
+        "css": 2999,
         "js": 3482
       }
     },
@@ -697,19 +700,20 @@
       "js": true,
       "accesibilidad": "La zona es un botón con nombre; cada archivo dice su estado; rechazos con role=alert que nombran el archivo y el motivo.",
       "movil": "Botón de cámara con capture (environment para evidencias; user para una fotografía de frente); vista previa de 96 px; con un solo archivo, los textos en singular.",
-      "escritorio": "Arrastrar y soltar; guardia global de drop.",
+      "escritorio": "Arrastrar y soltar; guardia global de drop. Con el máximo cargado no se ofrece «Elegir archivo»; el archivo listo se ve en verde.",
       "errores": [
         "Validar sólo por extensión.",
         "Medir el peso antes de optimizar.",
-        "Enviar la ubicación de la foto sin que la persona lo sepa."
+        "Enviar la ubicación de la foto sin que la persona lo sepa.",
+        "Dejar «Elegir archivo» a la vista con el máximo ya cargado: la persona cree que no subió nada."
       ],
       "archivos": {
         "css": "codigo/modulos/archivos/archivos.css",
         "js": "codigo/modulos/archivos/archivos.js"
       },
       "tamano": {
-        "css": 2637,
-        "js": 19102
+        "css": 3038,
+        "js": 20019
       }
     },
     {
@@ -850,5 +854,5 @@
       }
     }
   ],
-  "generado": "2026-10-17T14:30:55.008Z"
+  "generado": "2026-10-17T15:13:31.079Z"
 }

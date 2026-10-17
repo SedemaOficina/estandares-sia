@@ -115,7 +115,7 @@ Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({
 
 **Mínimo o máximo según otra respuesta.** `data-min-segun="experiencia"` en la envoltura de un número toma el mínimo de `FORMKIT_CONFIG.limitesSegun.experiencia(datos)`, que recibe las respuestas activas y devuelve un número (o nada, para dejar el `min` del control). Al cambiar la respuesta de la que depende, el campo se vuelve a revisar. El servidor recibe la misma función en `validaPayload(…, { limitesSegun: { experiencia } })`; si falta, lo anota en `senales`.
 
-**Mostrar contraseña.** Todo campo `type="password"` recibe un botón «Mostrar contraseña» con `aria-pressed` que alterna entre ver y ocultar lo escrito. `data-sin-mostrar` en la envoltura lo quita (por ejemplo, en la confirmación de una contraseña ya visible).
+**Mostrar contraseña.** Todo campo `type="password"` recibe, dentro del campo y a la derecha, un botón «Mostrar» / «Ocultar» con `aria-pressed` (el lector oye «Mostrar la contraseña»). El núcleo envuelve el control en `.contrasena-caja`, que en una `.fila` ocupa el renglón del control. Al enviar, la contraseña vuelve a ocultarse. `data-sin-mostrar` en la envoltura quita el botón.
 
 **Fotografía de frente.** En el módulo `archivos`, `capture="user"` en el `input` abre la cámara frontal del teléfono (retrato, fotografía de la persona); `capture="environment"` abre la trasera (evidencias). Con `data-max="1"`, los textos van en singular: «Un archivo de hasta 5 MB».
 

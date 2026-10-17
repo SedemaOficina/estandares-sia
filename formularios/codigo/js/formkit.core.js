@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.1
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -290,18 +290,24 @@
       const ctl = controlPrincipal(n);
       if (ctl && el.dataset.formato === 'fecha' && el.hasAttribute('data-no-futura') && !ctl.max) ctl.max = cfg.hoyISO();
 
-      /* Contraseña: botón «Mostrar contraseña» (aria-pressed) para ver lo
-         escrito; se omite con data-sin-mostrar en el campo. */
+      /* Contraseña: botón «Mostrar» / «Ocultar» dentro del campo, a la derecha
+         (aria-pressed), para revisar lo escrito; el control va en
+         .contrasena-caja, que en una .fila ocupa el renglón del control. Se
+         omite con data-sin-mostrar en el campo. */
       if (ctl && ctl.type === 'password' && !el.hasAttribute('data-sin-mostrar') && !$('[data-ver-contrasena]', el)) {
         if (!ctl.id) ctl.id = idUnico(`c-${n}`);
+        let caja = ctl.closest('.contrasena-caja');
+        if (!caja) { caja = document.createElement('div'); caja.className = 'contrasena-caja'; ctl.replaceWith(caja); caja.appendChild(ctl); }
         const ver = document.createElement('button');
         ver.type = 'button';
-        ver.className = 'btn-enlace contrasena-ver';
+        ver.className = 'contrasena-ver';
         ver.dataset.verContrasena = '';
         ver.setAttribute('aria-pressed', 'false');
         ver.setAttribute('aria-controls', ctl.id);
-        ver.textContent = M.contrasenaMostrar;
-        ctl.insertAdjacentElement('afterend', ver);
+        const t = document.createElement('span'); t.dataset.verTexto = ''; t.textContent = M.contrasenaMostrar;
+        const lector = document.createElement('span'); lector.className = 'solo-lector'; lector.textContent = M.contrasenaLector;
+        ver.append(t, lector);
+        caja.appendChild(ver);
       }
 
       /* Texto largo: contador y crecimiento automático. */
@@ -698,6 +704,8 @@
     function botonEnviar() { return $('[data-accion="enviar"],button[type="submit"]', form); }
 
     async function enviar() {
+      /* Al enviar, la contraseña vuelve a ocultarse: que el navegador no la guarde ni la muestre como texto. */
+      for (const b of $$('[data-ver-contrasena][aria-pressed="true"]', form)) verContrasena(b, false);
       /* Un módulo (pasos) puede validar por su cuenta; si devuelve null, el formulario no es suyo. */
       const porModulo = FormKit.ganchos.validaTodo ? FormKit.ganchos.validaTodo(form) : null;
       const fallos = porModulo || validaContenedor(form);
@@ -752,13 +760,19 @@
       }
     }
 
+    /* Muestra u oculta la contraseña: tipo del control, texto del botón y aria-pressed. */
+    function verContrasena(b, ver) {
+      const c = document.getElementById(b.getAttribute('aria-controls'));
+      if (!c) return;
+      c.type = ver ? 'text' : 'password';
+      b.setAttribute('aria-pressed', String(ver));
+      const t = $('[data-ver-texto]', b);
+      if (t) t.textContent = ver ? M.contrasenaOcultar : M.contrasenaMostrar;
+    }
+
     form.addEventListener('click', (e) => {
       const ver = e.target.closest('[data-ver-contrasena]');
-      if (ver && form.contains(ver)) {
-        const c = document.getElementById(ver.getAttribute('aria-controls'));
-        if (c) { const mostrar = c.type === 'password'; c.type = mostrar ? 'text' : 'password'; ver.setAttribute('aria-pressed', String(mostrar)); }
-        return;
-      }
+      if (ver && form.contains(ver)) { verContrasena(ver, ver.getAttribute('aria-pressed') !== 'true'); return; }
       const b = e.target.closest('[data-ir-campo],[data-accion="enviar"],[aria-disabled="true"]');
       if (!b || !form.contains(b)) return;
       if (b.getAttribute('aria-disabled') === 'true') { e.preventDefault(); e.stopImmediatePropagation(); return; }

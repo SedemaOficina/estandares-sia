@@ -71,16 +71,24 @@ test('dato calculado por la página: cuenta en condiciones y no se envía', asyn
   await p.context().close();
 });
 
-test('«Mostrar contraseña» alterna lo que se ve y lo dice con aria-pressed (P42)', async () => {
+test('«Mostrar» / «Ocultar» dentro del campo, con aria-pressed, y se vuelve a ocultar al enviar (P42, P73)', async () => {
   const p = await abre();
   const ver = p.locator('[data-campo="clave"] [data-ver-contrasena]');
-  assert.equal((await ver.textContent()).trim(), 'Mostrar contraseña');
+  assert.equal((await ver.textContent()).trim(), 'Mostrar la contraseña', 'el lector oye «Mostrar la contraseña»');
   assert.equal(await ver.getAttribute('aria-pressed'), 'false');
+  const dentro = await p.evaluate(() => { const c = document.getElementById('clave').getBoundingClientRect(); const b = document.querySelector('[data-campo="clave"] [data-ver-contrasena]').getBoundingClientRect(); return b.left >= c.left && b.right <= c.right + 1 && b.top >= c.top - 1 && b.bottom <= c.bottom + 1; });
+  assert.ok(dentro, 'el botón va dentro del campo');
   await ver.click();
   assert.equal(await p.getAttribute('#clave', 'type'), 'text', 'se ve lo escrito');
   assert.equal(await ver.getAttribute('aria-pressed'), 'true');
+  assert.equal((await ver.locator('[data-ver-texto]').textContent()).trim(), 'Ocultar');
   await ver.click();
   assert.equal(await p.getAttribute('#clave', 'type'), 'password', 'y se vuelve a ocultar');
+  assert.equal((await ver.locator('[data-ver-texto]').textContent()).trim(), 'Mostrar');
+  await ver.click();
+  await p.click('[data-accion="enviar"]');
+  assert.equal(await p.getAttribute('#clave', 'type'), 'password', 'al enviar, la contraseña vuelve a ocultarse');
+  assert.equal(await ver.getAttribute('aria-pressed'), 'false');
   await p.context().close();
 });
 
@@ -234,5 +242,39 @@ test('fecha día/mes/año: escritura guiada, edad y validación, sin calendario 
   await p.fill('#b_fn_fecha', '01/01/2099'); await p.keyboard.press('Tab');
   assert.match(await error(p, 'b_fn_fecha'), /posterior a hoy/, 'no acepta fechas futuras');
   assert.equal(await p.inputValue('#b_fn_edad'), '', 'con una fecha futura, la edad queda vacía');
+  await p.context().close();
+});
+
+/* ----- Versión 1.2.1: P71, P72 y P73 ----- */
+
+test('archivos: con el máximo cargado se oculta «Elegir archivo», el listo se ve en verde y vuelve al quitarlo (P71)', async () => {
+  const p = await abre();
+  const zona = p.locator('[data-campo="retrato"] .zona-carga');
+  assert.ok(await zona.isVisible(), 'al principio se ofrece «Elegir archivo»');
+  assert.match((await p.locator('[data-campo="retrato"] [data-limite-texto]').textContent()).trim(), /^Formatos admitidos: JPEG, PNG\. Un archivo de hasta/);
+  await p.setInputFiles('[data-campo="retrato"] input[type="file"]:not([data-entrada-camara])', [{ name: 'retrato.png', mimeType: 'image/png', buffer: pngRuido(400, 300) }]);
+  await p.waitForSelector('[data-campo="retrato"] .arch[data-estado="listo"]');
+  assert.ok(await zona.isHidden(), 'con el máximo (1) ya no se ofrece');
+  const fondo = await p.locator('[data-campo="retrato"] .arch').evaluate((li) => getComputedStyle(li).backgroundColor);
+  assert.equal(fondo, 'rgb(241, 248, 244)', 'el archivo listo se ve en verde (--ok-bg)');
+  await p.click('[data-campo="retrato"] .arch-quitar');
+  assert.ok(await zona.isVisible(), 'al quitarlo, vuelve');
+  await p.context().close();
+});
+
+test('acuse con relleno lateral y una acción para seguir; en la revisión, «Editar» no baja de renglón (P72)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.movil.contexto });
+  const acuse = await p.evaluate(() => { const a = document.querySelector('.tarjeta.acuse'); return { relleno: parseFloat(getComputedStyle(a).paddingLeft), seguir: a.querySelectorAll('.btn-primario').length }; });
+  assert.ok(acuse.relleno > 0, `la tarjeta del acuse conserva su relleno lateral: ${acuse.relleno}`);
+  assert.equal(acuse.seguir, 1, 'el acuse trae una sola acción principal para seguir');
+  const fila = await p.evaluate(() => {
+    const dd = document.createElement('dd'); dd.className = 'rev-dato-valor';
+    const v = document.createElement('span'); v.textContent = 'Calle de Prueba con un nombre muy largo que no cabe en un renglón del teléfono, número 1234';
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-enlace'; b.textContent = 'Editar';
+    dd.append(v, b); document.querySelector('main').append(dd);
+    const r = { v: v.getBoundingClientRect(), b: b.getBoundingClientRect() }; dd.remove();
+    return { mismoRenglon: Math.abs(r.v.top - r.b.top) < 8, aLaDerecha: r.b.left > r.v.left };
+  });
+  assert.ok(fila.mismoRenglon && fila.aLaDerecha, `«Editar» queda arriba y a la derecha del valor: ${JSON.stringify(fila)}`);
   await p.context().close();
 });

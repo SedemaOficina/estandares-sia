@@ -72,23 +72,23 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-05 · Una pantalla de revisión antes de enviar, con «Editar» que aterriza en el campo
 
-**Regla.** Los formularios por pasos muestran todo lo capturado agrupado por paso antes de enviar (módulo «revision»). Cada bloque lleva «Editar», que abre el paso y enfoca el campo correspondiente.
+**Regla.** Los formularios por pasos muestran todo lo capturado agrupado por paso antes de enviar (módulo «revision»). Cada bloque lleva «Editar», que abre el paso y enfoca el campo correspondiente. «Editar» se queda junto al valor, arriba y a la derecha, aunque el valor ocupe varios renglones.
 
 **Por qué.** Revisar antes de enviar evita envíos equivocados y repeticiones; «Editar» que sólo cambia de paso obliga a buscar el campo.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-08 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-08; P72 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
-**Verificación.** 01-por-pasos.prueba.mjs: «Editar» aterriza en el campo
+**Verificación.** 01-por-pasos.prueba.mjs: «Editar» aterriza en el campo; 07: «Editar» junto al valor largo
 
 ### FRM-06 · Un acuse con folio al terminar
 
-**Regla.** Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue y, si existe, descarga del comprobante. El foco va al título del acuse y se anuncia.
+**Regla.** Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue, si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia.
 
 **Por qué.** Sin acuse la persona no sabe si terminó; sin folio no puede dar seguimiento.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-09; B FRM-EST-03 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-09; B FRM-EST-03; P72 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
-**Verificación.** 01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs
+**Verificación.** 01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs; 07: relleno y acción del acuse
 
 ### FRM-07 · La pregunta condicional existe sólo mientras aplica
 
@@ -328,11 +328,11 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-30 · Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, contraseña
 
-**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año; el número respeta min, max y step.
+**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed, y se vuelve a ocultar al enviar.
 
 **Por qué.** Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.
 
-**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026) · *decisión del encargo*
+**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026); P42 (proyecto de acreditaciones, 15 oct 2026); P73 (proyecto de acreditaciones, 17 oct 2026) · *decisión del encargo*
 
 **Verificación.** guía: probador; 06-servidor; validaciones.config.js
 
@@ -556,13 +556,13 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-52 · Cada rechazo dice su motivo y cada archivo muestra su estado
 
-**Regla.** Lo que se sabe sin leer el archivo (tipo, peso, número, vacío, duplicado) se rechaza en el acto con motivo; lo que exige leerlo (firma real, dimensiones, optimización) se muestra en la lista con estado, progreso y «Reintentar». El tipo real se verifica por firma (bytes iniciales), no por extensión; los duplicados por SHA-256; el nombre se sanea.
+**Regla.** Lo que se sabe sin leer el archivo (tipo, peso, número, vacío, duplicado) se rechaza en el acto con motivo; lo que exige leerlo (firma real, dimensiones, optimización) se muestra en la lista con estado, progreso y «Reintentar». El tipo real se verifica por firma (bytes iniciales), no por extensión; los duplicados por SHA-256; el nombre se sanea. El archivo listo se ve en verde, con su estado escrito; con el máximo ya cargado, «Elegir archivo» y la cámara se ocultan (y el foco pasa a «Quitar») y vuelven al quitar un archivo; con un solo archivo o un solo formato, los textos van en singular.
 
 **Por qué.** «Archivo no válido» no dice qué cambiar; un .jpg que no es imagen pasa la extensión y rompe el servidor.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-61; B FRM-ARC-03 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-61; B FRM-ARC-03; P71 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
-**Verificación.** 01-por-pasos: rechazo inmediato con motivo, error tras leer
+**Verificación.** 01-por-pasos: rechazo inmediato con motivo, error tras leer; 07: máximo cargado
 
 ### FRM-53 · Las fotografías se optimizan en el navegador y se conserva la huella del original
 

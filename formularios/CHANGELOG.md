@@ -1,5 +1,15 @@
 # Historial de cambios
 
+## 1.2.1 · 2026-10-17
+
+Tres hallazgos más del sistema de acreditaciones (sus versiones 0.21 y 0.22). Son ajustes de piezas que ya existían, por eso es versión de parche. El proyecto puede quitar `app/archivos-lleno.js`, `app/ver-contrasena.js` y sus reglas en `apd.css` (`.tarjeta.acuse`, `.rev-dato-valor`, `.contrasena-caja`, `[data-lleno]`).
+
+- **P71 · Archivos con el máximo cargado** (módulo `archivos`, FRM-52): con el máximo ya cargado, «Elegir archivo» y la cámara se ocultan (`data-lleno` en `[data-archivos]`), se anuncia y el foco pasa a «Quitar»; al quitar el archivo vuelven. Antes seguían a la vista y la persona creía que no había subido nada. El archivo listo se ve en verde, con su estado escrito (par de contraste nuevo C41). Con un solo formato, el texto dice «Formato admitido»; el singular de «Un archivo de hasta 5 MB» ya venía de la 1.1.0 (P39).
+- **P72 · Acuse y revisión** (módulos `acuse` y `revision`, FRM-05 y FRM-06): la tarjeta del acuse conserva su relleno lateral (`.acuse` le quitaba el de la tarjeta y en teléfono los botones quedaban pegados a la orilla), y las dos plantillas y la encuesta de ejemplo terminan el acuse con una acción principal para seguir («Volver al inicio»). En la revisión, «Editar» se queda arriba y a la derecha del valor aunque éste ocupe varios renglones.
+- **P73 · «Mostrar» / «Ocultar» dentro del campo** (núcleo, FRM-30; mejora P42 de la 1.1.0): el botón va dentro del campo de contraseña, a la derecha, y cambia su texto entre «Mostrar» y «Ocultar» (el lector oye «Mostrar la contraseña»), con `aria-pressed`. El núcleo envuelve el control en `.contrasena-caja`, que en una `.fila` ocupa el renglón del control. Al enviar, la contraseña vuelve a ocultarse.
+
+**Pruebas**: dos casos nuevos en `07-correcciones` (16 en total) y el de la contraseña ampliado.
+
 ## 1.2.0 · 2026-10-17
 
 Cuatro hallazgos más del sistema de acreditaciones de poda y dictaminación, de su segunda revisión (bandeja de revisión documental y perfil del dictaminador). Trae piezas nuevas (un módulo y un formato), por eso es versión menor. El proyecto puede quitar sus soluciones provisionales: `app/visor.js` (con la copia de pdf.js de `construir-sitio.mjs`), `app/fecha-dma.js` y los botones `.sugerencia`.

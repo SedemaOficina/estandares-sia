@@ -1,7 +1,7 @@
 /* GENERADO: núcleo + todos los módulos. Para copiar sólo lo que se usa, toma los archivos de codigo/. */
 /* ===== codigo/css/tokens.css ===== */
 /* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.2.0
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.2.1
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -654,8 +654,10 @@ a{color:var(--azul)}
 /* Anuncio de estado de envío (error de red, plazo vencido): recibe el foco. */
 .estado-envio{margin-top:var(--e-4)}
 
-/* «Mostrar contraseña»: debajo del control; aria-pressed dice si se ve lo escrito. */
-.contrasena-ver{margin-top:var(--e-1)}
+/* «Mostrar» / «Ocultar»: dentro del campo, a la derecha; aria-pressed dice si se ve lo escrito. */
+.contrasena-caja{position:relative}
+.contrasena-caja > .control{padding-right:var(--e-11)}
+.contrasena-ver{position:absolute;top:var(--b-1);right:var(--b-1);bottom:var(--b-1);min-width:var(--objetivo-min);padding:0 var(--e-3);background:transparent;border:0;border-radius:var(--r-ctrl);font:inherit;font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--azul);cursor:pointer}
 
 /* Redes sociales de la Secretaría: íconos de 44 px con nombre accesible, la
    única fila de íconos sin texto del paquete (FRM-72). */
@@ -663,7 +665,8 @@ a{color:var(--azul)}
 .redes-enlace{display:inline-flex;align-items:center;justify-content:center;width:var(--objetivo-min);height:var(--objetivo-min);border:var(--b-1) solid var(--borde);border-radius:var(--r-ctrl);color:var(--gris)}
 
 /* @bloque estados */
-.contrasena-ver[aria-pressed="true"]{font-weight:var(--peso-fuerte)}
+.contrasena-ver:hover{text-decoration:underline}
+.contrasena-ver:focus-visible{outline:var(--foco-ancho) solid var(--foco);outline-offset:calc(var(--foco-sep) * -1)}
 
 /* Foco: el MISMO anillo en todo el paquete y sobre cualquier fondo. Es la
    única regla de foco; los componentes no declaran la suya. [data-demo-foco]
@@ -727,7 +730,7 @@ a{color:var(--azul)}
   .fila > .campo,.fila-3 > .campo,.fila-2-1 > .campo{display:grid;grid-template-rows:subgrid;grid-row:span 4;gap:0;align-content:start}
   .etiqueta{grid-row:1}
   .ayuda{grid-row:2}
-  .control,.select,.control-grupo{grid-row:3}
+  .control,.select,.control-grupo,.contrasena-caja{grid-row:3}
   .err{grid-row:4}
 }
 
@@ -1263,7 +1266,10 @@ a{color:var(--azul)}
   font-size:var(--t-md);
 }
 .rev-dato-etq{padding:var(--e-2) var(--e-3) 0;background:var(--blanco);font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
-.rev-dato-valor{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--e-2);padding:0 var(--e-3) var(--e-2);background:var(--blanco);white-space:pre-wrap;word-break:break-word}
+.rev-dato-valor{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--e-2);padding:0 var(--e-3) var(--e-2);background:var(--blanco);white-space:pre-wrap;word-break:break-word}
+/* Con un valor largo, el valor se parte en renglones y «Editar» se queda a su lado, arriba. */
+.rev-dato-valor > span{flex:1 1 auto;min-width:0}
+.rev-dato-valor > .btn-enlace{flex:none}
 
 /* @bloque estados */
 
@@ -1290,7 +1296,8 @@ a{color:var(--azul)}
 
 /* @bloque componentes */
 
-.acuse{padding:var(--e-4) 0;text-align:center}
+/* Sólo arriba y abajo: el relleno lateral es el de la tarjeta; sin él, en teléfono los botones quedaban pegados a la orilla. */
+.acuse{padding-top:var(--e-4);padding-bottom:var(--e-4);text-align:center}
 .acuse-marca{
   display:flex;
   align-items:center;
@@ -1894,6 +1901,11 @@ a{color:var(--azul)}
 /* @bloque estados */
 
 .zona-carga:hover,.zona-carga[data-encima]{background:var(--azul-cl);border-color:var(--azul)}
+/* Archivo listo: verde, con el estado escrito; no sólo con color. */
+.arch[data-estado="listo"]{border-color:var(--ok);background:var(--ok-bg)}
+.arch[data-estado="listo"] .arch-estado{color:var(--ok-txt)}
+/* Con el máximo cargado no se ofrece «Elegir archivo» ni la cámara; vuelven al quitar uno. */
+[data-archivos][data-lleno] .zona-carga,[data-archivos][data-lleno] .zona-camara{display:none}
 .arch[data-estado="error"]{border-color:var(--error);background:var(--error-bg)}
 .arch[data-estado="error"] .arch-estado{color:var(--error-txt)}
 .arch[data-estado="procesando"] .arch-estado{color:var(--azul)}

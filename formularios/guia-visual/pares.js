@@ -419,5 +419,12 @@ window.GUIA_PARES = [
   "fondo": "--beige",
   "minimo": 4.5,
   "donde": "Distintivo de versión de un sitio de prueba"
+ },
+ {
+  "id": "C41",
+  "texto": "--texto",
+  "fondo": "--ok-bg",
+  "minimo": 4.5,
+  "donde": "Nombre de un archivo listo (su estado va en --ok-txt, C27)"
  }
 ];

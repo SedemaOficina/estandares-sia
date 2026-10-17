@@ -38,8 +38,8 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.6 KB |
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
 | `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.7 KB |
-| `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.1 KB | 3.2 KB |
-| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.8 KB | 3.4 KB |
+| `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.3 KB | 3.2 KB |
+| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.9 KB | 3.4 KB |
 | `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 1.7 KB | 4.0 KB |
 | `copiar` | Copiar y compartir | RECOMENDADO | retroalimentacion | — | 542 B | 4.0 KB |
 | `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 3.3 KB |
@@ -51,7 +51,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
 | `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.2 KB | 5.0 KB |
-| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 2.6 KB | 18.7 KB |
+| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.0 KB | 19.5 KB |
 | `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.3 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
@@ -269,10 +269,11 @@ Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el camp
 **Errores frecuentes que evita.**
 - «Editar» que lleva al inicio del paso.
 - Mostrar campos ocultos por condicional.
+- «Editar» que baja de renglón con un valor largo.
 
 ### Acuse y «qué sigue» (`acuse`) · RECOMENDADO
 
-Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descarga opcional y pantalla de límite de envíos.
+Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones).
 
 **Cuándo.** Todo envío que genere folio.
 
@@ -290,6 +291,8 @@ Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descar
 - Prometer plazos que el sistema no controla.
 - Folio con aspecto de botón.
 - No borrar el borrador al recibir.
+- Acuse sin una acción para seguir.
+- Quitarle el relleno lateral a la tarjeta del acuse: en teléfono los botones quedan pegados a la orilla.
 
 ### Diálogo y confirmación (`modal`) · RECOMENDADO
 
@@ -532,12 +535,13 @@ Zona de carga (botón real + arrastre), cámara en móvil, validación por exten
 
 **En teléfono.** Botón de cámara con capture (environment para evidencias; user para una fotografía de frente); vista previa de 96 px; con un solo archivo, los textos en singular.
 
-**En escritorio.** Arrastrar y soltar; guardia global de drop.
+**En escritorio.** Arrastrar y soltar; guardia global de drop. Con el máximo cargado no se ofrece «Elegir archivo»; el archivo listo se ve en verde.
 
 **Errores frecuentes que evita.**
 - Validar sólo por extensión.
 - Medir el peso antes de optimizar.
 - Enviar la ubicación de la foto sin que la persona lo sepa.
+- Dejar «Elegir archivo» a la vista con el máximo ya cargado: la persona cree que no subió nada.
 
 ### Visor de documentos (`visor`) · OPCIONAL
 

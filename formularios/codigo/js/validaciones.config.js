@@ -489,7 +489,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.2.0',
+    version: '1.2.1',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -535,7 +535,9 @@
       pasoHecho: 'completado',
       pasoError: 'con errores',
       palabraObligatorio: 'obligatorio',
-      contrasenaMostrar: 'Mostrar contraseña',
+      contrasenaMostrar: 'Mostrar',
+      contrasenaOcultar: 'Ocultar',
+      contrasenaLector: ' la contraseña',
       palabraSi: 'Sí',
       palabraNo: 'No',
       sinValor: 'No indicado',
@@ -565,8 +567,12 @@
       archRechazoDuplicado: 'ya adjuntaste ese mismo archivo.',
       archRechazoDimension: 'la imagen es demasiado pequeña (mínimo {ancho} × {alto} píxeles).',
       archRechazoOptimizada: 'aun optimizada pesa {peso} y el máximo es {mb} MB.',
-      archLimite: 'Formatos admitidos: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
-      archLimiteUno: 'Formatos admitidos: {formatos}. Un archivo de hasta {mb} MB.',
+      archLimite: '{admitidos}: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
+      archLimiteUno: '{admitidos}: {formatos}. Un archivo de hasta {mb} MB.',
+      archFormatos: 'Formatos admitidos',
+      archFormato: 'Formato admitido',
+      archLleno: 'Ya adjuntaste los {max} archivos. Para cambiar uno, quítalo.',
+      archLlenoUno: 'Ya adjuntaste el archivo. Para cambiarlo, quítalo.',
       archAgregado: 'Se agregó {nombre}.',
       archQuitado: 'Se quitó {nombre}.',
       archReintentar: 'Reintentar',

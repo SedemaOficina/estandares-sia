@@ -292,8 +292,10 @@
 /* Anuncio de estado de envío (error de red, plazo vencido): recibe el foco. */
 .estado-envio{margin-top:var(--e-4)}
 
-/* «Mostrar contraseña»: debajo del control; aria-pressed dice si se ve lo escrito. */
-.contrasena-ver{margin-top:var(--e-1)}
+/* «Mostrar» / «Ocultar»: dentro del campo, a la derecha; aria-pressed dice si se ve lo escrito. */
+.contrasena-caja{position:relative}
+.contrasena-caja > .control{padding-right:var(--e-11)}
+.contrasena-ver{position:absolute;top:var(--b-1);right:var(--b-1);bottom:var(--b-1);min-width:var(--objetivo-min);padding:0 var(--e-3);background:transparent;border:0;border-radius:var(--r-ctrl);font:inherit;font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--azul);cursor:pointer}
 
 /* Redes sociales de la Secretaría: íconos de 44 px con nombre accesible, la
    única fila de íconos sin texto del paquete (FRM-72). */
@@ -301,7 +303,8 @@
 .redes-enlace{display:inline-flex;align-items:center;justify-content:center;width:var(--objetivo-min);height:var(--objetivo-min);border:var(--b-1) solid var(--borde);border-radius:var(--r-ctrl);color:var(--gris)}
 
 /* @bloque estados */
-.contrasena-ver[aria-pressed="true"]{font-weight:var(--peso-fuerte)}
+.contrasena-ver:hover{text-decoration:underline}
+.contrasena-ver:focus-visible{outline:var(--foco-ancho) solid var(--foco);outline-offset:calc(var(--foco-sep) * -1)}
 
 /* Foco: el MISMO anillo en todo el paquete y sobre cualquier fondo. Es la
    única regla de foco; los componentes no declaran la suya. [data-demo-foco]
@@ -365,7 +368,7 @@
   .fila > .campo,.fila-3 > .campo,.fila-2-1 > .campo{display:grid;grid-template-rows:subgrid;grid-row:span 4;gap:0;align-content:start}
   .etiqueta{grid-row:1}
   .ayuda{grid-row:2}
-  .control,.select,.control-grupo{grid-row:3}
+  .control,.select,.control-grupo,.contrasena-caja{grid-row:3}
   .err{grid-row:4}
 }
 

@@ -248,6 +248,19 @@
           li.appendChild(q);
           ul.appendChild(li);
         });
+        /* Con el máximo ya cargado, «Elegir archivo» y la cámara se ocultan (data-lleno): a la vista,
+           la persona creía que no había subido nada. Vuelven al quitar un archivo. */
+        const cont = $('[data-archivos]', el);
+        const c = configDe(el);
+        const lleno = lista.filter((x) => x.estado !== 'error').length >= c.max;
+        if (cont && cont.hasAttribute('data-lleno') !== lleno) {
+          const conFoco = cont.contains(document.activeElement) && document.activeElement.matches('.zona-carga,[data-camara]');
+          cont.toggleAttribute('data-lleno', lleno);
+          if (lleno) {
+            anuncia(plantilla(c.max === 1 ? M.archLlenoUno : M.archLleno, { max: c.max }));
+            if (conFoco) { const q = $$('.arch-quitar', ul).pop(); if (q) q.focus(); }
+          }
+        }
       }
 
       for (const cont of $$('[data-archivos]', form)) {
@@ -261,7 +274,8 @@
         const lim = $('[data-limite-texto]', cont);
         entrada.accept = c.extensiones.map((e) => `.${e}`).join(',');
         entrada.multiple = c.max > 1;
-        if (lim) lim.textContent = plantilla(c.max === 1 ? M.archLimiteUno : M.archLimite, { formatos: formatosTxt(c), max: c.max, mb: c.mb });
+        const fmts = formatosTxt(c);
+        if (lim) lim.textContent = plantilla(c.max === 1 ? M.archLimiteUno : M.archLimite, { admitidos: fmts.includes(',') ? M.archFormatos : M.archFormato, formatos: fmts, max: c.max, mb: c.mb });
         const etq = $('.etiqueta', el);
         if (etq) { etq.id = etq.id || ctx.idUnico(`et-${el.dataset.campo}`); const zt = $('.zona-carga-texto', zona); if (zt) zt.id = zt.id || ctx.idUnico(`zt-${el.dataset.campo}`); zona.setAttribute('aria-labelledby', `${etq.id}${zt ? ` ${zt.id}` : ''}`); }
         /* La cámara se ofrece sólo donde existe: teléfonos y tabletas con puntero grueso. */

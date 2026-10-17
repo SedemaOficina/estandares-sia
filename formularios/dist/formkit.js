@@ -491,7 +491,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.2.0',
+    version: '1.2.1',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -537,7 +537,9 @@
       pasoHecho: 'completado',
       pasoError: 'con errores',
       palabraObligatorio: 'obligatorio',
-      contrasenaMostrar: 'Mostrar contraseña',
+      contrasenaMostrar: 'Mostrar',
+      contrasenaOcultar: 'Ocultar',
+      contrasenaLector: ' la contraseña',
       palabraSi: 'Sí',
       palabraNo: 'No',
       sinValor: 'No indicado',
@@ -567,8 +569,12 @@
       archRechazoDuplicado: 'ya adjuntaste ese mismo archivo.',
       archRechazoDimension: 'la imagen es demasiado pequeña (mínimo {ancho} × {alto} píxeles).',
       archRechazoOptimizada: 'aun optimizada pesa {peso} y el máximo es {mb} MB.',
-      archLimite: 'Formatos admitidos: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
-      archLimiteUno: 'Formatos admitidos: {formatos}. Un archivo de hasta {mb} MB.',
+      archLimite: '{admitidos}: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
+      archLimiteUno: '{admitidos}: {formatos}. Un archivo de hasta {mb} MB.',
+      archFormatos: 'Formatos admitidos',
+      archFormato: 'Formato admitido',
+      archLleno: 'Ya adjuntaste los {max} archivos. Para cambiar uno, quítalo.',
+      archLlenoUno: 'Ya adjuntaste el archivo. Para cambiarlo, quítalo.',
       archAgregado: 'Se agregó {nombre}.',
       archQuitado: 'Se quitó {nombre}.',
       archReintentar: 'Reintentar',
@@ -614,7 +620,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.1
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -905,18 +911,24 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       const ctl = controlPrincipal(n);
       if (ctl && el.dataset.formato === 'fecha' && el.hasAttribute('data-no-futura') && !ctl.max) ctl.max = cfg.hoyISO();
 
-      /* Contraseña: botón «Mostrar contraseña» (aria-pressed) para ver lo
-         escrito; se omite con data-sin-mostrar en el campo. */
+      /* Contraseña: botón «Mostrar» / «Ocultar» dentro del campo, a la derecha
+         (aria-pressed), para revisar lo escrito; el control va en
+         .contrasena-caja, que en una .fila ocupa el renglón del control. Se
+         omite con data-sin-mostrar en el campo. */
       if (ctl && ctl.type === 'password' && !el.hasAttribute('data-sin-mostrar') && !$('[data-ver-contrasena]', el)) {
         if (!ctl.id) ctl.id = idUnico(`c-${n}`);
+        let caja = ctl.closest('.contrasena-caja');
+        if (!caja) { caja = document.createElement('div'); caja.className = 'contrasena-caja'; ctl.replaceWith(caja); caja.appendChild(ctl); }
         const ver = document.createElement('button');
         ver.type = 'button';
-        ver.className = 'btn-enlace contrasena-ver';
+        ver.className = 'contrasena-ver';
         ver.dataset.verContrasena = '';
         ver.setAttribute('aria-pressed', 'false');
         ver.setAttribute('aria-controls', ctl.id);
-        ver.textContent = M.contrasenaMostrar;
-        ctl.insertAdjacentElement('afterend', ver);
+        const t = document.createElement('span'); t.dataset.verTexto = ''; t.textContent = M.contrasenaMostrar;
+        const lector = document.createElement('span'); lector.className = 'solo-lector'; lector.textContent = M.contrasenaLector;
+        ver.append(t, lector);
+        caja.appendChild(ver);
       }
 
       /* Texto largo: contador y crecimiento automático. */
@@ -1313,6 +1325,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     function botonEnviar() { return $('[data-accion="enviar"],button[type="submit"]', form); }
 
     async function enviar() {
+      /* Al enviar, la contraseña vuelve a ocultarse: que el navegador no la guarde ni la muestre como texto. */
+      for (const b of $$('[data-ver-contrasena][aria-pressed="true"]', form)) verContrasena(b, false);
       /* Un módulo (pasos) puede validar por su cuenta; si devuelve null, el formulario no es suyo. */
       const porModulo = FormKit.ganchos.validaTodo ? FormKit.ganchos.validaTodo(form) : null;
       const fallos = porModulo || validaContenedor(form);
@@ -1367,13 +1381,19 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       }
     }
 
+    /* Muestra u oculta la contraseña: tipo del control, texto del botón y aria-pressed. */
+    function verContrasena(b, ver) {
+      const c = document.getElementById(b.getAttribute('aria-controls'));
+      if (!c) return;
+      c.type = ver ? 'text' : 'password';
+      b.setAttribute('aria-pressed', String(ver));
+      const t = $('[data-ver-texto]', b);
+      if (t) t.textContent = ver ? M.contrasenaOcultar : M.contrasenaMostrar;
+    }
+
     form.addEventListener('click', (e) => {
       const ver = e.target.closest('[data-ver-contrasena]');
-      if (ver && form.contains(ver)) {
-        const c = document.getElementById(ver.getAttribute('aria-controls'));
-        if (c) { const mostrar = c.type === 'password'; c.type = mostrar ? 'text' : 'password'; ver.setAttribute('aria-pressed', String(mostrar)); }
-        return;
-      }
+      if (ver && form.contains(ver)) { verContrasena(ver, ver.getAttribute('aria-pressed') !== 'true'); return; }
       const b = e.target.closest('[data-ir-campo],[data-accion="enviar"],[aria-disabled="true"]');
       if (!b || !form.contains(b)) return;
       if (b.getAttribute('aria-disabled') === 'true') { e.preventDefault(); e.stopImmediatePropagation(); return; }
@@ -3233,6 +3253,19 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           li.appendChild(q);
           ul.appendChild(li);
         });
+        /* Con el máximo ya cargado, «Elegir archivo» y la cámara se ocultan (data-lleno): a la vista,
+           la persona creía que no había subido nada. Vuelven al quitar un archivo. */
+        const cont = $('[data-archivos]', el);
+        const c = configDe(el);
+        const lleno = lista.filter((x) => x.estado !== 'error').length >= c.max;
+        if (cont && cont.hasAttribute('data-lleno') !== lleno) {
+          const conFoco = cont.contains(document.activeElement) && document.activeElement.matches('.zona-carga,[data-camara]');
+          cont.toggleAttribute('data-lleno', lleno);
+          if (lleno) {
+            anuncia(plantilla(c.max === 1 ? M.archLlenoUno : M.archLleno, { max: c.max }));
+            if (conFoco) { const q = $$('.arch-quitar', ul).pop(); if (q) q.focus(); }
+          }
+        }
       }
 
       for (const cont of $$('[data-archivos]', form)) {
@@ -3246,7 +3279,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const lim = $('[data-limite-texto]', cont);
         entrada.accept = c.extensiones.map((e) => `.${e}`).join(',');
         entrada.multiple = c.max > 1;
-        if (lim) lim.textContent = plantilla(c.max === 1 ? M.archLimiteUno : M.archLimite, { formatos: formatosTxt(c), max: c.max, mb: c.mb });
+        const fmts = formatosTxt(c);
+        if (lim) lim.textContent = plantilla(c.max === 1 ? M.archLimiteUno : M.archLimite, { admitidos: fmts.includes(',') ? M.archFormatos : M.archFormato, formatos: fmts, max: c.max, mb: c.mb });
         const etq = $('.etiqueta', el);
         if (etq) { etq.id = etq.id || ctx.idUnico(`et-${el.dataset.campo}`); const zt = $('.zona-carga-texto', zona); if (zt) zt.id = zt.id || ctx.idUnico(`zt-${el.dataset.campo}`); zona.setAttribute('aria-labelledby', `${etq.id}${zt ? ` ${zt.id}` : ''}`); }
         /* La cámara se ofrece sólo donde existe: teléfonos y tabletas con puntero grueso. */
