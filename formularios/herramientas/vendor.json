@@ -6,7 +6,10 @@
       "version": "1.9.4",
       "licencia": "BSD-2-Clause",
       "uso": "Mapa de ubicación (sólo cuando el formulario pide un punto): lo usa el módulo «mapa» (codigo/modulos/mapa). El mapa base (teselas) se declara en FORMKIT_CONFIG.mapa.",
-      "archivos": ["dist/leaflet.js", "dist/leaflet.css"],
+      "archivos": [
+        "dist/leaflet.js",
+        "dist/leaflet.css"
+      ],
       "archivoLicencia": "LICENSE"
     },
     {
@@ -14,7 +17,24 @@
       "version": "1.2.2",
       "licencia": "MIT",
       "uso": "Evita que el mapa atrape el desplazamiento de la página en el teléfono.",
-      "archivos": ["dist/leaflet-gesture-handling.min.js", "dist/leaflet-gesture-handling.min.css"],
+      "archivos": [
+        "dist/leaflet-gesture-handling.min.js",
+        "dist/leaflet-gesture-handling.min.css"
+      ],
+      "archivoLicencia": "LICENSE"
+    },
+    {
+      "paquete": "pdfjs-dist",
+      "version": "4.10.38",
+      "licencia": "Apache-2.0",
+      "uso": "Visor de documentos (módulo «visor»): pinta las hojas de un PDF en el navegador. Se carga sólo al abrir el primer documento. Versión 4.2.67 o posterior: corrige la ejecución de código desde un PDF malicioso.",
+      "archivos": [
+        "build/pdf.min.mjs",
+        "build/pdf.worker.min.mjs"
+      ],
+      "carpetas": [
+        "standard_fonts"
+      ],
       "archivoLicencia": "LICENSE"
     },
     {
@@ -22,7 +42,9 @@
       "version": "4.13.0",
       "licencia": "MPL-2.0",
       "uso": "Sólo verificación (pruebas/accesibilidad.prueba.mjs). No viaja al sitio publicado.",
-      "archivos": ["axe.min.js"],
+      "archivos": [
+        "axe.min.js"
+      ],
       "archivoLicencia": "LICENSE"
     }
   ]

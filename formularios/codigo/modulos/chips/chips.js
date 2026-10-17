@@ -14,14 +14,57 @@
 
    Contrato HTML: data-chips en el [data-campo]. El aviso de privacidad del
    formulario debe mencionar que se guardan sugerencias en el dispositivo.
+
+   Respuestas frecuentes fijas: data-chips-fijos="Texto uno|Texto dos" en el
+   [data-campo] muestra siempre esa lista (por ejemplo, los motivos para
+   observar un documento). No guarda nada en el dispositivo, así que sirve
+   también en datos personales. En un texto largo, el chip agrega su texto
+   al final («… Falta una página.») para que la persona lo complete; en un
+   campo corto, lo pone como respuesta.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('chips', {
-    selector: '[data-chips]',
+    selector: '[data-chips],[data-chips-fijos]',
     iniciar(form, ctx) {
       const { $$, cfg, M, plantilla, anuncia, almacen, controlPrincipal, valorDe, validaCampo, icono, programaBorrador } = ctx;
       const clave = (n) => `${cfg.chips.clave}:${form.dataset.borrador || form.id || 'form'}:${n}`;
+      const antesDelControl = (ctl, caja) => (ctl.closest('.select,.combo,.control-grupo,.fecha-grupo') || ctl).insertAdjacentElement('beforebegin', caja);
+
+      for (const campo of $$('[data-chips-fijos]', form)) {
+        const n = campo.dataset.campo;
+        const ctl = controlPrincipal(n);
+        const lista = campo.dataset.chipsFijos.split('|').map((t) => t.trim()).filter(Boolean);
+        if (!ctl || !lista.length) continue;
+        const largo = ctl.tagName === 'TEXTAREA';
+        const caja = document.createElement('div');
+        caja.className = 'chips chips-fijos';
+        caja.setAttribute('role', 'group');
+        caja.setAttribute('aria-label', plantilla(M.chipsFijos, { etiqueta: ctx.etiquetaDe(n).toLowerCase() }));
+        for (const t of lista) {
+          const b = document.createElement('button'); b.type = 'button'; b.className = 'chip chip-fijo'; b.dataset.chipFijo = t; b.textContent = t;
+          caja.appendChild(b);
+        }
+        antesDelControl(ctl, caja);
+        const marca = () => { if (!largo) for (const b of $$('[data-chip-fijo]', caja)) b.setAttribute('aria-pressed', String(valorDe(n) === b.dataset.chipFijo)); };
+        caja.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-chip-fijo]');
+          if (!b) return;
+          const t = b.dataset.chipFijo;
+          const previo = ctl.value.trim();
+          ctl.value = largo ? `${previo ? `${previo} ` : ''}${t}${/[.!?]$/.test(t) ? '' : '.'}` : t;
+          ctl.dispatchEvent(new Event('input', { bubbles: true }));
+          ctl.dispatchEvent(new Event('change', { bubbles: true }));
+          ctx.estadoDe(n).tocado = true;
+          ctx.validaYPinta(n);
+          marca();
+          anuncia(plantilla(M.chipsAgregado, { texto: t }));
+          if (largo) { ctl.focus(); ctl.setSelectionRange(ctl.value.length, ctl.value.length); }
+          programaBorrador();
+        });
+        ctl.addEventListener('input', marca);
+        marca();
+      }
 
       for (const campo of $$('[data-chips]', form)) {
         const n = campo.dataset.campo;
@@ -32,7 +75,7 @@
         caja.className = 'chips';
         caja.setAttribute('role', 'group');
         caja.setAttribute('aria-label', `Usados antes en ${ctx.etiquetaDe(n).toLowerCase()}`);
-        ctl.closest('.select,.combo,.control-grupo,.fecha-grupo') ? ctl.closest('.select,.combo,.control-grupo,.fecha-grupo').insertAdjacentElement('beforebegin', caja) : ctl.insertAdjacentElement('beforebegin', caja);
+        antesDelControl(ctl, caja);
 
         const lee = () => { try { return JSON.parse(almacen.lee(clave(n)) || '[]'); } catch (e) { return []; } };
         const escribe = (lista) => almacen.escribe(clave(n), JSON.stringify(lista.slice(0, cfg.chips.max)));

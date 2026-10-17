@@ -7,7 +7,7 @@
         node herramientas/vendor.mjs --verificar (sólo comprueba sumas)      */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,8 +35,9 @@ for (const b of config.bibliotecas) {
   const carpeta = join(DESTINO, b.paquete);
   mkdirSync(carpeta, { recursive: true });
   // --json da el nombre exacto del tarball; adivinarlo falla con paquetes con alcance (@x/y).
-  const tgz = JSON.parse(execFileSync('npm', ['pack', `${b.paquete}@${b.version}`, '--json'], { cwd: trabajo, encoding: 'utf8' }))[0].filename;
-  execFileSync('tar', ['-xzf', join(trabajo, tgz), '-C', trabajo]);
+  // En Windows npm es npm.cmd y sólo se puede lanzar con shell.
+  const tgz = JSON.parse(execFileSync('npm', ['pack', `${b.paquete}@${b.version}`, '--json'], { cwd: trabajo, encoding: 'utf8', shell: process.platform === 'win32' }))[0].filename;
+  execFileSync('tar', ['-xzf', tgz, '-C', '.'], { cwd: trabajo });
   const pkg = join(trabajo, 'package');
   const real = JSON.parse(readFileSync(join(pkg, 'package.json'), 'utf8'));
   if (real.version !== b.version) throw new Error(`${b.paquete}: se pidió ${b.version} y llegó ${real.version}`);
@@ -44,11 +45,20 @@ for (const b of config.bibliotecas) {
   if (licenciaReal !== b.licencia) throw new Error(`${b.paquete}: la licencia declarada (${b.licencia}) no coincide con la del paquete (${licenciaReal})`);
   const archivos = [...b.archivos, b.archivoLicencia].map((rel) => {
     const nombre = rel.split('/').pop();
-    cpSync(join(pkg, rel), join(carpeta, nombre));
+    copyFileSync(join(pkg, rel), join(carpeta, nombre)); // copyFileSync sobrescribe bien también en carpetas de OneDrive
     return { ruta: `${b.paquete}/${nombre}`, sha256: suma(join(carpeta, nombre)) };
   });
+  // Carpetas que la biblioteca lee por su nombre (las tipografías de pdf.js): se copian enteras, cada archivo con su suma.
+  for (const dir of b.carpetas || []) {
+    const nombres = readdirSync(join(pkg, dir)).filter((n) => statSync(join(pkg, dir, n)).isFile()).sort();
+    mkdirSync(join(carpeta, dir), { recursive: true });
+    for (const n of nombres) {
+      copyFileSync(join(pkg, dir, n), join(carpeta, dir, n));
+      archivos.push({ ruta: `${b.paquete}/${dir}/${n}`, sha256: suma(join(carpeta, dir, n)) });
+    }
+  }
   manifiesto.bibliotecas.push({ paquete: b.paquete, version: b.version, licencia: b.licencia, uso: b.uso, archivos });
-  execFileSync('rm', ['-rf', pkg]);
+  rmSync(pkg, { recursive: true, force: true });
   console.log(`✓ ${b.paquete}@${b.version} (${b.licencia})`);
 }
 writeFileSync(MANIFIESTO, JSON.stringify(manifiesto, null, 2) + '\n');

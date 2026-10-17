@@ -246,6 +246,26 @@ test('CURP contra nombre y apellidos: letras, partículas, MARÍA y JOSÉ, Ñ, p
   assert.ok(con({ apellido_materno: '' }).errores.some((x) => x.campo === 'curp' && /segundo apellido/.test(x.mensaje)), 'y un segundo apellido que falta');
 });
 
+test('servidor · fecha día/mes/año: variantes, fecha real, no futura y cruce con la CURP (P70)', () => {
+  const V = globalThis.FORMKIT_VALIDACIONES;
+  const f = V.formatos['fecha-dma'];
+  for (const x of ['23/07/1985', '23-7-1985', '23.07.1985', '23071985', '1985-07-23']) assert.equal(f.normaliza(x), '23/07/1985', `${x} se acomoda`);
+  assert.match(f.valida('31/02/1990', {}), /fecha real/);
+  assert.match(f.valida('01/01/1850', {}), /1900/);
+  assert.equal(V.guiaFechaDma('2371985'), '23/07/1985', 'escritura guiada');
+  assert.equal(V.guiaFechaDma('4'), '04/', 'un 4 sólo puede ser 04');
+  assert.equal(V.cruzadas['curp-fecha-dma'].valida({ curp: 'PEGJ900515HDFRRN09', fecha: '15/05/1990' }), '', 'la cruzada acepta día/mes/año');
+  assert.equal(V.cruzadas['curp-fecha'].valida({ curp: 'PEGJ900515HDFRRN09', fecha: '15/05/1990' }), '', 'y la de siempre también');
+  const e = esquemaDe(`<div class="campo" data-campo="curp" data-formato="curp" data-requerido data-uso="x."><label class="etiqueta" for="curp">CURP</label><input class="control" id="curp" name="curp"></div>
+<div class="campo" data-campo="nac" data-formato="fecha-dma" data-no-futura data-requerido data-uso="x." data-cruzada="curp-fecha-dma" data-cruzada-campos="curp=curp fecha=nac"><label class="etiqueta" for="nac">Fecha</label><input class="control" id="nac" name="nac" type="text" inputmode="numeric"></div>`);
+  const v = (nac) => validaPayload({ datos: { curp: 'PEGJ900515HDFRRN09', nac }, meta: META }, e);
+  const bueno = v('15051990');
+  assert.deepEqual(bueno.errores, [], JSON.stringify(bueno.errores));
+  assert.equal(bueno.datos.nac, '15/05/1990', 'el servidor la guarda como DD/MM/AAAA');
+  assert.ok(v('16/05/1990').errores.some((x) => x.campo === 'nac' && /no coincide/.test(x.mensaje)), 'cruce con la CURP en el servidor');
+  assert.ok(v('01/01/2999').errores.some((x) => x.campo === 'nac' && /posterior a hoy/.test(x.mensaje)), 'no futura en el servidor');
+});
+
 const herramienta = (nombre, args) => test(`herramientas · ${nombre}`, () => {
   const r = spawnSync(process.execPath, args, { cwd: RAIZ, encoding: 'utf8' });
   assert.equal(r.status, 0, (r.stdout + r.stderr).split('\n').slice(-30).join('\n'));

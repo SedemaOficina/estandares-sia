@@ -35,6 +35,44 @@
   const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
   const esFechaReal = (a, m, d) => { const f = new Date(Date.UTC(a, m - 1, d)); return f.getUTCFullYear() === a && f.getUTCMonth() === m - 1 && f.getUTCDate() === d; };
+
+  /* Fecha escrita como día/mes/año (formato «fecha-dma»): 23/07/1985,
+     23-07-1985, 23.07.1985, 23 07 1985 o 23071985; también AAAA-MM-DD, que es
+     lo que pone el autocompletado del navegador. */
+  function partesDma(v) {
+    const t = String(v || '').trim();
+    let m = t.match(/^(\d{1,2})\s*[/.\- ]\s*(\d{1,2})\s*[/.\- ]\s*(\d{4})$/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (m) return { d: Number(m[1]), m: Number(m[2]), a: Number(m[3]) };
+    m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? { d: Number(m[3]), m: Number(m[2]), a: Number(m[1]) } : null;
+  }
+  const dosCifras = (n) => String(n).padStart(2, '0');
+  /* «23/07/1985» → «1985-07-23»; '' si no es una fecha real. */
+  const isoDeDma = (v) => { const p = partesDma(v); return p && esFechaReal(p.a, p.m, p.d) ? `${p.a}-${dosCifras(p.m)}-${dosCifras(p.d)}` : ''; };
+  /* «1985-07-23» → «23/07/1985». */
+  const dmaDeIso = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
+  /* Escritura guiada, sin calendario: al completar el día pasa al mes y al
+     completar el mes pasa al año, poniendo las diagonales. Un primer dígito
+     que no puede empezar un día de dos cifras (4 a 9) o un mes (2 a 9) se
+     completa con cero: «4» → «04/». Una diagonal, punto, guion o espacio tras
+     un solo dígito también lo cierra: «3/» → «03/». */
+  function guiaFechaDma(texto) {
+    const seg = ['', '', ''];
+    const cerrado = [false, false];
+    let i = 0;
+    for (const c of String(texto)) {
+      if (/\d/.test(c)) {
+        if (i < 2 && cerrado[i]) i++;
+        if (i === 2) { if (seg[2].length < 4) seg[2] += c; continue; }
+        seg[i] += c;
+        if (seg[i].length === 1 && Number(c) > (i === 0 ? 3 : 1)) seg[i] = `0${c}`;
+        if (seg[i].length === 2) cerrado[i] = true;
+      } else if (/[/.\- ]/.test(c) && i < 2 && seg[i].length === 1) {
+        seg[i] = `0${seg[i]}`; cerrado[i] = true;
+      }
+    }
+    return seg[0] + (cerrado[0] ? '/' : '') + seg[1] + (cerrado[1] ? '/' : '') + seg[2];
+  }
   const hoyISO = () => {
     /* La fecha de «hoy» se toma en la zona horaria de la Ciudad de México,
        no en la del dispositivo: una persona que captura desde otro huso no
@@ -266,6 +304,21 @@
         return '';
       }
     },
+    'fecha-dma': {
+      descripcion: 'Fecha real escrita como día/mes/año (DD/MM/AAAA), sin calendario; para la fecha de nacimiento',
+      inputmode: 'numeric', autocomplete: 'off',
+      normaliza: (v) => { const iso = isoDeDma(v); return iso ? dmaDeIso(iso) : recorta(v); },
+      valida: (v, a = {}) => {
+        const iso = isoDeDma(v);
+        if (!iso) return 'Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985';
+        if (Number(iso.slice(0, 4)) < 1900) return 'Revisa el año: escribe los cuatro dígitos, de 1900 en adelante. Ejemplo: 1985';
+        /* En el navegador llega data-no-futura; en el servidor, max ya resuelto a hoy. */
+        const max = a.max || (a.noFutura !== undefined ? hoyISO() : '');
+        if (max && iso > max) return max === hoyISO() ? 'La fecha no puede ser posterior a hoy.' : `La fecha no puede ser posterior al ${dmaDeIso(max)}.`;
+        if (a.min && iso < a.min) return `La fecha no puede ser anterior al ${dmaDeIso(a.min)}.`;
+        return '';
+      }
+    },
     hora: {
       descripcion: 'Hora en formato de 24 horas',
       inputmode: 'numeric', autocomplete: 'off',
@@ -338,7 +391,8 @@
     'curp-fecha': {
       descripcion: 'La fecha de nacimiento coincide con la contenida en la CURP',
       campos: ['curp', 'fecha'], bloquea: true,
-      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === fecha ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
+      /* La fecha puede venir como AAAA-MM-DD (formato «fecha») o DD/MM/AAAA («fecha-dma»). */
+      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === (isoDeDma(fecha) || fecha) ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
     },
     'curp-sexo': {
       descripcion: 'El sexo declarado coincide con la posición 11 de la CURP',
@@ -409,6 +463,9 @@
     }
   };
 
+  /* «curp-fecha-dma»: el mismo cruce, con el nombre que usan los proyectos con fecha día/mes/año. */
+  CRUZADAS['curp-fecha-dma'] = { ...CRUZADAS['curp-fecha'], descripcion: 'La fecha de nacimiento (día/mes/año) coincide con la contenida en la CURP' };
+
   /* ---------- Archivos ---------- */
   const ARCHIVOS = {
     extensiones: ['jpg', 'jpeg', 'png', 'pdf'],
@@ -434,7 +491,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.1.0',
+    version: '1.2.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -453,6 +510,10 @@
     anuncios: { retardoMs: 50 },
     combo: { maxResultados: 8 },
     chips: { max: 5, clave: 'sia-chips' },
+    /* Visor de documentos: dónde está pdf.js (vacío: vendor/pdfjs-dist/ junto
+       al paquete), desde qué ancho queda fijo junto a lo que se revisa en lugar
+       de abrirse a pantalla completa, y la espera para repintar al cambiar el tamaño. */
+    visor: { pdfjs: '', fijoDesde: '(min-width: 1024px)', retardoMs: 250 },
     mensajes: {
       prefijoError: 'Error:',
       obligatorioTexto: 'Completa «{etiqueta}».',
@@ -530,11 +591,17 @@
       mapaFuera: 'El punto queda fuera del ámbito. Muévelo o escribe la dirección.',
       chipsBorrar: 'Borrar historial',
       chipsQuitar: 'Quitar {texto} de las sugerencias',
+      chipsFijos: 'Respuestas frecuentes para {etiqueta}',
+      chipsAgregado: 'Agregado: {texto}',
+      visorCargando: 'Cargando el documento…',
+      visorError: 'No se pudo mostrar el documento aquí. Ábrelo en otra pestaña con el enlace de arriba.',
+      visorNavegador: 'Se muestra con el visor del navegador. Si no lo ves completo, ábrelo en otra pestaña con el enlace de arriba.',
+      visorHoja: 'Hoja {n} de {total}',
       sesionExpira: 'Tu sesión terminará en {min} minutos. Guarda o continúa para mantenerla.'
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, isoDeDma, dmaDeIso, guiaFechaDma, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 
 
@@ -547,7 +614,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -1678,11 +1745,14 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    Para edad: data-deriva="edad=edad" en el campo de la fecha de nacimiento;
    el destino es un [data-campo] con <input readonly>. La edad nunca se
    escribe a mano: se calcula, también cuando la fecha viene de la CURP.
+   Para la fecha de nacimiento, sin calendario: data-formato="fecha-dma" en
+   un <input type="text" inputmode="numeric" maxlength="10">; se escribe
+   día/mes/año (23/07/1985) y la escritura se acomoda sola.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('fecha', {
-    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato="fecha"][data-deriva]',
+    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato="fecha"][data-deriva],[data-formato="fecha-dma"]',
     iniciar(form, ctx) {
       const { $, $$, cfg, M, anuncia, envoltura, controlPrincipal, validaYPinta, programaBorrador } = ctx;
 
@@ -1712,12 +1782,26 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
       /* Edad cumplida desde la fecha de nacimiento, con «hoy» de la Ciudad de
          México. Con una fecha vacía, incompleta o futura, la edad queda vacía. */
-      for (const campo of $$('[data-campo][data-formato="fecha"][data-deriva]', form)) {
+      /* Fecha día/mes/año (formato «fecha-dma»), sin calendario: la escritura
+         se acomoda sola (23 → 23/, 07 → 23/07/) mientras se escribe al final;
+         al borrar o al editar en medio no se mueve nada. Corre en el control,
+         antes de que el núcleo lea el valor. */
+      for (const campo of $$('[data-campo][data-formato="fecha-dma"]', form)) {
+        const ctl = controlPrincipal(campo.dataset.campo);
+        if (!ctl || ctl.tagName !== 'INPUT') continue;
+        ctl.addEventListener('input', (e) => {
+          if ((e.inputType && e.inputType.startsWith('delete')) || ctl.selectionStart !== ctl.value.length) return;
+          const v = cfg.guiaFechaDma(ctl.value);
+          if (v !== ctl.value) { ctl.value = v; ctl.setSelectionRange(v.length, v.length); }
+        });
+      }
+
+      for (const campo of $$('[data-campo][data-formato="fecha"][data-deriva],[data-campo][data-formato="fecha-dma"][data-deriva]', form)) {
         const ctl = controlPrincipal(campo.dataset.campo);
         const destinos = campo.dataset.deriva.split(/\s+/).filter((p) => p.startsWith('edad=')).map((p) => p.slice(5));
         if (!ctl || !destinos.length) continue;
         const calcula = () => {
-          const v = ctl.value;
+          const v = campo.dataset.formato === 'fecha-dma' ? cfg.isoDeDma(ctl.value) : ctl.value;
           const edad = /^\d{4}-\d{2}-\d{2}$/.test(v) && v <= cfg.hoyISO() ? String(cfg.edadEn(v, cfg.hoyISO())) : '';
           for (const d of destinos) {
             const c = controlPrincipal(d);
@@ -1833,7 +1917,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           const ctlDestino = envDestino && controlPrincipal(destino);
           if (!ctlDestino) continue;
           const bruto = datos[clave] || '';
-          const valor = clave === 'sexo' && ctlDestino.tagName !== 'SELECT' ? (textos[bruto] || bruto) : bruto;
+          /* La fecha de nacimiento va como el destino la pide: AAAA-MM-DD o, en «fecha-dma», DD/MM/AAAA. */
+          const valor = clave === 'sexo' && ctlDestino.tagName !== 'SELECT' ? (textos[bruto] || bruto)
+            : clave === 'fechaNacimiento' && envDestino.dataset.formato === 'fecha-dma' ? cfg.dmaDeIso(bruto) : bruto;
           if (ctlDestino.value !== valor) {
             ctlDestino.value = valor;
             ctlDestino.dispatchEvent(new Event('change', { bubbles: true }));
@@ -2841,8 +2927,14 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const ths = $$('thead th', tabla);
         const clave = marco.dataset.clave;
 
+        /* Un encabezado cuyo texto es sólo para el lector de pantalla (.solo-lector) no se muestra en teléfono. */
+        const soloLector = (th) => { const c = th.cloneNode(true); for (const s of $$('.solo-lector', c)) s.remove(); return !c.textContent.trim(); };
         function etiquetaCeldas() {
-          for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => { if (ths[i] && !td.dataset.etiqueta) td.dataset.etiqueta = ths[i].textContent.trim(); });
+          for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => {
+            if (!ths[i] || td.dataset.etiqueta) return;
+            td.dataset.etiqueta = ths[i].textContent.trim();
+            if (soloLector(ths[i])) td.dataset.etiquetaOculta = '';
+          });
           /* Acciones por fila: «Ver», no basta; «Ver solicitud 123» sí. */
           for (const tr of $$('tbody tr', tabla)) {
             const id = clave ? (tr.dataset[clave] || ($$('td', tr)[ths.findIndex((t) => t.textContent.trim().toLowerCase() === clave)] || {}).textContent) : '';
@@ -3193,6 +3285,241 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     }
   });
 }());
+
+
+/* ===== codigo/modulos/visor/visor.js ===== */
+/* =========================================================
+   visor.js · Módulo «visor» · nivel OPCIONAL
+
+   Visor de documentos para quien revisa lo que se cargó: muestra TODAS las
+   hojas de un PDF, una debajo de otra, con contador de hoja, acercar y
+   alejar, ajustar al ancho, girar y abrir en otra pestaña; también muestra
+   imágenes (JPEG, PNG). En computadora (FORMKIT_CONFIG.visor.fijoDesde,
+   1024 px) queda fijo junto a lo que se revisa, para decidir viendo el
+   documento; en pantallas más chicas se abre a pantalla completa como
+   diálogo (Escape cierra y el foco vuelve al botón que lo abrió).
+
+   Usa pdf.js (vendor/pdfjs-dist, sin CDN) y lo carga sólo al abrir el
+   primer PDF. Si no se puede cargar (por ejemplo, la página se abrió con
+   doble clic, sin servidor), muestra el documento con el visor del
+   navegador y lo dice.
+
+   Contrato HTML (el visor va junto a lo que se revisa, en .visor-area):
+     <div class="visor-area">
+       <div>… <button type="button" class="btn-enlace" data-visor-url="docs/ine.pdf"
+                 data-visor-titulo="Identificación oficial" data-visor-archivo="ine.pdf">Ver documento</button> …</div>
+       <dialog class="visor" data-visor aria-labelledby="visor-titulo">
+         <div class="visor-cabeza">
+           <div class="visor-nombre"><h3 class="visor-titulo" id="visor-titulo" data-visor-titulo>Documento</h3>
+             <p class="visor-archivo mono" data-visor-archivo></p></div>
+           <button type="button" class="btn-enlace visor-cerrar" data-visor-accion="cerrar">Cerrar</button>
+         </div>
+         <div class="visor-barra" role="toolbar" aria-label="Herramientas del visor">
+           <button type="button" class="btn btn-secundario" data-visor-accion="alejar" aria-label="Alejar"><span class="visor-paso" aria-hidden="true">−</span></button>
+           <output class="visor-zoom" data-visor-zoom aria-live="polite">100 %</output>
+           <button type="button" class="btn btn-secundario" data-visor-accion="acercar" aria-label="Acercar"><span class="visor-paso" aria-hidden="true">+</span></button>
+           <button type="button" class="btn btn-secundario" data-visor-accion="ajustar">Ajustar al ancho</button>
+           <button type="button" class="btn btn-secundario" data-visor-accion="girar">Girar</button>
+           <a class="btn-enlace visor-abrir" data-visor-abrir href="#" target="_blank" rel="noopener">Abrir en otra pestaña …</a>
+         </div>
+         <p class="visor-pagina" data-visor-pagina aria-live="polite"></p>
+         <p class="aviso visor-aviso" data-visor-aviso hidden></p>
+         <div class="visor-hojas" data-visor-hojas tabindex="0" aria-label="Hojas del documento"></div>
+         <p class="visor-nota" data-visor-nota hidden></p>
+       </dialog>
+     </div>
+   Desde código: FormKit.visor.abre({ url, titulo, archivo, tipo, nota }, boton).
+   Para una imagen sin extensión en la dirección (blob:), data-visor-tipo="image/png".
+   Tomado del sistema de acreditaciones (P67).
+   ========================================================= */
+(function (global) {
+  'use strict';
+  /* Acercamientos: la hoja de estilos da el ancho de cada uno (data-zoom), sin estilos en línea. */
+  const ZOOMS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+  const AJUSTAR = 2; /* 100 %: la hoja al ancho del visor */
+  /* La carpeta de pdf.js va junto al paquete: se deduce de dónde se cargó este
+     archivo (codigo/modulos/visor/visor.js o dist/formkit.js). */
+  const src = document.currentScript && document.currentScript.src;
+  const raiz = src && src.match(/^(.*\/)(?:codigo\/modulos\/visor\/visor|dist\/formkit)\.js(?:\?.*)?$/);
+  const PDFJS_JUNTO = raiz ? `${raiz[1]}vendor/pdfjs-dist/` : '';
+
+  let listo = false;
+  let pdfjs = null;
+  let d, hojas, aviso, contador, ancho, cfg, M;
+  let estado = { doc: null, imagen: false, url: '', zoom: AJUSTAR, giro: 0, tarea: 0 };
+  let origen = null;
+  let observador = null;
+
+  const base = () => { const r = cfg.visor.pdfjs || PDFJS_JUNTO || 'vendor/pdfjs-dist/'; return new URL(r.endsWith('/') ? r : `${r}/`, document.baseURI).href; };
+  const di = (texto) => { aviso.textContent = texto; aviso.hidden = !texto; };
+  const hoja = (n, total) => FormKit.utilidades.plantilla(M.visorHoja, { n, total });
+  const esImagen = (tipo, nombre) => /^image\//.test(tipo || '') || /\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(nombre || '');
+
+  function carga() {
+    if (pdfjs) return Promise.resolve(pdfjs);
+    return import(new URL('pdf.min.mjs', base()).href).then((m) => {
+      m.GlobalWorkerOptions.workerSrc = new URL('pdf.worker.min.mjs', base()).href;
+      pdfjs = m;
+      return m;
+    });
+  }
+
+  /* Pinta todas las hojas al ancho disponible por el acercamiento elegido. */
+  async function pinta() {
+    const tarea = ++estado.tarea;
+    const factor = ZOOMS[estado.zoom];
+    d.querySelector('[data-visor-zoom]').textContent = `${Math.round(factor * 100)} %`;
+    if (estado.imagen) {
+      hojas.dataset.zoom = String(Math.round(factor * 100));
+      const img = hojas.querySelector('img');
+      if (img) img.dataset.giro = String(estado.giro);
+      return;
+    }
+    const doc = estado.doc;
+    if (!doc) return;
+    const disponible = Math.max(hojas.clientWidth - 2 * parseFloat(getComputedStyle(hojas).paddingLeft || 0), 1);
+    const dpr = global.devicePixelRatio || 1;
+    const figuras = [];
+    for (let n = 1; n <= doc.numPages; n++) {
+      const pagina = await doc.getPage(n);
+      if (tarea !== estado.tarea) return; /* llegó otro documento u otro acercamiento */
+      const giro = (pagina.rotate + estado.giro) % 360;
+      const medida = pagina.getViewport({ scale: 1, rotation: giro });
+      const vista = pagina.getViewport({ scale: ((disponible * factor) / medida.width) * dpr, rotation: giro });
+      const lienzo = document.createElement('canvas');
+      lienzo.width = Math.floor(vista.width);
+      lienzo.height = Math.floor(vista.height);
+      lienzo.className = 'visor-lienzo';
+      lienzo.setAttribute('role', 'img');
+      lienzo.setAttribute('aria-label', hoja(n, doc.numPages));
+      const fig = document.createElement('figure');
+      fig.className = 'visor-hoja-pdf';
+      fig.dataset.hoja = String(n);
+      const pie = document.createElement('figcaption');
+      pie.className = 'visor-pie';
+      pie.textContent = hoja(n, doc.numPages);
+      fig.append(lienzo, pie);
+      figuras.push(fig);
+      await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport: vista }).promise;
+    }
+    if (tarea !== estado.tarea) return;
+    hojas.replaceChildren(...figuras);
+    hojas.dataset.zoom = String(Math.round(factor * 100));
+    observa();
+  }
+
+  /* Contador: la hoja que más se ve. */
+  function observa() {
+    if (observador) observador.disconnect();
+    const visibles = new Map();
+    observador = new IntersectionObserver((entradas) => {
+      if (!estado.doc) return;
+      for (const e of entradas) visibles.set(e.target.dataset.hoja, e.intersectionRatio);
+      const [h] = [...visibles.entries()].sort((a, b) => b[1] - a[1])[0] || ['1'];
+      contador.textContent = hoja(h, estado.doc.numPages);
+    }, { root: hojas, threshold: [0, 0.25, 0.5, 0.75, 1] });
+    for (const f of hojas.querySelectorAll('figure')) observador.observe(f);
+    contador.textContent = hoja(1, estado.doc.numPages);
+  }
+
+  /* En computadora queda abierto junto a lo que se revisa sin quitarle el foco a quien revisa (show() lo movería). */
+  function abreDialogo() {
+    if (ancho.matches) { if (!d.open) d.setAttribute('open', ''); } else if (!d.open) d.showModal();
+  }
+
+  /* Si pdf.js no se pudo cargar, el documento se muestra con el visor del navegador. */
+  function enNavegador(url, titulo) {
+    const marco = document.createElement('iframe');
+    marco.className = 'visor-marco';
+    marco.src = url;
+    marco.title = titulo;
+    hojas.replaceChildren(marco);
+    di(M.visorNavegador);
+  }
+
+  async function abre({ url, titulo = 'Documento', archivo = '', tipo = '', nota = '' }, boton) {
+    if (!prepara()) return;
+    origen = boton || null;
+    d.querySelector('[data-visor-titulo]').textContent = titulo;
+    d.querySelector('[data-visor-archivo]').textContent = archivo;
+    d.querySelector('[data-visor-abrir]').href = url;
+    const n = d.querySelector('[data-visor-nota]');
+    if (n) { n.textContent = nota; n.hidden = !nota; }
+    abreDialogo();
+    if (url === estado.url && (estado.doc || estado.imagen)) return;
+    if (observador) observador.disconnect();
+    estado = { doc: null, imagen: false, url, zoom: AJUSTAR, giro: 0, tarea: estado.tarea + 1 };
+    hojas.replaceChildren();
+    contador.textContent = '';
+    if (esImagen(tipo, archivo || url)) {
+      estado.imagen = true;
+      const img = document.createElement('img');
+      img.className = 'visor-lienzo visor-imagen';
+      img.alt = titulo;
+      img.src = url;
+      hojas.replaceChildren(img);
+      di('');
+      pinta();
+      return;
+    }
+    di(M.visorCargando);
+    let m;
+    try { m = await carga(); } catch (e) { if (estado.url === url) enNavegador(url, titulo); return; }
+    try {
+      const doc = await m.getDocument({ url, standardFontDataUrl: new URL('standard_fonts/', base()).href, isEvalSupported: false }).promise;
+      if (estado.url !== url) return;
+      estado.doc = doc;
+      di('');
+      await pinta();
+    } catch (e) {
+      if (estado.url === url) di(M.visorError);
+    }
+  }
+
+  function prepara() {
+    if (listo) return Boolean(d);
+    listo = true;
+    d = document.querySelector('[data-visor]');
+    if (!d) return false;
+    cfg = FormKit.config;
+    M = cfg.mensajes;
+    hojas = d.querySelector('[data-visor-hojas]');
+    aviso = d.querySelector('[data-visor-aviso]');
+    contador = d.querySelector('[data-visor-pagina]');
+    ancho = global.matchMedia(cfg.visor.fijoDesde);
+
+    /* Botones que abren un documento, en cualquier parte de la página. */
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-visor-url]');
+      if (!b) return;
+      e.preventDefault();
+      abre({ url: b.dataset.visorUrl, titulo: b.dataset.visorTitulo || b.textContent.trim(), archivo: b.dataset.visorArchivo || '', tipo: b.dataset.visorTipo || '' }, b);
+    });
+    /* Barra del visor. */
+    d.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-visor-accion]');
+      if (!b) return;
+      const a = b.dataset.visorAccion;
+      if (a === 'cerrar') { d.close(); return; }
+      if (!estado.doc && !estado.imagen) return;
+      if (a === 'acercar') estado.zoom = Math.min(estado.zoom + 1, ZOOMS.length - 1);
+      if (a === 'alejar') estado.zoom = Math.max(estado.zoom - 1, 0);
+      if (a === 'ajustar') estado.zoom = AJUSTAR;
+      if (a === 'girar') estado.giro = (estado.giro + 90) % 360;
+      pinta();
+    });
+    d.addEventListener('close', () => { if (origen && origen.focus) origen.focus(); });
+    /* Al pasar de computadora a pantalla chica (o al revés), el visor cambia de forma. */
+    ancho.addEventListener('change', () => { if (d.open) { d.close(); abreDialogo(); } });
+    let espera = 0;
+    global.addEventListener('resize', () => { clearTimeout(espera); espera = setTimeout(() => { if (d.open && estado.doc) pinta(); }, cfg.visor.retardoMs); });
+    return true;
+  }
+
+  FormKit.registra('visor', { selector: '[data-visor],[data-visor-url]', fueraDelFormulario: true, iniciar() { prepara(); } });
+  document.addEventListener('DOMContentLoaded', prepara);
+  FormKit.visor = { abre, enComputadora: () => prepara() && ancho.matches };
+}(window));
 
 
 /* ===== codigo/modulos/mapa/mapa.js ===== */
@@ -3613,14 +3940,57 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
    Contrato HTML: data-chips en el [data-campo]. El aviso de privacidad del
    formulario debe mencionar que se guardan sugerencias en el dispositivo.
+
+   Respuestas frecuentes fijas: data-chips-fijos="Texto uno|Texto dos" en el
+   [data-campo] muestra siempre esa lista (por ejemplo, los motivos para
+   observar un documento). No guarda nada en el dispositivo, así que sirve
+   también en datos personales. En un texto largo, el chip agrega su texto
+   al final («… Falta una página.») para que la persona lo complete; en un
+   campo corto, lo pone como respuesta.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('chips', {
-    selector: '[data-chips]',
+    selector: '[data-chips],[data-chips-fijos]',
     iniciar(form, ctx) {
       const { $$, cfg, M, plantilla, anuncia, almacen, controlPrincipal, valorDe, validaCampo, icono, programaBorrador } = ctx;
       const clave = (n) => `${cfg.chips.clave}:${form.dataset.borrador || form.id || 'form'}:${n}`;
+      const antesDelControl = (ctl, caja) => (ctl.closest('.select,.combo,.control-grupo,.fecha-grupo') || ctl).insertAdjacentElement('beforebegin', caja);
+
+      for (const campo of $$('[data-chips-fijos]', form)) {
+        const n = campo.dataset.campo;
+        const ctl = controlPrincipal(n);
+        const lista = campo.dataset.chipsFijos.split('|').map((t) => t.trim()).filter(Boolean);
+        if (!ctl || !lista.length) continue;
+        const largo = ctl.tagName === 'TEXTAREA';
+        const caja = document.createElement('div');
+        caja.className = 'chips chips-fijos';
+        caja.setAttribute('role', 'group');
+        caja.setAttribute('aria-label', plantilla(M.chipsFijos, { etiqueta: ctx.etiquetaDe(n).toLowerCase() }));
+        for (const t of lista) {
+          const b = document.createElement('button'); b.type = 'button'; b.className = 'chip chip-fijo'; b.dataset.chipFijo = t; b.textContent = t;
+          caja.appendChild(b);
+        }
+        antesDelControl(ctl, caja);
+        const marca = () => { if (!largo) for (const b of $$('[data-chip-fijo]', caja)) b.setAttribute('aria-pressed', String(valorDe(n) === b.dataset.chipFijo)); };
+        caja.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-chip-fijo]');
+          if (!b) return;
+          const t = b.dataset.chipFijo;
+          const previo = ctl.value.trim();
+          ctl.value = largo ? `${previo ? `${previo} ` : ''}${t}${/[.!?]$/.test(t) ? '' : '.'}` : t;
+          ctl.dispatchEvent(new Event('input', { bubbles: true }));
+          ctl.dispatchEvent(new Event('change', { bubbles: true }));
+          ctx.estadoDe(n).tocado = true;
+          ctx.validaYPinta(n);
+          marca();
+          anuncia(plantilla(M.chipsAgregado, { texto: t }));
+          if (largo) { ctl.focus(); ctl.setSelectionRange(ctl.value.length, ctl.value.length); }
+          programaBorrador();
+        });
+        ctl.addEventListener('input', marca);
+        marca();
+      }
 
       for (const campo of $$('[data-chips]', form)) {
         const n = campo.dataset.campo;
@@ -3631,7 +4001,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         caja.className = 'chips';
         caja.setAttribute('role', 'group');
         caja.setAttribute('aria-label', `Usados antes en ${ctx.etiquetaDe(n).toLowerCase()}`);
-        ctl.closest('.select,.combo,.control-grupo,.fecha-grupo') ? ctl.closest('.select,.combo,.control-grupo,.fecha-grupo').insertAdjacentElement('beforebegin', caja) : ctl.insertAdjacentElement('beforebegin', caja);
+        antesDelControl(ctl, caja);
 
         const lee = () => { try { return JSON.parse(almacen.lee(clave(n)) || '[]'); } catch (e) { return []; } };
         const escribe = (lista) => almacen.escribe(clave(n), JSON.stringify(lista.slice(0, cfg.chips.max)));

@@ -32,6 +32,7 @@
 <link rel="stylesheet" href="../codigo/modulos/archivos/archivos.css">
 <link rel="stylesheet" href="../codigo/modulos/chips/chips.css">
 <link rel="stylesheet" href="../codigo/modulos/version/version.css">
+<link rel="stylesheet" href="../codigo/modulos/visor/visor.css">
 <link rel="stylesheet" href="../vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="../vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.css">
 <link rel="stylesheet" href="../codigo/modulos/mapa/mapa.css">
@@ -103,6 +104,7 @@
           <label class="casilla"><input class="casilla-input" type="checkbox" name="repetibles" value="repetibles,modal"><span class="casilla-texto">tiene elementos repetibles («agregar otro»)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="escala" value="escala,opciones"><span class="casilla-texto">es una encuesta con escalas</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="interna" value="tabla,paginacion,pestanas,migas,chips,descarga,modal"><span class="casilla-texto">es una consulta o captura interna (tablas, paginación, pestañas, sugerencias)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="visor" value="visor"><span class="casilla-texto">sirve para revisar documentos cargados (visor de PDF e imágenes junto a la revisión)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="version" value="version"><span class="casilla-texto">muestra en pantalla qué versión del sitio es (distintivo de versión en el pie)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="terceros" value=""><span class="casilla-texto">captura datos de terceros (se desactiva el autocompletado en esos campos)</span></label>
         </form>
@@ -607,6 +609,37 @@
 <nav class="paginacion" data-paginacion data-total="312" data-pagina="2" data-tamano="20" data-tamanos="10,20,50" data-lista="#m_resultados" aria-label="Páginas de resultados (muestra)"></nav>
 </template>
 
+<template data-demo="visor">
+<!-- Visor de documentos. En computadora queda fijo a la derecha de lo que se revisa; en teléfono se abre a pantalla completa. Los documentos son ficticios. -->
+<div class="visor-area">
+  <div>
+    <p><button type="button" class="btn-enlace" data-visor-url="muestras/comprobante-muestra.pdf" data-visor-titulo="Comprobante de domicilio" data-visor-archivo="comprobante-muestra.pdf">Ver documento<span class="solo-lector">: Comprobante de domicilio</span></button> · PDF de dos hojas</p>
+    <p><button type="button" class="btn-enlace" data-visor-url="muestras/identificacion-muestra.png" data-visor-titulo="Identificación oficial" data-visor-archivo="identificacion-muestra.png">Ver documento<span class="solo-lector">: Identificación oficial</span></button> · imagen</p>
+  </div>
+  <dialog class="visor" data-visor aria-labelledby="visor-titulo">
+    <div class="visor-cabeza">
+      <div class="visor-nombre">
+        <h4 class="visor-titulo" id="visor-titulo" data-visor-titulo>Documento</h4>
+        <p class="visor-archivo mono" data-visor-archivo></p>
+      </div>
+      <button type="button" class="btn-enlace visor-cerrar" data-visor-accion="cerrar">Cerrar</button>
+    </div>
+    <div class="visor-barra" role="toolbar" aria-label="Herramientas del visor">
+      <button type="button" class="btn btn-secundario" data-visor-accion="alejar" aria-label="Alejar"><span class="visor-paso" aria-hidden="true">−</span></button>
+      <output class="visor-zoom" data-visor-zoom aria-live="polite">100 %</output>
+      <button type="button" class="btn btn-secundario" data-visor-accion="acercar" aria-label="Acercar"><span class="visor-paso" aria-hidden="true">+</span></button>
+      <button type="button" class="btn btn-secundario" data-visor-accion="ajustar">Ajustar al ancho</button>
+      <button type="button" class="btn btn-secundario" data-visor-accion="girar">Girar</button>
+      <a class="btn-enlace visor-abrir" data-visor-abrir href="#" target="_blank" rel="noopener">Abrir en otra pestaña<svg class="icono icono-sm" aria-hidden="true"><use href="#i-externo"></use></svg><span class="solo-lector"> (se abre en otra pestaña)</span></a>
+    </div>
+    <p class="visor-pagina" data-visor-pagina aria-live="polite"></p>
+    <p class="aviso visor-aviso" data-visor-aviso hidden></p>
+    <div class="visor-hojas" data-visor-hojas tabindex="0" aria-label="Hojas del documento"></div>
+    <p class="visor-nota" data-visor-nota hidden></p>
+  </dialog>
+</div>
+</template>
+
 <template data-demo="version">
 <!-- El distintivo va dentro del pie de la página (<footer class="pie">), fijo abajo a la izquierda. Aquí se ven los tres estados quietos, uno junto a otro; los textos son de muestra: el texto y el estado los pone el sitio. -->
 <footer class="guia-version-demo">
@@ -623,9 +656,11 @@
 <template data-demo="tabla">
 <div class="tabla-marco" data-tabla data-clave="folio">
   <table class="tabla"><caption class="tabla-titulo">Solicitudes (muestra)</caption>
-    <thead><tr><th scope="col" data-ordenable>Folio</th><th scope="col" data-ordenable>Título</th><th scope="col" data-ordenable>Fecha</th><th scope="col">Acciones</th></tr></thead>
+    <thead><tr><th scope="col" data-ordenable>Folio</th><th scope="col" data-ordenable>Título</th><th scope="col" data-ordenable>Fecha</th><th scope="col"><span class="solo-lector">Acciones</span></th></tr></thead>
     <tbody>
       <tr data-folio="EJ-001"><td>EJ-001</td><td>Árbol de prueba inclinado</td><td>2026-03-01</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
+      <!-- Fila oculta por un filtro: el rayado alterno cuenta sólo las filas visibles. -->
+      <tr data-folio="EJ-004" hidden><td>EJ-004</td><td>Fila filtrada de prueba</td><td>2026-02-01</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
       <tr data-folio="EJ-002"><td>EJ-002</td><td>Residuos de prueba</td><td>2026-02-10</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
       <tr data-folio="EJ-003"><td>EJ-003</td><td>Registro con un título muy largo que no cabe en una línea</td><td>2026-01-20</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
     </tbody>
@@ -849,10 +884,11 @@
 <template data-demo="bloque-nacimiento">
 <!-- Bloque «Fecha de nacimiento y edad», para cuando no se pide la CURP. Antes de usarlo, cambia data-uso y data-finalidad por el uso real en tu formulario (FRM-55). Si tu formulario exige una edad mínima o máxima, agrega a la fecha data-cruzada="edad" data-cruzada-campos="fecha=b_fn_fecha" y data-edad-min o data-edad-max. -->
 <div class="fila">
-  <div class="campo" data-campo="b_fn_fecha" data-formato="fecha" data-no-futura data-requerido data-sensible data-deriva="edad=b_fn_edad" data-uso="Conocer la edad de quien llena el formulario." data-finalidad="Identificar a la persona.">
+  <!-- Sin calendario (formato «fecha-dma»): la fecha de nacimiento se escribe día/mes/año y la escritura se acomoda sola. -->
+  <div class="campo" data-campo="b_fn_fecha" data-formato="fecha-dma" data-no-futura data-requerido data-sensible data-deriva="edad=b_fn_edad" data-uso="Conocer la edad de quien llena el formulario." data-finalidad="Identificar a la persona.">
     <label class="etiqueta" for="b_fn_fecha">Fecha de nacimiento</label>
-    <p class="ayuda">Como aparece en tu acta de nacimiento.</p>
-    <input class="control control-corto" id="b_fn_fecha" name="b_fn_fecha" type="date" autocomplete="bday">
+    <p class="ayuda">Día, mes y año, como en tu acta de nacimiento. Por ejemplo: 23/07/1985.</p>
+    <input class="control control-corto" id="b_fn_fecha" name="b_fn_fecha" type="text" inputmode="numeric" maxlength="10" autocomplete="bday">
   </div>
   <!-- autocomplete off: la edad no se escribe; se calcula con la fecha de nacimiento. -->
   <div class="campo" data-campo="b_fn_edad" data-formato="numero" data-sensible data-uso="Derivada de la fecha de nacimiento; no se pide por separado." data-finalidad="Identificar a la persona.">
@@ -891,6 +927,12 @@
 
 <template data-demo="chips">
 <div class="campo" data-campo="m_cat" data-requerido data-uso="Muestra." data-chips><label class="etiqueta" for="m_cat">Categoría (con sugerencias de uso frecuente)</label><p class="ayuda">Escribe un valor y sal del campo: aparece como sugerencia. El historial vive sólo en este dispositivo.</p><input class="control" id="m_cat" name="m_cat" type="text" maxlength="60" autocomplete="off"></div>
+<!-- Respuestas frecuentes fijas (data-chips-fijos): la misma lista siempre, sin guardar nada en el dispositivo. En un texto largo, cada chip agrega su texto al final para completarlo. -->
+<div class="campo" data-campo="m_observacion" data-uso="Muestra." data-chips-fijos="No se lee completo|Está vencido|No corresponde al requisito|Falta una página">
+  <label class="etiqueta" for="m_observacion">¿Qué debe corregir la persona? (con respuestas frecuentes fijas)</label>
+  <p class="ayuda">Elige un motivo frecuente y complétalo con tus palabras.</p>
+  <textarea class="control control-texto" id="m_observacion" name="m_observacion" rows="3" maxlength="400" autocomplete="off"></textarea>
+</div>
 </template>
 
 <script src="../codigo/js/validaciones.config.js"></script>
@@ -924,6 +966,7 @@
 <script src="../codigo/modulos/mapa/mapa.js"></script>
 <script src="../codigo/modulos/enlace-mapa/enlace-mapa.js"></script>
 <script src="../codigo/modulos/chips/chips.js"></script>
+<script src="../codigo/modulos/visor/visor.js"></script>
 <script src="../../guia-visual/pendientes.js"></script>
 <script src="guia.js"></script>
 </body>

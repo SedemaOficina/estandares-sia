@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const TYPES_CON_TECLADO = { email: 'email', tel: 'tel', number: 'numeric', date: '', time: '', url: 'url', search: '' };
-const INPUTMODE_POR_FORMATO = { cp: 'numeric', telefono: 'tel', correo: 'email', numero: 'decimal', coordenadas: 'decimal', fecha: '', hora: '' };
+const INPUTMODE_POR_FORMATO = { cp: 'numeric', telefono: 'tel', correo: 'email', numero: 'decimal', coordenadas: 'decimal', fecha: '', 'fecha-dma': 'numeric', hora: '' };
 const IDENTIDAD = /^(nombre|correo|telefono|curp|rfc)$/;
 const AUTOCOMPLETE_IDENTIDAD = /^(name|given-name|family-name|additional-name|email|tel|tel-national|street-address|address-line\d|postal-code|bday|sex|username)$/;
 

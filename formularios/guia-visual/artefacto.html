@@ -8,7 +8,7 @@
 <link rel="icon" href="data:,">
 <style data-origen="codigo\css\tokens.css">
 /* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -1729,6 +1729,8 @@ a{color:var(--azul)}
 .tabla td{display:flex;flex-wrap:wrap;gap:var(--e-1) var(--e-3);padding:var(--e-2) 0;border-bottom:var(--b-1) solid var(--linea);vertical-align:top}
 .tabla td:last-child{border-bottom:0}
 .tabla td::before{content:attr(data-etiqueta);flex:0 0 40%;font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
+/* Columna cuyo encabezado es sólo para el lector de pantalla (acciones): en teléfono tampoco se ve su rótulo. */
+.tabla td[data-etiqueta-oculta]::before{display:none}
 .tabla th{padding:var(--e-2) var(--e-3);background:var(--guinda);font-family:var(--fuente-titulo);font-size:var(--t-md);font-weight:var(--peso-fuerte);text-align:left;color:var(--blanco)}
 .tabla-orden{display:inline-flex;align-items:center;gap:var(--e-1);min-height:var(--objetivo-min);padding:0;background:none;border:0;font:inherit;color:inherit}
 .tabla-orden-icono{opacity:var(--op-inactivo);transition:transform var(--dur-rapida)}
@@ -1742,6 +1744,8 @@ a{color:var(--azul)}
 [aria-sort="ascending"] .tabla-orden-icono{opacity:1;transform:rotate(180deg)}
 [aria-sort="descending"] .tabla-orden-icono{opacity:1}
 .tabla[aria-busy="true"]{opacity:var(--op-inactivo)}
+/* Fila filtrada con [hidden]: «.tabla tr» declara display y le ganaría al atributo (FRM-69). */
+.tabla tr[hidden]{display:none}
 
 /* @bloque adaptaciones */
 
@@ -1751,7 +1755,8 @@ a{color:var(--azul)}
   .tabla tr{display:table-row;margin:0;padding:0;background:none;border:0;border-radius:0}
   .tabla td{display:table-cell;padding:var(--e-2) var(--e-3)}
   .tabla td::before{display:none}
-  .tabla tr:nth-child(even){background:var(--guinda-cl)}
+  /* Filas alternas contadas sólo entre las visibles: al filtrar con [hidden], el rayado no pierde el ritmo. */
+  .tabla tr:nth-child(even of :not([hidden])){background:var(--guinda-cl)}
 }
 
 </style>
@@ -1881,6 +1886,8 @@ a{color:var(--azul)}
   color:var(--texto);
 }
 .chip-texto{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Respuesta frecuente fija: sin «quitar», redonda de los dos lados y con su texto completo. */
+.chip-fijo{border-radius:var(--r-pill);text-align:left;cursor:pointer}
 .chip-quitar{
   display:inline-flex;
   align-items:center;
@@ -1959,6 +1966,74 @@ a{color:var(--azul)}
 
 @media print{
   .version-sia{position:static;display:inline-block;box-shadow:none}
+}
+
+</style>
+<style data-origen="codigo\modulos\visor\visor.css">
+/* =========================================================
+   visor.css · Módulo «visor» · nivel OPCIONAL
+   Visor de documentos: en teléfono, diálogo a pantalla completa; desde
+   1024 px, columna fija junto a lo que se revisa (.visor-area). Las hojas
+   del PDF van una debajo de otra; el acercamiento lo da data-zoom.
+   Depende de: nucleo.css. Bloques: componentes → estados → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.visor-area{display:grid;gap:var(--e-5)}
+.visor{
+  flex-direction:column;
+  gap:var(--e-2);
+  width:100%;
+  max-width:none;
+  height:100dvh;
+  max-height:none;
+  margin:0;
+  padding:var(--e-4);
+  background:var(--blanco);
+  border:0;
+  color:var(--texto);
+}
+.visor::backdrop{background:var(--velo)}
+.visor-cabeza{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--e-3)}
+.visor-nombre{min-width:0}
+.visor-titulo{margin:0;font-family:var(--fuente-titulo);font-size:var(--t-md);font-weight:var(--peso-semi);line-height:var(--interlineado-titulo);color:var(--guinda)}
+.visor-archivo{margin:0;font-size:var(--t-xs);color:var(--gris);overflow-wrap:anywhere}
+.visor-barra{display:flex;flex-wrap:wrap;align-items:center;gap:var(--e-2)}
+/* En la barra, los botones van a la medida de su texto, también en teléfono. */
+.visor-barra .btn{width:auto;min-width:var(--objetivo-min)}
+.visor-paso{font-size:var(--t-lg);line-height:var(--interlineado-compacto)}
+.visor-zoom{min-width:var(--e-9);font-size:var(--t-sm);font-variant-numeric:tabular-nums;text-align:center}
+.visor-abrir{display:inline-flex;align-items:center;gap:var(--e-1);margin-left:auto}
+.visor-pagina{margin:0;font-size:var(--t-sm);font-weight:var(--peso-medio);color:var(--gris)}
+.visor-hojas{flex:1 1 auto;min-height:0;overflow:auto;padding:var(--e-3);background:var(--linea);border-radius:var(--r-ctrl)}
+.visor-hoja-pdf{margin:0 0 var(--e-4)}
+.visor-lienzo{display:block;width:100%;height:auto;margin:0 auto;background:var(--blanco);box-shadow:var(--sombra-lista)}
+.visor-pie{margin-top:var(--e-1);font-size:var(--t-xs);text-align:center;color:var(--texto)}
+/* Visor del navegador, cuando pdf.js no se pudo cargar. */
+.visor-marco{display:block;width:100%;min-height:var(--alto-mapa);height:100%;background:var(--blanco);border:0}
+.visor-nota{margin:0;font-size:var(--t-xs)}
+
+/* @bloque estados */
+
+.visor[open]{display:flex}
+.visor-hojas:focus-visible{outline:var(--foco-ancho) solid var(--foco);outline-offset:var(--foco-sep)}
+.visor-hojas[data-zoom="50"] .visor-lienzo{width:50%}
+.visor-hojas[data-zoom="75"] .visor-lienzo{width:75%}
+.visor-hojas[data-zoom="125"] .visor-lienzo{width:125%}
+.visor-hojas[data-zoom="150"] .visor-lienzo{width:150%}
+.visor-hojas[data-zoom="200"] .visor-lienzo{width:200%}
+.visor-hojas[data-zoom="300"] .visor-lienzo{width:300%}
+.visor-imagen[data-giro="90"]{transform:rotate(90deg)}
+.visor-imagen[data-giro="180"]{transform:rotate(180deg)}
+.visor-imagen[data-giro="270"]{transform:rotate(270deg)}
+
+/* @bloque adaptaciones */
+
+@media (min-width:1024px){
+  .visor-area{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:start}
+  .visor{position:sticky;top:var(--e-3);height:calc(100dvh - var(--e-6));border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
+  .visor-cerrar{display:none}
 }
 
 </style>
@@ -2976,6 +3051,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
           <label class="casilla"><input class="casilla-input" type="checkbox" name="repetibles" value="repetibles,modal"><span class="casilla-texto">tiene elementos repetibles («agregar otro»)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="escala" value="escala,opciones"><span class="casilla-texto">es una encuesta con escalas</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="interna" value="tabla,paginacion,pestanas,migas,chips,descarga,modal"><span class="casilla-texto">es una consulta o captura interna (tablas, paginación, pestañas, sugerencias)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="visor" value="visor"><span class="casilla-texto">sirve para revisar documentos cargados (visor de PDF e imágenes junto a la revisión)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="version" value="version"><span class="casilla-texto">muestra en pantalla qué versión del sitio es (distintivo de versión en el pie)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="terceros" value=""><span class="casilla-texto">captura datos de terceros (se desactiva el autocompletado en esos campos)</span></label>
         </form>
@@ -3114,7 +3190,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <link rel=&quot;icon&quot; href=&quot;data:,&quot;>
 <!-- Núcleo (obligatorio) -->
 <style>/* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -5619,6 +5695,44 @@ window.FORMKIT_OPCIONES = {
   const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
   const esFechaReal = (a, m, d) => { const f = new Date(Date.UTC(a, m - 1, d)); return f.getUTCFullYear() === a &amp;&amp; f.getUTCMonth() === m - 1 &amp;&amp; f.getUTCDate() === d; };
+
+  /* Fecha escrita como día/mes/año (formato «fecha-dma»): 23/07/1985,
+     23-07-1985, 23.07.1985, 23 07 1985 o 23071985; también AAAA-MM-DD, que es
+     lo que pone el autocompletado del navegador. */
+  function partesDma(v) {
+    const t = String(v || '').trim();
+    let m = t.match(/^(\d{1,2})\s*[/.\- ]\s*(\d{1,2})\s*[/.\- ]\s*(\d{4})$/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (m) return { d: Number(m[1]), m: Number(m[2]), a: Number(m[3]) };
+    m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? { d: Number(m[3]), m: Number(m[2]), a: Number(m[1]) } : null;
+  }
+  const dosCifras = (n) => String(n).padStart(2, '0');
+  /* «23/07/1985» → «1985-07-23»; '' si no es una fecha real. */
+  const isoDeDma = (v) => { const p = partesDma(v); return p &amp;&amp; esFechaReal(p.a, p.m, p.d) ? `${p.a}-${dosCifras(p.m)}-${dosCifras(p.d)}` : ''; };
+  /* «1985-07-23» → «23/07/1985». */
+  const dmaDeIso = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
+  /* Escritura guiada, sin calendario: al completar el día pasa al mes y al
+     completar el mes pasa al año, poniendo las diagonales. Un primer dígito
+     que no puede empezar un día de dos cifras (4 a 9) o un mes (2 a 9) se
+     completa con cero: «4» → «04/». Una diagonal, punto, guion o espacio tras
+     un solo dígito también lo cierra: «3/» → «03/». */
+  function guiaFechaDma(texto) {
+    const seg = ['', '', ''];
+    const cerrado = [false, false];
+    let i = 0;
+    for (const c of String(texto)) {
+      if (/\d/.test(c)) {
+        if (i < 2 &amp;&amp; cerrado[i]) i++;
+        if (i === 2) { if (seg[2].length < 4) seg[2] += c; continue; }
+        seg[i] += c;
+        if (seg[i].length === 1 &amp;&amp; Number(c) > (i === 0 ? 3 : 1)) seg[i] = `0${c}`;
+        if (seg[i].length === 2) cerrado[i] = true;
+      } else if (/[/.\- ]/.test(c) &amp;&amp; i < 2 &amp;&amp; seg[i].length === 1) {
+        seg[i] = `0${seg[i]}`; cerrado[i] = true;
+      }
+    }
+    return seg[0] + (cerrado[0] ? '/' : '') + seg[1] + (cerrado[1] ? '/' : '') + seg[2];
+  }
   const hoyISO = () => {
     /* La fecha de «hoy» se toma en la zona horaria de la Ciudad de México,
        no en la del dispositivo: una persona que captura desde otro huso no
@@ -5850,6 +5964,21 @@ window.FORMKIT_OPCIONES = {
         return '';
       }
     },
+    'fecha-dma': {
+      descripcion: 'Fecha real escrita como día/mes/año (DD/MM/AAAA), sin calendario; para la fecha de nacimiento',
+      inputmode: 'numeric', autocomplete: 'off',
+      normaliza: (v) => { const iso = isoDeDma(v); return iso ? dmaDeIso(iso) : recorta(v); },
+      valida: (v, a = {}) => {
+        const iso = isoDeDma(v);
+        if (!iso) return 'Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985';
+        if (Number(iso.slice(0, 4)) < 1900) return 'Revisa el año: escribe los cuatro dígitos, de 1900 en adelante. Ejemplo: 1985';
+        /* En el navegador llega data-no-futura; en el servidor, max ya resuelto a hoy. */
+        const max = a.max || (a.noFutura !== undefined ? hoyISO() : '');
+        if (max &amp;&amp; iso > max) return max === hoyISO() ? 'La fecha no puede ser posterior a hoy.' : `La fecha no puede ser posterior al ${dmaDeIso(max)}.`;
+        if (a.min &amp;&amp; iso < a.min) return `La fecha no puede ser anterior al ${dmaDeIso(a.min)}.`;
+        return '';
+      }
+    },
     hora: {
       descripcion: 'Hora en formato de 24 horas',
       inputmode: 'numeric', autocomplete: 'off',
@@ -5922,7 +6051,8 @@ window.FORMKIT_OPCIONES = {
     'curp-fecha': {
       descripcion: 'La fecha de nacimiento coincide con la contenida en la CURP',
       campos: ['curp', 'fecha'], bloquea: true,
-      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === fecha ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
+      /* La fecha puede venir como AAAA-MM-DD (formato «fecha») o DD/MM/AAAA («fecha-dma»). */
+      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === (isoDeDma(fecha) || fecha) ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
     },
     'curp-sexo': {
       descripcion: 'El sexo declarado coincide con la posición 11 de la CURP',
@@ -5993,6 +6123,9 @@ window.FORMKIT_OPCIONES = {
     }
   };
 
+  /* «curp-fecha-dma»: el mismo cruce, con el nombre que usan los proyectos con fecha día/mes/año. */
+  CRUZADAS['curp-fecha-dma'] = { ...CRUZADAS['curp-fecha'], descripcion: 'La fecha de nacimiento (día/mes/año) coincide con la contenida en la CURP' };
+
   /* ---------- Archivos ---------- */
   const ARCHIVOS = {
     extensiones: ['jpg', 'jpeg', 'png', 'pdf'],
@@ -6018,7 +6151,7 @@ window.FORMKIT_OPCIONES = {
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.1.0',
+    version: '1.2.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -6037,6 +6170,10 @@ window.FORMKIT_OPCIONES = {
     anuncios: { retardoMs: 50 },
     combo: { maxResultados: 8 },
     chips: { max: 5, clave: 'sia-chips' },
+    /* Visor de documentos: dónde está pdf.js (vacío: vendor/pdfjs-dist/ junto
+       al paquete), desde qué ancho queda fijo junto a lo que se revisa en lugar
+       de abrirse a pantalla completa, y la espera para repintar al cambiar el tamaño. */
+    visor: { pdfjs: '', fijoDesde: '(min-width: 1024px)', retardoMs: 250 },
     mensajes: {
       prefijoError: 'Error:',
       obligatorioTexto: 'Completa «{etiqueta}».',
@@ -6114,11 +6251,17 @@ window.FORMKIT_OPCIONES = {
       mapaFuera: 'El punto queda fuera del ámbito. Muévelo o escribe la dirección.',
       chipsBorrar: 'Borrar historial',
       chipsQuitar: 'Quitar {texto} de las sugerencias',
+      chipsFijos: 'Respuestas frecuentes para {etiqueta}',
+      chipsAgregado: 'Agregado: {texto}',
+      visorCargando: 'Cargando el documento…',
+      visorError: 'No se pudo mostrar el documento aquí. Ábrelo en otra pestaña con el enlace de arriba.',
+      visorNavegador: 'Se muestra con el visor del navegador. Si no lo ves completo, ábrelo en otra pestaña con el enlace de arriba.',
+      visorHoja: 'Hoja {n} de {total}',
       sesionExpira: 'Tu sesión terminará en {min} minutos. Guarda o continúa para mantenerla.'
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, isoDeDma, dmaDeIso, guiaFechaDma, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 </script>
 <script>/* GENERADO por herramientas/construir.mjs desde codigo/iconos/sprite.svg. No se edita a mano.
@@ -6127,7 +6270,7 @@ window.FORMKIT_OPCIONES = {
 window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; hidden> <symbol id=\&quot;i-alerta\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3 2.5 20h19L12 3z\&quot;/><path d=\&quot;M12 9v5\&quot;/><path d=\&quot;M12 17.5h.01\&quot;/></symbol> <symbol id=\&quot;i-error\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v6\&quot;/><path d=\&quot;M12 16.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ok\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;m8 12.5 2.5 2.5L16 9.5\&quot;/></symbol> <symbol id=\&quot;i-info\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 11v6\&quot;/><path d=\&quot;M12 7.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ayuda\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7\&quot;/><path d=\&quot;M12 17h.01\&quot;/></symbol> <symbol id=\&quot;i-cerrar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 6 12 12\&quot;/><path d=\&quot;M18 6 6 18\&quot;/></symbol> <symbol id=\&quot;i-palomita\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m5 12.5 4.5 4.5L19 7.5\&quot;/></symbol> <symbol id=\&quot;i-flecha-izq\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M19 12H5\&quot;/><path d=\&quot;m11 6-6 6 6 6\&quot;/></symbol> <symbol id=\&quot;i-flecha-der\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M5 12h14\&quot;/><path d=\&quot;m13 6 6 6-6 6\&quot;/></symbol> <symbol id=\&quot;i-abajo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 9 6 6 6-6\&quot;/></symbol> <symbol id=\&quot;i-descarga\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 4v11\&quot;/><path d=\&quot;m7 10 5 5 5-5\&quot;/><path d=\&quot;M4 19h16\&quot;/></symbol> <symbol id=\&quot;i-copiar\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;9\&quot; y=\&quot;9\&quot; width=\&quot;11\&quot; height=\&quot;11\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M5 15V6a2 2 0 0 1 2-2h9\&quot;/></symbol> <symbol id=\&quot;i-compartir\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;18\&quot; cy=\&quot;5\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;6\&quot; cy=\&quot;12\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;18\&quot; cy=\&quot;19\&quot; r=\&quot;2.5\&quot;/><path d=\&quot;m8.3 10.8 7.4-4.6\&quot;/><path d=\&quot;m8.3 13.2 7.4 4.6\&quot;/></symbol> <symbol id=\&quot;i-eliminar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 7h16\&quot;/><path d=\&quot;M9 7V4h6v3\&quot;/><path d=\&quot;M6 7l1 13h10l1-13\&quot;/></symbol> <symbol id=\&quot;i-editar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 20h4l11-11-4-4L4 16v4z\&quot;/><path d=\&quot;m13 7 4 4\&quot;/></symbol> <symbol id=\&quot;i-ubicacion\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 21s-6-6.3-6-11a6 6 0 0 1 12 0c0 4.7-6 11-6 11z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;10\&quot; r=\&quot;2.2\&quot;/></symbol> <symbol id=\&quot;i-fecha\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;4\&quot; y=\&quot;5\&quot; width=\&quot;16\&quot; height=\&quot;15\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M4 10h16\&quot;/><path d=\&quot;M8 3v4\&quot;/><path d=\&quot;M16 3v4\&quot;/></symbol> <symbol id=\&quot;i-adjunto\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7L9.5 17a1.6 1.6 0 0 1-2.3-2.3L15 7\&quot;/></symbol> <symbol id=\&quot;i-camara\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 8h3l2-3h6l2 3h3v11H4z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;13\&quot; r=\&quot;3.5\&quot;/></symbol> <symbol id=\&quot;i-buscar\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;11\&quot; cy=\&quot;11\&quot; r=\&quot;6\&quot;/><path d=\&quot;m20 20-4.5-4.5\&quot;/></symbol> <symbol id=\&quot;i-mas\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 5v14\&quot;/><path d=\&quot;M5 12h14\&quot;/></symbol> <symbol id=\&quot;i-cargando\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3a9 9 0 1 0 9 9\&quot;/></symbol> <symbol id=\&quot;i-reloj\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v5l3 2\&quot;/></symbol> <symbol id=\&quot;i-externo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M14 4h6v6\&quot;/><path d=\&quot;M20 4 10 14\&quot;/><path d=\&quot;M19 14v5H5V5h5\&quot;/></symbol> <symbol id=\&quot;i-facebook\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.93 8.44-9.94Z\&quot;/></symbol> <symbol id=\&quot;i-x\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M17.53 3h3.03l-6.62 7.57L21.75 21h-6.09l-4.77-6.24L5.42 21H2.38l7.08-8.09L2.25 3h6.24l4.31 5.7L17.53 3Zm-1.07 16.17h1.68L7.62 4.73H5.82l10.64 14.44Z\&quot;/></symbol> <symbol id=\&quot;i-instagram\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.29a6.55 6.55 0 1 0 0 13.1 6.55 6.55 0 0 0 0-13.1Zm0 10.8a4.25 4.25 0 1 1 0-8.5 4.25 4.25 0 0 1 0 8.5Zm8.34-11.06a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z\&quot;/></symbol> <symbol id=\&quot;i-tiktok\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.28a4.29 4.29 0 0 1-3.24-1.46Z\&quot;/></symbol> <symbol id=\&quot;i-youtube\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M23.5 6.5a3.02 3.02 0 0 0-2.12-2.14C19.5 3.85 12 3.85 12 3.85s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.5C0 8.39 0 12 0 12s0 3.61.5 5.5a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.61 24 12 24 12s0-3.61-.5-5.5ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z\&quot;/></symbol> </svg>&quot;;
 </script>
 <script>/* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -7375,11 +7518,14 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
    Para edad: data-deriva=&quot;edad=edad&quot; en el campo de la fecha de nacimiento;
    el destino es un [data-campo] con <input readonly>. La edad nunca se
    escribe a mano: se calcula, también cuando la fecha viene de la CURP.
+   Para la fecha de nacimiento, sin calendario: data-formato=&quot;fecha-dma&quot; en
+   un <input type=&quot;text&quot; inputmode=&quot;numeric&quot; maxlength=&quot;10&quot;>; se escribe
+   día/mes/año (23/07/1985) y la escritura se acomoda sola.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('fecha', {
-    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato=&quot;fecha&quot;][data-deriva]',
+    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato=&quot;fecha&quot;][data-deriva],[data-formato=&quot;fecha-dma&quot;]',
     iniciar(form, ctx) {
       const { $, $$, cfg, M, anuncia, envoltura, controlPrincipal, validaYPinta, programaBorrador } = ctx;
 
@@ -7409,12 +7555,26 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
       /* Edad cumplida desde la fecha de nacimiento, con «hoy» de la Ciudad de
          México. Con una fecha vacía, incompleta o futura, la edad queda vacía. */
-      for (const campo of $$('[data-campo][data-formato=&quot;fecha&quot;][data-deriva]', form)) {
+      /* Fecha día/mes/año (formato «fecha-dma»), sin calendario: la escritura
+         se acomoda sola (23 → 23/, 07 → 23/07/) mientras se escribe al final;
+         al borrar o al editar en medio no se mueve nada. Corre en el control,
+         antes de que el núcleo lea el valor. */
+      for (const campo of $$('[data-campo][data-formato=&quot;fecha-dma&quot;]', form)) {
+        const ctl = controlPrincipal(campo.dataset.campo);
+        if (!ctl || ctl.tagName !== 'INPUT') continue;
+        ctl.addEventListener('input', (e) => {
+          if ((e.inputType &amp;&amp; e.inputType.startsWith('delete')) || ctl.selectionStart !== ctl.value.length) return;
+          const v = cfg.guiaFechaDma(ctl.value);
+          if (v !== ctl.value) { ctl.value = v; ctl.setSelectionRange(v.length, v.length); }
+        });
+      }
+
+      for (const campo of $$('[data-campo][data-formato=&quot;fecha&quot;][data-deriva],[data-campo][data-formato=&quot;fecha-dma&quot;][data-deriva]', form)) {
         const ctl = controlPrincipal(campo.dataset.campo);
         const destinos = campo.dataset.deriva.split(/\s+/).filter((p) => p.startsWith('edad=')).map((p) => p.slice(5));
         if (!ctl || !destinos.length) continue;
         const calcula = () => {
-          const v = ctl.value;
+          const v = campo.dataset.formato === 'fecha-dma' ? cfg.isoDeDma(ctl.value) : ctl.value;
           const edad = /^\d{4}-\d{2}-\d{2}$/.test(v) &amp;&amp; v <= cfg.hoyISO() ? String(cfg.edadEn(v, cfg.hoyISO())) : '';
           for (const d of destinos) {
             const c = controlPrincipal(d);
@@ -8613,7 +8773,7 @@ globalThis.FORMKIT_CATALOGOS.alcaldias = [...new Set(globalThis.FORMKIT_CATALOGO
 <meta name=&quot;description&quot; content=&quot;Plantilla de formulario de una sola página del estándar de formularios del SIA (SEDEMA). Contenido ficticio.&quot;>
 <link rel=&quot;icon&quot; href=&quot;data:,&quot;>
 <style>/* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -9681,6 +9841,8 @@ a{color:var(--azul)}
   color:var(--texto);
 }
 .chip-texto{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Respuesta frecuente fija: sin «quitar», redonda de los dos lados y con su texto completo. */
+.chip-fijo{border-radius:var(--r-pill);text-align:left;cursor:pointer}
 .chip-quitar{
   display:inline-flex;
   align-items:center;
@@ -10228,6 +10390,44 @@ window.FORMKIT_OPCIONES = {
   const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
   const esFechaReal = (a, m, d) => { const f = new Date(Date.UTC(a, m - 1, d)); return f.getUTCFullYear() === a &amp;&amp; f.getUTCMonth() === m - 1 &amp;&amp; f.getUTCDate() === d; };
+
+  /* Fecha escrita como día/mes/año (formato «fecha-dma»): 23/07/1985,
+     23-07-1985, 23.07.1985, 23 07 1985 o 23071985; también AAAA-MM-DD, que es
+     lo que pone el autocompletado del navegador. */
+  function partesDma(v) {
+    const t = String(v || '').trim();
+    let m = t.match(/^(\d{1,2})\s*[/.\- ]\s*(\d{1,2})\s*[/.\- ]\s*(\d{4})$/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (m) return { d: Number(m[1]), m: Number(m[2]), a: Number(m[3]) };
+    m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? { d: Number(m[3]), m: Number(m[2]), a: Number(m[1]) } : null;
+  }
+  const dosCifras = (n) => String(n).padStart(2, '0');
+  /* «23/07/1985» → «1985-07-23»; '' si no es una fecha real. */
+  const isoDeDma = (v) => { const p = partesDma(v); return p &amp;&amp; esFechaReal(p.a, p.m, p.d) ? `${p.a}-${dosCifras(p.m)}-${dosCifras(p.d)}` : ''; };
+  /* «1985-07-23» → «23/07/1985». */
+  const dmaDeIso = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
+  /* Escritura guiada, sin calendario: al completar el día pasa al mes y al
+     completar el mes pasa al año, poniendo las diagonales. Un primer dígito
+     que no puede empezar un día de dos cifras (4 a 9) o un mes (2 a 9) se
+     completa con cero: «4» → «04/». Una diagonal, punto, guion o espacio tras
+     un solo dígito también lo cierra: «3/» → «03/». */
+  function guiaFechaDma(texto) {
+    const seg = ['', '', ''];
+    const cerrado = [false, false];
+    let i = 0;
+    for (const c of String(texto)) {
+      if (/\d/.test(c)) {
+        if (i < 2 &amp;&amp; cerrado[i]) i++;
+        if (i === 2) { if (seg[2].length < 4) seg[2] += c; continue; }
+        seg[i] += c;
+        if (seg[i].length === 1 &amp;&amp; Number(c) > (i === 0 ? 3 : 1)) seg[i] = `0${c}`;
+        if (seg[i].length === 2) cerrado[i] = true;
+      } else if (/[/.\- ]/.test(c) &amp;&amp; i < 2 &amp;&amp; seg[i].length === 1) {
+        seg[i] = `0${seg[i]}`; cerrado[i] = true;
+      }
+    }
+    return seg[0] + (cerrado[0] ? '/' : '') + seg[1] + (cerrado[1] ? '/' : '') + seg[2];
+  }
   const hoyISO = () => {
     /* La fecha de «hoy» se toma en la zona horaria de la Ciudad de México,
        no en la del dispositivo: una persona que captura desde otro huso no
@@ -10459,6 +10659,21 @@ window.FORMKIT_OPCIONES = {
         return '';
       }
     },
+    'fecha-dma': {
+      descripcion: 'Fecha real escrita como día/mes/año (DD/MM/AAAA), sin calendario; para la fecha de nacimiento',
+      inputmode: 'numeric', autocomplete: 'off',
+      normaliza: (v) => { const iso = isoDeDma(v); return iso ? dmaDeIso(iso) : recorta(v); },
+      valida: (v, a = {}) => {
+        const iso = isoDeDma(v);
+        if (!iso) return 'Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985';
+        if (Number(iso.slice(0, 4)) < 1900) return 'Revisa el año: escribe los cuatro dígitos, de 1900 en adelante. Ejemplo: 1985';
+        /* En el navegador llega data-no-futura; en el servidor, max ya resuelto a hoy. */
+        const max = a.max || (a.noFutura !== undefined ? hoyISO() : '');
+        if (max &amp;&amp; iso > max) return max === hoyISO() ? 'La fecha no puede ser posterior a hoy.' : `La fecha no puede ser posterior al ${dmaDeIso(max)}.`;
+        if (a.min &amp;&amp; iso < a.min) return `La fecha no puede ser anterior al ${dmaDeIso(a.min)}.`;
+        return '';
+      }
+    },
     hora: {
       descripcion: 'Hora en formato de 24 horas',
       inputmode: 'numeric', autocomplete: 'off',
@@ -10531,7 +10746,8 @@ window.FORMKIT_OPCIONES = {
     'curp-fecha': {
       descripcion: 'La fecha de nacimiento coincide con la contenida en la CURP',
       campos: ['curp', 'fecha'], bloquea: true,
-      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === fecha ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
+      /* La fecha puede venir como AAAA-MM-DD (formato «fecha») o DD/MM/AAAA («fecha-dma»). */
+      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === (isoDeDma(fecha) || fecha) ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
     },
     'curp-sexo': {
       descripcion: 'El sexo declarado coincide con la posición 11 de la CURP',
@@ -10602,6 +10818,9 @@ window.FORMKIT_OPCIONES = {
     }
   };
 
+  /* «curp-fecha-dma»: el mismo cruce, con el nombre que usan los proyectos con fecha día/mes/año. */
+  CRUZADAS['curp-fecha-dma'] = { ...CRUZADAS['curp-fecha'], descripcion: 'La fecha de nacimiento (día/mes/año) coincide con la contenida en la CURP' };
+
   /* ---------- Archivos ---------- */
   const ARCHIVOS = {
     extensiones: ['jpg', 'jpeg', 'png', 'pdf'],
@@ -10627,7 +10846,7 @@ window.FORMKIT_OPCIONES = {
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.1.0',
+    version: '1.2.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -10646,6 +10865,10 @@ window.FORMKIT_OPCIONES = {
     anuncios: { retardoMs: 50 },
     combo: { maxResultados: 8 },
     chips: { max: 5, clave: 'sia-chips' },
+    /* Visor de documentos: dónde está pdf.js (vacío: vendor/pdfjs-dist/ junto
+       al paquete), desde qué ancho queda fijo junto a lo que se revisa en lugar
+       de abrirse a pantalla completa, y la espera para repintar al cambiar el tamaño. */
+    visor: { pdfjs: '', fijoDesde: '(min-width: 1024px)', retardoMs: 250 },
     mensajes: {
       prefijoError: 'Error:',
       obligatorioTexto: 'Completa «{etiqueta}».',
@@ -10723,11 +10946,17 @@ window.FORMKIT_OPCIONES = {
       mapaFuera: 'El punto queda fuera del ámbito. Muévelo o escribe la dirección.',
       chipsBorrar: 'Borrar historial',
       chipsQuitar: 'Quitar {texto} de las sugerencias',
+      chipsFijos: 'Respuestas frecuentes para {etiqueta}',
+      chipsAgregado: 'Agregado: {texto}',
+      visorCargando: 'Cargando el documento…',
+      visorError: 'No se pudo mostrar el documento aquí. Ábrelo en otra pestaña con el enlace de arriba.',
+      visorNavegador: 'Se muestra con el visor del navegador. Si no lo ves completo, ábrelo en otra pestaña con el enlace de arriba.',
+      visorHoja: 'Hoja {n} de {total}',
       sesionExpira: 'Tu sesión terminará en {min} minutos. Guarda o continúa para mantenerla.'
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, isoDeDma, dmaDeIso, guiaFechaDma, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 </script>
 <script>/* GENERADO por herramientas/construir.mjs desde codigo/iconos/sprite.svg. No se edita a mano.
@@ -10736,7 +10965,7 @@ window.FORMKIT_OPCIONES = {
 window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; hidden> <symbol id=\&quot;i-alerta\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3 2.5 20h19L12 3z\&quot;/><path d=\&quot;M12 9v5\&quot;/><path d=\&quot;M12 17.5h.01\&quot;/></symbol> <symbol id=\&quot;i-error\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v6\&quot;/><path d=\&quot;M12 16.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ok\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;m8 12.5 2.5 2.5L16 9.5\&quot;/></symbol> <symbol id=\&quot;i-info\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 11v6\&quot;/><path d=\&quot;M12 7.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ayuda\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7\&quot;/><path d=\&quot;M12 17h.01\&quot;/></symbol> <symbol id=\&quot;i-cerrar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 6 12 12\&quot;/><path d=\&quot;M18 6 6 18\&quot;/></symbol> <symbol id=\&quot;i-palomita\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m5 12.5 4.5 4.5L19 7.5\&quot;/></symbol> <symbol id=\&quot;i-flecha-izq\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M19 12H5\&quot;/><path d=\&quot;m11 6-6 6 6 6\&quot;/></symbol> <symbol id=\&quot;i-flecha-der\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M5 12h14\&quot;/><path d=\&quot;m13 6 6 6-6 6\&quot;/></symbol> <symbol id=\&quot;i-abajo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 9 6 6 6-6\&quot;/></symbol> <symbol id=\&quot;i-descarga\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 4v11\&quot;/><path d=\&quot;m7 10 5 5 5-5\&quot;/><path d=\&quot;M4 19h16\&quot;/></symbol> <symbol id=\&quot;i-copiar\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;9\&quot; y=\&quot;9\&quot; width=\&quot;11\&quot; height=\&quot;11\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M5 15V6a2 2 0 0 1 2-2h9\&quot;/></symbol> <symbol id=\&quot;i-compartir\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;18\&quot; cy=\&quot;5\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;6\&quot; cy=\&quot;12\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;18\&quot; cy=\&quot;19\&quot; r=\&quot;2.5\&quot;/><path d=\&quot;m8.3 10.8 7.4-4.6\&quot;/><path d=\&quot;m8.3 13.2 7.4 4.6\&quot;/></symbol> <symbol id=\&quot;i-eliminar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 7h16\&quot;/><path d=\&quot;M9 7V4h6v3\&quot;/><path d=\&quot;M6 7l1 13h10l1-13\&quot;/></symbol> <symbol id=\&quot;i-editar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 20h4l11-11-4-4L4 16v4z\&quot;/><path d=\&quot;m13 7 4 4\&quot;/></symbol> <symbol id=\&quot;i-ubicacion\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 21s-6-6.3-6-11a6 6 0 0 1 12 0c0 4.7-6 11-6 11z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;10\&quot; r=\&quot;2.2\&quot;/></symbol> <symbol id=\&quot;i-fecha\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;4\&quot; y=\&quot;5\&quot; width=\&quot;16\&quot; height=\&quot;15\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M4 10h16\&quot;/><path d=\&quot;M8 3v4\&quot;/><path d=\&quot;M16 3v4\&quot;/></symbol> <symbol id=\&quot;i-adjunto\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7L9.5 17a1.6 1.6 0 0 1-2.3-2.3L15 7\&quot;/></symbol> <symbol id=\&quot;i-camara\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 8h3l2-3h6l2 3h3v11H4z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;13\&quot; r=\&quot;3.5\&quot;/></symbol> <symbol id=\&quot;i-buscar\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;11\&quot; cy=\&quot;11\&quot; r=\&quot;6\&quot;/><path d=\&quot;m20 20-4.5-4.5\&quot;/></symbol> <symbol id=\&quot;i-mas\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 5v14\&quot;/><path d=\&quot;M5 12h14\&quot;/></symbol> <symbol id=\&quot;i-cargando\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3a9 9 0 1 0 9 9\&quot;/></symbol> <symbol id=\&quot;i-reloj\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v5l3 2\&quot;/></symbol> <symbol id=\&quot;i-externo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M14 4h6v6\&quot;/><path d=\&quot;M20 4 10 14\&quot;/><path d=\&quot;M19 14v5H5V5h5\&quot;/></symbol> <symbol id=\&quot;i-facebook\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.93 8.44-9.94Z\&quot;/></symbol> <symbol id=\&quot;i-x\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M17.53 3h3.03l-6.62 7.57L21.75 21h-6.09l-4.77-6.24L5.42 21H2.38l7.08-8.09L2.25 3h6.24l4.31 5.7L17.53 3Zm-1.07 16.17h1.68L7.62 4.73H5.82l10.64 14.44Z\&quot;/></symbol> <symbol id=\&quot;i-instagram\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.29a6.55 6.55 0 1 0 0 13.1 6.55 6.55 0 0 0 0-13.1Zm0 10.8a4.25 4.25 0 1 1 0-8.5 4.25 4.25 0 0 1 0 8.5Zm8.34-11.06a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z\&quot;/></symbol> <symbol id=\&quot;i-tiktok\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.28a4.29 4.29 0 0 1-3.24-1.46Z\&quot;/></symbol> <symbol id=\&quot;i-youtube\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M23.5 6.5a3.02 3.02 0 0 0-2.12-2.14C19.5 3.85 12 3.85 12 3.85s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.5C0 8.39 0 12 0 12s0 3.61.5 5.5a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.61 24 12 24 12s0-3.61-.5-5.5ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z\&quot;/></symbol> </svg>&quot;;
 </script>
 <script>/* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -11855,14 +12084,57 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
    Contrato HTML: data-chips en el [data-campo]. El aviso de privacidad del
    formulario debe mencionar que se guardan sugerencias en el dispositivo.
+
+   Respuestas frecuentes fijas: data-chips-fijos=&quot;Texto uno|Texto dos&quot; en el
+   [data-campo] muestra siempre esa lista (por ejemplo, los motivos para
+   observar un documento). No guarda nada en el dispositivo, así que sirve
+   también en datos personales. En un texto largo, el chip agrega su texto
+   al final («… Falta una página.») para que la persona lo complete; en un
+   campo corto, lo pone como respuesta.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('chips', {
-    selector: '[data-chips]',
+    selector: '[data-chips],[data-chips-fijos]',
     iniciar(form, ctx) {
       const { $$, cfg, M, plantilla, anuncia, almacen, controlPrincipal, valorDe, validaCampo, icono, programaBorrador } = ctx;
       const clave = (n) => `${cfg.chips.clave}:${form.dataset.borrador || form.id || 'form'}:${n}`;
+      const antesDelControl = (ctl, caja) => (ctl.closest('.select,.combo,.control-grupo,.fecha-grupo') || ctl).insertAdjacentElement('beforebegin', caja);
+
+      for (const campo of $$('[data-chips-fijos]', form)) {
+        const n = campo.dataset.campo;
+        const ctl = controlPrincipal(n);
+        const lista = campo.dataset.chipsFijos.split('|').map((t) => t.trim()).filter(Boolean);
+        if (!ctl || !lista.length) continue;
+        const largo = ctl.tagName === 'TEXTAREA';
+        const caja = document.createElement('div');
+        caja.className = 'chips chips-fijos';
+        caja.setAttribute('role', 'group');
+        caja.setAttribute('aria-label', plantilla(M.chipsFijos, { etiqueta: ctx.etiquetaDe(n).toLowerCase() }));
+        for (const t of lista) {
+          const b = document.createElement('button'); b.type = 'button'; b.className = 'chip chip-fijo'; b.dataset.chipFijo = t; b.textContent = t;
+          caja.appendChild(b);
+        }
+        antesDelControl(ctl, caja);
+        const marca = () => { if (!largo) for (const b of $$('[data-chip-fijo]', caja)) b.setAttribute('aria-pressed', String(valorDe(n) === b.dataset.chipFijo)); };
+        caja.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-chip-fijo]');
+          if (!b) return;
+          const t = b.dataset.chipFijo;
+          const previo = ctl.value.trim();
+          ctl.value = largo ? `${previo ? `${previo} ` : ''}${t}${/[.!?]$/.test(t) ? '' : '.'}` : t;
+          ctl.dispatchEvent(new Event('input', { bubbles: true }));
+          ctl.dispatchEvent(new Event('change', { bubbles: true }));
+          ctx.estadoDe(n).tocado = true;
+          ctx.validaYPinta(n);
+          marca();
+          anuncia(plantilla(M.chipsAgregado, { texto: t }));
+          if (largo) { ctl.focus(); ctl.setSelectionRange(ctl.value.length, ctl.value.length); }
+          programaBorrador();
+        });
+        ctl.addEventListener('input', marca);
+        marca();
+      }
 
       for (const campo of $$('[data-chips]', form)) {
         const n = campo.dataset.campo;
@@ -11873,7 +12145,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         caja.className = 'chips';
         caja.setAttribute('role', 'group');
         caja.setAttribute('aria-label', `Usados antes en ${ctx.etiquetaDe(n).toLowerCase()}`);
-        ctl.closest('.select,.combo,.control-grupo,.fecha-grupo') ? ctl.closest('.select,.combo,.control-grupo,.fecha-grupo').insertAdjacentElement('beforebegin', caja) : ctl.insertAdjacentElement('beforebegin', caja);
+        antesDelControl(ctl, caja);
 
         const lee = () => { try { return JSON.parse(almacen.lee(clave(n)) || '[]'); } catch (e) { return []; } };
         const escribe = (lista) => almacen.escribe(clave(n), JSON.stringify(lista.slice(0, cfg.chips.max)));
@@ -11947,11 +12219,14 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
    Para edad: data-deriva=&quot;edad=edad&quot; en el campo de la fecha de nacimiento;
    el destino es un [data-campo] con <input readonly>. La edad nunca se
    escribe a mano: se calcula, también cuando la fecha viene de la CURP.
+   Para la fecha de nacimiento, sin calendario: data-formato=&quot;fecha-dma&quot; en
+   un <input type=&quot;text&quot; inputmode=&quot;numeric&quot; maxlength=&quot;10&quot;>; se escribe
+   día/mes/año (23/07/1985) y la escritura se acomoda sola.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('fecha', {
-    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato=&quot;fecha&quot;][data-deriva]',
+    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato=&quot;fecha&quot;][data-deriva],[data-formato=&quot;fecha-dma&quot;]',
     iniciar(form, ctx) {
       const { $, $$, cfg, M, anuncia, envoltura, controlPrincipal, validaYPinta, programaBorrador } = ctx;
 
@@ -11981,12 +12256,26 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
       /* Edad cumplida desde la fecha de nacimiento, con «hoy» de la Ciudad de
          México. Con una fecha vacía, incompleta o futura, la edad queda vacía. */
-      for (const campo of $$('[data-campo][data-formato=&quot;fecha&quot;][data-deriva]', form)) {
+      /* Fecha día/mes/año (formato «fecha-dma»), sin calendario: la escritura
+         se acomoda sola (23 → 23/, 07 → 23/07/) mientras se escribe al final;
+         al borrar o al editar en medio no se mueve nada. Corre en el control,
+         antes de que el núcleo lea el valor. */
+      for (const campo of $$('[data-campo][data-formato=&quot;fecha-dma&quot;]', form)) {
+        const ctl = controlPrincipal(campo.dataset.campo);
+        if (!ctl || ctl.tagName !== 'INPUT') continue;
+        ctl.addEventListener('input', (e) => {
+          if ((e.inputType &amp;&amp; e.inputType.startsWith('delete')) || ctl.selectionStart !== ctl.value.length) return;
+          const v = cfg.guiaFechaDma(ctl.value);
+          if (v !== ctl.value) { ctl.value = v; ctl.setSelectionRange(v.length, v.length); }
+        });
+      }
+
+      for (const campo of $$('[data-campo][data-formato=&quot;fecha&quot;][data-deriva],[data-campo][data-formato=&quot;fecha-dma&quot;][data-deriva]', form)) {
         const ctl = controlPrincipal(campo.dataset.campo);
         const destinos = campo.dataset.deriva.split(/\s+/).filter((p) => p.startsWith('edad=')).map((p) => p.slice(5));
         if (!ctl || !destinos.length) continue;
         const calcula = () => {
-          const v = ctl.value;
+          const v = campo.dataset.formato === 'fecha-dma' ? cfg.isoDeDma(ctl.value) : ctl.value;
           const edad = /^\d{4}-\d{2}-\d{2}$/.test(v) &amp;&amp; v <= cfg.hoyISO() ? String(cfg.edadEn(v, cfg.hoyISO())) : '';
           for (const d of destinos) {
             const c = controlPrincipal(d);
@@ -12100,7 +12389,9 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
           const ctlDestino = envDestino &amp;&amp; controlPrincipal(destino);
           if (!ctlDestino) continue;
           const bruto = datos[clave] || '';
-          const valor = clave === 'sexo' &amp;&amp; ctlDestino.tagName !== 'SELECT' ? (textos[bruto] || bruto) : bruto;
+          /* La fecha de nacimiento va como el destino la pide: AAAA-MM-DD o, en «fecha-dma», DD/MM/AAAA. */
+          const valor = clave === 'sexo' &amp;&amp; ctlDestino.tagName !== 'SELECT' ? (textos[bruto] || bruto)
+            : clave === 'fechaNacimiento' &amp;&amp; envDestino.dataset.formato === 'fecha-dma' ? cfg.dmaDeIso(bruto) : bruto;
           if (ctlDestino.value !== valor) {
             ctlDestino.value = valor;
             ctlDestino.dispatchEvent(new Event('change', { bubbles: true }));
@@ -12604,7 +12895,7 @@ globalThis.FORMKIT_CATALOGOS.alcaldias = [...new Set(globalThis.FORMKIT_CATALOGO
 <title>Encuesta de ejemplo</title>
 <link rel=&quot;icon&quot; href=&quot;data:,&quot;>
 <style>/* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -13727,6 +14018,44 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
   const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
   const esFechaReal = (a, m, d) => { const f = new Date(Date.UTC(a, m - 1, d)); return f.getUTCFullYear() === a &amp;&amp; f.getUTCMonth() === m - 1 &amp;&amp; f.getUTCDate() === d; };
+
+  /* Fecha escrita como día/mes/año (formato «fecha-dma»): 23/07/1985,
+     23-07-1985, 23.07.1985, 23 07 1985 o 23071985; también AAAA-MM-DD, que es
+     lo que pone el autocompletado del navegador. */
+  function partesDma(v) {
+    const t = String(v || '').trim();
+    let m = t.match(/^(\d{1,2})\s*[/.\- ]\s*(\d{1,2})\s*[/.\- ]\s*(\d{4})$/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (m) return { d: Number(m[1]), m: Number(m[2]), a: Number(m[3]) };
+    m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? { d: Number(m[3]), m: Number(m[2]), a: Number(m[1]) } : null;
+  }
+  const dosCifras = (n) => String(n).padStart(2, '0');
+  /* «23/07/1985» → «1985-07-23»; '' si no es una fecha real. */
+  const isoDeDma = (v) => { const p = partesDma(v); return p &amp;&amp; esFechaReal(p.a, p.m, p.d) ? `${p.a}-${dosCifras(p.m)}-${dosCifras(p.d)}` : ''; };
+  /* «1985-07-23» → «23/07/1985». */
+  const dmaDeIso = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
+  /* Escritura guiada, sin calendario: al completar el día pasa al mes y al
+     completar el mes pasa al año, poniendo las diagonales. Un primer dígito
+     que no puede empezar un día de dos cifras (4 a 9) o un mes (2 a 9) se
+     completa con cero: «4» → «04/». Una diagonal, punto, guion o espacio tras
+     un solo dígito también lo cierra: «3/» → «03/». */
+  function guiaFechaDma(texto) {
+    const seg = ['', '', ''];
+    const cerrado = [false, false];
+    let i = 0;
+    for (const c of String(texto)) {
+      if (/\d/.test(c)) {
+        if (i < 2 &amp;&amp; cerrado[i]) i++;
+        if (i === 2) { if (seg[2].length < 4) seg[2] += c; continue; }
+        seg[i] += c;
+        if (seg[i].length === 1 &amp;&amp; Number(c) > (i === 0 ? 3 : 1)) seg[i] = `0${c}`;
+        if (seg[i].length === 2) cerrado[i] = true;
+      } else if (/[/.\- ]/.test(c) &amp;&amp; i < 2 &amp;&amp; seg[i].length === 1) {
+        seg[i] = `0${seg[i]}`; cerrado[i] = true;
+      }
+    }
+    return seg[0] + (cerrado[0] ? '/' : '') + seg[1] + (cerrado[1] ? '/' : '') + seg[2];
+  }
   const hoyISO = () => {
     /* La fecha de «hoy» se toma en la zona horaria de la Ciudad de México,
        no en la del dispositivo: una persona que captura desde otro huso no
@@ -13958,6 +14287,21 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
         return '';
       }
     },
+    'fecha-dma': {
+      descripcion: 'Fecha real escrita como día/mes/año (DD/MM/AAAA), sin calendario; para la fecha de nacimiento',
+      inputmode: 'numeric', autocomplete: 'off',
+      normaliza: (v) => { const iso = isoDeDma(v); return iso ? dmaDeIso(iso) : recorta(v); },
+      valida: (v, a = {}) => {
+        const iso = isoDeDma(v);
+        if (!iso) return 'Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985';
+        if (Number(iso.slice(0, 4)) < 1900) return 'Revisa el año: escribe los cuatro dígitos, de 1900 en adelante. Ejemplo: 1985';
+        /* En el navegador llega data-no-futura; en el servidor, max ya resuelto a hoy. */
+        const max = a.max || (a.noFutura !== undefined ? hoyISO() : '');
+        if (max &amp;&amp; iso > max) return max === hoyISO() ? 'La fecha no puede ser posterior a hoy.' : `La fecha no puede ser posterior al ${dmaDeIso(max)}.`;
+        if (a.min &amp;&amp; iso < a.min) return `La fecha no puede ser anterior al ${dmaDeIso(a.min)}.`;
+        return '';
+      }
+    },
     hora: {
       descripcion: 'Hora en formato de 24 horas',
       inputmode: 'numeric', autocomplete: 'off',
@@ -14030,7 +14374,8 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
     'curp-fecha': {
       descripcion: 'La fecha de nacimiento coincide con la contenida en la CURP',
       campos: ['curp', 'fecha'], bloquea: true,
-      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === fecha ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
+      /* La fecha puede venir como AAAA-MM-DD (formato «fecha») o DD/MM/AAAA («fecha-dma»). */
+      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === (isoDeDma(fecha) || fecha) ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
     },
     'curp-sexo': {
       descripcion: 'El sexo declarado coincide con la posición 11 de la CURP',
@@ -14101,6 +14446,9 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
     }
   };
 
+  /* «curp-fecha-dma»: el mismo cruce, con el nombre que usan los proyectos con fecha día/mes/año. */
+  CRUZADAS['curp-fecha-dma'] = { ...CRUZADAS['curp-fecha'], descripcion: 'La fecha de nacimiento (día/mes/año) coincide con la contenida en la CURP' };
+
   /* ---------- Archivos ---------- */
   const ARCHIVOS = {
     extensiones: ['jpg', 'jpeg', 'png', 'pdf'],
@@ -14126,7 +14474,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.1.0',
+    version: '1.2.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -14145,6 +14493,10 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
     anuncios: { retardoMs: 50 },
     combo: { maxResultados: 8 },
     chips: { max: 5, clave: 'sia-chips' },
+    /* Visor de documentos: dónde está pdf.js (vacío: vendor/pdfjs-dist/ junto
+       al paquete), desde qué ancho queda fijo junto a lo que se revisa en lugar
+       de abrirse a pantalla completa, y la espera para repintar al cambiar el tamaño. */
+    visor: { pdfjs: '', fijoDesde: '(min-width: 1024px)', retardoMs: 250 },
     mensajes: {
       prefijoError: 'Error:',
       obligatorioTexto: 'Completa «{etiqueta}».',
@@ -14222,11 +14574,17 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
       mapaFuera: 'El punto queda fuera del ámbito. Muévelo o escribe la dirección.',
       chipsBorrar: 'Borrar historial',
       chipsQuitar: 'Quitar {texto} de las sugerencias',
+      chipsFijos: 'Respuestas frecuentes para {etiqueta}',
+      chipsAgregado: 'Agregado: {texto}',
+      visorCargando: 'Cargando el documento…',
+      visorError: 'No se pudo mostrar el documento aquí. Ábrelo en otra pestaña con el enlace de arriba.',
+      visorNavegador: 'Se muestra con el visor del navegador. Si no lo ves completo, ábrelo en otra pestaña con el enlace de arriba.',
+      visorHoja: 'Hoja {n} de {total}',
       sesionExpira: 'Tu sesión terminará en {min} minutos. Guarda o continúa para mantenerla.'
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, isoDeDma, dmaDeIso, guiaFechaDma, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 </script>
 <script>/* GENERADO por herramientas/construir.mjs desde codigo/iconos/sprite.svg. No se edita a mano.
@@ -14235,7 +14593,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
 window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; hidden> <symbol id=\&quot;i-alerta\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3 2.5 20h19L12 3z\&quot;/><path d=\&quot;M12 9v5\&quot;/><path d=\&quot;M12 17.5h.01\&quot;/></symbol> <symbol id=\&quot;i-error\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v6\&quot;/><path d=\&quot;M12 16.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ok\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;m8 12.5 2.5 2.5L16 9.5\&quot;/></symbol> <symbol id=\&quot;i-info\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 11v6\&quot;/><path d=\&quot;M12 7.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ayuda\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7\&quot;/><path d=\&quot;M12 17h.01\&quot;/></symbol> <symbol id=\&quot;i-cerrar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 6 12 12\&quot;/><path d=\&quot;M18 6 6 18\&quot;/></symbol> <symbol id=\&quot;i-palomita\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m5 12.5 4.5 4.5L19 7.5\&quot;/></symbol> <symbol id=\&quot;i-flecha-izq\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M19 12H5\&quot;/><path d=\&quot;m11 6-6 6 6 6\&quot;/></symbol> <symbol id=\&quot;i-flecha-der\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M5 12h14\&quot;/><path d=\&quot;m13 6 6 6-6 6\&quot;/></symbol> <symbol id=\&quot;i-abajo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 9 6 6 6-6\&quot;/></symbol> <symbol id=\&quot;i-descarga\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 4v11\&quot;/><path d=\&quot;m7 10 5 5 5-5\&quot;/><path d=\&quot;M4 19h16\&quot;/></symbol> <symbol id=\&quot;i-copiar\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;9\&quot; y=\&quot;9\&quot; width=\&quot;11\&quot; height=\&quot;11\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M5 15V6a2 2 0 0 1 2-2h9\&quot;/></symbol> <symbol id=\&quot;i-compartir\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;18\&quot; cy=\&quot;5\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;6\&quot; cy=\&quot;12\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;18\&quot; cy=\&quot;19\&quot; r=\&quot;2.5\&quot;/><path d=\&quot;m8.3 10.8 7.4-4.6\&quot;/><path d=\&quot;m8.3 13.2 7.4 4.6\&quot;/></symbol> <symbol id=\&quot;i-eliminar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 7h16\&quot;/><path d=\&quot;M9 7V4h6v3\&quot;/><path d=\&quot;M6 7l1 13h10l1-13\&quot;/></symbol> <symbol id=\&quot;i-editar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 20h4l11-11-4-4L4 16v4z\&quot;/><path d=\&quot;m13 7 4 4\&quot;/></symbol> <symbol id=\&quot;i-ubicacion\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 21s-6-6.3-6-11a6 6 0 0 1 12 0c0 4.7-6 11-6 11z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;10\&quot; r=\&quot;2.2\&quot;/></symbol> <symbol id=\&quot;i-fecha\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;4\&quot; y=\&quot;5\&quot; width=\&quot;16\&quot; height=\&quot;15\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M4 10h16\&quot;/><path d=\&quot;M8 3v4\&quot;/><path d=\&quot;M16 3v4\&quot;/></symbol> <symbol id=\&quot;i-adjunto\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7L9.5 17a1.6 1.6 0 0 1-2.3-2.3L15 7\&quot;/></symbol> <symbol id=\&quot;i-camara\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 8h3l2-3h6l2 3h3v11H4z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;13\&quot; r=\&quot;3.5\&quot;/></symbol> <symbol id=\&quot;i-buscar\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;11\&quot; cy=\&quot;11\&quot; r=\&quot;6\&quot;/><path d=\&quot;m20 20-4.5-4.5\&quot;/></symbol> <symbol id=\&quot;i-mas\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 5v14\&quot;/><path d=\&quot;M5 12h14\&quot;/></symbol> <symbol id=\&quot;i-cargando\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3a9 9 0 1 0 9 9\&quot;/></symbol> <symbol id=\&quot;i-reloj\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v5l3 2\&quot;/></symbol> <symbol id=\&quot;i-externo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M14 4h6v6\&quot;/><path d=\&quot;M20 4 10 14\&quot;/><path d=\&quot;M19 14v5H5V5h5\&quot;/></symbol> <symbol id=\&quot;i-facebook\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.93 8.44-9.94Z\&quot;/></symbol> <symbol id=\&quot;i-x\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M17.53 3h3.03l-6.62 7.57L21.75 21h-6.09l-4.77-6.24L5.42 21H2.38l7.08-8.09L2.25 3h6.24l4.31 5.7L17.53 3Zm-1.07 16.17h1.68L7.62 4.73H5.82l10.64 14.44Z\&quot;/></symbol> <symbol id=\&quot;i-instagram\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.29a6.55 6.55 0 1 0 0 13.1 6.55 6.55 0 0 0 0-13.1Zm0 10.8a4.25 4.25 0 1 1 0-8.5 4.25 4.25 0 0 1 0 8.5Zm8.34-11.06a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z\&quot;/></symbol> <symbol id=\&quot;i-tiktok\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.28a4.29 4.29 0 0 1-3.24-1.46Z\&quot;/></symbol> <symbol id=\&quot;i-youtube\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M23.5 6.5a3.02 3.02 0 0 0-2.12-2.14C19.5 3.85 12 3.85 12 3.85s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.5C0 8.39 0 12 0 12s0 3.61.5 5.5a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.61 24 12 24 12s0-3.61-.5-5.5ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z\&quot;/></symbol> </svg>&quot;;
 </script>
 <script>/* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -15336,7 +15694,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 <title>Captura interna de ejemplo</title>
 <link rel=&quot;icon&quot; href=&quot;data:,&quot;>
 <style>/* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -16159,6 +16517,8 @@ a{color:var(--azul)}
 .tabla td{display:flex;flex-wrap:wrap;gap:var(--e-1) var(--e-3);padding:var(--e-2) 0;border-bottom:var(--b-1) solid var(--linea);vertical-align:top}
 .tabla td:last-child{border-bottom:0}
 .tabla td::before{content:attr(data-etiqueta);flex:0 0 40%;font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
+/* Columna cuyo encabezado es sólo para el lector de pantalla (acciones): en teléfono tampoco se ve su rótulo. */
+.tabla td[data-etiqueta-oculta]::before{display:none}
 .tabla th{padding:var(--e-2) var(--e-3);background:var(--guinda);font-family:var(--fuente-titulo);font-size:var(--t-md);font-weight:var(--peso-fuerte);text-align:left;color:var(--blanco)}
 .tabla-orden{display:inline-flex;align-items:center;gap:var(--e-1);min-height:var(--objetivo-min);padding:0;background:none;border:0;font:inherit;color:inherit}
 .tabla-orden-icono{opacity:var(--op-inactivo);transition:transform var(--dur-rapida)}
@@ -16172,6 +16532,8 @@ a{color:var(--azul)}
 [aria-sort=&quot;ascending&quot;] .tabla-orden-icono{opacity:1;transform:rotate(180deg)}
 [aria-sort=&quot;descending&quot;] .tabla-orden-icono{opacity:1}
 .tabla[aria-busy=&quot;true&quot;]{opacity:var(--op-inactivo)}
+/* Fila filtrada con [hidden]: «.tabla tr» declara display y le ganaría al atributo (FRM-69). */
+.tabla tr[hidden]{display:none}
 
 /* @bloque adaptaciones */
 
@@ -16181,7 +16543,8 @@ a{color:var(--azul)}
   .tabla tr{display:table-row;margin:0;padding:0;background:none;border:0;border-radius:0}
   .tabla td{display:table-cell;padding:var(--e-2) var(--e-3)}
   .tabla td::before{display:none}
-  .tabla tr:nth-child(even){background:var(--guinda-cl)}
+  /* Filas alternas contadas sólo entre las visibles: al filtrar con [hidden], el rayado no pierde el ritmo. */
+  .tabla tr:nth-child(even of :not([hidden])){background:var(--guinda-cl)}
 }
 </style>
 <style>/* =========================================================
@@ -16300,6 +16663,8 @@ a{color:var(--azul)}
   color:var(--texto);
 }
 .chip-texto{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Respuesta frecuente fija: sin «quitar», redonda de los dos lados y con su texto completo. */
+.chip-fijo{border-radius:var(--r-pill);text-align:left;cursor:pointer}
 .chip-quitar{
   display:inline-flex;
   align-items:center;
@@ -16573,6 +16938,44 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
   const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
   const esFechaReal = (a, m, d) => { const f = new Date(Date.UTC(a, m - 1, d)); return f.getUTCFullYear() === a &amp;&amp; f.getUTCMonth() === m - 1 &amp;&amp; f.getUTCDate() === d; };
+
+  /* Fecha escrita como día/mes/año (formato «fecha-dma»): 23/07/1985,
+     23-07-1985, 23.07.1985, 23 07 1985 o 23071985; también AAAA-MM-DD, que es
+     lo que pone el autocompletado del navegador. */
+  function partesDma(v) {
+    const t = String(v || '').trim();
+    let m = t.match(/^(\d{1,2})\s*[/.\- ]\s*(\d{1,2})\s*[/.\- ]\s*(\d{4})$/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (m) return { d: Number(m[1]), m: Number(m[2]), a: Number(m[3]) };
+    m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? { d: Number(m[3]), m: Number(m[2]), a: Number(m[1]) } : null;
+  }
+  const dosCifras = (n) => String(n).padStart(2, '0');
+  /* «23/07/1985» → «1985-07-23»; '' si no es una fecha real. */
+  const isoDeDma = (v) => { const p = partesDma(v); return p &amp;&amp; esFechaReal(p.a, p.m, p.d) ? `${p.a}-${dosCifras(p.m)}-${dosCifras(p.d)}` : ''; };
+  /* «1985-07-23» → «23/07/1985». */
+  const dmaDeIso = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
+  /* Escritura guiada, sin calendario: al completar el día pasa al mes y al
+     completar el mes pasa al año, poniendo las diagonales. Un primer dígito
+     que no puede empezar un día de dos cifras (4 a 9) o un mes (2 a 9) se
+     completa con cero: «4» → «04/». Una diagonal, punto, guion o espacio tras
+     un solo dígito también lo cierra: «3/» → «03/». */
+  function guiaFechaDma(texto) {
+    const seg = ['', '', ''];
+    const cerrado = [false, false];
+    let i = 0;
+    for (const c of String(texto)) {
+      if (/\d/.test(c)) {
+        if (i < 2 &amp;&amp; cerrado[i]) i++;
+        if (i === 2) { if (seg[2].length < 4) seg[2] += c; continue; }
+        seg[i] += c;
+        if (seg[i].length === 1 &amp;&amp; Number(c) > (i === 0 ? 3 : 1)) seg[i] = `0${c}`;
+        if (seg[i].length === 2) cerrado[i] = true;
+      } else if (/[/.\- ]/.test(c) &amp;&amp; i < 2 &amp;&amp; seg[i].length === 1) {
+        seg[i] = `0${seg[i]}`; cerrado[i] = true;
+      }
+    }
+    return seg[0] + (cerrado[0] ? '/' : '') + seg[1] + (cerrado[1] ? '/' : '') + seg[2];
+  }
   const hoyISO = () => {
     /* La fecha de «hoy» se toma en la zona horaria de la Ciudad de México,
        no en la del dispositivo: una persona que captura desde otro huso no
@@ -16804,6 +17207,21 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
         return '';
       }
     },
+    'fecha-dma': {
+      descripcion: 'Fecha real escrita como día/mes/año (DD/MM/AAAA), sin calendario; para la fecha de nacimiento',
+      inputmode: 'numeric', autocomplete: 'off',
+      normaliza: (v) => { const iso = isoDeDma(v); return iso ? dmaDeIso(iso) : recorta(v); },
+      valida: (v, a = {}) => {
+        const iso = isoDeDma(v);
+        if (!iso) return 'Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985';
+        if (Number(iso.slice(0, 4)) < 1900) return 'Revisa el año: escribe los cuatro dígitos, de 1900 en adelante. Ejemplo: 1985';
+        /* En el navegador llega data-no-futura; en el servidor, max ya resuelto a hoy. */
+        const max = a.max || (a.noFutura !== undefined ? hoyISO() : '');
+        if (max &amp;&amp; iso > max) return max === hoyISO() ? 'La fecha no puede ser posterior a hoy.' : `La fecha no puede ser posterior al ${dmaDeIso(max)}.`;
+        if (a.min &amp;&amp; iso < a.min) return `La fecha no puede ser anterior al ${dmaDeIso(a.min)}.`;
+        return '';
+      }
+    },
     hora: {
       descripcion: 'Hora en formato de 24 horas',
       inputmode: 'numeric', autocomplete: 'off',
@@ -16876,7 +17294,8 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
     'curp-fecha': {
       descripcion: 'La fecha de nacimiento coincide con la contenida en la CURP',
       campos: ['curp', 'fecha'], bloquea: true,
-      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === fecha ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
+      /* La fecha puede venir como AAAA-MM-DD (formato «fecha») o DD/MM/AAAA («fecha-dma»). */
+      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === (isoDeDma(fecha) || fecha) ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
     },
     'curp-sexo': {
       descripcion: 'El sexo declarado coincide con la posición 11 de la CURP',
@@ -16947,6 +17366,9 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
     }
   };
 
+  /* «curp-fecha-dma»: el mismo cruce, con el nombre que usan los proyectos con fecha día/mes/año. */
+  CRUZADAS['curp-fecha-dma'] = { ...CRUZADAS['curp-fecha'], descripcion: 'La fecha de nacimiento (día/mes/año) coincide con la contenida en la CURP' };
+
   /* ---------- Archivos ---------- */
   const ARCHIVOS = {
     extensiones: ['jpg', 'jpeg', 'png', 'pdf'],
@@ -16972,7 +17394,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.1.0',
+    version: '1.2.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -16991,6 +17413,10 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
     anuncios: { retardoMs: 50 },
     combo: { maxResultados: 8 },
     chips: { max: 5, clave: 'sia-chips' },
+    /* Visor de documentos: dónde está pdf.js (vacío: vendor/pdfjs-dist/ junto
+       al paquete), desde qué ancho queda fijo junto a lo que se revisa en lugar
+       de abrirse a pantalla completa, y la espera para repintar al cambiar el tamaño. */
+    visor: { pdfjs: '', fijoDesde: '(min-width: 1024px)', retardoMs: 250 },
     mensajes: {
       prefijoError: 'Error:',
       obligatorioTexto: 'Completa «{etiqueta}».',
@@ -17068,11 +17494,17 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
       mapaFuera: 'El punto queda fuera del ámbito. Muévelo o escribe la dirección.',
       chipsBorrar: 'Borrar historial',
       chipsQuitar: 'Quitar {texto} de las sugerencias',
+      chipsFijos: 'Respuestas frecuentes para {etiqueta}',
+      chipsAgregado: 'Agregado: {texto}',
+      visorCargando: 'Cargando el documento…',
+      visorError: 'No se pudo mostrar el documento aquí. Ábrelo en otra pestaña con el enlace de arriba.',
+      visorNavegador: 'Se muestra con el visor del navegador. Si no lo ves completo, ábrelo en otra pestaña con el enlace de arriba.',
+      visorHoja: 'Hoja {n} de {total}',
       sesionExpira: 'Tu sesión terminará en {min} minutos. Guarda o continúa para mantenerla.'
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, isoDeDma, dmaDeIso, guiaFechaDma, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 </script>
 <script>/* GENERADO por herramientas/construir.mjs desde codigo/iconos/sprite.svg. No se edita a mano.
@@ -17081,7 +17513,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
 window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; hidden> <symbol id=\&quot;i-alerta\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3 2.5 20h19L12 3z\&quot;/><path d=\&quot;M12 9v5\&quot;/><path d=\&quot;M12 17.5h.01\&quot;/></symbol> <symbol id=\&quot;i-error\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v6\&quot;/><path d=\&quot;M12 16.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ok\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;m8 12.5 2.5 2.5L16 9.5\&quot;/></symbol> <symbol id=\&quot;i-info\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 11v6\&quot;/><path d=\&quot;M12 7.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ayuda\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7\&quot;/><path d=\&quot;M12 17h.01\&quot;/></symbol> <symbol id=\&quot;i-cerrar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 6 12 12\&quot;/><path d=\&quot;M18 6 6 18\&quot;/></symbol> <symbol id=\&quot;i-palomita\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m5 12.5 4.5 4.5L19 7.5\&quot;/></symbol> <symbol id=\&quot;i-flecha-izq\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M19 12H5\&quot;/><path d=\&quot;m11 6-6 6 6 6\&quot;/></symbol> <symbol id=\&quot;i-flecha-der\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M5 12h14\&quot;/><path d=\&quot;m13 6 6 6-6 6\&quot;/></symbol> <symbol id=\&quot;i-abajo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 9 6 6 6-6\&quot;/></symbol> <symbol id=\&quot;i-descarga\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 4v11\&quot;/><path d=\&quot;m7 10 5 5 5-5\&quot;/><path d=\&quot;M4 19h16\&quot;/></symbol> <symbol id=\&quot;i-copiar\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;9\&quot; y=\&quot;9\&quot; width=\&quot;11\&quot; height=\&quot;11\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M5 15V6a2 2 0 0 1 2-2h9\&quot;/></symbol> <symbol id=\&quot;i-compartir\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;18\&quot; cy=\&quot;5\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;6\&quot; cy=\&quot;12\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;18\&quot; cy=\&quot;19\&quot; r=\&quot;2.5\&quot;/><path d=\&quot;m8.3 10.8 7.4-4.6\&quot;/><path d=\&quot;m8.3 13.2 7.4 4.6\&quot;/></symbol> <symbol id=\&quot;i-eliminar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 7h16\&quot;/><path d=\&quot;M9 7V4h6v3\&quot;/><path d=\&quot;M6 7l1 13h10l1-13\&quot;/></symbol> <symbol id=\&quot;i-editar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 20h4l11-11-4-4L4 16v4z\&quot;/><path d=\&quot;m13 7 4 4\&quot;/></symbol> <symbol id=\&quot;i-ubicacion\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 21s-6-6.3-6-11a6 6 0 0 1 12 0c0 4.7-6 11-6 11z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;10\&quot; r=\&quot;2.2\&quot;/></symbol> <symbol id=\&quot;i-fecha\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;4\&quot; y=\&quot;5\&quot; width=\&quot;16\&quot; height=\&quot;15\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M4 10h16\&quot;/><path d=\&quot;M8 3v4\&quot;/><path d=\&quot;M16 3v4\&quot;/></symbol> <symbol id=\&quot;i-adjunto\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7L9.5 17a1.6 1.6 0 0 1-2.3-2.3L15 7\&quot;/></symbol> <symbol id=\&quot;i-camara\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 8h3l2-3h6l2 3h3v11H4z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;13\&quot; r=\&quot;3.5\&quot;/></symbol> <symbol id=\&quot;i-buscar\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;11\&quot; cy=\&quot;11\&quot; r=\&quot;6\&quot;/><path d=\&quot;m20 20-4.5-4.5\&quot;/></symbol> <symbol id=\&quot;i-mas\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 5v14\&quot;/><path d=\&quot;M5 12h14\&quot;/></symbol> <symbol id=\&quot;i-cargando\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3a9 9 0 1 0 9 9\&quot;/></symbol> <symbol id=\&quot;i-reloj\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v5l3 2\&quot;/></symbol> <symbol id=\&quot;i-externo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M14 4h6v6\&quot;/><path d=\&quot;M20 4 10 14\&quot;/><path d=\&quot;M19 14v5H5V5h5\&quot;/></symbol> <symbol id=\&quot;i-facebook\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.93 8.44-9.94Z\&quot;/></symbol> <symbol id=\&quot;i-x\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M17.53 3h3.03l-6.62 7.57L21.75 21h-6.09l-4.77-6.24L5.42 21H2.38l7.08-8.09L2.25 3h6.24l4.31 5.7L17.53 3Zm-1.07 16.17h1.68L7.62 4.73H5.82l10.64 14.44Z\&quot;/></symbol> <symbol id=\&quot;i-instagram\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.29a6.55 6.55 0 1 0 0 13.1 6.55 6.55 0 0 0 0-13.1Zm0 10.8a4.25 4.25 0 1 1 0-8.5 4.25 4.25 0 0 1 0 8.5Zm8.34-11.06a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z\&quot;/></symbol> <symbol id=\&quot;i-tiktok\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.28a4.29 4.29 0 0 1-3.24-1.46Z\&quot;/></symbol> <symbol id=\&quot;i-youtube\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M23.5 6.5a3.02 3.02 0 0 0-2.12-2.14C19.5 3.85 12 3.85 12 3.85s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.5C0 8.39 0 12 0 12s0 3.61.5 5.5a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.61 24 12 24 12s0-3.61-.5-5.5ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z\&quot;/></symbol> </svg>&quot;;
 </script>
 <script>/* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -18061,8 +18493,14 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         const ths = $$('thead th', tabla);
         const clave = marco.dataset.clave;
 
+        /* Un encabezado cuyo texto es sólo para el lector de pantalla (.solo-lector) no se muestra en teléfono. */
+        const soloLector = (th) => { const c = th.cloneNode(true); for (const s of $$('.solo-lector', c)) s.remove(); return !c.textContent.trim(); };
         function etiquetaCeldas() {
-          for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => { if (ths[i] &amp;&amp; !td.dataset.etiqueta) td.dataset.etiqueta = ths[i].textContent.trim(); });
+          for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => {
+            if (!ths[i] || td.dataset.etiqueta) return;
+            td.dataset.etiqueta = ths[i].textContent.trim();
+            if (soloLector(ths[i])) td.dataset.etiquetaOculta = '';
+          });
           /* Acciones por fila: «Ver», no basta; «Ver solicitud 123» sí. */
           for (const tr of $$('tbody tr', tabla)) {
             const id = clave ? (tr.dataset[clave] || ($$('td', tr)[ths.findIndex((t) => t.textContent.trim().toLowerCase() === clave)] || {}).textContent) : '';
@@ -18355,14 +18793,57 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
    Contrato HTML: data-chips en el [data-campo]. El aviso de privacidad del
    formulario debe mencionar que se guardan sugerencias en el dispositivo.
+
+   Respuestas frecuentes fijas: data-chips-fijos=&quot;Texto uno|Texto dos&quot; en el
+   [data-campo] muestra siempre esa lista (por ejemplo, los motivos para
+   observar un documento). No guarda nada en el dispositivo, así que sirve
+   también en datos personales. En un texto largo, el chip agrega su texto
+   al final («… Falta una página.») para que la persona lo complete; en un
+   campo corto, lo pone como respuesta.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('chips', {
-    selector: '[data-chips]',
+    selector: '[data-chips],[data-chips-fijos]',
     iniciar(form, ctx) {
       const { $$, cfg, M, plantilla, anuncia, almacen, controlPrincipal, valorDe, validaCampo, icono, programaBorrador } = ctx;
       const clave = (n) => `${cfg.chips.clave}:${form.dataset.borrador || form.id || 'form'}:${n}`;
+      const antesDelControl = (ctl, caja) => (ctl.closest('.select,.combo,.control-grupo,.fecha-grupo') || ctl).insertAdjacentElement('beforebegin', caja);
+
+      for (const campo of $$('[data-chips-fijos]', form)) {
+        const n = campo.dataset.campo;
+        const ctl = controlPrincipal(n);
+        const lista = campo.dataset.chipsFijos.split('|').map((t) => t.trim()).filter(Boolean);
+        if (!ctl || !lista.length) continue;
+        const largo = ctl.tagName === 'TEXTAREA';
+        const caja = document.createElement('div');
+        caja.className = 'chips chips-fijos';
+        caja.setAttribute('role', 'group');
+        caja.setAttribute('aria-label', plantilla(M.chipsFijos, { etiqueta: ctx.etiquetaDe(n).toLowerCase() }));
+        for (const t of lista) {
+          const b = document.createElement('button'); b.type = 'button'; b.className = 'chip chip-fijo'; b.dataset.chipFijo = t; b.textContent = t;
+          caja.appendChild(b);
+        }
+        antesDelControl(ctl, caja);
+        const marca = () => { if (!largo) for (const b of $$('[data-chip-fijo]', caja)) b.setAttribute('aria-pressed', String(valorDe(n) === b.dataset.chipFijo)); };
+        caja.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-chip-fijo]');
+          if (!b) return;
+          const t = b.dataset.chipFijo;
+          const previo = ctl.value.trim();
+          ctl.value = largo ? `${previo ? `${previo} ` : ''}${t}${/[.!?]$/.test(t) ? '' : '.'}` : t;
+          ctl.dispatchEvent(new Event('input', { bubbles: true }));
+          ctl.dispatchEvent(new Event('change', { bubbles: true }));
+          ctx.estadoDe(n).tocado = true;
+          ctx.validaYPinta(n);
+          marca();
+          anuncia(plantilla(M.chipsAgregado, { texto: t }));
+          if (largo) { ctl.focus(); ctl.setSelectionRange(ctl.value.length, ctl.value.length); }
+          programaBorrador();
+        });
+        ctl.addEventListener('input', marca);
+        marca();
+      }
 
       for (const campo of $$('[data-chips]', form)) {
         const n = campo.dataset.campo;
@@ -18373,7 +18854,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         caja.className = 'chips';
         caja.setAttribute('role', 'group');
         caja.setAttribute('aria-label', `Usados antes en ${ctx.etiquetaDe(n).toLowerCase()}`);
-        ctl.closest('.select,.combo,.control-grupo,.fecha-grupo') ? ctl.closest('.select,.combo,.control-grupo,.fecha-grupo').insertAdjacentElement('beforebegin', caja) : ctl.insertAdjacentElement('beforebegin', caja);
+        antesDelControl(ctl, caja);
 
         const lee = () => { try { return JSON.parse(almacen.lee(clave(n)) || '[]'); } catch (e) { return []; } };
         const escribe = (lista) => almacen.escribe(clave(n), JSON.stringify(lista.slice(0, cfg.chips.max)));
@@ -18447,11 +18928,14 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
    Para edad: data-deriva=&quot;edad=edad&quot; en el campo de la fecha de nacimiento;
    el destino es un [data-campo] con <input readonly>. La edad nunca se
    escribe a mano: se calcula, también cuando la fecha viene de la CURP.
+   Para la fecha de nacimiento, sin calendario: data-formato=&quot;fecha-dma&quot; en
+   un <input type=&quot;text&quot; inputmode=&quot;numeric&quot; maxlength=&quot;10&quot;>; se escribe
+   día/mes/año (23/07/1985) y la escritura se acomoda sola.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('fecha', {
-    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato=&quot;fecha&quot;][data-deriva]',
+    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato=&quot;fecha&quot;][data-deriva],[data-formato=&quot;fecha-dma&quot;]',
     iniciar(form, ctx) {
       const { $, $$, cfg, M, anuncia, envoltura, controlPrincipal, validaYPinta, programaBorrador } = ctx;
 
@@ -18481,12 +18965,26 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
       /* Edad cumplida desde la fecha de nacimiento, con «hoy» de la Ciudad de
          México. Con una fecha vacía, incompleta o futura, la edad queda vacía. */
-      for (const campo of $$('[data-campo][data-formato=&quot;fecha&quot;][data-deriva]', form)) {
+      /* Fecha día/mes/año (formato «fecha-dma»), sin calendario: la escritura
+         se acomoda sola (23 → 23/, 07 → 23/07/) mientras se escribe al final;
+         al borrar o al editar en medio no se mueve nada. Corre en el control,
+         antes de que el núcleo lea el valor. */
+      for (const campo of $$('[data-campo][data-formato=&quot;fecha-dma&quot;]', form)) {
+        const ctl = controlPrincipal(campo.dataset.campo);
+        if (!ctl || ctl.tagName !== 'INPUT') continue;
+        ctl.addEventListener('input', (e) => {
+          if ((e.inputType &amp;&amp; e.inputType.startsWith('delete')) || ctl.selectionStart !== ctl.value.length) return;
+          const v = cfg.guiaFechaDma(ctl.value);
+          if (v !== ctl.value) { ctl.value = v; ctl.setSelectionRange(v.length, v.length); }
+        });
+      }
+
+      for (const campo of $$('[data-campo][data-formato=&quot;fecha&quot;][data-deriva],[data-campo][data-formato=&quot;fecha-dma&quot;][data-deriva]', form)) {
         const ctl = controlPrincipal(campo.dataset.campo);
         const destinos = campo.dataset.deriva.split(/\s+/).filter((p) => p.startsWith('edad=')).map((p) => p.slice(5));
         if (!ctl || !destinos.length) continue;
         const calcula = () => {
-          const v = ctl.value;
+          const v = campo.dataset.formato === 'fecha-dma' ? cfg.isoDeDma(ctl.value) : ctl.value;
           const edad = /^\d{4}-\d{2}-\d{2}$/.test(v) &amp;&amp; v <= cfg.hoyISO() ? String(cfg.edadEn(v, cfg.hoyISO())) : '';
           for (const d of destinos) {
             const c = controlPrincipal(d);
@@ -18600,7 +19098,9 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
           const ctlDestino = envDestino &amp;&amp; controlPrincipal(destino);
           if (!ctlDestino) continue;
           const bruto = datos[clave] || '';
-          const valor = clave === 'sexo' &amp;&amp; ctlDestino.tagName !== 'SELECT' ? (textos[bruto] || bruto) : bruto;
+          /* La fecha de nacimiento va como el destino la pide: AAAA-MM-DD o, en «fecha-dma», DD/MM/AAAA. */
+          const valor = clave === 'sexo' &amp;&amp; ctlDestino.tagName !== 'SELECT' ? (textos[bruto] || bruto)
+            : clave === 'fechaNacimiento' &amp;&amp; envDestino.dataset.formato === 'fecha-dma' ? cfg.dmaDeIso(bruto) : bruto;
           if (ctlDestino.value !== valor) {
             ctlDestino.value = valor;
             ctlDestino.dispatchEvent(new Event('change', { bubbles: true }));
@@ -19239,6 +19739,37 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 <nav class="paginacion" data-paginacion data-total="312" data-pagina="2" data-tamano="20" data-tamanos="10,20,50" data-lista="#m_resultados" aria-label="Páginas de resultados (muestra)"></nav>
 </template>
 
+<template data-demo="visor">
+<!-- Visor de documentos. En computadora queda fijo a la derecha de lo que se revisa; en teléfono se abre a pantalla completa. Los documentos son ficticios. -->
+<div class="visor-area">
+  <div>
+    <p><button type="button" class="btn-enlace" data-visor-url="muestras/comprobante-muestra.pdf" data-visor-titulo="Comprobante de domicilio" data-visor-archivo="comprobante-muestra.pdf">Ver documento<span class="solo-lector">: Comprobante de domicilio</span></button> · PDF de dos hojas</p>
+    <p><button type="button" class="btn-enlace" data-visor-url="muestras/identificacion-muestra.png" data-visor-titulo="Identificación oficial" data-visor-archivo="identificacion-muestra.png">Ver documento<span class="solo-lector">: Identificación oficial</span></button> · imagen</p>
+  </div>
+  <dialog class="visor" data-visor aria-labelledby="visor-titulo">
+    <div class="visor-cabeza">
+      <div class="visor-nombre">
+        <h4 class="visor-titulo" id="visor-titulo" data-visor-titulo>Documento</h4>
+        <p class="visor-archivo mono" data-visor-archivo></p>
+      </div>
+      <button type="button" class="btn-enlace visor-cerrar" data-visor-accion="cerrar">Cerrar</button>
+    </div>
+    <div class="visor-barra" role="toolbar" aria-label="Herramientas del visor">
+      <button type="button" class="btn btn-secundario" data-visor-accion="alejar" aria-label="Alejar"><span class="visor-paso" aria-hidden="true">−</span></button>
+      <output class="visor-zoom" data-visor-zoom aria-live="polite">100 %</output>
+      <button type="button" class="btn btn-secundario" data-visor-accion="acercar" aria-label="Acercar"><span class="visor-paso" aria-hidden="true">+</span></button>
+      <button type="button" class="btn btn-secundario" data-visor-accion="ajustar">Ajustar al ancho</button>
+      <button type="button" class="btn btn-secundario" data-visor-accion="girar">Girar</button>
+      <a class="btn-enlace visor-abrir" data-visor-abrir href="#" target="_blank" rel="noopener">Abrir en otra pestaña<svg class="icono icono-sm" aria-hidden="true"><use href="#i-externo"></use></svg><span class="solo-lector"> (se abre en otra pestaña)</span></a>
+    </div>
+    <p class="visor-pagina" data-visor-pagina aria-live="polite"></p>
+    <p class="aviso visor-aviso" data-visor-aviso hidden></p>
+    <div class="visor-hojas" data-visor-hojas tabindex="0" aria-label="Hojas del documento"></div>
+    <p class="visor-nota" data-visor-nota hidden></p>
+  </dialog>
+</div>
+</template>
+
 <template data-demo="version">
 <!-- El distintivo va dentro del pie de la página (<footer class="pie">), fijo abajo a la izquierda. Aquí se ven los tres estados quietos, uno junto a otro; los textos son de muestra: el texto y el estado los pone el sitio. -->
 <footer class="guia-version-demo">
@@ -19255,9 +19786,11 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 <template data-demo="tabla">
 <div class="tabla-marco" data-tabla data-clave="folio">
   <table class="tabla"><caption class="tabla-titulo">Solicitudes (muestra)</caption>
-    <thead><tr><th scope="col" data-ordenable>Folio</th><th scope="col" data-ordenable>Título</th><th scope="col" data-ordenable>Fecha</th><th scope="col">Acciones</th></tr></thead>
+    <thead><tr><th scope="col" data-ordenable>Folio</th><th scope="col" data-ordenable>Título</th><th scope="col" data-ordenable>Fecha</th><th scope="col"><span class="solo-lector">Acciones</span></th></tr></thead>
     <tbody>
       <tr data-folio="EJ-001"><td>EJ-001</td><td>Árbol de prueba inclinado</td><td>2026-03-01</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
+      <!-- Fila oculta por un filtro: el rayado alterno cuenta sólo las filas visibles. -->
+      <tr data-folio="EJ-004" hidden><td>EJ-004</td><td>Fila filtrada de prueba</td><td>2026-02-01</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
       <tr data-folio="EJ-002"><td>EJ-002</td><td>Residuos de prueba</td><td>2026-02-10</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
       <tr data-folio="EJ-003"><td>EJ-003</td><td>Registro con un título muy largo que no cabe en una línea</td><td>2026-01-20</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
     </tbody>
@@ -19481,10 +20014,11 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 <template data-demo="bloque-nacimiento">
 <!-- Bloque «Fecha de nacimiento y edad», para cuando no se pide la CURP. Antes de usarlo, cambia data-uso y data-finalidad por el uso real en tu formulario (FRM-55). Si tu formulario exige una edad mínima o máxima, agrega a la fecha data-cruzada="edad" data-cruzada-campos="fecha=b_fn_fecha" y data-edad-min o data-edad-max. -->
 <div class="fila">
-  <div class="campo" data-campo="b_fn_fecha" data-formato="fecha" data-no-futura data-requerido data-sensible data-deriva="edad=b_fn_edad" data-uso="Conocer la edad de quien llena el formulario." data-finalidad="Identificar a la persona.">
+  <!-- Sin calendario (formato «fecha-dma»): la fecha de nacimiento se escribe día/mes/año y la escritura se acomoda sola. -->
+  <div class="campo" data-campo="b_fn_fecha" data-formato="fecha-dma" data-no-futura data-requerido data-sensible data-deriva="edad=b_fn_edad" data-uso="Conocer la edad de quien llena el formulario." data-finalidad="Identificar a la persona.">
     <label class="etiqueta" for="b_fn_fecha">Fecha de nacimiento</label>
-    <p class="ayuda">Como aparece en tu acta de nacimiento.</p>
-    <input class="control control-corto" id="b_fn_fecha" name="b_fn_fecha" type="date" autocomplete="bday">
+    <p class="ayuda">Día, mes y año, como en tu acta de nacimiento. Por ejemplo: 23/07/1985.</p>
+    <input class="control control-corto" id="b_fn_fecha" name="b_fn_fecha" type="text" inputmode="numeric" maxlength="10" autocomplete="bday">
   </div>
   <!-- autocomplete off: la edad no se escribe; se calcula con la fecha de nacimiento. -->
   <div class="campo" data-campo="b_fn_edad" data-formato="numero" data-sensible data-uso="Derivada de la fecha de nacimiento; no se pide por separado." data-finalidad="Identificar a la persona.">
@@ -19523,6 +20057,12 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
 <template data-demo="chips">
 <div class="campo" data-campo="m_cat" data-requerido data-uso="Muestra." data-chips><label class="etiqueta" for="m_cat">Categoría (con sugerencias de uso frecuente)</label><p class="ayuda">Escribe un valor y sal del campo: aparece como sugerencia. El historial vive sólo en este dispositivo.</p><input class="control" id="m_cat" name="m_cat" type="text" maxlength="60" autocomplete="off"></div>
+<!-- Respuestas frecuentes fijas (data-chips-fijos): la misma lista siempre, sin guardar nada en el dispositivo. En un texto largo, cada chip agrega su texto al final para completarlo. -->
+<div class="campo" data-campo="m_observacion" data-uso="Muestra." data-chips-fijos="No se lee completo|Está vencido|No corresponde al requisito|Falta una página">
+  <label class="etiqueta" for="m_observacion">¿Qué debe corregir la persona? (con respuestas frecuentes fijas)</label>
+  <p class="ayuda">Elige un motivo frecuente y complétalo con tus palabras.</p>
+  <textarea class="control control-texto" id="m_observacion" name="m_observacion" rows="3" maxlength="400" autocomplete="off"></textarea>
+</div>
 </template>
 
 <script data-origen="codigo\js\validaciones.config.js">
@@ -19561,6 +20101,44 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
   const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
   const esFechaReal = (a, m, d) => { const f = new Date(Date.UTC(a, m - 1, d)); return f.getUTCFullYear() === a && f.getUTCMonth() === m - 1 && f.getUTCDate() === d; };
+
+  /* Fecha escrita como día/mes/año (formato «fecha-dma»): 23/07/1985,
+     23-07-1985, 23.07.1985, 23 07 1985 o 23071985; también AAAA-MM-DD, que es
+     lo que pone el autocompletado del navegador. */
+  function partesDma(v) {
+    const t = String(v || '').trim();
+    let m = t.match(/^(\d{1,2})\s*[/.\- ]\s*(\d{1,2})\s*[/.\- ]\s*(\d{4})$/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (m) return { d: Number(m[1]), m: Number(m[2]), a: Number(m[3]) };
+    m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? { d: Number(m[3]), m: Number(m[2]), a: Number(m[1]) } : null;
+  }
+  const dosCifras = (n) => String(n).padStart(2, '0');
+  /* «23/07/1985» → «1985-07-23»; '' si no es una fecha real. */
+  const isoDeDma = (v) => { const p = partesDma(v); return p && esFechaReal(p.a, p.m, p.d) ? `${p.a}-${dosCifras(p.m)}-${dosCifras(p.d)}` : ''; };
+  /* «1985-07-23» → «23/07/1985». */
+  const dmaDeIso = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
+  /* Escritura guiada, sin calendario: al completar el día pasa al mes y al
+     completar el mes pasa al año, poniendo las diagonales. Un primer dígito
+     que no puede empezar un día de dos cifras (4 a 9) o un mes (2 a 9) se
+     completa con cero: «4» → «04/». Una diagonal, punto, guion o espacio tras
+     un solo dígito también lo cierra: «3/» → «03/». */
+  function guiaFechaDma(texto) {
+    const seg = ['', '', ''];
+    const cerrado = [false, false];
+    let i = 0;
+    for (const c of String(texto)) {
+      if (/\d/.test(c)) {
+        if (i < 2 && cerrado[i]) i++;
+        if (i === 2) { if (seg[2].length < 4) seg[2] += c; continue; }
+        seg[i] += c;
+        if (seg[i].length === 1 && Number(c) > (i === 0 ? 3 : 1)) seg[i] = `0${c}`;
+        if (seg[i].length === 2) cerrado[i] = true;
+      } else if (/[/.\- ]/.test(c) && i < 2 && seg[i].length === 1) {
+        seg[i] = `0${seg[i]}`; cerrado[i] = true;
+      }
+    }
+    return seg[0] + (cerrado[0] ? '/' : '') + seg[1] + (cerrado[1] ? '/' : '') + seg[2];
+  }
   const hoyISO = () => {
     /* La fecha de «hoy» se toma en la zona horaria de la Ciudad de México,
        no en la del dispositivo: una persona que captura desde otro huso no
@@ -19792,6 +20370,21 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         return '';
       }
     },
+    'fecha-dma': {
+      descripcion: 'Fecha real escrita como día/mes/año (DD/MM/AAAA), sin calendario; para la fecha de nacimiento',
+      inputmode: 'numeric', autocomplete: 'off',
+      normaliza: (v) => { const iso = isoDeDma(v); return iso ? dmaDeIso(iso) : recorta(v); },
+      valida: (v, a = {}) => {
+        const iso = isoDeDma(v);
+        if (!iso) return 'Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985';
+        if (Number(iso.slice(0, 4)) < 1900) return 'Revisa el año: escribe los cuatro dígitos, de 1900 en adelante. Ejemplo: 1985';
+        /* En el navegador llega data-no-futura; en el servidor, max ya resuelto a hoy. */
+        const max = a.max || (a.noFutura !== undefined ? hoyISO() : '');
+        if (max && iso > max) return max === hoyISO() ? 'La fecha no puede ser posterior a hoy.' : `La fecha no puede ser posterior al ${dmaDeIso(max)}.`;
+        if (a.min && iso < a.min) return `La fecha no puede ser anterior al ${dmaDeIso(a.min)}.`;
+        return '';
+      }
+    },
     hora: {
       descripcion: 'Hora en formato de 24 horas',
       inputmode: 'numeric', autocomplete: 'off',
@@ -19864,7 +20457,8 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     'curp-fecha': {
       descripcion: 'La fecha de nacimiento coincide con la contenida en la CURP',
       campos: ['curp', 'fecha'], bloquea: true,
-      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === fecha ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
+      /* La fecha puede venir como AAAA-MM-DD (formato «fecha») o DD/MM/AAAA («fecha-dma»). */
+      valida: ({ curp, fecha }) => (fechaDeCurp(curp) === (isoDeDma(fecha) || fecha) ? '' : 'La fecha de nacimiento no coincide con la CURP. Revisa que ambos datos estén correctos.')
     },
     'curp-sexo': {
       descripcion: 'El sexo declarado coincide con la posición 11 de la CURP',
@@ -19935,6 +20529,9 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     }
   };
 
+  /* «curp-fecha-dma»: el mismo cruce, con el nombre que usan los proyectos con fecha día/mes/año. */
+  CRUZADAS['curp-fecha-dma'] = { ...CRUZADAS['curp-fecha'], descripcion: 'La fecha de nacimiento (día/mes/año) coincide con la contenida en la CURP' };
+
   /* ---------- Archivos ---------- */
   const ARCHIVOS = {
     extensiones: ['jpg', 'jpeg', 'png', 'pdf'],
@@ -19960,7 +20557,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.1.0',
+    version: '1.2.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -19979,6 +20576,10 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     anuncios: { retardoMs: 50 },
     combo: { maxResultados: 8 },
     chips: { max: 5, clave: 'sia-chips' },
+    /* Visor de documentos: dónde está pdf.js (vacío: vendor/pdfjs-dist/ junto
+       al paquete), desde qué ancho queda fijo junto a lo que se revisa en lugar
+       de abrirse a pantalla completa, y la espera para repintar al cambiar el tamaño. */
+    visor: { pdfjs: '', fijoDesde: '(min-width: 1024px)', retardoMs: 250 },
     mensajes: {
       prefijoError: 'Error:',
       obligatorioTexto: 'Completa «{etiqueta}».',
@@ -20056,11 +20657,17 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       mapaFuera: 'El punto queda fuera del ámbito. Muévelo o escribe la dirección.',
       chipsBorrar: 'Borrar historial',
       chipsQuitar: 'Quitar {texto} de las sugerencias',
+      chipsFijos: 'Respuestas frecuentes para {etiqueta}',
+      chipsAgregado: 'Agregado: {texto}',
+      visorCargando: 'Cargando el documento…',
+      visorError: 'No se pudo mostrar el documento aquí. Ábrelo en otra pestaña con el enlace de arriba.',
+      visorNavegador: 'Se muestra con el visor del navegador. Si no lo ves completo, ábrelo en otra pestaña con el enlace de arriba.',
+      visorHoja: 'Hoja {n} de {total}',
       sesionExpira: 'Tu sesión terminará en {min} minutos. Guarda o continúa para mantenerla.'
     }
   };
 
-  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
+  return Object.assign(CONFIG, { pareceTexto, fechaDeCurp, digitoCurp, letrasDeCurp, prefijoCurp, isoDeDma, dmaDeIso, guiaFechaDma, hoyISO, ahoraHM, edadEn, plantilla, recorta, soloDigitos, distancia, formatosArchivo });
 }));
 
 </script>
@@ -20537,7 +21144,7 @@ window.GUIA_PARES = [
 </script>
 <script data-origen="guia-visual\manifiesto.js">
 /* GENERADO por herramientas/construir.mjs desde codigo/manifiesto.json. No se edita a mano. */
-window.GUIA_MANIFIESTO = {"_nota":"Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).","version":"1.1.0","nucleo":{"archivos":["codigo/css/tokens.css","codigo/css/base.css","codigo/css/nucleo.css","codigo/js/validaciones.config.js","codigo/js/formkit.core.js","codigo/js/iconos.js"],"orden":"tokens.css → base.css → nucleo.css → (CSS de módulos) … validaciones.config.js → iconos.js → formkit.core.js → (JS de módulos)","incluye":[{"pieza":"Campo (etiqueta, ayuda, control, error)","nivel":"BASE"},{"pieza":"Texto corto, correo, teléfono, numérico, texto largo con contador","nivel":"BASE"},{"pieza":"Lista desplegable simple (select)","nivel":"BASE"},{"pieza":"Casilla de declaración o consentimiento","nivel":"BASE"},{"pieza":"Solo lectura frente a deshabilitado","nivel":"BASE"},{"pieza":"Pregunta condicional (data-si)","nivel":"BASE"},{"pieza":"Autocompletado, inputmode y enterkeyhint","nivel":"BASE"},{"pieza":"Validación individual, cruzada y resumen de errores con foco","nivel":"BASE"},{"pieza":"Botones (principal, secundario, peligro, atrás, enlace, icono)","nivel":"BASE"},{"pieza":"Avisos (neutro, advertencia, bloqueo, éxito) y pendiente visible","nivel":"BASE"},{"pieza":"Iconografía (sprite SVG)","nivel":"BASE"},{"pieza":"Estados de envío (enviando, error, plazo, límite) sin duplicados","nivel":"BASE"},{"pieza":"Borrador local versionado","nivel":"RECOMENDADO"},{"pieza":"Encabezado y pie institucionales, enlace de salto","nivel":"BASE"}],"tamano":{"tokens.css":8394,"base.css":5841,"nucleo.css":16940,"validaciones.config.js":31865,"formkit.core.js":46299,"iconos.js":5845}},"modulos":[{"nombre":"opciones","titulo":"Opciones elegibles","nivel":"BASE","tipo":"pregunta","proposito":"Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con descripción y la variante corta Sí/No, sobre controles nativos. Para una sola respuesta, la lista (.opciones-lista, una por renglón con el círculo visible) es la forma por omisión; dos o tres opciones cortas sin descripción (Sí/No) van en línea (.opciones-en-linea). La opción deshabilitada se ve atenuada.","cuando":"Elegir una o varias respuestas entre 2 y 7 opciones conocidas.","cuandoNo":"Más de 7 opciones (usa combo); ajustes inmediatos (usa toggle); escalas (usa escala).","dependencias":[],"js":false,"accesibilidad":"Input nativo cubriendo la tarjeta: flechas, espacio, anuncio «botón de opción 1 de 3»; lo elegido se marca con fondo, sombra interior y palomita.","movil":"Una columna, también la lista en línea; Sí/No con botones a 48 px con puntero grueso.","escritorio":"Lista con el círculo visible; en línea, una columna por opción con el hueco de las filas de campos; Sí/No con botones a 40 px con ratón.","errores":["Usar div con onclick en lugar de radio.","Marcar lo elegido sólo con color.","Premarcar una opción.","Más de siete tarjetas.","Tarjetas en rejilla para una sola respuesta: en escritorio no se ve que hay que elegir una.","Sí/No apilado a todo lo ancho: dos o tres opciones cortas van en línea."],"archivos":{"css":"codigo/modulos/opciones/opciones.css","js":null},"tamano":{"css":5175,"js":0}},{"nombre":"otro","titulo":"Opción «Otro» con especificación","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Campo de texto que aparece al elegir «Otro» en radios, casillas, select o tarjetas; obligatorio sólo mientras exista; conserva lo escrito.","cuando":"La lista puede no cubrir el caso de la persona.","cuandoNo":"El detalle no se va a usar (usa «Otro» simple, que es una opción más).","dependencias":["opciones"],"js":true,"accesibilidad":"aria-expanded y aria-controls en el control que gobierna; sin mover el foco; mensaje propio de obligatorio.","movil":"Igual que el campo de texto.","escritorio":"Igual.","errores":["Poner «Otro» al inicio de la lista.","Enviar el texto aunque «Otro» no esté elegida.","Borrar lo escrito al desmarcar."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/otro/otro.js"},"tamano":{"css":0,"js":4313}},{"nombre":"combo","titulo":"Lista desplegable con búsqueda","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, anuncia resultados; cerrado por omisión, libre con data-libre.","cuando":"Catálogos de 8 o más valores (alcaldías, giros, especies).","cuandoNo":"Listas cortas (usa select u opciones).","dependencias":[],"js":true,"accesibilidad":"role=combobox, aria-expanded, aria-activedescendant, flechas, Inicio/Fin, Enter, Escape; no abre al recibir foco para no tapar el error.","movil":"Lista bajo el campo, 44 px por opción.","escritorio":"Igual, 8 resultados máximo.","errores":["Mezclar select nativo y combo en el mismo formulario.","Escribir el catálogo a mano en el código.","Aceptar valor libre sin decirlo."],"archivos":{"css":"codigo/modulos/combo/combo.css","js":"codigo/modulos/combo/combo.js"},"tamano":{"css":1466,"js":7871}},{"nombre":"fecha","titulo":"Fecha y hora con «Hoy» y atajos","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria de la Ciudad de México, límites por atributo, atajos de rango y edad calculada desde la fecha de nacimiento (data-deriva=\"edad=…\"), que nunca se escribe a mano.","cuando":"Cualquier fecha u hora.","cuandoNo":"Fecha de nacimiento cuando ya se pide CURP (se deriva).","dependencias":[],"js":true,"accesibilidad":"Botón con texto; el valor nuevo se anuncia; la validación cruzada de rango se declara sola.","movil":"Botón bajo el campo a todo lo ancho; rueda nativa del sistema.","escritorio":"Botón al lado del campo.","errores":["Tomar «hoy» del reloj del dispositivo sin zona horaria.","Permitir fecha de hechos futura.","Rango sin validación cruzada.","Pedir la edad escrita además de la fecha de nacimiento."],"archivos":{"css":"codigo/modulos/fecha/fecha.css","js":"codigo/modulos/fecha/fecha.js"},"tamano":{"css":1003,"js":6042}},{"nombre":"identificadores","titulo":"CURP, RFC y folios","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Campos con formato cerrado: mayúsculas al escribir, validación por capas desde la configuración, derivación de fecha de nacimiento y sexo desde la CURP a campos de solo lectura, enmascarado en revisión.","cuando":"El formulario necesita identificar a la persona.","cuandoNo":"Cuando el dato no tiene uso declarado: la CURP es dato personal.","dependencias":[],"js":true,"accesibilidad":"Los derivados se anuncian («tomado de la CURP»); el mensaje dice qué posición falló.","movil":"autocapitalize=characters; teclado de texto.","escritorio":"Igual.","errores":["Pedir fecha de nacimiento y CURP por separado sin cruzarlas.","Registrar la CURP en bitácoras o en la URL.","Dar por verificada la existencia con el formato."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/identificadores/identificadores.js"},"tamano":{"css":0,"js":3908}},{"nombre":"repetibles","titulo":"Grupos repetibles («Agregar otro»)","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos.","cuando":"La cantidad de elementos la decide la persona.","cuandoNo":"Siempre son exactamente N (ponlos fijos).","dependencias":["modal"],"js":true,"accesibilidad":"Cada fila tiene título numerado y botón «Quitar fila N»; el foco va al primer campo al agregar y a un lugar sensato al quitar.","movil":"Filas apiladas como tarjetas.","escritorio":"Igual; en tabla de captura, por renglones.","errores":["Nombres de campo repetidos entre filas.","Quitar sin confirmar una fila con datos.","Sin máximo."],"archivos":{"css":"codigo/modulos/repetibles/repetibles.css","js":"codigo/modulos/repetibles/repetibles.js"},"tamano":{"css":929,"js":6960}},{"nombre":"toggle","titulo":"Interruptor","nivel":"OPCIONAL","tipo":"pregunta","proposito":"role=switch para ajustes que surten efecto de inmediato.","cuando":"Activar o desactivar algo al momento (mostrar mapa, recibir avisos).","cuandoNo":"Una respuesta del formulario (usa casilla o Sí/No).","dependencias":[],"js":true,"accesibilidad":"aria-checked es el estado; texto «Sí/No» visible; 44 px.","movil":"Igual.","escritorio":"Igual.","errores":["Usarlo como consentimiento.","Estado sólo por color."],"archivos":{"css":"codigo/modulos/toggle/toggle.css","js":"codigo/modulos/toggle/toggle.js"},"tamano":{"css":1458,"js":2633}},{"nombre":"escala","titulo":"Escala o valoración","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Radios en fila (1 a 5) con extremos rotulados.","cuando":"Encuestas y valoraciones.","cuandoNo":"Más de 7 puntos; respuestas con descripción (usa opciones).","dependencias":["opciones"],"js":false,"accesibilidad":"fieldset/legend; extremos en texto oculto en el primer y último radio.","movil":"Puntos a 48 px repartidos a lo ancho.","escritorio":"Igual.","errores":["Escala sin extremos rotulados.","Puntos menores de 44 px."],"archivos":{"css":"codigo/modulos/escala/escala.css","js":null},"tamano":{"css":2215,"js":0}},{"nombre":"pasos","titulo":"Formulario por pasos y barra de avance","nivel":"RECOMENDADO","tipo":"navegacion","proposito":"Pasos con barra fija navegable que valida igual que «Continuar»; estados completado, actual, pendiente y con error; «Paso X de N» en teléfono; recordatorio; barra de acciones fija opcional.","cuando":"Más de una pantalla de preguntas.","cuandoNo":"Formularios de 5 campos o menos (una página).","dependencias":[],"js":true,"accesibilidad":"Botones con aria-current=step y nombre «Paso N de M: título, completado»; el foco va al título al cambiar; Enter avanza, no envía.","movil":"Círculos sin etiqueta + «Paso X de N · Título»; acciones en columna, principal arriba. Opcional: la clase acciones-fijas en el bloque de acciones del paso lo deja fijo al pie, respetando las áreas seguras del teléfono.","escritorio":"Etiquetas bajo cada círculo; acciones en fila.","errores":["Deshabilitar los pasos futuros (el teclado no puede inspeccionarlos).","Barra que deja saltar sobre errores.","Mover el foco en cada cambio de campo."],"archivos":{"css":"codigo/modulos/pasos/pasos.css","js":"codigo/modulos/pasos/pasos.js"},"tamano":{"css":4892,"js":8949}},{"nombre":"revision","titulo":"Pantalla de revisión","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el campo y enmascarado de identificadores.","cuando":"Siempre que haya más de un paso o datos personales.","cuandoNo":"Formularios de una pregunta.","dependencias":["pasos"],"js":true,"accesibilidad":"details/summary nativos; «Editar» con el nombre del campo para el lector.","movil":"Etiqueta y valor apilados.","escritorio":"Dos columnas.","errores":["«Editar» que lleva al inicio del paso.","Mostrar campos ocultos por condicional."],"archivos":{"css":"codigo/modulos/revision/revision.css","js":"codigo/modulos/revision/revision.js"},"tamano":{"css":2164,"js":3292}},{"nombre":"acuse","titulo":"Acuse y «qué sigue»","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descarga opcional y pantalla de límite de envíos.","cuando":"Todo envío que genere folio.","cuandoNo":"Capturas internas sin acuse.","dependencias":["copiar"],"js":true,"accesibilidad":"Foco al título del acuse; folio en tarjeta, no en botón; la secuencia es una lista ordenada.","movil":"Acciones en columna.","escritorio":"Acciones en fila centradas.","errores":["Prometer plazos que el sistema no controla.","Folio con aspecto de botón.","No borrar el borrador al recibir."],"archivos":{"css":"codigo/modulos/acuse/acuse.css","js":"codigo/modulos/acuse/acuse.js"},"tamano":{"css":2839,"js":3482}},{"nombre":"modal","titulo":"Diálogo y confirmación","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"<dialog> nativo para contenido que hay que leer y FormKit.confirma() para acciones irreversibles; hoja inferior en teléfono.","cuando":"Aviso de privacidad; confirmar descartar, quitar o enviar sin vuelta atrás.","cuandoNo":"Errores de campo; avisos sin decisión; acciones recuperables.","dependencias":[],"js":true,"accesibilidad":"Trampa de foco nativa, Escape cierra, el foco vuelve a quien abrió; foco inicial en la opción segura.","movil":"Hoja inferior a todo lo ancho con dvh y franja segura.","escritorio":"Caja centrada de 560 px.","errores":["confirm()/alert() nativos.","Foco inicial en la acción destructiva.","Diálogo para instrucciones que deberían estar en pantalla."],"archivos":{"css":"codigo/modulos/modal/modal.css","js":"codigo/modulos/modal/modal.js"},"tamano":{"css":1731,"js":4090}},{"nombre":"copiar","titulo":"Copiar y compartir","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Botones de copiar (folio, campo de solo lectura) y compartir, con confirmación visible y anunciada y alternativa sin portapapeles.","cuando":"Todo dato que la persona deba transcribir.","cuandoNo":"Datos sensibles que no deban salir de la pantalla.","dependencias":[],"js":true,"accesibilidad":"El botón cambia su texto a «Copiado» y se anuncia; sin portapapeles selecciona el texto.","movil":"navigator.share cuando existe.","escritorio":"Copia el enlace.","errores":["Confirmar sólo con un color.","Icono solo sin texto."],"archivos":{"css":"codigo/modulos/copiar/copiar.css","js":"codigo/modulos/copiar/copiar.js"},"tamano":{"css":542,"js":4052}},{"nombre":"descarga","titulo":"Botón de descarga","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Enlace o botón de descarga con icono, acción, formato y peso; estado de preparación; aviso de otra pestaña.","cuando":"Acuse en PDF, plantillas, resultados.","cuandoNo":"Abrir un sitio (es un enlace normal).","dependencias":[],"js":true,"accesibilidad":"Texto dice formato y peso; «se abre en otra pestaña» para el lector; aria-busy mientras se genera.","movil":"Igual.","escritorio":"Igual.","errores":["Nombre de archivo con datos personales.","Icono sin texto."],"archivos":{"css":"codigo/modulos/descarga/descarga.css","js":"codigo/modulos/descarga/descarga.js"},"tamano":{"css":434,"js":3337}},{"nombre":"acordeon","titulo":"Acordeón y secciones plegables","nivel":"OPCIONAL","tipo":"navegacion","proposito":"details/summary para datos accesorios y preguntas frecuentes.","cuando":"Información de apoyo que no todos necesitan.","cuandoNo":"Campos obligatorios o contenido necesario para decidir.","dependencias":[],"js":false,"accesibilidad":"Nativo: Enter/espacio, estado expandido anunciado.","movil":"Igual.","escritorio":"Igual.","errores":["Plegar lo obligatorio.","Flecha con imagen (color fuera de :root)."],"archivos":{"css":"codigo/modulos/acordeon/acordeon.css","js":null},"tamano":{"css":2029,"js":0}},{"nombre":"pestanas","titulo":"Pestañas","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Vistas alternativas del mismo contenido con patrón ARIA tabs y teclado completo.","cuando":"Consulta interna con varias vistas.","cuandoNo":"Dividir un formulario que debe llenarse completo (usa pasos).","dependencias":[],"js":true,"accesibilidad":"role=tab/tabpanel, aria-selected, tabindex rotatorio, flechas e Inicio/Fin.","movil":"Lista con desplazamiento horizontal.","escritorio":"Igual.","errores":["Pestañas con campos obligatorios ocultos.","Más de 5 pestañas."],"archivos":{"css":"codigo/modulos/pestanas/pestanas.css","js":"codigo/modulos/pestanas/pestanas.js"},"tamano":{"css":1101,"js":2941}},{"nombre":"migas","titulo":"Migas de pan","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Ubicación dentro del sitio o del sistema.","cuando":"Consulta interna con niveles.","cuandoNo":"Dentro de un formulario por pasos.","dependencias":[],"js":false,"accesibilidad":"nav con aria-label; aria-current=page; separadores dibujados, no leídos.","movil":"Sólo el nivel anterior con flecha.","escritorio":"Ruta completa.","errores":["Separador con carácter que el lector lee.","Último nivel como enlace a sí mismo."],"archivos":{"css":"codigo/modulos/migas/migas.css","js":null},"tamano":{"css":2540,"js":0}},{"nombre":"progreso","titulo":"Barra de progreso","nivel":"OPCIONAL","tipo":"navegacion","proposito":"<progress> nativo con porcentaje en texto; indeterminado dice «Cargando…».","cuando":"Cargas y formularios largos de una página.","cuandoNo":"Formularios por pasos.","dependencias":[],"js":true,"accesibilidad":"Etiqueta asociada; aria-valuetext con el porcentaje.","movil":"Igual.","escritorio":"Igual.","errores":["Porcentaje sólo visual.","Barra que nunca termina sin mensaje."],"archivos":{"css":"codigo/modulos/progreso/progreso.css","js":"codigo/modulos/progreso/progreso.js"},"tamano":{"css":1126,"js":1810}},{"nombre":"paginacion","titulo":"Paginación de resultados","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Paginación numerada o «Cargar más» con rango visible, tamaño de página, anuncio y foco al inicio de la lista.","cuando":"Listas y tablas de más de una pantalla.","cuandoNo":"Menos de 20 resultados.","dependencias":[],"js":true,"accesibilidad":"nav con etiqueta; aria-current=page; Anterior/Siguiente con aria-disabled; anuncio «Página N de M».","movil":"Anterior · «Página X de N» · Siguiente.","escritorio":"Números, rango y selector.","errores":["Desplazamiento infinito.","Perder filtros al cambiar de página.","Foco que se queda en el botón pulsado."],"archivos":{"css":"codigo/modulos/paginacion/paginacion.css","js":"codigo/modulos/paginacion/paginacion.js"},"tamano":{"css":2189,"js":6129}},{"nombre":"version","titulo":"Distintivo de versión","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Distintivo pequeño y siempre visible, fijo abajo a la izquierda, que dice qué versión del sitio se tiene enfrente: de prueba (dorado), instalada en el SIA (gris) o sin leer (guinda). Es la hoja de la plantilla de versión del SIA hecha con los tokens del estándar.","cuando":"Sitios que se prueban antes de instalarse en el SIA, o que deben mostrar su versión en pantalla.","cuandoNo":"Para avisos a la persona (usa los avisos del núcleo): el distintivo no recibe toques ni se anuncia como estado.","dependencias":[],"js":false,"accesibilidad":"Va dentro del pie (<footer>), para quedar en una región de la página; no recibe toques (pointer-events: none), así que nunca tapa un control; texto de 4.5:1 o más en sus tres estados.","movil":"Abajo a la izquierda, respetando el área segura de la pantalla.","escritorio":"Igual; al imprimir va en su lugar, sin flotar.","errores":["Ponerlo fuera del pie: axe lo marca como contenido fuera de una región.","Escribir colores o medidas a mano en lugar de los tokens (el auditor de CSS lo rechaza).","Usarlo para avisar algo a la persona."],"archivos":{"css":"codigo/modulos/version/version.css","js":null},"tamano":{"css":2244,"js":0}},{"nombre":"tooltip","titulo":"Ayuda desplegable","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Botón «?» que muestra un texto corto, por clic y teclado, con Escape.","cuando":"Aclaración breve junto a una etiqueta.","cuandoNo":"Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay ícono).","dependencias":[],"js":true,"accesibilidad":"aria-expanded, aria-describedby mientras está abierto, role=tooltip; no depende de hover.","movil":"Texto bajo la etiqueta, dentro del ancho del campo (no se sale de la pantalla aunque el «?» esté al borde), no flotante sobre otros controles.","escritorio":"Igual.","errores":["Sólo con hover.","Texto largo.","Repetir la ayuda visible del mismo campo (auditar-campos D5)."],"archivos":{"css":"codigo/modulos/tooltip/tooltip.css","js":"codigo/modulos/tooltip/tooltip.js"},"tamano":{"css":1511,"js":2737}},{"nombre":"tabla","titulo":"Tabla de consulta y de captura","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Tabla con caption, orden por columna accesible, estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.","cuando":"Consulta interna de registros.","cuandoNo":"Maquetar.","dependencias":["repetibles"],"js":true,"accesibilidad":"th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123».","movil":"Cada fila es una tarjeta.","escritorio":"Tabla con desplazamiento controlado.","errores":["Tabla sin encabezados.","«Eliminar» sin decir qué.","Desplazamiento horizontal libre en teléfono."],"archivos":{"css":"codigo/modulos/tabla/tabla.css","js":"codigo/modulos/tabla/tabla.js"},"tamano":{"css":2845,"js":4714}},{"nombre":"archivos","titulo":"Carga de archivos y fotografías","nivel":"RECOMENDADO","tipo":"archivos","proposito":"Zona de carga (botón real + arrastre), cámara en móvil, validación por extensión, firma, peso, total, duplicados y dimensiones; optimización; huella SHA-256; EXIF configurable; estado, vista previa, quitar y reintentar por archivo.","cuando":"Evidencia, documentos, fotografías.","cuandoNo":"Un solo archivo pequeño sin optimizar (basta el input nativo con ayuda).","dependencias":[],"js":true,"accesibilidad":"La zona es un botón con nombre; cada archivo dice su estado; rechazos con role=alert que nombran el archivo y el motivo.","movil":"Botón de cámara con capture (environment para evidencias; user para una fotografía de frente); vista previa de 96 px; con un solo archivo, los textos en singular.","escritorio":"Arrastrar y soltar; guardia global de drop.","errores":["Validar sólo por extensión.","Medir el peso antes de optimizar.","Enviar la ubicación de la foto sin que la persona lo sepa."],"archivos":{"css":"codigo/modulos/archivos/archivos.css","js":"codigo/modulos/archivos/archivos.js"},"tamano":{"css":2637,"js":19102}},{"nombre":"mapa","titulo":"Mapa con selección de punto","nivel":"OPCIONAL","tipo":"archivos","proposito":"Leaflet autoalojado con gestos que no atrapan la página, marcador propio, ámbito acotado, confirmación del punto, alternativa manual y sin mapa base.","cuando":"Se necesita un punto además de la dirección.","cuandoNo":"Basta la dirección escrita; coordenadas exactas que identifiquen un domicilio sin uso declarado.","dependencias":[],"js":true,"accesibilidad":"role=application con nombre; coordenadas en texto con aria-live; Enter coloca el punto; alternativa de coordenadas manuales.","movil":"Un dedo desplaza la página, dos el mapa; alto fluido.","escritorio":"Clic y arrastre.","errores":["Mapa como único camino.","Teselas con clave escrita en el código.","Punto fuera del ámbito aceptado hasta el envío."],"archivos":{"css":"codigo/modulos/mapa/mapa.css","js":"codigo/modulos/mapa/mapa.js"},"tamano":{"css":2754,"js":9846}},{"nombre":"enlace-mapa","titulo":"Coordenadas desde un enlace de Google Maps","nivel":"OPCIONAL","tipo":"archivos","proposito":"La persona pega el enlace de Google Maps del lugar y el módulo escribe sus coordenadas en el campo de coordenadas, que valida el núcleo. También acomoda lo que se escribe directo: latitud y longitud al revés, grados-minutos-segundos, coma decimal o la longitud sin signo menos. El enlace no se envía; sólo viajan las coordenadas.","cuando":"Se pide la ubicación exacta de un domicilio o de un sitio y la persona puede tenerla en Google Maps (por ejemplo, la que le llegó por WhatsApp).","cuandoNo":"Como única vía para dar la ubicación: la dirección va primero (FRM-46). Tampoco para resolver enlaces cortos, que obligarían a la página a consultar a Google (FRM-77).","dependencias":[],"js":true,"accesibilidad":"Lo que se toma del enlace o se corrige se dice con palabras y se anuncia («Coordenadas tomadas del enlace: …»); los avisos llevan icono y texto, no sólo color.","movil":"Lee el enlace en cuanto se pega, sin salir del campo. Agrega el signo menos que el teclado numérico del iPhone no trae.","escritorio":"Igual; también al salir del campo.","errores":["Tomar el centro de la pantalla (@) como si fuera el lugar: el punto puede caer a cientos de metros.","Tomar el primer punto del enlace en lugar del último.","Rechazar coordenadas que vienen al revés o sin el signo menos.","Pedirle a Google desde la página que resuelva un enlace corto."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/enlace-mapa/enlace-mapa.js"},"tamano":{"css":0,"js":8196}},{"nombre":"cascadas","titulo":"Campos dependientes en cascada","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Alcaldía → colonia → código postal desde un catálogo oficial versionado; relación inversa desde el código postal; captura manual si el catálogo no carga.","cuando":"Domicilio dentro de un ámbito con catálogo.","cuandoNo":"Sin catálogo oficial disponible (captura libre).","dependencias":[],"js":true,"accesibilidad":"El hijo deshabilitado explica por qué; cada reinicio y cada autocompletado se anuncian.","movil":"Selects nativos (rueda del sistema).","escritorio":"Selects.","errores":["Catálogo escrito a mano.","Reiniciar al hijo sin anunciarlo.","Bloquear si el cp no coincide (es advertencia)."],"archivos":{"css":"codigo/modulos/cascadas/cascadas.css","js":"codigo/modulos/cascadas/cascadas.js"},"tamano":{"css":539,"js":7583}},{"nombre":"chips","titulo":"Chips de uso frecuente","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Sugerencias de un toque desde el historial del dispositivo; nunca al servidor; quitar y borrar historial; se niega en datos personales.","cuando":"Captura por personal con respuestas repetidas.","cuandoNo":"Formularios ciudadanos de una sola vez; datos personales.","dependencias":[],"js":true,"accesibilidad":"Botones con aria-pressed; «Quitar X de las sugerencias»; grupo con nombre.","movil":"Chips de 44 px que se envuelven.","escritorio":"Igual.","errores":["Guardar historial de nombre o correo.","Chips sin forma de borrarlos."],"archivos":{"css":"codigo/modulos/chips/chips.css","js":"codigo/modulos/chips/chips.js"},"tamano":{"css":1459,"js":4836}}],"generado":"2026-10-16T15:11:01.640Z"};
+window.GUIA_MANIFIESTO = {"_nota":"Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).","version":"1.2.0","nucleo":{"archivos":["codigo/css/tokens.css","codigo/css/base.css","codigo/css/nucleo.css","codigo/js/validaciones.config.js","codigo/js/formkit.core.js","codigo/js/iconos.js"],"orden":"tokens.css → base.css → nucleo.css → (CSS de módulos) … validaciones.config.js → iconos.js → formkit.core.js → (JS de módulos)","incluye":[{"pieza":"Campo (etiqueta, ayuda, control, error)","nivel":"BASE"},{"pieza":"Texto corto, correo, teléfono, numérico, texto largo con contador","nivel":"BASE"},{"pieza":"Lista desplegable simple (select)","nivel":"BASE"},{"pieza":"Casilla de declaración o consentimiento","nivel":"BASE"},{"pieza":"Solo lectura frente a deshabilitado","nivel":"BASE"},{"pieza":"Pregunta condicional (data-si)","nivel":"BASE"},{"pieza":"Autocompletado, inputmode y enterkeyhint","nivel":"BASE"},{"pieza":"Validación individual, cruzada y resumen de errores con foco","nivel":"BASE"},{"pieza":"Botones (principal, secundario, peligro, atrás, enlace, icono)","nivel":"BASE"},{"pieza":"Avisos (neutro, advertencia, bloqueo, éxito) y pendiente visible","nivel":"BASE"},{"pieza":"Iconografía (sprite SVG)","nivel":"BASE"},{"pieza":"Estados de envío (enviando, error, plazo, límite) sin duplicados","nivel":"BASE"},{"pieza":"Borrador local versionado","nivel":"RECOMENDADO"},{"pieza":"Encabezado y pie institucionales, enlace de salto","nivel":"BASE"}],"tamano":{"tokens.css":8394,"base.css":5841,"nucleo.css":16940,"validaciones.config.js":36165,"formkit.core.js":46299,"iconos.js":5845}},"modulos":[{"nombre":"opciones","titulo":"Opciones elegibles","nivel":"BASE","tipo":"pregunta","proposito":"Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con descripción y la variante corta Sí/No, sobre controles nativos. Para una sola respuesta, la lista (.opciones-lista, una por renglón con el círculo visible) es la forma por omisión; dos o tres opciones cortas sin descripción (Sí/No) van en línea (.opciones-en-linea). La opción deshabilitada se ve atenuada.","cuando":"Elegir una o varias respuestas entre 2 y 7 opciones conocidas.","cuandoNo":"Más de 7 opciones (usa combo); ajustes inmediatos (usa toggle); escalas (usa escala).","dependencias":[],"js":false,"accesibilidad":"Input nativo cubriendo la tarjeta: flechas, espacio, anuncio «botón de opción 1 de 3»; lo elegido se marca con fondo, sombra interior y palomita.","movil":"Una columna, también la lista en línea; Sí/No con botones a 48 px con puntero grueso.","escritorio":"Lista con el círculo visible; en línea, una columna por opción con el hueco de las filas de campos; Sí/No con botones a 40 px con ratón.","errores":["Usar div con onclick en lugar de radio.","Marcar lo elegido sólo con color.","Premarcar una opción.","Más de siete tarjetas.","Tarjetas en rejilla para una sola respuesta: en escritorio no se ve que hay que elegir una.","Sí/No apilado a todo lo ancho: dos o tres opciones cortas van en línea."],"archivos":{"css":"codigo/modulos/opciones/opciones.css","js":null},"tamano":{"css":5175,"js":0}},{"nombre":"otro","titulo":"Opción «Otro» con especificación","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Campo de texto que aparece al elegir «Otro» en radios, casillas, select o tarjetas; obligatorio sólo mientras exista; conserva lo escrito.","cuando":"La lista puede no cubrir el caso de la persona.","cuandoNo":"El detalle no se va a usar (usa «Otro» simple, que es una opción más).","dependencias":["opciones"],"js":true,"accesibilidad":"aria-expanded y aria-controls en el control que gobierna; sin mover el foco; mensaje propio de obligatorio.","movil":"Igual que el campo de texto.","escritorio":"Igual.","errores":["Poner «Otro» al inicio de la lista.","Enviar el texto aunque «Otro» no esté elegida.","Borrar lo escrito al desmarcar."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/otro/otro.js"},"tamano":{"css":0,"js":4313}},{"nombre":"combo","titulo":"Lista desplegable con búsqueda","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, anuncia resultados; cerrado por omisión, libre con data-libre.","cuando":"Catálogos de 8 o más valores (alcaldías, giros, especies).","cuandoNo":"Listas cortas (usa select u opciones).","dependencias":[],"js":true,"accesibilidad":"role=combobox, aria-expanded, aria-activedescendant, flechas, Inicio/Fin, Enter, Escape; no abre al recibir foco para no tapar el error.","movil":"Lista bajo el campo, 44 px por opción.","escritorio":"Igual, 8 resultados máximo.","errores":["Mezclar select nativo y combo en el mismo formulario.","Escribir el catálogo a mano en el código.","Aceptar valor libre sin decirlo."],"archivos":{"css":"codigo/modulos/combo/combo.css","js":"codigo/modulos/combo/combo.js"},"tamano":{"css":1466,"js":7871}},{"nombre":"fecha","titulo":"Fecha y hora con «Hoy» y atajos","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria de la Ciudad de México, límites por atributo, atajos de rango y edad calculada desde la fecha de nacimiento (data-deriva=\"edad=…\"), que nunca se escribe a mano. Para la fecha de nacimiento, sin calendario: formato «fecha-dma», escrita día/mes/año (23/07/1985) con la escritura acomodada sola.","cuando":"Cualquier fecha u hora.","cuandoNo":"Fecha de nacimiento cuando ya se pide CURP (se deriva).","dependencias":[],"js":true,"accesibilidad":"Botón con texto; el valor nuevo se anuncia; la validación cruzada de rango se declara sola.","movil":"Botón bajo el campo a todo lo ancho; rueda nativa del sistema.","escritorio":"Botón al lado del campo.","errores":["Tomar «hoy» del reloj del dispositivo sin zona horaria.","Permitir fecha de hechos futura.","Rango sin validación cruzada.","Pedir la edad escrita además de la fecha de nacimiento.","Pedir la fecha de nacimiento con el calendario: obliga a recorrer décadas; se escribe día/mes/año («fecha-dma»)."],"archivos":{"css":"codigo/modulos/fecha/fecha.css","js":"codigo/modulos/fecha/fecha.js"},"tamano":{"css":1003,"js":7213}},{"nombre":"identificadores","titulo":"CURP, RFC y folios","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Campos con formato cerrado: mayúsculas al escribir, validación por capas desde la configuración, derivación de fecha de nacimiento y sexo desde la CURP a campos de solo lectura, enmascarado en revisión.","cuando":"El formulario necesita identificar a la persona.","cuandoNo":"Cuando el dato no tiene uso declarado: la CURP es dato personal.","dependencias":[],"js":true,"accesibilidad":"Los derivados se anuncian («tomado de la CURP»); el mensaje dice qué posición falló.","movil":"autocapitalize=characters; teclado de texto.","escritorio":"Igual.","errores":["Pedir fecha de nacimiento y CURP por separado sin cruzarlas.","Registrar la CURP en bitácoras o en la URL.","Dar por verificada la existencia con el formato."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/identificadores/identificadores.js"},"tamano":{"css":0,"js":4129}},{"nombre":"repetibles","titulo":"Grupos repetibles («Agregar otro»)","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos.","cuando":"La cantidad de elementos la decide la persona.","cuandoNo":"Siempre son exactamente N (ponlos fijos).","dependencias":["modal"],"js":true,"accesibilidad":"Cada fila tiene título numerado y botón «Quitar fila N»; el foco va al primer campo al agregar y a un lugar sensato al quitar.","movil":"Filas apiladas como tarjetas.","escritorio":"Igual; en tabla de captura, por renglones.","errores":["Nombres de campo repetidos entre filas.","Quitar sin confirmar una fila con datos.","Sin máximo."],"archivos":{"css":"codigo/modulos/repetibles/repetibles.css","js":"codigo/modulos/repetibles/repetibles.js"},"tamano":{"css":929,"js":6960}},{"nombre":"toggle","titulo":"Interruptor","nivel":"OPCIONAL","tipo":"pregunta","proposito":"role=switch para ajustes que surten efecto de inmediato.","cuando":"Activar o desactivar algo al momento (mostrar mapa, recibir avisos).","cuandoNo":"Una respuesta del formulario (usa casilla o Sí/No).","dependencias":[],"js":true,"accesibilidad":"aria-checked es el estado; texto «Sí/No» visible; 44 px.","movil":"Igual.","escritorio":"Igual.","errores":["Usarlo como consentimiento.","Estado sólo por color."],"archivos":{"css":"codigo/modulos/toggle/toggle.css","js":"codigo/modulos/toggle/toggle.js"},"tamano":{"css":1458,"js":2633}},{"nombre":"escala","titulo":"Escala o valoración","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Radios en fila (1 a 5) con extremos rotulados.","cuando":"Encuestas y valoraciones.","cuandoNo":"Más de 7 puntos; respuestas con descripción (usa opciones).","dependencias":["opciones"],"js":false,"accesibilidad":"fieldset/legend; extremos en texto oculto en el primer y último radio.","movil":"Puntos a 48 px repartidos a lo ancho.","escritorio":"Igual.","errores":["Escala sin extremos rotulados.","Puntos menores de 44 px."],"archivos":{"css":"codigo/modulos/escala/escala.css","js":null},"tamano":{"css":2215,"js":0}},{"nombre":"pasos","titulo":"Formulario por pasos y barra de avance","nivel":"RECOMENDADO","tipo":"navegacion","proposito":"Pasos con barra fija navegable que valida igual que «Continuar»; estados completado, actual, pendiente y con error; «Paso X de N» en teléfono; recordatorio; barra de acciones fija opcional.","cuando":"Más de una pantalla de preguntas.","cuandoNo":"Formularios de 5 campos o menos (una página).","dependencias":[],"js":true,"accesibilidad":"Botones con aria-current=step y nombre «Paso N de M: título, completado»; el foco va al título al cambiar; Enter avanza, no envía.","movil":"Círculos sin etiqueta + «Paso X de N · Título»; acciones en columna, principal arriba. Opcional: la clase acciones-fijas en el bloque de acciones del paso lo deja fijo al pie, respetando las áreas seguras del teléfono.","escritorio":"Etiquetas bajo cada círculo; acciones en fila.","errores":["Deshabilitar los pasos futuros (el teclado no puede inspeccionarlos).","Barra que deja saltar sobre errores.","Mover el foco en cada cambio de campo."],"archivos":{"css":"codigo/modulos/pasos/pasos.css","js":"codigo/modulos/pasos/pasos.js"},"tamano":{"css":4892,"js":8949}},{"nombre":"revision","titulo":"Pantalla de revisión","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el campo y enmascarado de identificadores.","cuando":"Siempre que haya más de un paso o datos personales.","cuandoNo":"Formularios de una pregunta.","dependencias":["pasos"],"js":true,"accesibilidad":"details/summary nativos; «Editar» con el nombre del campo para el lector.","movil":"Etiqueta y valor apilados.","escritorio":"Dos columnas.","errores":["«Editar» que lleva al inicio del paso.","Mostrar campos ocultos por condicional."],"archivos":{"css":"codigo/modulos/revision/revision.css","js":"codigo/modulos/revision/revision.js"},"tamano":{"css":2164,"js":3292}},{"nombre":"acuse","titulo":"Acuse y «qué sigue»","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descarga opcional y pantalla de límite de envíos.","cuando":"Todo envío que genere folio.","cuandoNo":"Capturas internas sin acuse.","dependencias":["copiar"],"js":true,"accesibilidad":"Foco al título del acuse; folio en tarjeta, no en botón; la secuencia es una lista ordenada.","movil":"Acciones en columna.","escritorio":"Acciones en fila centradas.","errores":["Prometer plazos que el sistema no controla.","Folio con aspecto de botón.","No borrar el borrador al recibir."],"archivos":{"css":"codigo/modulos/acuse/acuse.css","js":"codigo/modulos/acuse/acuse.js"},"tamano":{"css":2839,"js":3482}},{"nombre":"modal","titulo":"Diálogo y confirmación","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"<dialog> nativo para contenido que hay que leer y FormKit.confirma() para acciones irreversibles; hoja inferior en teléfono.","cuando":"Aviso de privacidad; confirmar descartar, quitar o enviar sin vuelta atrás.","cuandoNo":"Errores de campo; avisos sin decisión; acciones recuperables.","dependencias":[],"js":true,"accesibilidad":"Trampa de foco nativa, Escape cierra, el foco vuelve a quien abrió; foco inicial en la opción segura.","movil":"Hoja inferior a todo lo ancho con dvh y franja segura.","escritorio":"Caja centrada de 560 px.","errores":["confirm()/alert() nativos.","Foco inicial en la acción destructiva.","Diálogo para instrucciones que deberían estar en pantalla."],"archivos":{"css":"codigo/modulos/modal/modal.css","js":"codigo/modulos/modal/modal.js"},"tamano":{"css":1731,"js":4090}},{"nombre":"copiar","titulo":"Copiar y compartir","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Botones de copiar (folio, campo de solo lectura) y compartir, con confirmación visible y anunciada y alternativa sin portapapeles.","cuando":"Todo dato que la persona deba transcribir.","cuandoNo":"Datos sensibles que no deban salir de la pantalla.","dependencias":[],"js":true,"accesibilidad":"El botón cambia su texto a «Copiado» y se anuncia; sin portapapeles selecciona el texto.","movil":"navigator.share cuando existe.","escritorio":"Copia el enlace.","errores":["Confirmar sólo con un color.","Icono solo sin texto."],"archivos":{"css":"codigo/modulos/copiar/copiar.css","js":"codigo/modulos/copiar/copiar.js"},"tamano":{"css":542,"js":4052}},{"nombre":"descarga","titulo":"Botón de descarga","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Enlace o botón de descarga con icono, acción, formato y peso; estado de preparación; aviso de otra pestaña.","cuando":"Acuse en PDF, plantillas, resultados.","cuandoNo":"Abrir un sitio (es un enlace normal).","dependencias":[],"js":true,"accesibilidad":"Texto dice formato y peso; «se abre en otra pestaña» para el lector; aria-busy mientras se genera.","movil":"Igual.","escritorio":"Igual.","errores":["Nombre de archivo con datos personales.","Icono sin texto."],"archivos":{"css":"codigo/modulos/descarga/descarga.css","js":"codigo/modulos/descarga/descarga.js"},"tamano":{"css":434,"js":3337}},{"nombre":"acordeon","titulo":"Acordeón y secciones plegables","nivel":"OPCIONAL","tipo":"navegacion","proposito":"details/summary para datos accesorios y preguntas frecuentes.","cuando":"Información de apoyo que no todos necesitan.","cuandoNo":"Campos obligatorios o contenido necesario para decidir.","dependencias":[],"js":false,"accesibilidad":"Nativo: Enter/espacio, estado expandido anunciado.","movil":"Igual.","escritorio":"Igual.","errores":["Plegar lo obligatorio.","Flecha con imagen (color fuera de :root)."],"archivos":{"css":"codigo/modulos/acordeon/acordeon.css","js":null},"tamano":{"css":2029,"js":0}},{"nombre":"pestanas","titulo":"Pestañas","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Vistas alternativas del mismo contenido con patrón ARIA tabs y teclado completo.","cuando":"Consulta interna con varias vistas.","cuandoNo":"Dividir un formulario que debe llenarse completo (usa pasos).","dependencias":[],"js":true,"accesibilidad":"role=tab/tabpanel, aria-selected, tabindex rotatorio, flechas e Inicio/Fin.","movil":"Lista con desplazamiento horizontal.","escritorio":"Igual.","errores":["Pestañas con campos obligatorios ocultos.","Más de 5 pestañas."],"archivos":{"css":"codigo/modulos/pestanas/pestanas.css","js":"codigo/modulos/pestanas/pestanas.js"},"tamano":{"css":1101,"js":2941}},{"nombre":"migas","titulo":"Migas de pan","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Ubicación dentro del sitio o del sistema.","cuando":"Consulta interna con niveles.","cuandoNo":"Dentro de un formulario por pasos.","dependencias":[],"js":false,"accesibilidad":"nav con aria-label; aria-current=page; separadores dibujados, no leídos.","movil":"Sólo el nivel anterior con flecha.","escritorio":"Ruta completa.","errores":["Separador con carácter que el lector lee.","Último nivel como enlace a sí mismo."],"archivos":{"css":"codigo/modulos/migas/migas.css","js":null},"tamano":{"css":2540,"js":0}},{"nombre":"progreso","titulo":"Barra de progreso","nivel":"OPCIONAL","tipo":"navegacion","proposito":"<progress> nativo con porcentaje en texto; indeterminado dice «Cargando…».","cuando":"Cargas y formularios largos de una página.","cuandoNo":"Formularios por pasos.","dependencias":[],"js":true,"accesibilidad":"Etiqueta asociada; aria-valuetext con el porcentaje.","movil":"Igual.","escritorio":"Igual.","errores":["Porcentaje sólo visual.","Barra que nunca termina sin mensaje."],"archivos":{"css":"codigo/modulos/progreso/progreso.css","js":"codigo/modulos/progreso/progreso.js"},"tamano":{"css":1126,"js":1810}},{"nombre":"paginacion","titulo":"Paginación de resultados","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Paginación numerada o «Cargar más» con rango visible, tamaño de página, anuncio y foco al inicio de la lista.","cuando":"Listas y tablas de más de una pantalla.","cuandoNo":"Menos de 20 resultados.","dependencias":[],"js":true,"accesibilidad":"nav con etiqueta; aria-current=page; Anterior/Siguiente con aria-disabled; anuncio «Página N de M».","movil":"Anterior · «Página X de N» · Siguiente.","escritorio":"Números, rango y selector.","errores":["Desplazamiento infinito.","Perder filtros al cambiar de página.","Foco que se queda en el botón pulsado."],"archivos":{"css":"codigo/modulos/paginacion/paginacion.css","js":"codigo/modulos/paginacion/paginacion.js"},"tamano":{"css":2189,"js":6129}},{"nombre":"version","titulo":"Distintivo de versión","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Distintivo pequeño y siempre visible, fijo abajo a la izquierda, que dice qué versión del sitio se tiene enfrente: de prueba (dorado), instalada en el SIA (gris) o sin leer (guinda). Es la hoja de la plantilla de versión del SIA hecha con los tokens del estándar.","cuando":"Sitios que se prueban antes de instalarse en el SIA, o que deben mostrar su versión en pantalla.","cuandoNo":"Para avisos a la persona (usa los avisos del núcleo): el distintivo no recibe toques ni se anuncia como estado.","dependencias":[],"js":false,"accesibilidad":"Va dentro del pie (<footer>), para quedar en una región de la página; no recibe toques (pointer-events: none), así que nunca tapa un control; texto de 4.5:1 o más en sus tres estados.","movil":"Abajo a la izquierda, respetando el área segura de la pantalla.","escritorio":"Igual; al imprimir va en su lugar, sin flotar.","errores":["Ponerlo fuera del pie: axe lo marca como contenido fuera de una región.","Escribir colores o medidas a mano en lugar de los tokens (el auditor de CSS lo rechaza).","Usarlo para avisar algo a la persona."],"archivos":{"css":"codigo/modulos/version/version.css","js":null},"tamano":{"css":2244,"js":0}},{"nombre":"tooltip","titulo":"Ayuda desplegable","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Botón «?» que muestra un texto corto, por clic y teclado, con Escape.","cuando":"Aclaración breve junto a una etiqueta.","cuandoNo":"Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay ícono).","dependencias":[],"js":true,"accesibilidad":"aria-expanded, aria-describedby mientras está abierto, role=tooltip; no depende de hover.","movil":"Texto bajo la etiqueta, dentro del ancho del campo (no se sale de la pantalla aunque el «?» esté al borde), no flotante sobre otros controles.","escritorio":"Igual.","errores":["Sólo con hover.","Texto largo.","Repetir la ayuda visible del mismo campo (auditar-campos D5)."],"archivos":{"css":"codigo/modulos/tooltip/tooltip.css","js":"codigo/modulos/tooltip/tooltip.js"},"tamano":{"css":1511,"js":2737}},{"nombre":"tabla","titulo":"Tabla de consulta y de captura","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Tabla con caption, orden por columna accesible, estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.","cuando":"Consulta interna de registros.","cuandoNo":"Maquetar.","dependencias":["repetibles"],"js":true,"accesibilidad":"th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123».","movil":"Cada fila es una tarjeta.","escritorio":"Tabla con desplazamiento controlado.","errores":["Tabla sin encabezados.","«Eliminar» sin decir qué.","Desplazamiento horizontal libre en teléfono.","Filtrar ocultando filas y que el rayado alterno se descuadre (cuenta sólo las filas visibles).","Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla."],"archivos":{"css":"codigo/modulos/tabla/tabla.css","js":"codigo/modulos/tabla/tabla.js"},"tamano":{"css":3279,"js":5093}},{"nombre":"archivos","titulo":"Carga de archivos y fotografías","nivel":"RECOMENDADO","tipo":"archivos","proposito":"Zona de carga (botón real + arrastre), cámara en móvil, validación por extensión, firma, peso, total, duplicados y dimensiones; optimización; huella SHA-256; EXIF configurable; estado, vista previa, quitar y reintentar por archivo.","cuando":"Evidencia, documentos, fotografías.","cuandoNo":"Un solo archivo pequeño sin optimizar (basta el input nativo con ayuda).","dependencias":[],"js":true,"accesibilidad":"La zona es un botón con nombre; cada archivo dice su estado; rechazos con role=alert que nombran el archivo y el motivo.","movil":"Botón de cámara con capture (environment para evidencias; user para una fotografía de frente); vista previa de 96 px; con un solo archivo, los textos en singular.","escritorio":"Arrastrar y soltar; guardia global de drop.","errores":["Validar sólo por extensión.","Medir el peso antes de optimizar.","Enviar la ubicación de la foto sin que la persona lo sepa."],"archivos":{"css":"codigo/modulos/archivos/archivos.css","js":"codigo/modulos/archivos/archivos.js"},"tamano":{"css":2637,"js":19102}},{"nombre":"visor","titulo":"Visor de documentos","nivel":"OPCIONAL","tipo":"archivos","proposito":"Para quien revisa lo que se cargó: muestra todas las hojas de un PDF, una debajo de otra, con contador de hoja, acercar y alejar, ajustar al ancho, girar y abrir en otra pestaña; también imágenes. En computadora queda fijo junto a lo que se revisa, para decidir viendo el documento; en teléfono se abre a pantalla completa. Usa pdf.js (vendor/pdfjs-dist), que se carga sólo al abrir el primer PDF.","cuando":"Revisión documental: personal que acepta u observa los documentos que la persona cargó.","cuandoNo":"Para que la persona vea lo que ella misma adjuntó (la vista previa de «archivos» basta) o para un solo documento corto (basta «Abrir en otra pestaña»).","dependencias":[],"js":true,"accesibilidad":"Diálogo con título; en teléfono es modal y Escape cierra con el foco de vuelta al botón «Ver documento»; en computadora no le quita el foco a quien revisa. Cada hoja es una imagen con nombre («Hoja 1 de 2»); el contador y el acercamiento se anuncian; barra de herramientas con nombre.","movil":"Pantalla completa, con «Cerrar»; la barra se parte en dos renglones si no cabe.","escritorio":"Columna fija a la derecha de lo que se revisa (.visor-area), del alto de la pantalla.","errores":["Abrir el documento en otra pestaña como única forma de revisarlo: quien revisa pierde lo que estaba decidiendo.","Mostrar sólo la primera hoja.","Cargar pdf.js de una CDN.","Usar una versión de pdf.js anterior a la 4.2.67, que deja ejecutar código desde un PDF malicioso."],"archivos":{"css":"codigo/modulos/visor/visor.css","js":"codigo/modulos/visor/visor.js"},"tamano":{"css":3321,"js":11563}},{"nombre":"mapa","titulo":"Mapa con selección de punto","nivel":"OPCIONAL","tipo":"archivos","proposito":"Leaflet autoalojado con gestos que no atrapan la página, marcador propio, ámbito acotado, confirmación del punto, alternativa manual y sin mapa base.","cuando":"Se necesita un punto además de la dirección.","cuandoNo":"Basta la dirección escrita; coordenadas exactas que identifiquen un domicilio sin uso declarado.","dependencias":[],"js":true,"accesibilidad":"role=application con nombre; coordenadas en texto con aria-live; Enter coloca el punto; alternativa de coordenadas manuales.","movil":"Un dedo desplaza la página, dos el mapa; alto fluido.","escritorio":"Clic y arrastre.","errores":["Mapa como único camino.","Teselas con clave escrita en el código.","Punto fuera del ámbito aceptado hasta el envío."],"archivos":{"css":"codigo/modulos/mapa/mapa.css","js":"codigo/modulos/mapa/mapa.js"},"tamano":{"css":2754,"js":9846}},{"nombre":"enlace-mapa","titulo":"Coordenadas desde un enlace de Google Maps","nivel":"OPCIONAL","tipo":"archivos","proposito":"La persona pega el enlace de Google Maps del lugar y el módulo escribe sus coordenadas en el campo de coordenadas, que valida el núcleo. También acomoda lo que se escribe directo: latitud y longitud al revés, grados-minutos-segundos, coma decimal o la longitud sin signo menos. El enlace no se envía; sólo viajan las coordenadas.","cuando":"Se pide la ubicación exacta de un domicilio o de un sitio y la persona puede tenerla en Google Maps (por ejemplo, la que le llegó por WhatsApp).","cuandoNo":"Como única vía para dar la ubicación: la dirección va primero (FRM-46). Tampoco para resolver enlaces cortos, que obligarían a la página a consultar a Google (FRM-77).","dependencias":[],"js":true,"accesibilidad":"Lo que se toma del enlace o se corrige se dice con palabras y se anuncia («Coordenadas tomadas del enlace: …»); los avisos llevan icono y texto, no sólo color.","movil":"Lee el enlace en cuanto se pega, sin salir del campo. Agrega el signo menos que el teclado numérico del iPhone no trae.","escritorio":"Igual; también al salir del campo.","errores":["Tomar el centro de la pantalla (@) como si fuera el lugar: el punto puede caer a cientos de metros.","Tomar el primer punto del enlace en lugar del último.","Rechazar coordenadas que vienen al revés o sin el signo menos.","Pedirle a Google desde la página que resuelva un enlace corto."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/enlace-mapa/enlace-mapa.js"},"tamano":{"css":0,"js":8196}},{"nombre":"cascadas","titulo":"Campos dependientes en cascada","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Alcaldía → colonia → código postal desde un catálogo oficial versionado; relación inversa desde el código postal; captura manual si el catálogo no carga.","cuando":"Domicilio dentro de un ámbito con catálogo.","cuandoNo":"Sin catálogo oficial disponible (captura libre).","dependencias":[],"js":true,"accesibilidad":"El hijo deshabilitado explica por qué; cada reinicio y cada autocompletado se anuncian.","movil":"Selects nativos (rueda del sistema).","escritorio":"Selects.","errores":["Catálogo escrito a mano.","Reiniciar al hijo sin anunciarlo.","Bloquear si el cp no coincide (es advertencia)."],"archivos":{"css":"codigo/modulos/cascadas/cascadas.css","js":"codigo/modulos/cascadas/cascadas.js"},"tamano":{"css":539,"js":7583}},{"nombre":"chips","titulo":"Chips de uso frecuente","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Sugerencias de un toque desde el historial del dispositivo (nunca al servidor; quitar y borrar historial; se niega en datos personales) y respuestas frecuentes fijas (data-chips-fijos), que no guardan nada y sirven en cualquier campo: en un texto largo, el chip agrega su texto para completarlo.","cuando":"Captura por personal con respuestas repetidas.","cuandoNo":"Historial: formularios ciudadanos de una sola vez y datos personales (para ellos, la lista fija).","dependencias":[],"js":true,"accesibilidad":"Botones con aria-pressed; «Quitar X de las sugerencias»; grupo con nombre.","movil":"Chips de 44 px que se envuelven.","escritorio":"Igual.","errores":["Guardar historial de nombre o correo.","Chips sin forma de borrarlos."],"archivos":{"css":"codigo/modulos/chips/chips.css","js":"codigo/modulos/chips/chips.js"},"tamano":{"css":1628,"js":7077}}],"generado":"2026-10-17T14:30:55.008Z"};
 
 </script>
 <script data-origen="guia-visual\guia-config.js">
@@ -20583,7 +21190,7 @@ window.FORMKIT_OPCIONES = {
 </script>
 <script data-origen="codigo\js\formkit.core.js">
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.1.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -21839,11 +22446,14 @@ window.FORMKIT_OPCIONES = {
    Para edad: data-deriva="edad=edad" en el campo de la fecha de nacimiento;
    el destino es un [data-campo] con <input readonly>. La edad nunca se
    escribe a mano: se calcula, también cuando la fecha viene de la CURP.
+   Para la fecha de nacimiento, sin calendario: data-formato="fecha-dma" en
+   un <input type="text" inputmode="numeric" maxlength="10">; se escribe
+   día/mes/año (23/07/1985) y la escritura se acomoda sola.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('fecha', {
-    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato="fecha"][data-deriva]',
+    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato="fecha"][data-deriva],[data-formato="fecha-dma"]',
     iniciar(form, ctx) {
       const { $, $$, cfg, M, anuncia, envoltura, controlPrincipal, validaYPinta, programaBorrador } = ctx;
 
@@ -21873,12 +22483,26 @@ window.FORMKIT_OPCIONES = {
 
       /* Edad cumplida desde la fecha de nacimiento, con «hoy» de la Ciudad de
          México. Con una fecha vacía, incompleta o futura, la edad queda vacía. */
-      for (const campo of $$('[data-campo][data-formato="fecha"][data-deriva]', form)) {
+      /* Fecha día/mes/año (formato «fecha-dma»), sin calendario: la escritura
+         se acomoda sola (23 → 23/, 07 → 23/07/) mientras se escribe al final;
+         al borrar o al editar en medio no se mueve nada. Corre en el control,
+         antes de que el núcleo lea el valor. */
+      for (const campo of $$('[data-campo][data-formato="fecha-dma"]', form)) {
+        const ctl = controlPrincipal(campo.dataset.campo);
+        if (!ctl || ctl.tagName !== 'INPUT') continue;
+        ctl.addEventListener('input', (e) => {
+          if ((e.inputType && e.inputType.startsWith('delete')) || ctl.selectionStart !== ctl.value.length) return;
+          const v = cfg.guiaFechaDma(ctl.value);
+          if (v !== ctl.value) { ctl.value = v; ctl.setSelectionRange(v.length, v.length); }
+        });
+      }
+
+      for (const campo of $$('[data-campo][data-formato="fecha"][data-deriva],[data-campo][data-formato="fecha-dma"][data-deriva]', form)) {
         const ctl = controlPrincipal(campo.dataset.campo);
         const destinos = campo.dataset.deriva.split(/\s+/).filter((p) => p.startsWith('edad=')).map((p) => p.slice(5));
         if (!ctl || !destinos.length) continue;
         const calcula = () => {
-          const v = ctl.value;
+          const v = campo.dataset.formato === 'fecha-dma' ? cfg.isoDeDma(ctl.value) : ctl.value;
           const edad = /^\d{4}-\d{2}-\d{2}$/.test(v) && v <= cfg.hoyISO() ? String(cfg.edadEn(v, cfg.hoyISO())) : '';
           for (const d of destinos) {
             const c = controlPrincipal(d);
@@ -21994,7 +22618,9 @@ window.FORMKIT_OPCIONES = {
           const ctlDestino = envDestino && controlPrincipal(destino);
           if (!ctlDestino) continue;
           const bruto = datos[clave] || '';
-          const valor = clave === 'sexo' && ctlDestino.tagName !== 'SELECT' ? (textos[bruto] || bruto) : bruto;
+          /* La fecha de nacimiento va como el destino la pide: AAAA-MM-DD o, en «fecha-dma», DD/MM/AAAA. */
+          const valor = clave === 'sexo' && ctlDestino.tagName !== 'SELECT' ? (textos[bruto] || bruto)
+            : clave === 'fechaNacimiento' && envDestino.dataset.formato === 'fecha-dma' ? cfg.dmaDeIso(bruto) : bruto;
           if (ctlDestino.value !== valor) {
             ctlDestino.value = valor;
             ctlDestino.dispatchEvent(new Event('change', { bubbles: true }));
@@ -23002,8 +23628,14 @@ window.FORMKIT_OPCIONES = {
         const ths = $$('thead th', tabla);
         const clave = marco.dataset.clave;
 
+        /* Un encabezado cuyo texto es sólo para el lector de pantalla (.solo-lector) no se muestra en teléfono. */
+        const soloLector = (th) => { const c = th.cloneNode(true); for (const s of $$('.solo-lector', c)) s.remove(); return !c.textContent.trim(); };
         function etiquetaCeldas() {
-          for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => { if (ths[i] && !td.dataset.etiqueta) td.dataset.etiqueta = ths[i].textContent.trim(); });
+          for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => {
+            if (!ths[i] || td.dataset.etiqueta) return;
+            td.dataset.etiqueta = ths[i].textContent.trim();
+            if (soloLector(ths[i])) td.dataset.etiquetaOculta = '';
+          });
           /* Acciones por fila: «Ver», no basta; «Ver solicitud 123» sí. */
           for (const tr of $$('tbody tr', tabla)) {
             const id = clave ? (tr.dataset[clave] || ($$('td', tr)[ths.findIndex((t) => t.textContent.trim().toLowerCase() === clave)] || {}).textContent) : '';
@@ -23662,14 +24294,57 @@ window.FORMKIT_OPCIONES = {
 
    Contrato HTML: data-chips en el [data-campo]. El aviso de privacidad del
    formulario debe mencionar que se guardan sugerencias en el dispositivo.
+
+   Respuestas frecuentes fijas: data-chips-fijos="Texto uno|Texto dos" en el
+   [data-campo] muestra siempre esa lista (por ejemplo, los motivos para
+   observar un documento). No guarda nada en el dispositivo, así que sirve
+   también en datos personales. En un texto largo, el chip agrega su texto
+   al final («… Falta una página.») para que la persona lo complete; en un
+   campo corto, lo pone como respuesta.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('chips', {
-    selector: '[data-chips]',
+    selector: '[data-chips],[data-chips-fijos]',
     iniciar(form, ctx) {
       const { $$, cfg, M, plantilla, anuncia, almacen, controlPrincipal, valorDe, validaCampo, icono, programaBorrador } = ctx;
       const clave = (n) => `${cfg.chips.clave}:${form.dataset.borrador || form.id || 'form'}:${n}`;
+      const antesDelControl = (ctl, caja) => (ctl.closest('.select,.combo,.control-grupo,.fecha-grupo') || ctl).insertAdjacentElement('beforebegin', caja);
+
+      for (const campo of $$('[data-chips-fijos]', form)) {
+        const n = campo.dataset.campo;
+        const ctl = controlPrincipal(n);
+        const lista = campo.dataset.chipsFijos.split('|').map((t) => t.trim()).filter(Boolean);
+        if (!ctl || !lista.length) continue;
+        const largo = ctl.tagName === 'TEXTAREA';
+        const caja = document.createElement('div');
+        caja.className = 'chips chips-fijos';
+        caja.setAttribute('role', 'group');
+        caja.setAttribute('aria-label', plantilla(M.chipsFijos, { etiqueta: ctx.etiquetaDe(n).toLowerCase() }));
+        for (const t of lista) {
+          const b = document.createElement('button'); b.type = 'button'; b.className = 'chip chip-fijo'; b.dataset.chipFijo = t; b.textContent = t;
+          caja.appendChild(b);
+        }
+        antesDelControl(ctl, caja);
+        const marca = () => { if (!largo) for (const b of $$('[data-chip-fijo]', caja)) b.setAttribute('aria-pressed', String(valorDe(n) === b.dataset.chipFijo)); };
+        caja.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-chip-fijo]');
+          if (!b) return;
+          const t = b.dataset.chipFijo;
+          const previo = ctl.value.trim();
+          ctl.value = largo ? `${previo ? `${previo} ` : ''}${t}${/[.!?]$/.test(t) ? '' : '.'}` : t;
+          ctl.dispatchEvent(new Event('input', { bubbles: true }));
+          ctl.dispatchEvent(new Event('change', { bubbles: true }));
+          ctx.estadoDe(n).tocado = true;
+          ctx.validaYPinta(n);
+          marca();
+          anuncia(plantilla(M.chipsAgregado, { texto: t }));
+          if (largo) { ctl.focus(); ctl.setSelectionRange(ctl.value.length, ctl.value.length); }
+          programaBorrador();
+        });
+        ctl.addEventListener('input', marca);
+        marca();
+      }
 
       for (const campo of $$('[data-chips]', form)) {
         const n = campo.dataset.campo;
@@ -23680,7 +24355,7 @@ window.FORMKIT_OPCIONES = {
         caja.className = 'chips';
         caja.setAttribute('role', 'group');
         caja.setAttribute('aria-label', `Usados antes en ${ctx.etiquetaDe(n).toLowerCase()}`);
-        ctl.closest('.select,.combo,.control-grupo,.fecha-grupo') ? ctl.closest('.select,.combo,.control-grupo,.fecha-grupo').insertAdjacentElement('beforebegin', caja) : ctl.insertAdjacentElement('beforebegin', caja);
+        antesDelControl(ctl, caja);
 
         const lee = () => { try { return JSON.parse(almacen.lee(clave(n)) || '[]'); } catch (e) { return []; } };
         const escribe = (lista) => almacen.escribe(clave(n), JSON.stringify(lista.slice(0, cfg.chips.max)));
@@ -23731,6 +24406,241 @@ window.FORMKIT_OPCIONES = {
     }
   });
 }());
+
+</script>
+<script data-origen="codigo\modulos\visor\visor.js">
+/* =========================================================
+   visor.js · Módulo «visor» · nivel OPCIONAL
+
+   Visor de documentos para quien revisa lo que se cargó: muestra TODAS las
+   hojas de un PDF, una debajo de otra, con contador de hoja, acercar y
+   alejar, ajustar al ancho, girar y abrir en otra pestaña; también muestra
+   imágenes (JPEG, PNG). En computadora (FORMKIT_CONFIG.visor.fijoDesde,
+   1024 px) queda fijo junto a lo que se revisa, para decidir viendo el
+   documento; en pantallas más chicas se abre a pantalla completa como
+   diálogo (Escape cierra y el foco vuelve al botón que lo abrió).
+
+   Usa pdf.js (vendor/pdfjs-dist, sin CDN) y lo carga sólo al abrir el
+   primer PDF. Si no se puede cargar (por ejemplo, la página se abrió con
+   doble clic, sin servidor), muestra el documento con el visor del
+   navegador y lo dice.
+
+   Contrato HTML (el visor va junto a lo que se revisa, en .visor-area):
+     <div class="visor-area">
+       <div>… <button type="button" class="btn-enlace" data-visor-url="docs/ine.pdf"
+                 data-visor-titulo="Identificación oficial" data-visor-archivo="ine.pdf">Ver documento</button> …</div>
+       <dialog class="visor" data-visor aria-labelledby="visor-titulo">
+         <div class="visor-cabeza">
+           <div class="visor-nombre"><h3 class="visor-titulo" id="visor-titulo" data-visor-titulo>Documento</h3>
+             <p class="visor-archivo mono" data-visor-archivo></p></div>
+           <button type="button" class="btn-enlace visor-cerrar" data-visor-accion="cerrar">Cerrar</button>
+         </div>
+         <div class="visor-barra" role="toolbar" aria-label="Herramientas del visor">
+           <button type="button" class="btn btn-secundario" data-visor-accion="alejar" aria-label="Alejar"><span class="visor-paso" aria-hidden="true">−</span></button>
+           <output class="visor-zoom" data-visor-zoom aria-live="polite">100 %</output>
+           <button type="button" class="btn btn-secundario" data-visor-accion="acercar" aria-label="Acercar"><span class="visor-paso" aria-hidden="true">+</span></button>
+           <button type="button" class="btn btn-secundario" data-visor-accion="ajustar">Ajustar al ancho</button>
+           <button type="button" class="btn btn-secundario" data-visor-accion="girar">Girar</button>
+           <a class="btn-enlace visor-abrir" data-visor-abrir href="#" target="_blank" rel="noopener">Abrir en otra pestaña …</a>
+         </div>
+         <p class="visor-pagina" data-visor-pagina aria-live="polite"></p>
+         <p class="aviso visor-aviso" data-visor-aviso hidden></p>
+         <div class="visor-hojas" data-visor-hojas tabindex="0" aria-label="Hojas del documento"></div>
+         <p class="visor-nota" data-visor-nota hidden></p>
+       </dialog>
+     </div>
+   Desde código: FormKit.visor.abre({ url, titulo, archivo, tipo, nota }, boton).
+   Para una imagen sin extensión en la dirección (blob:), data-visor-tipo="image/png".
+   Tomado del sistema de acreditaciones (P67).
+   ========================================================= */
+(function (global) {
+  'use strict';
+  /* Acercamientos: la hoja de estilos da el ancho de cada uno (data-zoom), sin estilos en línea. */
+  const ZOOMS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+  const AJUSTAR = 2; /* 100 %: la hoja al ancho del visor */
+  /* La carpeta de pdf.js va junto al paquete: se deduce de dónde se cargó este
+     archivo (codigo/modulos/visor/visor.js o dist/formkit.js). */
+  const src = document.currentScript && document.currentScript.src;
+  const raiz = src && src.match(/^(.*\/)(?:codigo\/modulos\/visor\/visor|dist\/formkit)\.js(?:\?.*)?$/);
+  const PDFJS_JUNTO = raiz ? `${raiz[1]}vendor/pdfjs-dist/` : '';
+
+  let listo = false;
+  let pdfjs = null;
+  let d, hojas, aviso, contador, ancho, cfg, M;
+  let estado = { doc: null, imagen: false, url: '', zoom: AJUSTAR, giro: 0, tarea: 0 };
+  let origen = null;
+  let observador = null;
+
+  const base = () => { const r = cfg.visor.pdfjs || PDFJS_JUNTO || 'vendor/pdfjs-dist/'; return new URL(r.endsWith('/') ? r : `${r}/`, document.baseURI).href; };
+  const di = (texto) => { aviso.textContent = texto; aviso.hidden = !texto; };
+  const hoja = (n, total) => FormKit.utilidades.plantilla(M.visorHoja, { n, total });
+  const esImagen = (tipo, nombre) => /^image\//.test(tipo || '') || /\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(nombre || '');
+
+  function carga() {
+    if (pdfjs) return Promise.resolve(pdfjs);
+    return import(new URL('pdf.min.mjs', base()).href).then((m) => {
+      m.GlobalWorkerOptions.workerSrc = new URL('pdf.worker.min.mjs', base()).href;
+      pdfjs = m;
+      return m;
+    });
+  }
+
+  /* Pinta todas las hojas al ancho disponible por el acercamiento elegido. */
+  async function pinta() {
+    const tarea = ++estado.tarea;
+    const factor = ZOOMS[estado.zoom];
+    d.querySelector('[data-visor-zoom]').textContent = `${Math.round(factor * 100)} %`;
+    if (estado.imagen) {
+      hojas.dataset.zoom = String(Math.round(factor * 100));
+      const img = hojas.querySelector('img');
+      if (img) img.dataset.giro = String(estado.giro);
+      return;
+    }
+    const doc = estado.doc;
+    if (!doc) return;
+    const disponible = Math.max(hojas.clientWidth - 2 * parseFloat(getComputedStyle(hojas).paddingLeft || 0), 1);
+    const dpr = global.devicePixelRatio || 1;
+    const figuras = [];
+    for (let n = 1; n <= doc.numPages; n++) {
+      const pagina = await doc.getPage(n);
+      if (tarea !== estado.tarea) return; /* llegó otro documento u otro acercamiento */
+      const giro = (pagina.rotate + estado.giro) % 360;
+      const medida = pagina.getViewport({ scale: 1, rotation: giro });
+      const vista = pagina.getViewport({ scale: ((disponible * factor) / medida.width) * dpr, rotation: giro });
+      const lienzo = document.createElement('canvas');
+      lienzo.width = Math.floor(vista.width);
+      lienzo.height = Math.floor(vista.height);
+      lienzo.className = 'visor-lienzo';
+      lienzo.setAttribute('role', 'img');
+      lienzo.setAttribute('aria-label', hoja(n, doc.numPages));
+      const fig = document.createElement('figure');
+      fig.className = 'visor-hoja-pdf';
+      fig.dataset.hoja = String(n);
+      const pie = document.createElement('figcaption');
+      pie.className = 'visor-pie';
+      pie.textContent = hoja(n, doc.numPages);
+      fig.append(lienzo, pie);
+      figuras.push(fig);
+      await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport: vista }).promise;
+    }
+    if (tarea !== estado.tarea) return;
+    hojas.replaceChildren(...figuras);
+    hojas.dataset.zoom = String(Math.round(factor * 100));
+    observa();
+  }
+
+  /* Contador: la hoja que más se ve. */
+  function observa() {
+    if (observador) observador.disconnect();
+    const visibles = new Map();
+    observador = new IntersectionObserver((entradas) => {
+      if (!estado.doc) return;
+      for (const e of entradas) visibles.set(e.target.dataset.hoja, e.intersectionRatio);
+      const [h] = [...visibles.entries()].sort((a, b) => b[1] - a[1])[0] || ['1'];
+      contador.textContent = hoja(h, estado.doc.numPages);
+    }, { root: hojas, threshold: [0, 0.25, 0.5, 0.75, 1] });
+    for (const f of hojas.querySelectorAll('figure')) observador.observe(f);
+    contador.textContent = hoja(1, estado.doc.numPages);
+  }
+
+  /* En computadora queda abierto junto a lo que se revisa sin quitarle el foco a quien revisa (show() lo movería). */
+  function abreDialogo() {
+    if (ancho.matches) { if (!d.open) d.setAttribute('open', ''); } else if (!d.open) d.showModal();
+  }
+
+  /* Si pdf.js no se pudo cargar, el documento se muestra con el visor del navegador. */
+  function enNavegador(url, titulo) {
+    const marco = document.createElement('iframe');
+    marco.className = 'visor-marco';
+    marco.src = url;
+    marco.title = titulo;
+    hojas.replaceChildren(marco);
+    di(M.visorNavegador);
+  }
+
+  async function abre({ url, titulo = 'Documento', archivo = '', tipo = '', nota = '' }, boton) {
+    if (!prepara()) return;
+    origen = boton || null;
+    d.querySelector('[data-visor-titulo]').textContent = titulo;
+    d.querySelector('[data-visor-archivo]').textContent = archivo;
+    d.querySelector('[data-visor-abrir]').href = url;
+    const n = d.querySelector('[data-visor-nota]');
+    if (n) { n.textContent = nota; n.hidden = !nota; }
+    abreDialogo();
+    if (url === estado.url && (estado.doc || estado.imagen)) return;
+    if (observador) observador.disconnect();
+    estado = { doc: null, imagen: false, url, zoom: AJUSTAR, giro: 0, tarea: estado.tarea + 1 };
+    hojas.replaceChildren();
+    contador.textContent = '';
+    if (esImagen(tipo, archivo || url)) {
+      estado.imagen = true;
+      const img = document.createElement('img');
+      img.className = 'visor-lienzo visor-imagen';
+      img.alt = titulo;
+      img.src = url;
+      hojas.replaceChildren(img);
+      di('');
+      pinta();
+      return;
+    }
+    di(M.visorCargando);
+    let m;
+    try { m = await carga(); } catch (e) { if (estado.url === url) enNavegador(url, titulo); return; }
+    try {
+      const doc = await m.getDocument({ url, standardFontDataUrl: new URL('standard_fonts/', base()).href, isEvalSupported: false }).promise;
+      if (estado.url !== url) return;
+      estado.doc = doc;
+      di('');
+      await pinta();
+    } catch (e) {
+      if (estado.url === url) di(M.visorError);
+    }
+  }
+
+  function prepara() {
+    if (listo) return Boolean(d);
+    listo = true;
+    d = document.querySelector('[data-visor]');
+    if (!d) return false;
+    cfg = FormKit.config;
+    M = cfg.mensajes;
+    hojas = d.querySelector('[data-visor-hojas]');
+    aviso = d.querySelector('[data-visor-aviso]');
+    contador = d.querySelector('[data-visor-pagina]');
+    ancho = global.matchMedia(cfg.visor.fijoDesde);
+
+    /* Botones que abren un documento, en cualquier parte de la página. */
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-visor-url]');
+      if (!b) return;
+      e.preventDefault();
+      abre({ url: b.dataset.visorUrl, titulo: b.dataset.visorTitulo || b.textContent.trim(), archivo: b.dataset.visorArchivo || '', tipo: b.dataset.visorTipo || '' }, b);
+    });
+    /* Barra del visor. */
+    d.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-visor-accion]');
+      if (!b) return;
+      const a = b.dataset.visorAccion;
+      if (a === 'cerrar') { d.close(); return; }
+      if (!estado.doc && !estado.imagen) return;
+      if (a === 'acercar') estado.zoom = Math.min(estado.zoom + 1, ZOOMS.length - 1);
+      if (a === 'alejar') estado.zoom = Math.max(estado.zoom - 1, 0);
+      if (a === 'ajustar') estado.zoom = AJUSTAR;
+      if (a === 'girar') estado.giro = (estado.giro + 90) % 360;
+      pinta();
+    });
+    d.addEventListener('close', () => { if (origen && origen.focus) origen.focus(); });
+    /* Al pasar de computadora a pantalla chica (o al revés), el visor cambia de forma. */
+    ancho.addEventListener('change', () => { if (d.open) { d.close(); abreDialogo(); } });
+    let espera = 0;
+    global.addEventListener('resize', () => { clearTimeout(espera); espera = setTimeout(() => { if (d.open && estado.doc) pinta(); }, cfg.visor.retardoMs); });
+    return true;
+  }
+
+  FormKit.registra('visor', { selector: '[data-visor],[data-visor-url]', fueraDelFormulario: true, iniciar() { prepara(); } });
+  document.addEventListener('DOMContentLoaded', prepara);
+  FormKit.visor = { abre, enComputadora: () => prepara() && ancho.matches };
+}(window));
 
 </script>
 <script data-origen="..\guia-visual\pendientes.js">
@@ -23867,6 +24777,7 @@ window.FORMKIT_OPCIONES = {
     const notas = [];
     if (form.elements.terceros.checked) notas.push('Datos de terceros: en esos campos autocomplete="off" con el motivo en un comentario del HTML; en los de quien llena, el autocomplete correspondiente (name, email, tel-national, postal-code…).');
     if (elegidos.includes('mapa')) notas.push('El mapa base se declara en FORMKIT_CONFIG.mapa (teselas y atribución); sin él, el punto sigue pudiendo colocarse.');
+    if (elegidos.includes('visor')) notas.push('El visor carga pdf.js de vendor/pdfjs-dist/: copia esa carpeta junto al paquete o indica su ruta en FORMKIT_CONFIG.visor.pdfjs.');
     if (elegidos.includes('pasos')) notas.push('Con pasos, copia la plantilla codigo/plantillas/por-pasos.html; si no, una-pagina.html.');
     notas.push(`${elegidos.length} módulo(s) además del núcleo. Las rutas son relativas a la carpeta del paquete; ajústalas a tu proyecto.`);
     $('[data-arbol-nota]').textContent = notas.join(' ');
@@ -24064,7 +24975,7 @@ window.FORMKIT_OPCIONES = {
      cae al final de su grupo. */
   const GRUPOS = [['pregunta', 'Preguntas'], ['archivos', 'Ubicación y archivos'], ['navegacion', 'Recorrido de la página'], ['retroalimentacion', 'Respuesta a la persona']];
   const ORDEN = ['opciones', 'otro', 'combo', 'fecha', 'cascadas', 'identificadores', 'repetibles', 'chips', 'toggle', 'escala',
-    'archivos', 'mapa', 'enlace-mapa',
+    'archivos', 'visor', 'mapa', 'enlace-mapa',
     'pasos', 'progreso', 'acordeon', 'pestanas', 'migas', 'paginacion', 'version',
     'revision', 'modal', 'acuse', 'copiar', 'descarga', 'tooltip', 'tabla'];
   const posicion = (n) => { const i = ORDEN.indexOf(n); return i < 0 ? ORDEN.length : i; };
@@ -24101,10 +25012,10 @@ window.FORMKIT_OPCIONES = {
       movil: 'Una columna; la CURP pasa a mayúsculas mientras se escribe y la fecha y la edad aparecen solas.', escritorio: 'La ayuda común va una sola vez, arriba; nombre y apellidos en tres columnas alineadas aunque sólo uno lleve ayuda; la CURP y la fecha que sale de ella, en otra fila.',
       errores: ['Pedir «Apellido(s)» en un solo campo (FRM-13).', 'Hacer obligatorio el apellido materno: hay personas con un solo apellido.', 'Repetir «como aparece en tu identificación» en cada campo: va una vez, como ayuda de bloque.', 'Pedir la fecha de nacimiento y la CURP por separado sin cruzarlas.', 'Guardar la CURP en el borrador del dispositivo.', 'Pedir la edad escrita: se calcula con la fecha.'] },
     { id: 'b-nacimiento', titulo: 'Fecha de nacimiento y edad', nivel: 'OPCIONAL', demo: { nombre: 'bloque-nacimiento' },
-      proposito: 'Para cuando el formulario no pide la CURP. La persona escribe su fecha de nacimiento y la edad se calcula sola, en un campo de solo lectura, con la fecha de hoy en la Ciudad de México. La edad nunca se escribe: se deriva de una fecha. No acepta fechas futuras.',
-      meta: [['Usa', 'núcleo + fecha'], ['Edad mínima o máxima', 'Si el formulario la exige, agrega a la fecha data-cruzada="edad" data-cruzada-campos="fecha=…" y data-edad-min o data-edad-max: el mensaje dice qué hacer si la persona no cumple.'], ['Datos personales', 'Fecha y edad declaran data-uso, data-finalidad y data-sensible (FRM-55).']],
-      movil: 'La fecha abre el selector del sistema; la edad aparece al lado en cuanto la fecha está completa.', escritorio: 'Fecha y edad en una fila.',
-      errores: ['Pedir la edad escrita además de la fecha: pueden contradecirse.', 'Calcular la edad con el reloj del dispositivo sin la zona horaria de la Ciudad.', 'Aceptar una fecha de nacimiento futura.'] },
+      proposito: 'Para cuando el formulario no pide la CURP. La persona escribe su fecha de nacimiento como día/mes/año, sin calendario (formato «fecha-dma»): al escribir 2371985 queda 23/07/1985. La edad se calcula sola, en un campo de solo lectura, con la fecha de hoy en la Ciudad de México; nunca se escribe. No acepta fechas imposibles ni futuras.',
+      meta: [['Usa', 'núcleo + fecha'], ['Sin calendario', 'Para llegar a una fecha de nacimiento, el calendario obliga a recorrer décadas; día/mes/año es como se escribe en México. Acepta también guiones, puntos o los ocho dígitos juntos.'], ['Edad mínima o máxima', 'Si el formulario la exige, agrega a la fecha data-cruzada="edad" data-cruzada-campos="fecha=…" y data-edad-min o data-edad-max: el mensaje dice qué hacer si la persona no cumple.'], ['Datos personales', 'Fecha y edad declaran data-uso, data-finalidad y data-sensible (FRM-55).']],
+      movil: 'Teclado numérico; las diagonales se ponen solas y la edad aparece al lado en cuanto la fecha está completa.', escritorio: 'Fecha y edad en una fila.',
+      errores: ['Pedir la fecha de nacimiento con el calendario.', 'Pedir la edad escrita además de la fecha: pueden contradecirse.', 'Calcular la edad con el reloj del dispositivo sin la zona horaria de la Ciudad.', 'Aceptar una fecha de nacimiento futura.'] },
     { id: 'b-rango-edad', titulo: 'Rango de edad', nivel: 'OPCIONAL', demo: { nombre: 'bloque-rango-edad' },
       proposito: 'Para cuando basta saber el grupo de edad (encuestas, registros de asistencia) y no hace falta la fecha: se pide menos dato personal. Una sola respuesta, en una lista de opciones. Los cortes de la muestra son un ejemplo: se ajustan a los que necesites, sin huecos y sin que se encimen.',
       meta: [['Usa', 'núcleo + opciones'], ['Datos personales', 'Declara data-uso y data-finalidad (FRM-55); como no identifica a la persona, no lleva data-sensible.']],

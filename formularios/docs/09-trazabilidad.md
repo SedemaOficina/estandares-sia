@@ -91,8 +91,9 @@ Leyenda: **A** tomado del paquete A · **B** tomado del paquete B · **A+B** fus
 | archivos (zona, cámara, firma, SHA-256, duplicados, optimización, vista previa, reintento) | A (zona, estado, optimización) · Nuevo (cámara, firma, duplicados, reintento, dimensión) | C6 |
 | mapa (Leaflet, gestos, confirmación, ámbito) | A (reglas, vendor) + B (JS mínimo) · Nuevo (módulo) | |
 | cascadas | Nuevo | |
-| chips | Nuevo | |
+| chips | Nuevo | Lista fija de respuestas frecuentes agregada en 1.2.0 (P65) |
 | enlace-mapa | PR, CP, PL y Denuncias Ambientales | Agregado el 14 oct 2026 |
+| visor (visor de documentos con pdf.js) | Sistema de acreditaciones (P67) | Agregado en 1.2.0 |
 | version (distintivo de versión) | Plantilla de versión del SIA, rehecha con tokens en el proyecto de acreditaciones (P45) | Agregado en 1.1.0 |
 
 ### Herramientas y verificación

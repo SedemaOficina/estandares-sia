@@ -2,7 +2,7 @@
 
 > Este documento se **genera** de `codigo/manifiesto.json` (`node herramientas/construir.mjs`). No se edita a mano: se corrige el manifiesto y se vuelve a construir. La versión interactiva, con muestras vivas y HTML para copiar, es `guia-visual/index.html`.
 
-El paquete tiene un **núcleo** obligatorio y **27 módulos** que se copian sólo si el formulario los usa. Niveles: **BASE** obligatorio en todo formulario; **RECOMENDADO** salvo justificación escrita; **OPCIONAL** si el formulario necesita la pieza. Quien programa elige los módulos, no el nivel.
+El paquete tiene un **núcleo** obligatorio y **28 módulos** que se copian sólo si el formulario los usa. Niveles: **BASE** obligatorio en todo formulario; **RECOMENDADO** salvo justificación escrita; **OPCIONAL** si el formulario necesita la pieza. Quien programa elige los módulos, no el nivel.
 
 ## Núcleo (BASE)
 
@@ -32,8 +32,8 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `opciones` | Opciones elegibles | BASE | pregunta | — | 5.1 KB | — |
 | `otro` | Opción «Otro» con especificación | RECOMENDADO | pregunta | opciones | — | 4.2 KB |
 | `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 7.7 KB |
-| `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 5.9 KB |
-| `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 3.8 KB |
+| `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.0 KB |
+| `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 4.0 KB |
 | `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 929 B | 6.8 KB |
 | `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.6 KB |
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
@@ -50,12 +50,13 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `paginacion` | Paginación de resultados | OPCIONAL | navegacion | — | 2.1 KB | 6.0 KB |
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
-| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 2.8 KB | 4.6 KB |
+| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.2 KB | 5.0 KB |
 | `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 2.6 KB | 18.7 KB |
+| `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.3 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
 | `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 7.4 KB |
-| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 1.4 KB | 4.7 KB |
+| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 1.6 KB | 6.9 KB |
 
 ### Opciones elegibles (`opciones`) · BASE
 
@@ -125,7 +126,7 @@ Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, 
 
 ### Fecha y hora con «Hoy» y atajos (`fecha`) · RECOMENDADO
 
-Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria de la Ciudad de México, límites por atributo, atajos de rango y edad calculada desde la fecha de nacimiento (data-deriva="edad=…"), que nunca se escribe a mano.
+Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria de la Ciudad de México, límites por atributo, atajos de rango y edad calculada desde la fecha de nacimiento (data-deriva="edad=…"), que nunca se escribe a mano. Para la fecha de nacimiento, sin calendario: formato «fecha-dma», escrita día/mes/año (23/07/1985) con la escritura acomodada sola.
 
 **Cuándo.** Cualquier fecha u hora.
 
@@ -144,6 +145,7 @@ Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria d
 - Permitir fecha de hechos futura.
 - Rango sin validación cruzada.
 - Pedir la edad escrita además de la fecha de nacimiento.
+- Pedir la fecha de nacimiento con el calendario: obliga a recorrer décadas; se escribe día/mes/año («fecha-dma»).
 
 ### CURP, RFC y folios (`identificadores`) · OPCIONAL
 
@@ -513,6 +515,8 @@ Tabla con caption, orden por columna accesible, estados vacío/carga/error, acci
 - Tabla sin encabezados.
 - «Eliminar» sin decir qué.
 - Desplazamiento horizontal libre en teléfono.
+- Filtrar ocultando filas y que el rayado alterno se descuadre (cuenta sólo las filas visibles).
+- Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla.
 
 ### Carga de archivos y fotografías (`archivos`) · RECOMENDADO
 
@@ -534,6 +538,28 @@ Zona de carga (botón real + arrastre), cámara en móvil, validación por exten
 - Validar sólo por extensión.
 - Medir el peso antes de optimizar.
 - Enviar la ubicación de la foto sin que la persona lo sepa.
+
+### Visor de documentos (`visor`) · OPCIONAL
+
+Para quien revisa lo que se cargó: muestra todas las hojas de un PDF, una debajo de otra, con contador de hoja, acercar y alejar, ajustar al ancho, girar y abrir en otra pestaña; también imágenes. En computadora queda fijo junto a lo que se revisa, para decidir viendo el documento; en teléfono se abre a pantalla completa. Usa pdf.js (vendor/pdfjs-dist), que se carga sólo al abrir el primer PDF.
+
+**Cuándo.** Revisión documental: personal que acepta u observa los documentos que la persona cargó.
+
+**Cuándo no.** Para que la persona vea lo que ella misma adjuntó (la vista previa de «archivos» basta) o para un solo documento corto (basta «Abrir en otra pestaña»).
+
+**Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/visor/visor.css`, `codigo/modulos/visor/visor.js`
+
+**Accesibilidad.** Diálogo con título; en teléfono es modal y Escape cierra con el foco de vuelta al botón «Ver documento»; en computadora no le quita el foco a quien revisa. Cada hoja es una imagen con nombre («Hoja 1 de 2»); el contador y el acercamiento se anuncian; barra de herramientas con nombre.
+
+**En teléfono.** Pantalla completa, con «Cerrar»; la barra se parte en dos renglones si no cabe.
+
+**En escritorio.** Columna fija a la derecha de lo que se revisa (.visor-area), del alto de la pantalla.
+
+**Errores frecuentes que evita.**
+- Abrir el documento en otra pestaña como única forma de revisarlo: quien revisa pierde lo que estaba decidiendo.
+- Mostrar sólo la primera hoja.
+- Cargar pdf.js de una CDN.
+- Usar una versión de pdf.js anterior a la 4.2.67, que deja ejecutar código desde un PDF malicioso.
 
 ### Mapa con selección de punto (`mapa`) · OPCIONAL
 
@@ -601,11 +627,11 @@ Alcaldía → colonia → código postal desde un catálogo oficial versionado; 
 
 ### Chips de uso frecuente (`chips`) · OPCIONAL
 
-Sugerencias de un toque desde el historial del dispositivo; nunca al servidor; quitar y borrar historial; se niega en datos personales.
+Sugerencias de un toque desde el historial del dispositivo (nunca al servidor; quitar y borrar historial; se niega en datos personales) y respuestas frecuentes fijas (data-chips-fijos), que no guardan nada y sirven en cualquier campo: en un texto largo, el chip agrega su texto para completarlo.
 
 **Cuándo.** Captura por personal con respuestas repetidas.
 
-**Cuándo no.** Formularios ciudadanos de una sola vez; datos personales.
+**Cuándo no.** Historial: formularios ciudadanos de una sola vez y datos personales (para ellos, la lista fija).
 
 **Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/chips/chips.css`, `codigo/modulos/chips/chips.js`
 

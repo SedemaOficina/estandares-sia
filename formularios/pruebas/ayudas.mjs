@@ -22,7 +22,7 @@ const COMUN = resolve(RAIZ, '..');
 const BASE = existsSync(join(COMUN, 'guia-visual', 'pendientes.js')) ? COMUN : RAIZ;
 const PREFIJO = BASE === RAIZ ? '' : `/${basename(RAIZ)}`;
 
-const TIPOS = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.txt': 'text/plain; charset=utf-8' };
+const TIPOS = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.pdf': 'application/pdf', '.ttf': 'font/ttf', '.pfb': 'application/octet-stream', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.txt': 'text/plain; charset=utf-8' };
 
 export function sirve() {
   const servidor = createServer(async (req, res) => {

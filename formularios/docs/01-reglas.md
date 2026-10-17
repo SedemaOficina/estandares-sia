@@ -226,13 +226,13 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-20 · Fechas con «Hoy», horas con «Ahora», rangos con atajos, sin fechas imposibles y edad calculada
 
-**Regla.** Los campos de fecha son type=date con botón «Hoy» (módulo «fecha»); los de hora, «Ahora». Un rango declara data-rango y atajos; la fecha final anterior a la inicial es una validación cruzada. data-no-futura rechaza fechas posteriores a hoy, que el servidor resuelve con su propio reloj. La edad no se escribe: se calcula de la fecha de nacimiento (escrita o tomada de la CURP) en un campo de solo lectura (data-deriva="edad=…"), o se pide en rangos sin huecos ni encimados cuando basta el grupo de edad.
+**Regla.** Los campos de fecha son type=date con botón «Hoy» (módulo «fecha»); los de hora, «Ahora». La fecha de nacimiento no usa calendario: se escribe día/mes/año (formato «fecha-dma», 23/07/1985), la escritura se acomoda sola y la cruza con la CURP curp-fecha (o curp-fecha-dma). Un rango declara data-rango y atajos; la fecha final anterior a la inicial es una validación cruzada. data-no-futura rechaza fechas posteriores a hoy, que el servidor resuelve con su propio reloj. La edad no se escribe: se calcula de la fecha de nacimiento (escrita o tomada de la CURP) en un campo de solo lectura (data-deriva="edad=…"), o se pide en rangos sin huecos ni encimados cuando basta el grupo de edad.
 
-**Por qué.** Escribir la fecha de hoy es el caso más frecuente; un rango invertido o una fecha futura de nacimiento son errores silenciosos; una edad escrita junto a la fecha puede contradecirla.
+**Por qué.** Escribir la fecha de hoy es el caso más frecuente; un rango invertido o una fecha futura de nacimiento son errores silenciosos; una edad escrita junto a la fecha puede contradecirla. El calendario obliga a recorrer décadas para llegar a una fecha de nacimiento, y en México nadie la escribe como AAAA-MM-DD.
 
-**Nivel.** RECOMENDADO · **Origen.** encargo 5.2; A FRM-29; edad calculada o en rangos (la Secretaría, 14 oct 2026) · *decisión del encargo*
+**Nivel.** RECOMENDADO · **Origen.** encargo 5.2; A FRM-29; edad calculada o en rangos (la Secretaría, 14 oct 2026); P70 (proyecto de acreditaciones, 16 oct 2026) · *decisión del encargo*
 
-**Verificación.** 02-una-pagina: rango y atajos; 06-servidor: max «hoy»
+**Verificación.** 02-una-pagina: rango y atajos; 06-servidor: max «hoy»; 06 y 07: fecha día/mes/año
 
 ### FRM-21 · CURP de 18 caracteres con derivados en solo lectura y cruzada con la fecha de nacimiento y con el nombre
 
@@ -264,25 +264,25 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Verificación.** 02-una-pagina: interruptor y escala; manifiesto
 
-### FRM-24 · Pestañas, acordeón, migas, progreso, paginación, ayuda desplegable y tabla son módulos con teclado completo
+### FRM-24 · Pestañas, acordeón, migas, progreso, paginación, ayuda desplegable, tabla y visor de documentos son módulos con teclado completo
 
-**Regla.** Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que en teléfono se vuelve tarjetas.
+**Regla.** Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que en teléfono se vuelve tarjetas; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con contador, acercar y girar, fijo junto a la revisión en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor.
 
 **Por qué.** Un componente a medias (sólo ratón, sólo escritorio) excluye a una parte de las personas y obliga a rehacerlo después. Un ícono que repite lo que ya se lee obliga a abrirlo para nada.
 
-**Nivel.** OPCIONAL · **Origen.** encargo 5.1; encargo 5.4; S2-4 (proyecto de acreditaciones, 16 oct 2026) · *decisión del encargo*
+**Nivel.** OPCIONAL · **Origen.** encargo 5.1; encargo 5.4; S2-4 (proyecto de acreditaciones, 16 oct 2026); P66 (proyecto de acreditaciones, 16 oct 2026); P67 (proyecto de acreditaciones, 16 oct 2026) · *decisión del encargo*
 
-**Verificación.** 04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos; auditar-campos D5
+**Verificación.** 04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos; auditar-campos D5; 07: tabla filtrada y visor
 
-### FRM-25 · Chips de uso frecuente sólo con historial del propio dispositivo
+### FRM-25 · Chips de uso frecuente con historial del propio dispositivo o con una lista fija
 
-**Regla.** Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible.
+**Regla.** Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo los motivos para observar un documento) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete.
 
 **Por qué.** Un historial compartido o enviado es una fuga de datos; sugerir datos personales los expone en pantallas ajenas.
 
-**Nivel.** OPCIONAL · **Origen.** encargo 5.2 · *decisión del encargo*
+**Nivel.** OPCIONAL · **Origen.** encargo 5.2; P65 (proyecto de acreditaciones, 16 oct 2026) · *decisión del encargo*
 
-**Verificación.** 04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad
+**Verificación.** 04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad; 07: chips fijos
 
 ## 4. Validación y errores
 
@@ -326,13 +326,13 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Verificación.** auditor-css A10; 05-accesibilidad
 
-### FRM-30 · Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real, hora, numérico, texto, coordenadas, folio, contraseña
+### FRM-30 · Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, contraseña
 
-**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir; el número respeta min, max y step.
+**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año; el número respeta min, max y step.
 
 **Por qué.** Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.
 
-**Nivel.** BASE · **Origen.** encargo 5.5; C10 · *decisión del encargo*
+**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026) · *decisión del encargo*
 
 **Verificación.** guía: probador; 06-servidor; validaciones.config.js
 

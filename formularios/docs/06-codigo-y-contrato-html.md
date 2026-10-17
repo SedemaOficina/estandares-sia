@@ -11,7 +11,7 @@ codigo/
   fuentes/    Cabin 600/700, Roboto 400/500/700 (woff2) + licencias OFL
   iconos/     sprite.svg (29 símbolos; iconos.js se genera de aquí)
   imagenes/   logotipo-sedema.png
-  modulos/    <nombre>/<nombre>.css · <nombre>.js      (27 módulos, cada uno se copia solo)
+  modulos/    <nombre>/<nombre>.css · <nombre>.js      (28 módulos, cada uno se copia solo)
   catalogos/  cdmx-ejemplo.js (ficticio) · LEEME.md
   plantillas/ por-pasos.html + configuracion-por-pasos.js · una-pagina.html + configuracion-una-pagina.js
   servidor/   validar.mjs · esquemas/*.json (generados)
@@ -126,6 +126,14 @@ Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({
 **Filas para datos hermanos.** `.fila` (dos columnas), `.fila-3` (tres) y `.fila-2-1` (la primera al doble) sólo para datos hermanos: nombre y apellidos en `.fila-3`; CURP y fecha de nacimiento, correo y su confirmación, contraseña y su confirmación, calle y número, manzana y lote, en `.fila`. Lo demás, en una columna. Desde 760 px se alinean con subcuadrícula; en teléfono, una columna.
 
 **Opciones en línea.** `.opciones-lista.opciones-en-linea` pone dos o tres opciones cortas sin descripción (Sí/No) una por columna desde 760 px, con el mismo hueco que las filas; en teléfono, una por renglón.
+
+**Fecha de nacimiento sin calendario.** `data-formato="fecha-dma"` en un `<input type="text" inputmode="numeric" maxlength="10">` (módulo `fecha`): se escribe día/mes/año y la escritura se acomoda sola (`2371985` → `23/07/1985`); acepta también guiones, puntos y la forma AAAA-MM-DD que pone el autocompletado, y se envía como DD/MM/AAAA. Con `data-no-futura` no acepta fechas posteriores a hoy; `data-deriva="edad=…"` calcula la edad igual que con `fecha`; la CURP con `data-deriva="fechaNacimiento=…"` la escribe en ese formato, y la cruzada `curp-fecha` (o `curp-fecha-dma`) la compara.
+
+**Respuestas frecuentes fijas.** `data-chips-fijos="No se lee completo|Está vencido|Falta una página"` en la envoltura (módulo `chips`) muestra siempre esos botones. No guarda nada en el dispositivo, así que sirve también en datos personales. En un texto largo, el chip agrega su texto al final y deja el foco ahí para completarlo; en un campo corto, lo pone como respuesta.
+
+**Tabla filtrada.** Para filtrar, la página oculta filas con `hidden`: la fila no se ve y el rayado alterno cuenta sólo las visibles. Un encabezado cuyo texto es sólo para lector de pantalla (`<th><span class="solo-lector">Acciones</span></th>`) no muestra rótulo en la tarjeta del teléfono.
+
+**Visor de documentos.** Módulo `visor`: un `<dialog class="visor" data-visor>` (contrato completo en el encabezado de `visor.js`) dentro de `.visor-area`, junto a lo que se revisa; cada botón `data-visor-url="…"` (con `data-visor-titulo`, `data-visor-archivo` y, para una imagen sin extensión, `data-visor-tipo`) lo abre, o `FormKit.visor.abre({ url, titulo, archivo, tipo, nota }, boton)`. Usa pdf.js de `vendor/pdfjs-dist/` (o la ruta de `FORMKIT_CONFIG.visor.pdfjs`), que se carga sólo al abrir el primer PDF; si no se puede cargar, muestra el documento con el visor del navegador y lo dice. La página necesita servirse desde un servidor: abierta con doble clic, el navegador no deja cargar pdf.js.
 
 **Código postal de todo el país.** `data-ambito="nacional"` en un campo `data-formato="cp"` acepta cualquier código de cinco dígitos; sin él, sólo los del ámbito configurado (la Ciudad).
 

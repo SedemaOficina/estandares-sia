@@ -73,6 +73,7 @@
     const notas = [];
     if (form.elements.terceros.checked) notas.push('Datos de terceros: en esos campos autocomplete="off" con el motivo en un comentario del HTML; en los de quien llena, el autocomplete correspondiente (name, email, tel-national, postal-code…).');
     if (elegidos.includes('mapa')) notas.push('El mapa base se declara en FORMKIT_CONFIG.mapa (teselas y atribución); sin él, el punto sigue pudiendo colocarse.');
+    if (elegidos.includes('visor')) notas.push('El visor carga pdf.js de vendor/pdfjs-dist/: copia esa carpeta junto al paquete o indica su ruta en FORMKIT_CONFIG.visor.pdfjs.');
     if (elegidos.includes('pasos')) notas.push('Con pasos, copia la plantilla codigo/plantillas/por-pasos.html; si no, una-pagina.html.');
     notas.push(`${elegidos.length} módulo(s) además del núcleo. Las rutas son relativas a la carpeta del paquete; ajústalas a tu proyecto.`);
     $('[data-arbol-nota]').textContent = notas.join(' ');
@@ -270,7 +271,7 @@
      cae al final de su grupo. */
   const GRUPOS = [['pregunta', 'Preguntas'], ['archivos', 'Ubicación y archivos'], ['navegacion', 'Recorrido de la página'], ['retroalimentacion', 'Respuesta a la persona']];
   const ORDEN = ['opciones', 'otro', 'combo', 'fecha', 'cascadas', 'identificadores', 'repetibles', 'chips', 'toggle', 'escala',
-    'archivos', 'mapa', 'enlace-mapa',
+    'archivos', 'visor', 'mapa', 'enlace-mapa',
     'pasos', 'progreso', 'acordeon', 'pestanas', 'migas', 'paginacion', 'version',
     'revision', 'modal', 'acuse', 'copiar', 'descarga', 'tooltip', 'tabla'];
   const posicion = (n) => { const i = ORDEN.indexOf(n); return i < 0 ? ORDEN.length : i; };
@@ -307,10 +308,10 @@
       movil: 'Una columna; la CURP pasa a mayúsculas mientras se escribe y la fecha y la edad aparecen solas.', escritorio: 'La ayuda común va una sola vez, arriba; nombre y apellidos en tres columnas alineadas aunque sólo uno lleve ayuda; la CURP y la fecha que sale de ella, en otra fila.',
       errores: ['Pedir «Apellido(s)» en un solo campo (FRM-13).', 'Hacer obligatorio el apellido materno: hay personas con un solo apellido.', 'Repetir «como aparece en tu identificación» en cada campo: va una vez, como ayuda de bloque.', 'Pedir la fecha de nacimiento y la CURP por separado sin cruzarlas.', 'Guardar la CURP en el borrador del dispositivo.', 'Pedir la edad escrita: se calcula con la fecha.'] },
     { id: 'b-nacimiento', titulo: 'Fecha de nacimiento y edad', nivel: 'OPCIONAL', demo: { nombre: 'bloque-nacimiento' },
-      proposito: 'Para cuando el formulario no pide la CURP. La persona escribe su fecha de nacimiento y la edad se calcula sola, en un campo de solo lectura, con la fecha de hoy en la Ciudad de México. La edad nunca se escribe: se deriva de una fecha. No acepta fechas futuras.',
-      meta: [['Usa', 'núcleo + fecha'], ['Edad mínima o máxima', 'Si el formulario la exige, agrega a la fecha data-cruzada="edad" data-cruzada-campos="fecha=…" y data-edad-min o data-edad-max: el mensaje dice qué hacer si la persona no cumple.'], ['Datos personales', 'Fecha y edad declaran data-uso, data-finalidad y data-sensible (FRM-55).']],
-      movil: 'La fecha abre el selector del sistema; la edad aparece al lado en cuanto la fecha está completa.', escritorio: 'Fecha y edad en una fila.',
-      errores: ['Pedir la edad escrita además de la fecha: pueden contradecirse.', 'Calcular la edad con el reloj del dispositivo sin la zona horaria de la Ciudad.', 'Aceptar una fecha de nacimiento futura.'] },
+      proposito: 'Para cuando el formulario no pide la CURP. La persona escribe su fecha de nacimiento como día/mes/año, sin calendario (formato «fecha-dma»): al escribir 2371985 queda 23/07/1985. La edad se calcula sola, en un campo de solo lectura, con la fecha de hoy en la Ciudad de México; nunca se escribe. No acepta fechas imposibles ni futuras.',
+      meta: [['Usa', 'núcleo + fecha'], ['Sin calendario', 'Para llegar a una fecha de nacimiento, el calendario obliga a recorrer décadas; día/mes/año es como se escribe en México. Acepta también guiones, puntos o los ocho dígitos juntos.'], ['Edad mínima o máxima', 'Si el formulario la exige, agrega a la fecha data-cruzada="edad" data-cruzada-campos="fecha=…" y data-edad-min o data-edad-max: el mensaje dice qué hacer si la persona no cumple.'], ['Datos personales', 'Fecha y edad declaran data-uso, data-finalidad y data-sensible (FRM-55).']],
+      movil: 'Teclado numérico; las diagonales se ponen solas y la edad aparece al lado en cuanto la fecha está completa.', escritorio: 'Fecha y edad en una fila.',
+      errores: ['Pedir la fecha de nacimiento con el calendario.', 'Pedir la edad escrita además de la fecha: pueden contradecirse.', 'Calcular la edad con el reloj del dispositivo sin la zona horaria de la Ciudad.', 'Aceptar una fecha de nacimiento futura.'] },
     { id: 'b-rango-edad', titulo: 'Rango de edad', nivel: 'OPCIONAL', demo: { nombre: 'bloque-rango-edad' },
       proposito: 'Para cuando basta saber el grupo de edad (encuestas, registros de asistencia) y no hace falta la fecha: se pide menos dato personal. Una sola respuesta, en una lista de opciones. Los cortes de la muestra son un ejemplo: se ajustan a los que necesites, sin huecos y sin que se encimen.',
       meta: [['Usa', 'núcleo + opciones'], ['Datos personales', 'Declara data-uso y data-finalidad (FRM-55); como no identifica a la persona, no lleva data-sensible.']],

@@ -20,6 +20,8 @@
   color:var(--texto);
 }
 .chip-texto{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Respuesta frecuente fija: sin «quitar», redonda de los dos lados y con su texto completo. */
+.chip-fijo{border-radius:var(--r-pill);text-align:left;cursor:pointer}
 .chip-quitar{
   display:inline-flex;
   align-items:center;

@@ -23,6 +23,7 @@ Qué se valida, cuándo, con qué mensaje y dónde vive la regla. Fuente única:
 | `rfc` | 12 (moral) o 13 (física) caracteres; fecha real *[estructura a confirmar con el SAT: Fuente: __]* | Mayúsculas, sin guiones | El RFC lleva 3 o 4 letras, 6 dígitos de fecha y 3 caracteres finales. Ejemplo: XAXX010101000 | text |
 | `numero` | Número entero o decimal; `min`, `max`, `step` del campo (el paso cuenta desde el mínimo y admite decimales: `step="0.5"`); `data-min-segun`/`data-max-segun` para un límite que depende de otra respuesta | Coma → punto | Escribe sólo números; para decimales usa punto · El valor máximo es 20 · Usa múltiplos de 0.5 · Escribe un número entero, sin decimales | decimal |
 | `fecha` | AAAA-MM-DD existente; `min`/`max`; `data-no-futura` = máximo hoy | Recorta | Escribe una fecha real… Ejemplo: 2026-03-15 · La fecha no puede ser posterior a hoy | numeric |
+| `fecha-dma` | Fecha real escrita día/mes/año (23/07/1985, también con guiones, puntos, espacios, los ocho dígitos juntos o AAAA-MM-DD del autocompletado); año desde 1900; `data-no-futura` = máximo hoy. Para la fecha de nacimiento, sin calendario; la escritura se acomoda sola (módulo `fecha`) | Queda como DD/MM/AAAA | Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985 · La fecha no puede ser posterior a hoy | numeric |
 | `hora` | HH:MM de 24 horas | Recorta | Escribe la hora en formato de 24 horas, HH:MM. Ejemplo: 14:30 | numeric |
 | `texto` | `minlength`/`maxlength`; con `data-legible`, forma de texto (vocales, palabras, sin tecleo al azar) | Quita caracteres de control, colapsa espacios | Escribe al menos 40 caracteres; van 12 · Descríbelo con tus palabras, en una o dos frases completas | text |
 | `coordenadas` | «lat,lon» dentro de rango y del ámbito configurado | Sin espacios | Escribe latitud y longitud separadas por coma. Ejemplo: 19.4326,-99.1332 | decimal |
@@ -37,7 +38,7 @@ Se evalúan cuando todos sus campos tienen valor; marcan el campo que las lleva 
 
 | Clave | Campos (roles) | Bloquea por omisión | Qué comprueba |
 |---|---|---|---|
-| `curp-fecha` | `curp`, `fecha` | sí | La fecha de nacimiento coincide con la contenida en la CURP (posiciones 5–10). |
+| `curp-fecha` | `curp`, `fecha` | sí | La fecha de nacimiento coincide con la contenida en la CURP (posiciones 5–10); la fecha puede ser AAAA-MM-DD o día/mes/año. `curp-fecha-dma` es el mismo cruce con otro nombre. |
 | `curp-sexo` | `curp`, `sexo` | no | El sexo declarado coincide con la posición 11. |
 | `curp-entidad` | `curp`, `entidad` | no | La entidad de nacimiento coincide con las posiciones 12–13. |
 | `curp-nombre` | `curp`, `nombre`, `primer` | sí | Las letras 1, 2, 4, 14 y 16 corresponden al nombre y al primer apellido: sin partículas (DE, DEL, LA, LOS, Y, MC, VAN…), con el segundo nombre si el primero es MARÍA o JOSÉ, la Ñ como X y la segunda letra en X si las cuatro primeras forman una palabra altisonante *[reglas de formación de RENAPO, simplificadas; a confirmar: Fuente: __]*. |
@@ -75,7 +76,7 @@ Lo que se sabe sin leer el archivo se rechaza en el acto (`.arch-rechazo`); lo q
 
 ## 5. Mensajes
 
-Los 77 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc. Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo. Registro: tuteo, frase corta, qué hacer primero.
+Los 83 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc. Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo. Registro: tuteo, frase corta, qué hacer primero.
 
 ## 6. Configuración por formulario (`FORMKIT_CONFIG`)
 
@@ -91,9 +92,10 @@ Los 77 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.j
 | `combo.maxResultados` | 8 | Opciones visibles en el combo. |
 | `cruzadas` | las de la sección 3 | Cruzadas propias del formulario. |
 | `limitesSegun` | vacío | Funciones `(datos) => número` para `data-min-segun`/`data-max-segun`. |
-| `chips` | 5, `sia-chips` | Máximo de chips y clave del almacén local. |
+| `chips` | 5, `sia-chips` | Máximo de chips del historial y clave del almacén local (la lista fija no guarda nada). |
+| `visor` | pdf.js junto al paquete; fijo desde 1024 px | Dónde está pdf.js (`pdfjs`), desde qué ancho el visor queda fijo junto a la revisión (`fijoDesde`) y la espera para repintar (`retardoMs`). |
 | `mapa` | sin teselas | Proveedor, atribución, centro, zoom. |
-| `mensajes` | 77 textos | Cualquier mensaje. |
+| `mensajes` | 83 textos | Cualquier mensaje. |
 
 ## 7. En el servidor
 

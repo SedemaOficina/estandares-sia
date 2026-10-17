@@ -30,7 +30,7 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Dar un rango de fechas | `data-rango` + `data-atajos` (`fecha`) | OPCIONAL | — |
 | Dar una hora | `type=time` + «Ahora» (`fecha`) | OPCIONAL | — |
 | Dar su CURP o RFC | `identificadores`: mayúsculas, 18/13 caracteres, derivados en solo lectura; con nombre y apellidos, las cruzadas `curp-nombre` y `curp-segundo-apellido` (coherencia, no existencia) | OPCIONAL | No hay uso declarado para la CURP: no se pide. |
-| Dar su fecha de nacimiento sin CURP | **Bloque listo «Fecha de nacimiento y edad»**: fecha con `data-no-futura` y edad calculada en solo lectura (`data-deriva="edad=…"`, módulo `fecha`) | OPCIONAL | Se pide la CURP: la fecha y la edad salen de ella. |
+| Dar su fecha de nacimiento sin CURP | **Bloque listo «Fecha de nacimiento y edad»**: fecha escrita día/mes/año, sin calendario (`data-formato="fecha-dma"`, la escritura se acomoda sola), con `data-no-futura`, y edad calculada en solo lectura (`data-deriva="edad=…"`, módulo `fecha`) | OPCIONAL | Se pide la CURP: la fecha y la edad salen de ella. |
 | Saber la edad | Siempre calculada de una fecha, nunca escrita; si basta el grupo de edad, **bloque listo «Rango de edad»** (una opción, sin huecos ni encimados) | RECOMENDADO | — |
 | Confirmar un dato (correo, contraseña) | Dos campos + `data-cruzada="igual"` | RECOMENDADO | — |
 | Declarar o consentir | Casilla destacada (`.destacado`), nunca premarcada | BASE | — |
@@ -38,6 +38,7 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Valorar en una escala | `escala` (radios 1–5 con extremos) | OPCIONAL | — |
 | Agregar varios elementos iguales (personas, ejemplares) | `repetibles` con `data-min`/`data-max` | OPCIONAL | Siempre son exactamente dos: dos bloques fijos. |
 | Adjuntar fotos o documentos | `archivos`: formatos, peso, cámara, firma, duplicados | BASE (zona) / RECOMENDADO (optimización) | — |
+| Revisar los documentos que alguien cargó | `visor`: todas las hojas del PDF (o la imagen) junto a la decisión, con contador, acercar y girar; en teléfono, a pantalla completa | OPCIONAL | La persona sólo revisa lo que ella misma adjuntó: basta la vista previa de `archivos`. |
 | Marcar un punto en el mapa | `mapa` (Leaflet autoalojado) **además** de la dirección | OPCIONAL | La dirección basta; no hay mapa base acordado. |
 | Dar coordenadas a mano | `data-formato="coordenadas"` con ámbito | OPCIONAL | — |
 | Pegar el enlace de Google Maps del lugar | `enlace-mapa` sobre el campo de coordenadas: toma el lugar marcado, avisa si sólo trae el centro de la pantalla y explica los enlaces cortos | OPCIONAL | Como única vía: la dirección va primero (FRM-46). |
@@ -61,8 +62,9 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Ubicar a la persona en un sitio interno | `migas` | OPCIONAL |
 | Mostrar en pantalla qué versión del sitio es (de prueba, instalada en el SIA o sin leer) | `version`: distintivo fijo abajo a la izquierda, dentro del pie | OPCIONAL |
 | Mostrar avance de una tarea | `progreso` | OPCIONAL |
-| Listas largas de resultados | `tabla` + `paginacion` | OPCIONAL |
+| Listas largas de resultados | `tabla` + `paginacion`; para filtrar, las filas se ocultan con `hidden` (el rayado cuenta sólo las visibles) | OPCIONAL |
 | Sugerir lo que la persona ya escribió antes | `chips` (sólo campos sin datos personales) | OPCIONAL |
+| Ofrecer respuestas frecuentes conocidas (motivos para observar un documento) | `chips` con `data-chips-fijos`: lista fija, no guarda nada; en un texto largo, el chip agrega su texto para completarlo | OPCIONAL |
 | Ofrecer un archivo | `descarga` (formato y peso visibles) | OPCIONAL |
 | Copiar o compartir un folio | `copiar` | RECOMENDADO |
 | Enlazar a las redes de la Secretaría en el pie | **Bloque listo «Redes sociales»**: íconos de 44 px con nombre accesible; las direcciones van en la configuración del sitio (FRM-59) | OPCIONAL |

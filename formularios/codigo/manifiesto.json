@@ -1,6 +1,6 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -73,7 +73,7 @@
       "tokens.css": 8394,
       "base.css": 5841,
       "nucleo.css": 16940,
-      "validaciones.config.js": 31865,
+      "validaciones.config.js": 36165,
       "formkit.core.js": 46299,
       "iconos.js": 5845
     }
@@ -171,7 +171,7 @@
       "titulo": "Fecha y hora con «Hoy» y atajos",
       "nivel": "RECOMENDADO",
       "tipo": "pregunta",
-      "proposito": "Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria de la Ciudad de México, límites por atributo, atajos de rango y edad calculada desde la fecha de nacimiento (data-deriva=\"edad=…\"), que nunca se escribe a mano.",
+      "proposito": "Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria de la Ciudad de México, límites por atributo, atajos de rango y edad calculada desde la fecha de nacimiento (data-deriva=\"edad=…\"), que nunca se escribe a mano. Para la fecha de nacimiento, sin calendario: formato «fecha-dma», escrita día/mes/año (23/07/1985) con la escritura acomodada sola.",
       "cuando": "Cualquier fecha u hora.",
       "cuandoNo": "Fecha de nacimiento cuando ya se pide CURP (se deriva).",
       "dependencias": [],
@@ -183,7 +183,8 @@
         "Tomar «hoy» del reloj del dispositivo sin zona horaria.",
         "Permitir fecha de hechos futura.",
         "Rango sin validación cruzada.",
-        "Pedir la edad escrita además de la fecha de nacimiento."
+        "Pedir la edad escrita además de la fecha de nacimiento.",
+        "Pedir la fecha de nacimiento con el calendario: obliga a recorrer décadas; se escribe día/mes/año («fecha-dma»)."
       ],
       "archivos": {
         "css": "codigo/modulos/fecha/fecha.css",
@@ -191,7 +192,7 @@
       },
       "tamano": {
         "css": 1003,
-        "js": 6042
+        "js": 7213
       }
     },
     {
@@ -219,7 +220,7 @@
       },
       "tamano": {
         "css": 0,
-        "js": 3908
+        "js": 4129
       }
     },
     {
@@ -671,15 +672,17 @@
       "errores": [
         "Tabla sin encabezados.",
         "«Eliminar» sin decir qué.",
-        "Desplazamiento horizontal libre en teléfono."
+        "Desplazamiento horizontal libre en teléfono.",
+        "Filtrar ocultando filas y que el rayado alterno se descuadre (cuenta sólo las filas visibles).",
+        "Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla."
       ],
       "archivos": {
         "css": "codigo/modulos/tabla/tabla.css",
         "js": "codigo/modulos/tabla/tabla.js"
       },
       "tamano": {
-        "css": 2845,
-        "js": 4714
+        "css": 3279,
+        "js": 5093
       }
     },
     {
@@ -707,6 +710,34 @@
       "tamano": {
         "css": 2637,
         "js": 19102
+      }
+    },
+    {
+      "nombre": "visor",
+      "titulo": "Visor de documentos",
+      "nivel": "OPCIONAL",
+      "tipo": "archivos",
+      "proposito": "Para quien revisa lo que se cargó: muestra todas las hojas de un PDF, una debajo de otra, con contador de hoja, acercar y alejar, ajustar al ancho, girar y abrir en otra pestaña; también imágenes. En computadora queda fijo junto a lo que se revisa, para decidir viendo el documento; en teléfono se abre a pantalla completa. Usa pdf.js (vendor/pdfjs-dist), que se carga sólo al abrir el primer PDF.",
+      "cuando": "Revisión documental: personal que acepta u observa los documentos que la persona cargó.",
+      "cuandoNo": "Para que la persona vea lo que ella misma adjuntó (la vista previa de «archivos» basta) o para un solo documento corto (basta «Abrir en otra pestaña»).",
+      "dependencias": [],
+      "js": true,
+      "accesibilidad": "Diálogo con título; en teléfono es modal y Escape cierra con el foco de vuelta al botón «Ver documento»; en computadora no le quita el foco a quien revisa. Cada hoja es una imagen con nombre («Hoja 1 de 2»); el contador y el acercamiento se anuncian; barra de herramientas con nombre.",
+      "movil": "Pantalla completa, con «Cerrar»; la barra se parte en dos renglones si no cabe.",
+      "escritorio": "Columna fija a la derecha de lo que se revisa (.visor-area), del alto de la pantalla.",
+      "errores": [
+        "Abrir el documento en otra pestaña como única forma de revisarlo: quien revisa pierde lo que estaba decidiendo.",
+        "Mostrar sólo la primera hoja.",
+        "Cargar pdf.js de una CDN.",
+        "Usar una versión de pdf.js anterior a la 4.2.67, que deja ejecutar código desde un PDF malicioso."
+      ],
+      "archivos": {
+        "css": "codigo/modulos/visor/visor.css",
+        "js": "codigo/modulos/visor/visor.js"
+      },
+      "tamano": {
+        "css": 3321,
+        "js": 11563
       }
     },
     {
@@ -797,9 +828,9 @@
       "titulo": "Chips de uso frecuente",
       "nivel": "OPCIONAL",
       "tipo": "pregunta",
-      "proposito": "Sugerencias de un toque desde el historial del dispositivo; nunca al servidor; quitar y borrar historial; se niega en datos personales.",
+      "proposito": "Sugerencias de un toque desde el historial del dispositivo (nunca al servidor; quitar y borrar historial; se niega en datos personales) y respuestas frecuentes fijas (data-chips-fijos), que no guardan nada y sirven en cualquier campo: en un texto largo, el chip agrega su texto para completarlo.",
       "cuando": "Captura por personal con respuestas repetidas.",
-      "cuandoNo": "Formularios ciudadanos de una sola vez; datos personales.",
+      "cuandoNo": "Historial: formularios ciudadanos de una sola vez y datos personales (para ellos, la lista fija).",
       "dependencias": [],
       "js": true,
       "accesibilidad": "Botones con aria-pressed; «Quitar X de las sugerencias»; grupo con nombre.",
@@ -814,10 +845,10 @@
         "js": "codigo/modulos/chips/chips.js"
       },
       "tamano": {
-        "css": 1459,
-        "js": 4836
+        "css": 1628,
+        "js": 7077
       }
     }
   ],
-  "generado": "2026-10-16T15:11:01.640Z"
+  "generado": "2026-10-17T14:30:55.008Z"
 }

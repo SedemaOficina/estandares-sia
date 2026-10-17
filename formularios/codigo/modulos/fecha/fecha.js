@@ -20,11 +20,14 @@
    Para edad: data-deriva="edad=edad" en el campo de la fecha de nacimiento;
    el destino es un [data-campo] con <input readonly>. La edad nunca se
    escribe a mano: se calcula, también cuando la fecha viene de la CURP.
+   Para la fecha de nacimiento, sin calendario: data-formato="fecha-dma" en
+   un <input type="text" inputmode="numeric" maxlength="10">; se escribe
+   día/mes/año (23/07/1985) y la escritura se acomoda sola.
    ========================================================= */
 (function () {
   'use strict';
   FormKit.registra('fecha', {
-    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato="fecha"][data-deriva]',
+    selector: '[data-hoy],[data-ahora],[data-rango],[data-formato="fecha"][data-deriva],[data-formato="fecha-dma"]',
     iniciar(form, ctx) {
       const { $, $$, cfg, M, anuncia, envoltura, controlPrincipal, validaYPinta, programaBorrador } = ctx;
 
@@ -54,12 +57,26 @@
 
       /* Edad cumplida desde la fecha de nacimiento, con «hoy» de la Ciudad de
          México. Con una fecha vacía, incompleta o futura, la edad queda vacía. */
-      for (const campo of $$('[data-campo][data-formato="fecha"][data-deriva]', form)) {
+      /* Fecha día/mes/año (formato «fecha-dma»), sin calendario: la escritura
+         se acomoda sola (23 → 23/, 07 → 23/07/) mientras se escribe al final;
+         al borrar o al editar en medio no se mueve nada. Corre en el control,
+         antes de que el núcleo lea el valor. */
+      for (const campo of $$('[data-campo][data-formato="fecha-dma"]', form)) {
+        const ctl = controlPrincipal(campo.dataset.campo);
+        if (!ctl || ctl.tagName !== 'INPUT') continue;
+        ctl.addEventListener('input', (e) => {
+          if ((e.inputType && e.inputType.startsWith('delete')) || ctl.selectionStart !== ctl.value.length) return;
+          const v = cfg.guiaFechaDma(ctl.value);
+          if (v !== ctl.value) { ctl.value = v; ctl.setSelectionRange(v.length, v.length); }
+        });
+      }
+
+      for (const campo of $$('[data-campo][data-formato="fecha"][data-deriva],[data-campo][data-formato="fecha-dma"][data-deriva]', form)) {
         const ctl = controlPrincipal(campo.dataset.campo);
         const destinos = campo.dataset.deriva.split(/\s+/).filter((p) => p.startsWith('edad=')).map((p) => p.slice(5));
         if (!ctl || !destinos.length) continue;
         const calcula = () => {
-          const v = ctl.value;
+          const v = campo.dataset.formato === 'fecha-dma' ? cfg.isoDeDma(ctl.value) : ctl.value;
           const edad = /^\d{4}-\d{2}-\d{2}$/.test(v) && v <= cfg.hoyISO() ? String(cfg.edadEn(v, cfg.hoyISO())) : '';
           for (const d of destinos) {
             const c = controlPrincipal(d);

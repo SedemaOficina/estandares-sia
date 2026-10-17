@@ -159,3 +159,80 @@ test('Sí/No en línea: una columna por opción en escritorio y una por renglón
     await p.context().close();
   }
 });
+
+/* ----- Versión 1.2.0: P65, P66, P67 y P70, sobre las muestras de la guía ----- */
+
+const abreGuia = (perfil = PERFILES.escritorio) => abrePagina(navegador, servidor.url, PAGINAS.guia, { contexto: perfil.contexto });
+
+test('respuestas frecuentes fijas: el chip agrega su texto al texto largo y no guarda nada (P65)', async () => {
+  const p = await abreGuia();
+  const chips = p.locator('#m-chips [data-chip-fijo]');
+  assert.equal(await chips.count(), 4, 'la lista fija se ve siempre');
+  await chips.filter({ hasText: 'No se lee completo' }).click();
+  assert.equal(await p.inputValue('#m_observacion'), 'No se lee completo.');
+  await chips.filter({ hasText: 'Falta una página' }).click();
+  assert.equal(await p.inputValue('#m_observacion'), 'No se lee completo. Falta una página.', 'el segundo se agrega al final');
+  assert.equal(await p.evaluate(() => document.activeElement.id), 'm_observacion', 'el foco queda en el texto para completarlo');
+  assert.equal(await p.evaluate(() => Object.keys(localStorage).filter((k) => k.includes('m_observacion')).length), 0, 'no guarda nada en el dispositivo');
+  await p.context().close();
+});
+
+test('tabla: el rayado cuenta sólo las filas visibles y la fila oculta no se ve; en teléfono, sin rótulo de acciones (P66)', async () => {
+  const p = await abreGuia();
+  const fondo = (folio) => p.locator(`#m-tabla tr[data-folio="${folio}"]`).evaluate((tr) => getComputedStyle(tr).backgroundColor);
+  const sinFondo = 'rgba(0, 0, 0, 0)';
+  assert.equal(await fondo('EJ-001'), sinFondo, '1.ª visible, sin fondo');
+  assert.notEqual(await fondo('EJ-002'), sinFondo, '2.ª visible (después de la oculta), con fondo');
+  assert.equal(await fondo('EJ-003'), sinFondo, '3.ª visible, sin fondo');
+  await p.context().close();
+  const t = await abreGuia(PERFILES.movil);
+  assert.ok(await t.locator('#m-tabla tr[data-folio="EJ-004"]').isHidden(), 'la fila filtrada con hidden no se ve en teléfono');
+  const rotulo = await t.locator('#m-tabla tr[data-folio="EJ-001"] td').last().evaluate((td) => getComputedStyle(td, '::before').display);
+  assert.equal(rotulo, 'none', 'la columna de acciones no muestra su rótulo');
+  const otro = await t.locator('#m-tabla tr[data-folio="EJ-001"] td').first().evaluate((td) => getComputedStyle(td, '::before').display);
+  assert.notEqual(otro, 'none', 'las demás columnas sí');
+  await t.context().close();
+});
+
+test('visor: todas las hojas del PDF, contador, acercar e imagen; en teléfono, pantalla completa que vuelve al botón (P67)', async () => {
+  const p = await abreGuia();
+  await p.click('#m-visor [data-visor-url$=".pdf"]');
+  await p.waitForFunction(() => document.querySelectorAll('#m-visor canvas').length === 2, null, { timeout: 15000 });
+  const d = p.locator('#m-visor [data-visor]');
+  assert.equal(await d.evaluate((x) => x.open && !x.matches(':modal')), true, 'en computadora queda abierto junto a la revisión, sin ser modal');
+  assert.equal((await p.locator('#m-visor [data-visor-pagina]').textContent()).trim(), 'Hoja 1 de 2');
+  assert.equal(await p.locator('#m-visor canvas').first().getAttribute('aria-label'), 'Hoja 1 de 2', 'cada hoja tiene nombre');
+  await p.click('#m-visor [data-visor-accion="acercar"]');
+  await p.waitForFunction(() => document.querySelector('#m-visor [data-visor-hojas]').dataset.zoom === '125');
+  assert.equal((await p.locator('#m-visor [data-visor-zoom]').textContent()).trim(), '125 %');
+  await p.click('#m-visor [data-visor-url$=".png"]');
+  await p.waitForSelector('#m-visor img.visor-imagen');
+  assert.equal(await p.locator('#m-visor canvas').count(), 0, 'la imagen reemplaza al PDF');
+  assert.deepEqual(p.registro, [], 'consola limpia');
+  await p.context().close();
+
+  const t = await abreGuia(PERFILES.movil);
+  const boton = t.locator('#m-visor [data-visor-url$=".pdf"]');
+  await boton.click();
+  assert.equal(await t.locator('#m-visor [data-visor]').evaluate((x) => x.matches(':modal')), true, 'en teléfono es un diálogo a pantalla completa');
+  await t.keyboard.press('Escape');
+  assert.equal(await t.locator('#m-visor [data-visor]').evaluate((x) => x.open), false, 'Escape lo cierra');
+  assert.equal(await boton.evaluate((b) => b === document.activeElement), true, 'el foco vuelve a «Ver documento»');
+  await t.context().close();
+});
+
+test('fecha día/mes/año: escritura guiada, edad y validación, sin calendario (P70)', async () => {
+  const p = await abreGuia();
+  await p.click('#b_fn_fecha');
+  await p.keyboard.type('2371985');
+  assert.equal(await p.inputValue('#b_fn_fecha'), '23/07/1985', 'pasa sola al mes y al año');
+  await p.keyboard.press('Tab');
+  assert.match(await p.inputValue('#b_fn_edad'), /^\d+$/, 'la edad se calcula');
+  assert.equal(await error(p, 'b_fn_fecha'), '', 'una fecha real pasa');
+  await p.fill('#b_fn_fecha', '31/02/1990'); await p.keyboard.press('Tab');
+  assert.match(await error(p, 'b_fn_fecha'), /fecha real/, 'el 31 de febrero no existe');
+  await p.fill('#b_fn_fecha', '01/01/2099'); await p.keyboard.press('Tab');
+  assert.match(await error(p, 'b_fn_fecha'), /posterior a hoy/, 'no acepta fechas futuras');
+  assert.equal(await p.inputValue('#b_fn_edad'), '', 'con una fecha futura, la edad queda vacía');
+  await p.context().close();
+});

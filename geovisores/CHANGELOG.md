@@ -1,5 +1,9 @@
 # Cambios
 
+## Sin publicar
+
+- `herramientas/servir.mjs` (el servidor local de la guía común) sirve también `.pdf` y `.ttf`, para el visor de documentos de formularios 1.2.0.
+
 ## 0.1.2 · 14 oct 2026 · Fichas claras, rampa de verdor, norte, opacidad y mapas base
 
 - **Decisión D12 (la Secretaría, 14 oct 2026, con la recomendación del estándar): «mi ubicación» y el foco conservan su azul.** Son casi el mismo azul (MI03, 1.08:1), pero se distinguen por la forma: punto lleno con borde blanco contra anillo de dos tonos. GEO-31 lo dice y el foco nunca se dibuja como punto lleno.
