@@ -216,11 +216,11 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-19 · La lista desplegable con búsqueda es cerrada por omisión
 
-**Regla.** El combo (módulo «combo») filtra desde la primera letra, se opera con flechas, Enter y Escape, y sólo acepta valores del catálogo. Con data-libre acepta lo escrito. Se usa a partir de 8 opciones; con menos, radios o select nativo.
+**Regla.** El combo (módulo «combo») filtra desde la primera letra, se opera con flechas, Enter y Escape, y sólo acepta valores del catálogo. Con data-libre acepta lo escrito. Se usa a partir de 8 opciones; con menos, radios o select nativo. La lista se abre sólo cuando la persona escribe en el campo: si la página lo llena (al retomar un borrador), no se abre ni anuncia.
 
 **Por qué.** Un valor libre en un campo de catálogo rompe la consulta; un select de 40 opciones es intransitable en el teléfono.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-24; A FRM-25; B FRM-CMP-03; C4 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-24; A FRM-25; B FRM-CMP-03; C4; P99 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
 **Verificación.** 04-modulos.prueba.mjs: combo
 
@@ -266,11 +266,11 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-24 · Pestañas, acordeón, migas, progreso, paginación, ayuda desplegable, tabla y visor de documentos son módulos con teclado completo
 
-**Regla.** Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que en teléfono se vuelve tarjetas; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con contador, acercar y girar, fijo junto a la revisión en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor, que se busca junto a la copia del estándar o en la ruta que diga la configuración.
+**Regla.** Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que en teléfono se vuelve tarjetas con rótulo y valor en dos columnas fijas y en computadora lleva la línea de cada fila bajo todas sus columnas, con el contenido centrado en vertical; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con contador, acercar y girar, fijo junto a la revisión en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor, que se busca junto a la copia del estándar o en la ruta que diga la configuración.
 
 **Por qué.** Un componente a medias (sólo ratón, sólo escritorio) excluye a una parte de las personas y obliga a rehacerlo después. Un ícono que repite lo que ya se lee obliga a abrirlo para nada.
 
-**Nivel.** OPCIONAL · **Origen.** encargo 5.1; encargo 5.4; S2-4 (proyecto de acreditaciones, 16 oct 2026); P66 (proyecto de acreditaciones, 16 oct 2026); P67 (proyecto de acreditaciones, 16 oct 2026); P96 (proyecto de acreditaciones, 17 oct 2026) · *decisión del encargo*
+**Nivel.** OPCIONAL · **Origen.** encargo 5.1; encargo 5.4; S2-4 (proyecto de acreditaciones, 16 oct 2026); P66 (proyecto de acreditaciones, 16 oct 2026); P67 (proyecto de acreditaciones, 16 oct 2026); P96 (proyecto de acreditaciones, 17 oct 2026); P103 (proyecto de acreditaciones, 17 oct 2026); P104 (proyecto de acreditaciones, 17 oct 2026) · *decisión del encargo*
 
 **Verificación.** 04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos; auditar-campos D5; 07: tabla filtrada y visor
 
@@ -358,11 +358,11 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-33 · El navegador ayuda; el servidor defiende con las mismas reglas
 
-**Regla.** Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor además revisa la firma de los archivos, el límite por origen y la idempotencia.
+**Regla.** Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor además revisa la firma de los archivos, el límite por origen y la idempotencia. El esquema del servidor se toma sólo de lo que está dentro del <form>: un control de la página fuera de él no es parte de ningún campo.
 
 **Por qué.** La validación del navegador se salta con una petición directa; una segunda lista de reglas se desactualiza.
 
-**Nivel.** BASE · **Origen.** A FRM-70; B FRM-VAL-08 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-70; B FRM-VAL-08; P90 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
 **Verificación.** 06-servidor-y-herramientas.prueba.mjs; 04-modulos: esquema vs navegador
 

@@ -1,7 +1,7 @@
 /* GENERADO: núcleo + todos los módulos. Para copiar sólo lo que se usa, toma los archivos de codigo/. */
 /* ===== codigo/css/tokens.css ===== */
 /* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.3.2
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.3.3
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -132,6 +132,7 @@
   --alto-logo:48px;
   --marca-acuse:64px;
   --ancho-pagina:980px;
+  --ancho-contenido:calc(var(--ancho-pagina) - 2 * var(--e-pagina)); /* lo que queda dentro de .pagina: cabecera y pie se alinean con él */
   --ancho-lectura:70ch;
   --ancho-dialogo:560px;
   --ancho-acuse:460px;
@@ -305,7 +306,7 @@ a{color:var(--azul)}
   flex-direction:column;
   align-items:flex-start;
   gap:var(--e-3);
-  max-width:var(--ancho-pagina);
+  max-width:var(--ancho-contenido);
   margin-inline:auto;
 }
 .cabecera-logo{display:block;width:auto;height:auto;max-width:100%;max-height:var(--alto-logo)}
@@ -318,7 +319,10 @@ a{color:var(--azul)}
   font-size:var(--t-sm);
   color:var(--gris);
 }
-.pie-int{max-width:var(--ancho-pagina);margin-inline:auto}
+/* Cabecera y pie ponen su margen lateral por fuera y .pagina por dentro: los
+   tres miden lo mismo por dentro (--ancho-contenido), así logotipo, título,
+   contenido y pie empiezan en la misma línea (P102). */
+.pie-int{max-width:var(--ancho-contenido);margin-inline:auto}
 
 /* Enlace de salto al contenido: primer elemento enfocable de la página. */
 .salto{
@@ -1805,11 +1809,16 @@ a{color:var(--azul)}
 /* Teléfono: el encabezado se oculta visualmente (sigue para el lector) y las celdas se apilan. */
 .tabla thead{position:absolute;width:var(--b-1);height:var(--b-1);overflow:hidden;clip:rect(0,0,0,0)}
 .tabla tr{display:block;margin-bottom:var(--e-3);padding:var(--e-2) var(--e-3);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl)}
-.tabla td{display:flex;flex-wrap:wrap;gap:var(--e-1) var(--e-3);padding:var(--e-2) 0;border-bottom:var(--b-1) solid var(--linea);vertical-align:top}
+/* Teléfono: rejilla fija rótulo | valor en cada celda (P104); el valor va en
+   .tabla-valor, que el módulo crea, y se parte en renglones sin bajar entero. */
+.tabla td{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:var(--e-1) var(--e-3);padding:var(--e-2) 0;border-bottom:var(--b-1) solid var(--linea);vertical-align:top}
 .tabla td:last-child{border-bottom:0}
-.tabla td::before{content:attr(data-etiqueta);flex:0 0 40%;font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
+.tabla td::before{content:attr(data-etiqueta);font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
+.tabla-valor{min-width:0;overflow-wrap:anywhere}
 /* Columna cuyo encabezado es sólo para el lector de pantalla (acciones): en teléfono tampoco se ve su rótulo. */
 .tabla td[data-etiqueta-oculta]::before{display:none}
+/* Sin rótulo (acciones), el valor ocupa todo el ancho de la tarjeta. */
+td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
 .tabla th{padding:var(--e-2) var(--e-3);background:var(--guinda);font-family:var(--fuente-titulo);font-size:var(--t-md);font-weight:var(--peso-fuerte);text-align:left;color:var(--blanco)}
 .tabla-orden{display:inline-flex;align-items:center;gap:var(--e-1);min-height:var(--objetivo-min);padding:0;background:none;border:0;font:inherit;color:inherit}
 .tabla-orden-icono{opacity:var(--op-inactivo);transition:transform var(--dur-rapida)}
@@ -1832,7 +1841,9 @@ a{color:var(--azul)}
   .tabla{min-width:var(--ancho-tabla-min)}
   .tabla thead{position:static;width:auto;height:auto;overflow:visible;clip:auto}
   .tabla tr{display:table-row;margin:0;padding:0;background:none;border:0;border-radius:0}
-  .tabla td{display:table-cell;padding:var(--e-2) var(--e-3)}
+  /* Computadora: la línea de la fila llega bajo todas las columnas y el contenido va centrado en vertical (P103). */
+  .tabla td{display:table-cell;padding:var(--e-2) var(--e-3);vertical-align:middle}
+  .tabla td:last-child{border-bottom:var(--b-1) solid var(--linea)}
   .tabla td::before{display:none}
   /* Filas alternas contadas sólo entre las visibles: al filtrar con [hidden], el rayado no pierde el ritmo. */
   .tabla tr:nth-child(even of :not([hidden])){background:var(--guinda-cl)}

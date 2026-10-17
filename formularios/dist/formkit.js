@@ -516,7 +516,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.3.2',
+    version: '1.3.3',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -653,6 +653,7 @@
       comboUno: 'Un resultado disponible.',
       comboVarios: '{n} resultados disponibles.',
       comboNinguno: 'Sin resultados para «{texto}».',
+      comboLibre: 'No está en la lista: se guarda como lo escribiste.',
       cascadaEspera: 'Primero elige {padre}.',
       cascadaReiniciada: 'Se reinició «{etiqueta}» porque cambió «{padre}».',
       cascadaSinCatalogo: 'No se pudo cargar la lista; escribe el dato a mano.',
@@ -694,7 +695,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.2
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.3
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -1784,7 +1785,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
             const v = document.createElement('li');
             v.className = 'combo-vacio';
             v.setAttribute('role', 'presentation');
-            v.textContent = libre && q ? 'No está en la lista: se guarda como lo escribiste.' : plantilla(M.comboNinguno, { texto: entrada.value });
+            v.textContent = libre && q ? M.comboLibre : plantilla(M.comboNinguno, { texto: entrada.value });
             lista.appendChild(v);
           }
           lista.hidden = false;
@@ -1793,7 +1794,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           anuncia(visibles.length === 0 ? plantilla(M.comboNinguno, { texto: entrada.value }) : visibles.length === 1 ? M.comboUno : plantilla(M.comboVarios, { n: visibles.length }));
         }
 
-        entrada.addEventListener('input', pinta);
+        /* Sólo cuando la persona escribe en el campo (P99): si la página lo llena
+           (al retomar un borrador), la lista no se abre ni anuncia ni tapa la
+           pregunta siguiente. */
+        entrada.addEventListener('input', () => { if (document.activeElement === entrada) pinta(); });
         /* Clic (no foco): al llegar desde el resumen de errores la lista no debe tapar el mensaje. */
         entrada.addEventListener('click', () => { if (lista.hidden) pinta(); });
         entrada.addEventListener('keydown', (e) => {
@@ -3029,6 +3033,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const soloLector = (th) => { const c = th.cloneNode(true); for (const s of $$('.solo-lector', c)) s.remove(); return !c.textContent.trim(); };
         function etiquetaCeldas() {
           for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => {
+            /* El contenido de la celda va junto en .tabla-valor: en teléfono es la columna del valor (P104). */
+            if (!(td.children.length === 1 && td.firstElementChild.classList.contains('tabla-valor') && td.childNodes.length === 1)) {
+              const valor = document.createElement('div');
+              valor.className = 'tabla-valor';
+              valor.append(...td.childNodes);
+              td.appendChild(valor);
+            }
             if (!ths[i] || td.dataset.etiqueta) return;
             td.dataset.etiqueta = ths[i].textContent.trim();
             if (soloLector(ths[i])) td.dataset.etiquetaOculta = '';
@@ -4085,8 +4096,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const caja = document.createElement('div');
         caja.className = 'chips chips-fijos';
         caja.setAttribute('role', 'group');
-        /* Nombre del grupo: data-chips-fijos-nombre, o «Respuestas frecuentes para …» con la etiqueta. */
-        caja.setAttribute('aria-label', campo.dataset.chipsFijosNombre || plantilla(M.chipsFijos, { etiqueta: ctx.etiquetaDe(n).toLowerCase() }));
+        /* Nombre del grupo: data-chips-fijos-nombre (completo), o M.chipsFijos («Respuestas frecuentes para …»)
+           con data-chips-etiqueta (por ejemplo, el documento: «… para Identificación oficial») o la etiqueta del campo. */
+        caja.setAttribute('aria-label', campo.dataset.chipsFijosNombre || plantilla(M.chipsFijos, { etiqueta: campo.dataset.chipsEtiqueta || ctx.etiquetaDe(n).toLowerCase() }));
         for (const t of lista) {
           const b = document.createElement('button'); b.type = 'button'; b.className = 'chip chip-fijo'; b.dataset.chipFijo = t; b.textContent = t;
           caja.appendChild(b);

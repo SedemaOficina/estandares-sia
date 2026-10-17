@@ -1,5 +1,18 @@
 # Historial de cambios
 
+## 1.3.3 · 2026-10-17
+
+Cinco hallazgos más del sistema de acreditaciones (su documento de hallazgos abiertos del 17 oct y la auditoría visual de ese día), más el nombre propuesto para P97.
+
+- **P90 · El esquema lee sólo el `<form>`** (`esquema-desde-html.mjs`, FRM-33): leía toda la página, así que un control fuera del formulario (la casilla «Marcarla para revisar» de un examen) se tomaba como parte del último campo y lo volvía «casilla». Ahora sólo cuenta lo que está dentro de los `<form>`; sin `<form>`, toda la página. El proyecto puede quitar de `probar-esquemas.mjs` la extracción del `<form>`.
+- **P99 · La lista con búsqueda no se abre sola** (módulo `combo`, FRM-19): se abría y anunciaba con cualquier cambio de valor, también cuando la página llenaba el campo al retomar un borrador, y la lista tapaba la pregunta siguiente. Ahora sólo se abre cuando la persona escribe en el campo. Su texto «No está en la lista…» pasa a `mensajes` (`comboLibre`). El proyecto puede quitar el cierre de la lista en `APD.avisa`.
+- **P102 · Cabecera, contenido y pie alineados**: `.pagina` pone su margen lateral por dentro del ancho de página y la cabecera y el pie por fuera, así que en computadora el logotipo, el título y el pie empezaban antes que el contenido. Token nuevo `--ancho-contenido` (el ancho de página menos los dos márgenes) para `.cabecera-int` y `.pie-int`. El proyecto puede quitar sus reglas de `.cabecera-int` y `.pie-int` en `apd.css`.
+- **P103 · Tabla en computadora** (módulo `tabla`, FRM-24): la última celda conserva la línea de la fila (la regla que la quitaba era para las tarjetas del teléfono) y el contenido va centrado en vertical, alineando los botones con el texto.
+- **P104 · Tabla en teléfono** (módulo `tabla`, FRM-24): cada celda es una rejilla fija rótulo | valor. El módulo pone el contenido de la celda en `.tabla-valor`, así un valor largo se parte en renglones a la derecha de su rótulo en lugar de bajar entero, también en celdas con varios elementos. Sin rótulo (acciones), el valor ocupa toda la tarjeta.
+- **P97 (complemento)**: además del nombre automático de la 1.3.2, `data-chips-etiqueta` cambia la parte de la etiqueta en el nombre del grupo, como propuso el proyecto («Motivos frecuentes para Identificación oficial», con `mensajes.chipsFijos` = «Motivos frecuentes para {etiqueta}»).
+
+**Pruebas**: tres casos nuevos en `07-correcciones` (22 en total) y uno en `06` (27).
+
 ## 1.3.2 · 2026-10-17
 
 Cuatro hallazgos del sistema de acreditaciones al pasar a la 1.3.1.

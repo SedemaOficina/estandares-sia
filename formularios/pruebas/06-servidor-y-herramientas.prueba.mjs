@@ -291,6 +291,20 @@ test('servidor · folio fiscal (UUID) de una factura: minúsculas y sin guiones 
   assert.ok(validaPayload({ datos: { factura: '1234' }, meta: META }, e).errores.some((x) => x.campo === 'factura'), 'y rechaza uno incompleto');
 });
 
+test('esquema · sólo lee lo que está dentro del <form>: un control de la página no cambia el último campo (P90)', () => {
+  const archivo = join(TEMPORAL, `prueba-${++cuentaTemporal}.html`);
+  writeFileSync(archivo, `<main>
+<form data-formkit>
+  <div class="campo" data-campo="codigo" data-requerido data-uso="x."><label class="etiqueta" for="codigo">Código</label><input class="control" id="codigo" name="codigo"></div>
+</form>
+<label class="casilla"><input type="checkbox" id="revisar"> Marcarla para revisar</label>
+<div class="campo" data-campo="fuera" data-uso="x."><input class="control" name="fuera"></div>
+</main>`);
+  const e = JSON.parse(execFileSync(process.execPath, [resolve(RAIZ, 'herramientas/esquema-desde-html.mjs'), archivo], { encoding: 'utf8' }));
+  assert.equal(e.campos.codigo.tipo, 'texto', 'la casilla de fuera no vuelve «casilla» el campo del código');
+  assert.equal(e.campos.fuera, undefined, 'un data-campo fuera del <form> no es campo del formulario');
+});
+
 const herramienta = (nombre, args) => test(`herramientas · ${nombre}`, () => {
   const r = spawnSync(process.execPath, args, { cwd: RAIZ, encoding: 'utf8' });
   assert.equal(r.status, 0, (r.stdout + r.stderr).split('\n').slice(-30).join('\n'));

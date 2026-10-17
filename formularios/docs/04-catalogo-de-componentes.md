@@ -31,7 +31,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 |---|---|---|---|---|---|---|
 | `opciones` | Opciones elegibles | BASE | pregunta | — | 5.1 KB | — |
 | `otro` | Opción «Otro» con especificación | RECOMENDADO | pregunta | opciones | — | 4.2 KB |
-| `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 7.7 KB |
+| `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 7.9 KB |
 | `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.0 KB |
 | `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 4.0 KB |
 | `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 929 B | 6.8 KB |
@@ -50,13 +50,13 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `paginacion` | Paginación de resultados | OPCIONAL | navegacion | — | 2.1 KB | 6.0 KB |
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
-| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.2 KB | 5.0 KB |
+| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.8 KB | 5.4 KB |
 | `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.0 KB | 19.5 KB |
 | `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.7 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
 | `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 7.4 KB |
-| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 1.6 KB | 8.1 KB |
+| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 1.6 KB | 8.3 KB |
 
 ### Opciones elegibles (`opciones`) · BASE
 

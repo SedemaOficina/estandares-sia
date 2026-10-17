@@ -40,8 +40,9 @@
         const caja = document.createElement('div');
         caja.className = 'chips chips-fijos';
         caja.setAttribute('role', 'group');
-        /* Nombre del grupo: data-chips-fijos-nombre, o «Respuestas frecuentes para …» con la etiqueta. */
-        caja.setAttribute('aria-label', campo.dataset.chipsFijosNombre || plantilla(M.chipsFijos, { etiqueta: ctx.etiquetaDe(n).toLowerCase() }));
+        /* Nombre del grupo: data-chips-fijos-nombre (completo), o M.chipsFijos («Respuestas frecuentes para …»)
+           con data-chips-etiqueta (por ejemplo, el documento: «… para Identificación oficial») o la etiqueta del campo. */
+        caja.setAttribute('aria-label', campo.dataset.chipsFijosNombre || plantilla(M.chipsFijos, { etiqueta: campo.dataset.chipsEtiqueta || ctx.etiquetaDe(n).toLowerCase() }));
         for (const t of lista) {
           const b = document.createElement('button'); b.type = 'button'; b.className = 'chip chip-fijo'; b.dataset.chipFijo = t; b.textContent = t;
           caja.appendChild(b);

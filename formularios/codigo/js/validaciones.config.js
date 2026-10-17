@@ -514,7 +514,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.3.2',
+    version: '1.3.3',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -651,6 +651,7 @@
       comboUno: 'Un resultado disponible.',
       comboVarios: '{n} resultados disponibles.',
       comboNinguno: 'Sin resultados para «{texto}».',
+      comboLibre: 'No está en la lista: se guarda como lo escribiste.',
       cascadaEspera: 'Primero elige {padre}.',
       cascadaReiniciada: 'Se reinició «{etiqueta}» porque cambió «{padre}».',
       cascadaSinCatalogo: 'No se pudo cargar la lista; escribe el dato a mano.',

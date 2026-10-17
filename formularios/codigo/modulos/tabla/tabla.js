@@ -37,6 +37,13 @@
         const soloLector = (th) => { const c = th.cloneNode(true); for (const s of $$('.solo-lector', c)) s.remove(); return !c.textContent.trim(); };
         function etiquetaCeldas() {
           for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => {
+            /* El contenido de la celda va junto en .tabla-valor: en teléfono es la columna del valor (P104). */
+            if (!(td.children.length === 1 && td.firstElementChild.classList.contains('tabla-valor') && td.childNodes.length === 1)) {
+              const valor = document.createElement('div');
+              valor.className = 'tabla-valor';
+              valor.append(...td.childNodes);
+              td.appendChild(valor);
+            }
             if (!ths[i] || td.dataset.etiqueta) return;
             td.dataset.etiqueta = ths[i].textContent.trim();
             if (soloLector(ths[i])) td.dataset.etiquetaOculta = '';

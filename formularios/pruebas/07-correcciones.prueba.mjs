@@ -321,3 +321,42 @@ test('grupos de motivos con la misma etiqueta y dos «Mostrar» tienen nombres d
   assert.deepEqual(botones, ['Mostrar: Contraseña', 'Mostrar: Confirma tu contraseña'], 'cada «Mostrar» dice de qué campo es');
   await p.context().close();
 });
+
+/* ----- Versión 1.3.3: P99, P102, P103 y P104 ----- */
+
+test('la lista con búsqueda no se abre si la página llena el campo sin que la persona esté en él (P99)', async () => {
+  const p = await abre();
+  await p.focus('#materno');
+  await p.evaluate(() => { const c = document.getElementById('especie'); c.value = 'Ahuehuete gigante'; c.dispatchEvent(new Event('input', { bubbles: true })); });
+  assert.ok(await p.locator('[data-campo="especie"] .combo-lista').isHidden(), 'al llenarlo la página, la lista sigue cerrada');
+  await p.click('#especie'); await p.fill('#especie', ''); await p.type('#especie', 'jac');
+  assert.ok(await p.locator('.combo-lista li', { hasText: 'Jacaranda' }).isVisible(), 'al escribir la persona, sí se abre');
+  await p.context().close();
+});
+
+test('cabecera, contenido y pie empiezan en la misma línea en computadora (P102)', async () => {
+  const p = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
+  const x = await p.evaluate(() => {
+    const izq = (el) => el.getBoundingClientRect().left;
+    const pag = document.querySelector('.pagina');
+    return { cabecera: izq(document.querySelector('.cabecera-int')), contenido: izq(pag) + parseFloat(getComputedStyle(pag).paddingLeft), pie: izq(document.querySelector('.pie-int')) };
+  });
+  assert.ok(Math.abs(x.cabecera - x.contenido) < 1 && Math.abs(x.pie - x.contenido) < 1, JSON.stringify(x));
+  await p.context().close();
+});
+
+test('tabla: en computadora la línea llega bajo las acciones y todo va centrado; en teléfono, rótulo | valor en cada renglón (P103, P104)', async () => {
+  const p = await abreGuia();
+  const ultima = await p.locator('#m-tabla tr[data-folio="EJ-001"] td').last().evaluate((td) => ({ borde: getComputedStyle(td).borderBottomWidth, alto: getComputedStyle(td).verticalAlign }));
+  assert.equal(ultima.borde, '1px', 'la última celda también lleva la línea de la fila');
+  assert.equal(ultima.alto, 'middle', 'y el contenido va centrado en vertical');
+  await p.context().close();
+  const t = await abreGuia(PERFILES.movil);
+  const celda = await t.locator('#m-tabla tr[data-folio="EJ-003"] td').nth(1).evaluate((td) => {
+    const v = td.querySelector(':scope > .tabla-valor').getBoundingClientRect(), c = td.getBoundingClientRect(), pad = parseFloat(getComputedStyle(td).paddingTop);
+    return { arriba: Math.round(v.top - c.top - pad), izquierda: Math.round((v.left - c.left) / c.width * 100) };
+  });
+  assert.equal(celda.arriba, 0, `el valor largo empieza en el renglón de su rótulo, no abajo: ${JSON.stringify(celda)}`);
+  assert.ok(celda.izquierda >= 35, `y en la columna del valor: ${JSON.stringify(celda)}`);
+  await t.context().close();
+});
