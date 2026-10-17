@@ -39,7 +39,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
 | `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.7 KB |
 | `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.3 KB | 3.2 KB |
-| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.9 KB | 3.4 KB |
+| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.9 KB | 3.5 KB |
 | `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 1.7 KB | 4.0 KB |
 | `copiar` | Copiar y compartir | RECOMENDADO | retroalimentacion | — | 542 B | 4.0 KB |
 | `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 3.3 KB |
@@ -50,7 +50,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `paginacion` | Paginación de resultados | OPCIONAL | navegacion | — | 2.1 KB | 6.0 KB |
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
-| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.8 KB | 5.4 KB |
+| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.8 KB | 6.6 KB |
 | `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.0 KB | 19.5 KB |
 | `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.7 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |

@@ -1,5 +1,15 @@
 # Historial de cambios
 
+## 1.3.4 · 2026-10-17
+
+Tres hallazgos del sistema de acreditaciones (sus pantallas de grupos y su configuración en «usted»). P110 y P111 son los que el proyecto registró primero como P106 y P107.
+
+- **P110 · La tabla se inicia sola y vuelve a leer sus encabezados** (módulo `tabla`, FRM-24 y FRM-71): sólo se iniciaba cuando la página iniciaba un formulario, así que en una página de pura consulta las celdas no mostraban su encabezado en teléfono. Además leía los encabezados una sola vez: si el formulario arrancaba antes de que la página pintara un encabezado calculado, el rótulo quedaba vacío. Ahora la tabla se inicia sola al cargar la página, haya o no formulario. Con `formkit:tabla` vuelve a leer los encabezados actuales y prepara el orden de las columnas que ya tienen texto. Los rótulos que pone el módulo llevan `data-etiqueta-auto`; los escritos en el HTML no se tocan. `FormKit.tabla.inicia()` sirve para tablas agregadas después. El anuncio «Ordenado por…» pasa a `mensajes` (`tablaOrdenada`). El proyecto puede quitar el `data-etiqueta` que pone a mano en «Grupos».
+- **P111 · Un formulario se inicia una sola vez** (núcleo, FRM-71): `FormKit.iniciar` no revisaba si el formulario ya estaba iniciado. Un formulario que arrancaba solo al cargar y que la página volvía a iniciar con sus opciones quedaba con los escuchas duplicados (un clic, dos envíos). Ahora la segunda llamada le suma las opciones nuevas (por ejemplo `enviar`) y devuelve la misma instancia. `data-formkit="manual"`, que no arranca solo, queda documentado en `docs/06`. El proyecto puede seguir usándolo, aunque ya no hace falta. De paso, lo que un módulo agrega a las opciones (el acuse agrega su `alEnviar`) queda en ese formulario y ya no cambia el `FORMKIT_OPCIONES` de la página; el acuse llama al `alEnviar` y al `alFallar` de la página que haya en el momento del envío.
+- **P112 · La fecha del mensaje de límite en día/mes/año** (formato `fecha`, FRM-30): «La fecha no puede ser anterior al 2026-10-21» mostraba el `min` y el `max` tal como se escriben en el HTML. Ahora dice «anterior al 21/10/2026», como ya lo hacía el formato `fecha-dma`. El proyecto puede quitar la conversión de la fecha en sus mensajes (`app/config-usted.js`).
+
+**Pruebas**: dos casos nuevos en `07-correcciones` (24 en total), uno en `06` (28) y una página de prueba sin formulario (`pruebas/paginas/consulta.html`).
+
 ## 1.3.3 · 2026-10-17
 
 Cinco hallazgos más del sistema de acreditaciones (su documento de hallazgos abiertos del 17 oct y la auditoría visual de ese día), más el nombre propuesto para P97.

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de una página de consulta sin formulario</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../codigo/css/tokens.css">
+<link rel="stylesheet" href="../../codigo/css/base.css">
+<link rel="stylesheet" href="../../codigo/css/nucleo.css">
+<link rel="stylesheet" href="../../codigo/modulos/tabla/tabla.css">
+</head>
+<body>
+<main class="pagina" id="contenido">
+  <h1 class="titulo-pagina">Consulta sin formulario (P110)</h1>
+  <!-- Página de pura consulta: no hay <form>. El encabezado de la segunda columna lo pinta la página después de cargar. -->
+  <div class="tabla-marco" data-tabla data-clave="folio" id="grupos">
+    <table class="tabla"><caption class="tabla-titulo">Grupos (datos ficticios)</caption>
+      <thead><tr><th scope="col" data-ordenable>Folio</th><th scope="col" data-ordenable id="calculado"></th><th scope="col"><span class="solo-lector">Acciones</span></th></tr></thead>
+      <tbody>
+        <tr data-folio="G-001"><td>G-001</td><td>12</td><td><button type="button" class="btn-enlace" data-accion-fila="ver">Ver</button></td></tr>
+        <tr data-folio="G-002"><td>G-002</td><td>7</td><td><button type="button" class="btn-enlace" data-accion-fila="ver">Ver</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+<script src="../../codigo/js/validaciones.config.js"></script>
+<script src="../../codigo/js/iconos.js"></script>
+<script src="../../codigo/js/formkit.core.js"></script>
+<script src="../../codigo/modulos/tabla/tabla.js"></script>
+<script src="consulta-pagina.js"></script>
+</body>
+</html>

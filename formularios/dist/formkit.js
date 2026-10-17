@@ -309,8 +309,8 @@
         const M = cfg.mensajes;
         const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
         if (!m || !esFechaReal(Number(m[1]), Number(m[2]), Number(m[3]))) return M.fmtFecha;
-        if (a.max && v > a.max) return a.max === hoyISO() ? M.fmtFechaFutura : plantilla(M.fmtFechaMax, { fecha: a.max });
-        if (a.min && v < a.min) return plantilla(M.fmtFechaMin, { fecha: a.min });
+        if (a.max && v > a.max) return a.max === hoyISO() ? M.fmtFechaFutura : plantilla(M.fmtFechaMax, { fecha: dmaDeIso(a.max) || a.max });
+        if (a.min && v < a.min) return plantilla(M.fmtFechaMin, { fecha: dmaDeIso(a.min) || a.min });
         return '';
       }
     },
@@ -516,7 +516,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.3.3',
+    version: '1.3.4',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -654,6 +654,9 @@
       comboVarios: '{n} resultados disponibles.',
       comboNinguno: 'Sin resultados para «{texto}».',
       comboLibre: 'No está en la lista: se guarda como lo escribiste.',
+      tablaOrdenada: 'Ordenado por {columna}, {sentido}.',
+      tablaAscendente: 'ascendente',
+      tablaDescendente: 'descendente',
       cascadaEspera: 'Primero elige {padre}.',
       cascadaReiniciada: 'Se reinició «{etiqueta}» porque cambió «{padre}».',
       cascadaSinCatalogo: 'No se pudo cargar la lista; escribe el dato a mano.',
@@ -695,7 +698,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.3
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.4
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -804,6 +807,25 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   function iniciar(formulario, opciones = {}) {
     const form = typeof formulario === 'string' ? $(formulario) : formulario;
     if (!form) throw new Error(`FormKit: no existe el formulario «${formulario}»`);
+    /* Un formulario se inicia una sola vez (P111): si ya arrancó solo al
+       cargar, la llamada de la página le suma sus opciones (enviar, alEnviar…)
+       y recibe la misma instancia, sin duplicar escuchas. */
+    const previa = iniciados.get(form);
+    if (previa) { Object.assign(previa.extra, opciones); return previa.instancia; }
+    /* Opciones en dos capas. La de la página se lee en vivo (quien cambia
+       FORMKIT_OPCIONES después de cargar lo ve aplicado) y una segunda llamada
+       a iniciar le suma las suyas aparte, sin tocar las globales que comparten
+       otros formularios. Encima, lo que escriben los módulos (el acuse
+       encadena alEnviar), sólo para este formulario. */
+    const base = opciones;
+    const extra = {};
+    const deModulos = {};
+    const opcionesPagina = new Proxy({}, { get: (_, k) => (k in extra ? extra[k] : base[k]), has: (_, k) => k in extra || k in base });
+    opciones = new Proxy({}, {
+      get: (_, k) => (k in deModulos ? deModulos[k] : opcionesPagina[k]),
+      set: (_, k, v) => { deModulos[k] = v; return true; },
+      has: (_, k) => k in deModulos || k in opcionesPagina
+    });
     const cfg = FormKit.config;
     const M = cfg.mensajes;
     const inicio = performance.now();
@@ -1535,7 +1557,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
     /* ----- Contexto para los módulos ----- */
     const ctx = {
-      form, cfg, M, opciones, tipos, sugerencias: [],
+      form, cfg, M, opciones, opcionesPagina, tipos, sugerencias: [],
       $, $$, plantilla, icono, anuncia, almacen, idUnico, pesoTxt, normalizaBusqueda,
       envoltura, envolturas, nombres, tipoDe, controlesDe, controlPrincipal, valorDe, textoDeValor, etiquetaDe, esObligatorio, activo, atributosDe,
       validaCampo, validaYPinta, validaContenedor, marca, marcaError, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
@@ -1570,12 +1592,15 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       inventario: () => nombres().map((n) => { const d = envoltura(n).dataset; return { campo: n, etiqueta: etiquetaDe(n), obligatorio: esObligatorio(n), uso: d.uso || '', datoPersonal: d.finalidad !== undefined, finalidad: d.finalidad || '', sensible: d.sensible !== undefined, formato: d.formato || '', autocomplete: controlPrincipal(n) ? controlPrincipal(n).getAttribute('autocomplete') || '' : '' }; })
     };
     instancias.push(instancia);
+    iniciados.set(form, { instancia, extra });
     return instancia;
   }
 
   /* Formularios iniciados en la página, para marcar un error desde fuera
      sin tener a mano la instancia. */
   const instancias = [];
+  /* Cada formulario iniciado, con sus opciones: para no iniciarlo dos veces (P111). */
+  const iniciados = new WeakMap();
   const marcaErrorGlobal = (campo, mensaje) => instancias.some((i) => i.marcaError(campo, mensaje));
 
   const FormKit = {
@@ -2519,11 +2544,12 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         muestraSolo(sec);
       }
 
-      /* Si el formulario ya define alEnviar, se respeta y se encadena. */
-      const alEnviarAnterior = opciones.alEnviar;
-      opciones.alEnviar = (r, f) => { if (alEnviarAnterior) alEnviarAnterior(r, f); pinta(r); };
-      const alFallarAnterior = opciones.alFallar;
-      opciones.alFallar = (e, f) => { if (alFallarAnterior) alFallarAnterior(e, f); if (e && e.limite && limite) muestraSolo(limite); };
+      /* Si la página define alEnviar o alFallar, se respeta y se encadena. Se
+         lee al enviar, no al iniciar: así vale también el que la página pase
+         después en otra llamada a FormKit.iniciar. */
+      const dePagina = (k) => (ctx.opcionesPagina || {})[k];
+      opciones.alEnviar = (r, f) => { const previo = dePagina('alEnviar'); if (previo) previo(r, f); pinta(r); };
+      opciones.alFallar = (e, f) => { const previo = dePagina('alFallar'); if (previo) previo(e, f); if (e && e.limite && limite) muestraSolo(limite); };
 
       /* «Volver» desde la pantalla de límite devuelve al formulario donde estaba. */
       if (limite) limite.addEventListener('click', (e) => { if (e.target.closest('[data-accion="reintentar"]')) muestraSolo(form); });
@@ -3006,6 +3032,11 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    La tabla de captura (filas editables) es el módulo «repetibles» con la
    clase .tabla-captura: aquí sólo se le da forma.
 
+   Se inicia solo al cargar la página, haya o no formulario (una página de
+   pura consulta también lo usa). Cuando la página pinta o vuelve a pintar
+   filas o encabezados, avisa con el evento formkit:tabla en el [data-tabla]:
+   el módulo vuelve a leer los encabezados y a preparar las celdas.
+
    Contrato HTML:
      <div class="tabla-marco" data-tabla data-clave="folio">
        <table class="tabla"><caption class="tabla-titulo">Solicitudes</caption>
@@ -3014,80 +3045,102 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
        </table>
        <p class="tabla-vacia" data-tabla-vacia hidden>No hay resultados con esos filtros.</p>
      </div>
+   Una celda con data-etiqueta escrito en el HTML conserva ese rótulo.
    ========================================================= */
 (function () {
   'use strict';
-  FormKit.registra('tabla', {
-    selector: '[data-tabla]',
-    fueraDelFormulario: true,
-    iniciar(form, ctx) {
-      const { $, $$, anuncia, icono } = ctx;
-      for (const marco of $$('[data-tabla]')) {
-        const tabla = $('table', marco);
-        if (!tabla || marco.dataset.listo !== undefined) continue; /* ya iniciada por otro formulario de la página */
-        marco.dataset.listo = '';
-        const ths = $$('thead th', tabla);
-        const clave = marco.dataset.clave;
+  const { $, $$, plantilla } = FormKit.utilidades;
+  /* Un encabezado cuyo texto es sólo para el lector de pantalla (.solo-lector) no se muestra en teléfono. */
+  const soloLector = (th) => { const c = th.cloneNode(true); for (const s of $$('.solo-lector', c)) s.remove(); return !c.textContent.trim(); };
+  const textoDe = (th) => th.textContent.replace(/\s+/g, ' ').trim();
 
-        /* Un encabezado cuyo texto es sólo para el lector de pantalla (.solo-lector) no se muestra en teléfono. */
-        const soloLector = (th) => { const c = th.cloneNode(true); for (const s of $$('.solo-lector', c)) s.remove(); return !c.textContent.trim(); };
-        function etiquetaCeldas() {
-          for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => {
-            /* El contenido de la celda va junto en .tabla-valor: en teléfono es la columna del valor (P104). */
-            if (!(td.children.length === 1 && td.firstElementChild.classList.contains('tabla-valor') && td.childNodes.length === 1)) {
-              const valor = document.createElement('div');
-              valor.className = 'tabla-valor';
-              valor.append(...td.childNodes);
-              td.appendChild(valor);
-            }
-            if (!ths[i] || td.dataset.etiqueta) return;
-            td.dataset.etiqueta = ths[i].textContent.trim();
-            if (soloLector(ths[i])) td.dataset.etiquetaOculta = '';
-          });
-          /* Acciones por fila: «Ver», no basta; «Ver solicitud 123» sí. */
-          for (const tr of $$('tbody tr', tabla)) {
-            const id = clave ? (tr.dataset[clave] || ($$('td', tr)[ths.findIndex((t) => t.textContent.trim().toLowerCase() === clave)] || {}).textContent) : '';
-            for (const b of $$('[data-accion-fila]', tr)) if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', `${b.textContent.trim() || b.dataset.accionFila} ${id || ''}`.trim());
-          }
-          const vacio = $('[data-tabla-vacia]', marco);
-          if (vacio) vacio.hidden = $$('tbody tr', tabla).length > 0;
+  function prepara(marco) {
+    const tabla = $('table', marco);
+    if (!tabla) return;
+    const M = FormKit.config.mensajes;
+    const clave = marco.dataset.clave;
+    const ths = () => $$('thead th', tabla);
+
+    /* Rótulos de las celdas, leídos de los encabezados actuales cada vez: si la
+       página los pinta después (un encabezado calculado), se actualizan. Los
+       que puso el módulo llevan data-etiqueta-auto; los del HTML no se tocan. */
+    function etiquetaCeldas() {
+      const encabezados = ths();
+      for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => {
+        /* El contenido de la celda va junto en .tabla-valor: en teléfono es la columna del valor (P104). */
+        if (!(td.children.length === 1 && td.firstElementChild.classList.contains('tabla-valor') && td.childNodes.length === 1)) {
+          const valor = document.createElement('div');
+          valor.className = 'tabla-valor';
+          valor.append(...td.childNodes);
+          td.appendChild(valor);
         }
-
-        /* Orden por columna: botón dentro del th, aria-sort en el th. */
-        ths.forEach((th, i) => {
-          if (!th.hasAttribute('data-ordenable')) return;
-          const texto = th.textContent.trim();
-          th.textContent = '';
-          const b = document.createElement('button'); b.type = 'button'; b.className = 'tabla-orden';
-          b.append(document.createTextNode(texto), icono('abajo', 'icono icono-sm tabla-orden-icono'));
-          th.appendChild(b);
-          th.setAttribute('aria-sort', 'none');
-          b.addEventListener('click', () => {
-            const asc = th.getAttribute('aria-sort') !== 'ascending';
-            for (const o of ths) o.setAttribute('aria-sort', o === th ? (asc ? 'ascending' : 'descending') : 'none');
-            const filas = $$('tbody tr', tabla);
-            const val = (tr) => { const td = $$('td', tr)[i]; const t = td ? td.textContent.trim() : ''; const n = Number(t.replace(/[^\d.-]/g, '')); return t && !Number.isNaN(n) && /^[\d.,\s$-]+$/.test(t) ? n : t.toLowerCase(); };
-            filas.sort((a, b2) => { const x = val(a), y = val(b2); return (x > y ? 1 : x < y ? -1 : 0) * (asc ? 1 : -1); });
-            const tb = $('tbody', tabla); for (const f of filas) tb.appendChild(f);
-            anuncia(`Ordenado por ${texto}, ${asc ? 'ascendente' : 'descendente'}.`);
-          });
-        });
-
-        etiquetaCeldas();
-        marco.addEventListener('formkit:tabla', etiquetaCeldas);
-        FormKit.tabla = Object.assign(FormKit.tabla || {}, {
-          /* Estados de carga y error: el contenido se oculta y se anuncia qué pasa. */
-          estado(m, estado, texto) {
-            const car = $('[data-tabla-cargando]', m), err = $('[data-tabla-error]', m), t = $('table', m);
-            if (car) car.hidden = estado !== 'cargando';
-            if (err) { err.hidden = estado !== 'error'; if (texto) $('.aviso-texto', err).textContent = texto; }
-            if (t) t.toggleAttribute('aria-busy', estado === 'cargando');
-            if (estado === 'error' && err) err.focus();
-          }
-        });
+        const th = encabezados[i];
+        if (!th || (td.dataset.etiqueta !== undefined && td.dataset.etiquetaAuto === undefined)) return;
+        td.dataset.etiqueta = textoDe(th);
+        td.dataset.etiquetaAuto = '';
+        td.toggleAttribute('data-etiqueta-oculta', soloLector(th));
+      });
+      /* Acciones por fila: «Ver», no basta; «Ver solicitud 123» sí. */
+      for (const tr of $$('tbody tr', tabla)) {
+        const id = clave ? (tr.dataset[clave] || ($$('td', tr)[encabezados.findIndex((t) => textoDe(t).toLowerCase() === clave)] || {}).textContent) : '';
+        for (const b of $$('[data-accion-fila]', tr)) if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', `${b.textContent.trim() || b.dataset.accionFila} ${id || ''}`.trim());
       }
+      const vacio = $('[data-tabla-vacia]', marco);
+      if (vacio) vacio.hidden = $$('tbody tr', tabla).length > 0;
     }
+
+    /* Orden por columna: botón dentro del th, aria-sort en el th. Un
+       encabezado que todavía no tiene texto se prepara cuando lo tenga. */
+    function preparaOrden() {
+      ths().forEach((th, i) => {
+        if (!th.hasAttribute('data-ordenable') || $('.tabla-orden', th)) return;
+        const texto = textoDe(th);
+        if (!texto) return;
+        th.textContent = '';
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'tabla-orden';
+        b.append(document.createTextNode(texto), FormKit.icono('abajo', 'icono icono-sm tabla-orden-icono'));
+        th.appendChild(b);
+        th.setAttribute('aria-sort', 'none');
+        b.addEventListener('click', () => {
+          const asc = th.getAttribute('aria-sort') !== 'ascending';
+          for (const o of ths()) o.setAttribute('aria-sort', o === th ? (asc ? 'ascending' : 'descending') : 'none');
+          const filas = $$('tbody tr', tabla);
+          const val = (tr) => { const td = $$('td', tr)[i]; const t = td ? td.textContent.trim() : ''; const n = Number(t.replace(/[^\d.-]/g, '')); return t && !Number.isNaN(n) && /^[\d.,\s$-]+$/.test(t) ? n : t.toLowerCase(); };
+          filas.sort((a, b2) => { const x = val(a), y = val(b2); return (x > y ? 1 : x < y ? -1 : 0) * (asc ? 1 : -1); });
+          const tb = $('tbody', tabla); for (const f of filas) tb.appendChild(f);
+          FormKit.anuncia(plantilla(M.tablaOrdenada, { columna: texto, sentido: asc ? M.tablaAscendente : M.tablaDescendente }));
+        });
+      });
+    }
+
+    const repinta = () => { preparaOrden(); etiquetaCeldas(); };
+    repinta();
+    marco.addEventListener('formkit:tabla', repinta);
+  }
+
+  /* Una sola vez por tabla, desde la carga o desde el primer formulario que la vea. */
+  function iniciaTablas() {
+    for (const marco of $$('[data-tabla]')) {
+      if (marco.dataset.listo !== undefined) continue;
+      marco.dataset.listo = '';
+      prepara(marco);
+    }
+  }
+
+  FormKit.tabla = Object.assign(FormKit.tabla || {}, {
+    /* Estados de carga y error: el contenido se oculta y se anuncia qué pasa. */
+    estado(m, estado, texto) {
+      const car = $('[data-tabla-cargando]', m), err = $('[data-tabla-error]', m), t = $('table', m);
+      if (car) car.hidden = estado !== 'cargando';
+      if (err) { err.hidden = estado !== 'error'; if (texto) $('.aviso-texto', err).textContent = texto; }
+      if (t) t.toggleAttribute('aria-busy', estado === 'cargando');
+      if (estado === 'error' && err) err.focus();
+    },
+    /* Para tablas que la página agrega después de cargar. */
+    inicia: iniciaTablas
   });
+  FormKit.registra('tabla', { selector: '[data-tabla]', fueraDelFormulario: true, iniciar: iniciaTablas });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciaTablas); else iniciaTablas();
 }());
 
 

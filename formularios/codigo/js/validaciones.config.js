@@ -307,8 +307,8 @@
         const M = cfg.mensajes;
         const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
         if (!m || !esFechaReal(Number(m[1]), Number(m[2]), Number(m[3]))) return M.fmtFecha;
-        if (a.max && v > a.max) return a.max === hoyISO() ? M.fmtFechaFutura : plantilla(M.fmtFechaMax, { fecha: a.max });
-        if (a.min && v < a.min) return plantilla(M.fmtFechaMin, { fecha: a.min });
+        if (a.max && v > a.max) return a.max === hoyISO() ? M.fmtFechaFutura : plantilla(M.fmtFechaMax, { fecha: dmaDeIso(a.max) || a.max });
+        if (a.min && v < a.min) return plantilla(M.fmtFechaMin, { fecha: dmaDeIso(a.min) || a.min });
         return '';
       }
     },
@@ -514,7 +514,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.3.3',
+    version: '1.3.4',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -652,6 +652,9 @@
       comboVarios: '{n} resultados disponibles.',
       comboNinguno: 'Sin resultados para «{texto}».',
       comboLibre: 'No está en la lista: se guarda como lo escribiste.',
+      tablaOrdenada: 'Ordenado por {columna}, {sentido}.',
+      tablaAscendente: 'ascendente',
+      tablaDescendente: 'descendente',
       cascadaEspera: 'Primero elige {padre}.',
       cascadaReiniciada: 'Se reinició «{etiqueta}» porque cambió «{padre}».',
       cascadaSinCatalogo: 'No se pudo cargar la lista; escribe el dato a mano.',

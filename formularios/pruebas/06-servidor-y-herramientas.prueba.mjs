@@ -291,6 +291,15 @@ test('servidor · folio fiscal (UUID) de una factura: minúsculas y sin guiones 
   assert.ok(validaPayload({ datos: { factura: '1234' }, meta: META }, e).errores.some((x) => x.campo === 'factura'), 'y rechaza uno incompleto');
 });
 
+test('servidor · el mensaje de límite de una fecha AAAA-MM-DD da la fecha en día/mes/año (P112)', () => {
+  const f = globalThis.FORMKIT_VALIDACIONES.formatos.fecha;
+  assert.equal(f.valida('2026-10-01', { min: '2026-10-21' }), 'La fecha no puede ser anterior al 21/10/2026.');
+  assert.equal(f.valida('2026-12-01', { max: '2026-11-30' }), 'La fecha no puede ser posterior al 30/11/2026.');
+  const e = esquemaDe('<div class="campo" data-campo="inicio" data-formato="fecha" data-requerido data-uso="x."><label class="etiqueta" for="inicio">Inicio</label><input class="control" type="date" id="inicio" name="inicio" min="2026-10-21"></div>');
+  const r = validaPayload({ datos: { inicio: '2026-10-01' }, meta: META }, e);
+  assert.ok(r.errores.some((x) => x.campo === 'inicio' && x.mensaje.includes('21/10/2026')), JSON.stringify(r.errores));
+});
+
 test('esquema · sólo lee lo que está dentro del <form>: un control de la página no cambia el último campo (P90)', () => {
   const archivo = join(TEMPORAL, `prueba-${++cuentaTemporal}.html`);
   writeFileSync(archivo, `<main>

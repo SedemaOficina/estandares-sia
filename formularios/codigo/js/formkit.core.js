@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.3
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.4
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -108,6 +108,25 @@
   function iniciar(formulario, opciones = {}) {
     const form = typeof formulario === 'string' ? $(formulario) : formulario;
     if (!form) throw new Error(`FormKit: no existe el formulario «${formulario}»`);
+    /* Un formulario se inicia una sola vez (P111): si ya arrancó solo al
+       cargar, la llamada de la página le suma sus opciones (enviar, alEnviar…)
+       y recibe la misma instancia, sin duplicar escuchas. */
+    const previa = iniciados.get(form);
+    if (previa) { Object.assign(previa.extra, opciones); return previa.instancia; }
+    /* Opciones en dos capas. La de la página se lee en vivo (quien cambia
+       FORMKIT_OPCIONES después de cargar lo ve aplicado) y una segunda llamada
+       a iniciar le suma las suyas aparte, sin tocar las globales que comparten
+       otros formularios. Encima, lo que escriben los módulos (el acuse
+       encadena alEnviar), sólo para este formulario. */
+    const base = opciones;
+    const extra = {};
+    const deModulos = {};
+    const opcionesPagina = new Proxy({}, { get: (_, k) => (k in extra ? extra[k] : base[k]), has: (_, k) => k in extra || k in base });
+    opciones = new Proxy({}, {
+      get: (_, k) => (k in deModulos ? deModulos[k] : opcionesPagina[k]),
+      set: (_, k, v) => { deModulos[k] = v; return true; },
+      has: (_, k) => k in deModulos || k in opcionesPagina
+    });
     const cfg = FormKit.config;
     const M = cfg.mensajes;
     const inicio = performance.now();
@@ -839,7 +858,7 @@
 
     /* ----- Contexto para los módulos ----- */
     const ctx = {
-      form, cfg, M, opciones, tipos, sugerencias: [],
+      form, cfg, M, opciones, opcionesPagina, tipos, sugerencias: [],
       $, $$, plantilla, icono, anuncia, almacen, idUnico, pesoTxt, normalizaBusqueda,
       envoltura, envolturas, nombres, tipoDe, controlesDe, controlPrincipal, valorDe, textoDeValor, etiquetaDe, esObligatorio, activo, atributosDe,
       validaCampo, validaYPinta, validaContenedor, marca, marcaError, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
@@ -874,12 +893,15 @@
       inventario: () => nombres().map((n) => { const d = envoltura(n).dataset; return { campo: n, etiqueta: etiquetaDe(n), obligatorio: esObligatorio(n), uso: d.uso || '', datoPersonal: d.finalidad !== undefined, finalidad: d.finalidad || '', sensible: d.sensible !== undefined, formato: d.formato || '', autocomplete: controlPrincipal(n) ? controlPrincipal(n).getAttribute('autocomplete') || '' : '' }; })
     };
     instancias.push(instancia);
+    iniciados.set(form, { instancia, extra });
     return instancia;
   }
 
   /* Formularios iniciados en la página, para marcar un error desde fuera
      sin tener a mano la instancia. */
   const instancias = [];
+  /* Cada formulario iniciado, con sus opciones: para no iniciarlo dos veces (P111). */
+  const iniciados = new WeakMap();
   const marcaErrorGlobal = (campo, mensaje) => instancias.some((i) => i.marcaError(campo, mensaje));
 
   const FormKit = {

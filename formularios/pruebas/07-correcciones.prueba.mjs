@@ -360,3 +360,40 @@ test('tabla: en computadora la línea llega bajo las acciones y todo va centrado
   assert.ok(celda.izquierda >= 35, `y en la columna del valor: ${JSON.stringify(celda)}`);
   await t.context().close();
 });
+
+/* ----- Versión 1.3.4: P110 y P111 ----- */
+
+test('tabla en una página sin formulario, con un encabezado que la página pinta después (P110)', async () => {
+  const p = await abrePagina(navegador, servidor.url, 'pruebas/paginas/consulta.html', { contexto: PERFILES.movil.contexto });
+  await p.waitForFunction(() => document.querySelector('#grupos td:nth-child(2)').dataset.etiqueta === 'Personas inscritas');
+  const celda = p.locator('#grupos tr[data-folio="G-001"] td').nth(1);
+  assert.equal(await celda.evaluate((td) => getComputedStyle(td, '::before').content), '"Personas inscritas"', 'en teléfono la celda muestra el encabezado que la página pintó después');
+  assert.equal(await p.locator('#grupos tr[data-folio="G-001"] td').first().getAttribute('data-etiqueta'), 'Folio', 'sin formulario, la tabla se inició sola');
+  assert.equal(await p.locator('#calculado .tabla-orden').count(), 1, 'la columna que no tenía texto ya se puede ordenar');
+  assert.equal(await p.locator('#grupos [data-accion-fila]').first().getAttribute('aria-label'), 'Ver G-001', 'las acciones dicen de qué fila son');
+  assert.deepEqual(p.registro, [], 'consola limpia');
+  await p.context().close();
+});
+
+test('un formulario que ya arrancó solo no se inicia otra vez: la llamada de la página suma sus opciones (P111)', async () => {
+  const p = await abre();
+  const r = await p.evaluate(() => {
+    const form = document.getElementById('formulario');
+    window.__envios = 0;
+    const a = FormKit.iniciar(form, { enviar: () => { window.__envios++; return Promise.resolve({ folio: 'X' }); } });
+    const b = FormKit.iniciar(form, {});
+    return { misma: a === b, botones: form.querySelectorAll('[data-ver-contrasena]').length };
+  });
+  assert.ok(r.misma, 'la segunda llamada devuelve la misma instancia');
+  assert.equal(r.botones, 2, 'no se duplican los botones «Mostrar»');
+  await p.fill('#curp', 'PEGJ900515HDFRRN09');
+  await p.fill('#nacimiento', '1990-05-15');
+  await p.fill('#materno', 'Cual');
+  await p.setInputFiles('[data-campo="retrato"] input[type="file"]:not([data-entrada-camara])', [{ name: 'retrato.png', mimeType: 'image/png', buffer: pngRuido(400, 300) }]);
+  await p.waitForSelector('[data-campo="retrato"] .arch[data-estado="listo"]');
+  await p.click('[data-accion="enviar"]');
+  await p.waitForFunction(() => window.__envios > 0);
+  await p.waitForTimeout(200);
+  assert.equal(await p.evaluate(() => window.__envios), 1, 'un clic, un envío, con la función que pasó la página');
+  await p.context().close();
+});
