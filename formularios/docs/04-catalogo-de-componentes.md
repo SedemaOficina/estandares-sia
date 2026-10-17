@@ -52,11 +52,11 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
 | `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.2 KB | 5.0 KB |
 | `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.0 KB | 19.5 KB |
-| `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.3 KB |
+| `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.7 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
 | `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 7.4 KB |
-| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 1.6 KB | 6.9 KB |
+| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 1.6 KB | 8.1 KB |
 
 ### Opciones elegibles (`opciones`) · BASE
 

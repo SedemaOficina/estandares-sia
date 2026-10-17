@@ -51,7 +51,9 @@ const esObjetoPlano = (x) => x !== null && typeof x === 'object' && !Array.isArr
 const esTexto = (v) => typeof v === 'string' || (typeof v === 'number' && Number.isFinite(v));
 
 export function validaPayload(payload, esquema, opciones = {}) {
-  const cfg = opciones.config || CFG;
+  /* opciones.mensajes cambia textos sin pasar toda la configuración (por ejemplo, a «usted»). */
+  const base = opciones.config || CFG;
+  const cfg = opciones.mensajes ? { ...base, mensajes: { ...base.mensajes, ...opciones.mensajes } } : base;
   const errores = [];
   const senales = [];
   const M = cfg.mensajes;
@@ -178,11 +180,11 @@ export function validaPayload(payload, esquema, opciones = {}) {
         const r = fn(Object.fromEntries(Object.entries(datos)));
         if (r !== undefined && r !== null && r !== '') atr[lim] = String(r);
       }
-      const msg = f.valida(v, atr);
+      const msg = f.valida(v, atr, cfg);
       if (msg) errores.push({ campo: n, mensaje: msg });
     } else {
       v = cfg.recorta(v); datos[n] = v;
-      if (c.atributos?.maxlength && v.length > Number(c.atributos.maxlength)) errores.push({ campo: n, mensaje: `Usa hasta ${c.atributos.maxlength} caracteres en «${c.etiqueta}».` });
+      if (c.atributos?.maxlength && v.length > Number(c.atributos.maxlength)) errores.push({ campo: n, mensaje: plantilla(M.maximoCaracteres, { max: c.atributos.maxlength, etiqueta: c.etiqueta }) });
       if (c.atributos?.minlength && v.length < Number(c.atributos.minlength)) errores.push({ campo: n, mensaje: `Escribe al menos ${c.atributos.minlength} caracteres en «${c.etiqueta}».` });
     }
   }
@@ -220,7 +222,7 @@ export function validaPayload(payload, esquema, opciones = {}) {
       if (!listo) continue;
       const extra = { ...(c.atributos || {}) };
       if (cz.catalogo) { const cat = (opciones.catalogos || {})[cz.catalogo]; extra.catalogo = Array.isArray(cat) ? cat : (cat && cat.filas) || []; }
-      const msg = def.valida(valores, extra);
+      const msg = def.valida(valores, extra, cfg);
       if (msg && cz.nivel === 'error') errores.push({ campo: n, mensaje: msg });
       else if (msg) senales.push(`Advertencia en «${n}»: ${msg}`);
     }

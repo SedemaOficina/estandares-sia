@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="../../codigo/modulos/opciones/opciones.css">
 <link rel="stylesheet" href="../../codigo/modulos/combo/combo.css">
 <link rel="stylesheet" href="../../codigo/modulos/archivos/archivos.css">
+<link rel="stylesheet" href="../../codigo/modulos/chips/chips.css">
 </head>
 <body>
 <main class="pagina" id="contenido">
@@ -64,6 +65,19 @@
       <label class="etiqueta" for="clave">Contraseña</label>
       <input class="control" id="clave" name="clave" type="password" autocomplete="new-password">
     </div>
+    <!-- Dos botones «Mostrar» con nombre distinto (P98). -->
+    <div class="campo" data-campo="clave2" data-formato="contrasena" data-uso="Prueba.">
+      <label class="etiqueta" for="clave2">Confirma tu contraseña</label>
+      <input class="control" id="clave2" name="clave2" type="password" autocomplete="new-password">
+    </div>
+
+    <!-- Motivos frecuentes en dos campos con la misma etiqueta (P97). -->
+    <article><h2>Identificación oficial</h2>
+      <div class="campo" data-campo="obs_a" data-chips-fijos="Está vencido|Falta una página" data-uso="Prueba."><label class="etiqueta" for="obs_a">¿Qué debe corregir?</label><textarea class="control" id="obs_a" name="obs_a" rows="2" autocomplete="off"></textarea></div>
+    </article>
+    <article><h2>Comprobante de domicilio</h2>
+      <div class="campo" data-campo="obs_b" data-chips-fijos="Está vencido|Falta una página" data-uso="Prueba."><label class="etiqueta" for="obs_b">¿Qué debe corregir?</label><textarea class="control" id="obs_b" name="obs_b" rows="2" autocomplete="off"></textarea></div>
+    </article>
 
     <!-- Lista con búsqueda con el catálogo documentado {filas} (P37). -->
     <div class="campo" data-campo="especie" data-uso="Prueba.">
@@ -93,6 +107,7 @@
 <script src="../../codigo/js/formkit.core.js"></script>
 <script src="../../codigo/modulos/combo/combo.js"></script>
 <script src="../../codigo/modulos/archivos/archivos.js"></script>
+<script src="../../codigo/modulos/chips/chips.js"></script>
 <script src="correcciones-pagina.js"></script>
 </body>
 </html>

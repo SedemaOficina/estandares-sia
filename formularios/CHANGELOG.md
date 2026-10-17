@@ -1,5 +1,16 @@
 # Historial de cambios
 
+## 1.3.2 · 2026-10-17
+
+Cuatro hallazgos del sistema de acreditaciones al pasar a la 1.3.1.
+
+- **P95 · Los mensajes de los formatos y de las cruzadas se cambian con la configuración** (FRM-11): estaban escritos dentro de cada formato, así que un sistema que habla de usted no podía cambiarlos con `FORMKIT_CONFIG.mensajes`. Ahora los 44 textos de formatos (`fmt…`, 37) y cruzadas (`cz…`, 7) viven en `mensajes`, con la misma redacción de antes (137 mensajes en total), y cada formato y cada cruzada reciben la configuración del formulario. En el servidor, `validaPayload(…, { mensajes })` los cambia sin pasar toda la configuración. El mismo defecto dejaba sin efecto, en los formatos, dos ajustes documentados: el ámbito del código postal y de las coordenadas (`ambito`) y el dígito verificador de la CURP (`curp.verificarDigito`). Ya se leen de la configuración del formulario.
+- **P96 · El visor encuentra pdf.js en la copia del proyecto** (módulo `visor`, FRM-24): sólo lo deducía si el estándar estaba en `codigo/` o `dist/`. Ahora lo busca en `vendor/pdfjs-dist/`, junto a la carpeta que contiene `modulos/` (`sitio/formkit/` → `sitio/vendor/pdfjs-dist/`). Si no lo encuentra, avisa en la consola dónde lo buscó y que se indica con `FORMKIT_CONFIG.visor.pdfjs`.
+- **P97 · Grupos de respuestas frecuentes con nombre distinto** (módulo `chips`, FRM-25): si varios campos comparten etiqueta, a cada grupo se le agrega el título de su sección (por ejemplo, «Respuestas frecuentes para ¿qué debe corregir?, Identificación oficial») o, si no hay, su número de orden. `data-chips-fijos-nombre` le da un nombre propio.
+- **P98 · Cada «Mostrar» dice de qué campo es** (núcleo, FRM-30): el lector de pantalla oía «Mostrar la contraseña» en los dos botones de «Crea tu cuenta». Ahora oye «Mostrar: Contraseña» y «Mostrar: Confirma tu contraseña» (mensaje `contrasenaLector`).
+
+**Pruebas**: dos casos nuevos en `07-correcciones` (19 en total); la página de prueba suma una confirmación de contraseña, dos campos de motivos con la misma etiqueta y un mensaje en «usted».
+
 ## 1.3.1 · 2026-10-17
 
 Dos hallazgos más del sistema de acreditaciones (su versión 0.29, «Crear cuenta» y «Mi perfil»).

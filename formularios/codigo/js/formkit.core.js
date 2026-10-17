@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.1
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.2
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -305,7 +305,7 @@
         ver.setAttribute('aria-pressed', 'false');
         ver.setAttribute('aria-controls', ctl.id);
         const t = document.createElement('span'); t.dataset.verTexto = ''; t.textContent = M.contrasenaMostrar;
-        const lector = document.createElement('span'); lector.className = 'solo-lector'; lector.textContent = M.contrasenaLector;
+        const lector = document.createElement('span'); lector.className = 'solo-lector'; lector.textContent = plantilla(M.contrasenaLector, { etiqueta: etiquetaDe(n) }); /* nombre único: «Mostrar: Contraseña», «Mostrar: Confirma tu contraseña» */
         ver.append(t, lector);
         caja.appendChild(ver);
       }
@@ -368,9 +368,9 @@
       const nombreFormato = el.dataset.formato || ($('textarea', el) || a.legible ? 'texto' : '');
       const f = cfg.formatos[nombreFormato];
       if (f) {
-        const msg = f.valida(f.normaliza(v), a);
+        const msg = f.valida(f.normaliza(v), a, cfg);
         if (msg) return msg;
-      } else if (a.minlength && v.length < Number(a.minlength)) return plantilla('Escribe al menos {min} caracteres en «{etiqueta}»; van {n}.', { ...datos, min: a.minlength, n: v.length });
+      } else if (a.minlength && v.length < Number(a.minlength)) return plantilla(M.minimoCaracteres, { ...datos, min: a.minlength, n: v.length });
       return '';
     }
 
@@ -378,7 +378,7 @@
     function sugerenciaDe(n) {
       const el = envoltura(n);
       const f = cfg.formatos[el.dataset.formato];
-      return f && f.sugiere ? f.sugiere(valorDe(n)) : '';
+      return f && f.sugiere ? f.sugiere(valorDe(n), cfg) : '';
     }
 
     function marca(n, mensaje, nivel = 'error') {
@@ -448,7 +448,7 @@
         if (!listo) continue;
         const extra = { ...envoltura(n).dataset };
         if (extra.catalogo && global.FORMKIT_CATALOGOS) { const cat = global.FORMKIT_CATALOGOS[extra.catalogo]; extra.catalogo = cat && cat.filas ? cat.filas : cat; }
-        const msg = def.valida(valores, extra);
+        const msg = def.valida(valores, extra, cfg);
         if (msg) resultados.push({ mensaje: msg, nivel: c.nivel, campos: Object.values(c.mapa) });
       }
       return resultados;

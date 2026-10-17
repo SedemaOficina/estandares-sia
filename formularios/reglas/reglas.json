@@ -206,13 +206,14 @@
    "id": "FRM-11",
    "seccion": 2,
    "titulo": "Cada campo se declara con atributos y la validación vive en un solo archivo",
-   "regla": "El HTML declara cada campo con data-campo, data-formato, required o data-requerido, data-si, data-uso, data-finalidad, data-sensible y las cruzadas. Los patrones, límites y mensajes viven únicamente en validaciones.config.js; los ajustes por formulario, en FORMKIT_CONFIG.",
+   "regla": "El HTML declara cada campo con data-campo, data-formato, required o data-requerido, data-si, data-uso, data-finalidad, data-sensible y las cruzadas. Los patrones, límites y mensajes viven únicamente en validaciones.config.js; los ajustes por formulario, en FORMKIT_CONFIG. Todos los mensajes, también los de cada formato y cada cruzada, viven en mensajes: un formulario los cambia en FORMKIT_CONFIG.mensajes (por ejemplo, a usted) y el servidor en validaPayload(…, { mensajes }).",
    "porque": "Un catálogo paralelo al HTML se desincroniza y acopla (A); mensajes y patrones dispersos en el código incumplen «cero valores fijos» (B). La fusión toma lo mejor de ambos.",
    "nivel": "BASE",
    "origen": [
     "A FRM-28",
     "B FRM-CMP-10",
-    "C1"
+    "C1",
+    "P95 (proyecto de acreditaciones, 17 oct 2026)"
    ],
    "tipo": "decisión heredada",
    "verificacion": "04-modulos.prueba.mjs: esquema derivado del HTML coincide con el navegador"
@@ -394,7 +395,7 @@
    "id": "FRM-24",
    "seccion": 3,
    "titulo": "Pestañas, acordeón, migas, progreso, paginación, ayuda desplegable, tabla y visor de documentos son módulos con teclado completo",
-   "regla": "Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que en teléfono se vuelve tarjetas; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con contador, acercar y girar, fijo junto a la revisión en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor.",
+   "regla": "Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que en teléfono se vuelve tarjetas; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con contador, acercar y girar, fijo junto a la revisión en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor, que se busca junto a la copia del estándar o en la ruta que diga la configuración.",
    "porque": "Un componente a medias (sólo ratón, sólo escritorio) excluye a una parte de las personas y obliga a rehacerlo después. Un ícono que repite lo que ya se lee obliga a abrirlo para nada.",
    "nivel": "OPCIONAL",
    "origen": [
@@ -402,7 +403,8 @@
     "encargo 5.4",
     "S2-4 (proyecto de acreditaciones, 16 oct 2026)",
     "P66 (proyecto de acreditaciones, 16 oct 2026)",
-    "P67 (proyecto de acreditaciones, 16 oct 2026)"
+    "P67 (proyecto de acreditaciones, 16 oct 2026)",
+    "P96 (proyecto de acreditaciones, 17 oct 2026)"
    ],
    "tipo": "decisión del encargo",
    "verificacion": "04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos; auditar-campos D5; 07: tabla filtrada y visor"
@@ -411,12 +413,13 @@
    "id": "FRM-25",
    "seccion": 3,
    "titulo": "Chips de uso frecuente con historial del propio dispositivo o con una lista fija",
-   "regla": "Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo los motivos para observar un documento) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete.",
+   "regla": "Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo los motivos para observar un documento) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete. Cada grupo de chips tiene un nombre distinto para el lector de pantalla, aunque los campos compartan etiqueta.",
    "porque": "Un historial compartido o enviado es una fuga de datos; sugerir datos personales los expone en pantallas ajenas.",
    "nivel": "OPCIONAL",
    "origen": [
     "encargo 5.2",
-    "P65 (proyecto de acreditaciones, 16 oct 2026)"
+    "P65 (proyecto de acreditaciones, 16 oct 2026)",
+    "P97 (proyecto de acreditaciones, 17 oct 2026)"
    ],
    "tipo": "decisión del encargo",
    "verificacion": "04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad; 07: chips fijos"
@@ -484,7 +487,7 @@
    "id": "FRM-30",
    "seccion": 4,
    "titulo": "Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, folio fiscal, contraseña",
-   "regla": "Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed, y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos.",
+   "regla": "Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos.",
    "porque": "Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.",
    "nivel": "BASE",
    "origen": [
@@ -493,7 +496,8 @@
     "P70 (proyecto de acreditaciones, 16 oct 2026)",
     "P42 (proyecto de acreditaciones, 15 oct 2026)",
     "P73 (proyecto de acreditaciones, 17 oct 2026)",
-    "P82 (proyecto de acreditaciones, 17 oct 2026)"
+    "P82 (proyecto de acreditaciones, 17 oct 2026)",
+    "P98 (proyecto de acreditaciones, 17 oct 2026)"
    ],
    "tipo": "decisión del encargo",
    "verificacion": "guía: probador; 06-servidor; validaciones.config.js"

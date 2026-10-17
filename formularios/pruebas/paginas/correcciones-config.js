@@ -1,7 +1,9 @@
 /* Configuración de la página de prueba de las correcciones 1.1. */
 window.FORMKIT_CONFIG = {
   /* El mínimo de años depende del nivel (P61). */
-  limitesSegun: { experiencia: (datos) => (datos.nivel === 'avanzado' ? 5 : 2) }
+  limitesSegun: { experiencia: (datos) => (datos.nivel === 'avanzado' ? 5 : 2) },
+  /* Un mensaje de formato cambiado a «usted» sólo con la configuración (P95). */
+  mensajes: { fmtNumeroPaso: 'Use múltiplos de {paso}.' }
 };
 /* Catálogo con la forma documentada {filas, fuente, corte, es_ficticio} (P37). */
 window.FORMKIT_CATALOGOS = { especies: { filas: ['Ahuehuete', 'Fresno', 'Jacaranda'], fuente: 'prueba', corte: '2026-10-16', es_ficticio: true } };

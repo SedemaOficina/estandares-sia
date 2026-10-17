@@ -74,7 +74,7 @@ test('dato calculado por la página: cuenta en condiciones y no se envía', asyn
 test('«Mostrar» / «Ocultar» dentro del campo, con aria-pressed, y se vuelve a ocultar al enviar (P42, P73)', async () => {
   const p = await abre();
   const ver = p.locator('[data-campo="clave"] [data-ver-contrasena]');
-  assert.equal((await ver.textContent()).trim(), 'Mostrar la contraseña', 'el lector oye «Mostrar la contraseña»');
+  assert.equal((await ver.textContent()).trim(), 'Mostrar: Contraseña', 'el lector oye «Mostrar: Contraseña»');
   assert.equal(await ver.getAttribute('aria-pressed'), 'false');
   const dentro = await p.evaluate(() => { const c = document.getElementById('clave').getBoundingClientRect(); const b = document.querySelector('[data-campo="clave"] [data-ver-contrasena]').getBoundingClientRect(); return b.left >= c.left && b.right <= c.right + 1 && b.top >= c.top - 1 && b.bottom <= c.bottom + 1; });
   assert.ok(dentro, 'el botón va dentro del campo');
@@ -298,5 +298,26 @@ test('tras un envío fallido, el aviso no se oculta con el foco (el botón no sa
   assert.equal(await p.locator('[data-accion="enviar"]').evaluate((b) => b.getBoundingClientRect().top + window.scrollY), antes, 'y el botón no se mueve');
   await p.keyboard.type('a');
   assert.ok(await aviso.isHidden(), 'al cambiar un dato, el aviso se oculta');
+  await p.context().close();
+});
+
+/* ----- Versión 1.3.2: P95, P97 y P98 ----- */
+
+test('un mensaje de formato se cambia a «usted» sólo con FORMKIT_CONFIG.mensajes (P95)', async () => {
+  const p = await abre();
+  await p.check('input[name="tiene"][value="si"]');
+  await p.selectOption('#tipo', 'poda');
+  await p.fill('#anios', '2.3'); await p.keyboard.press('Tab');
+  assert.match(await error(p, 'anios'), /Use múltiplos de 0\.5\.$/, 'el texto propio del formulario («Use»), no el del estándar («Usa»)');
+  await p.context().close();
+});
+
+test('grupos de motivos con la misma etiqueta y dos «Mostrar» tienen nombres distintos para el lector de pantalla (P97, P98)', async () => {
+  const p = await abre();
+  const grupos = await p.locator('.chips-fijos').evaluateAll((gs) => gs.map((g) => g.getAttribute('aria-label')));
+  assert.equal(new Set(grupos).size, grupos.length, `cada grupo con su nombre: ${grupos.join(' | ')}`);
+  assert.ok(grupos.some((g) => /Identificación oficial$/.test(g)) && grupos.some((g) => /Comprobante de domicilio$/.test(g)), 'el nombre lleva el título de su sección');
+  const botones = await p.locator('[data-ver-contrasena]').evaluateAll((bs) => bs.map((b) => b.textContent.trim()));
+  assert.deepEqual(botones, ['Mostrar: Contraseña', 'Mostrar: Confirma tu contraseña'], 'cada «Mostrar» dice de qué campo es');
   await p.context().close();
 });
