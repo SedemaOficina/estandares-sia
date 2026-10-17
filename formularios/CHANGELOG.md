@@ -1,5 +1,12 @@
 # Historial de cambios
 
+## 1.3.1 · 2026-10-17
+
+Dos hallazgos más del sistema de acreditaciones (su versión 0.29, «Crear cuenta» y «Mi perfil»).
+
+- **P86 · Errores del servidor junto a su campo**: ya estaba resuelto desde la 1.1.0 (P41). El proyecto lo encontró porque sigue con la copia 1.0.0; al actualizar puede quitar `APD.pintaErrores`.
+- **P87 · El aviso de un envío fallido ya no se oculta con el foco** (núcleo, FRM-44): se ocultaba en cuanto otro elemento recibía el foco, así que al pulsar un botón de abajo el aviso desaparecía, el botón subía a media pulsación y el clic se perdía. Ahora se queda hasta que la persona cambia un dato o vuelve a enviar. El proyecto puede dejar de evitar que «Cancelar» mueva el foco. Prueba nueva en `07` (17 en total), que con el código anterior fallaba.
+
 ## 1.3.0 · 2026-10-17
 
 Dos hallazgos más del sistema de acreditaciones (su versión 0.27, cotejo de documentos). Trae un formato nuevo, por eso es versión menor. El proyecto puede quitar `app/folio-fiscal.js` y, si lo desea, los `div` que envolvían cada sección condicional de `cotejo.html`.

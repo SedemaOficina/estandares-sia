@@ -9,6 +9,8 @@ window.FORMKIT_CATALOGOS = { especies: { filas: ['Ahuehuete', 'Fresno', 'Jacaran
 window.FORMKIT_OPCIONES = {
   enviar: (payload) => {
     window.__payload = JSON.parse(JSON.stringify({ datos: payload.datos }));
+    /* «red»: una falla sin errores por campo, que se anuncia en el aviso de envío (P87). */
+    if (window.__rechazo === 'red') return Promise.reject(new Error('red'));
     return window.__rechazo ? Promise.reject(Object.assign(new Error('rechazo'), { errores: window.__rechazo })) : Promise.resolve({ folio: 'PRUEBA-1' });
   }
 };

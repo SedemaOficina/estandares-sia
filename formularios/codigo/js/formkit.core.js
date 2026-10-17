@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.1
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -829,9 +829,13 @@
       revisaResumen();
     });
 
-    /* Diálogos y copiado los atiende su módulo; el anuncio de envío fallido
-       se vuelve a ocultar al retomar la captura. */
-    form.addEventListener('focusin', () => { const a = $('[data-estado-envio]', form); if (a && !a.hidden && document.activeElement !== a) a.hidden = true; });
+    /* Diálogos y copiado los atiende su módulo. El anuncio de envío fallido se
+       oculta cuando la persona cambia un dato, no cuando otro elemento recibe
+       el foco: al ocultarse con el foco, el botón de abajo subía a media
+       pulsación y el clic se perdía. */
+    const ocultaAvisoEnvio = () => { const a = $('[data-estado-envio]', form); if (a && !a.hidden) a.hidden = true; };
+    form.addEventListener('input', ocultaAvisoEnvio);
+    form.addEventListener('change', ocultaAvisoEnvio);
 
     /* ----- Contexto para los módulos ----- */
     const ctx = {

@@ -278,3 +278,25 @@ test('acuse con relleno lateral y una acción para seguir; en la revisión, «Ed
   assert.ok(fila.mismoRenglon && fila.aLaDerecha, `«Editar» queda arriba y a la derecha del valor: ${JSON.stringify(fila)}`);
   await p.context().close();
 });
+
+/* ----- Versión 1.3.1: P87 ----- */
+
+test('tras un envío fallido, el aviso no se oculta con el foco (el botón no salta) y sí al cambiar un dato (P87)', async () => {
+  const p = await abre();
+  await p.fill('#curp', 'PEGJ900515HDFRRN09');
+  await p.fill('#nacimiento', '1990-05-15');
+  await p.fill('#materno', 'Cual');
+  await p.setInputFiles('[data-campo="retrato"] input[type="file"]:not([data-entrada-camara])', [{ name: 'retrato.png', mimeType: 'image/png', buffer: pngRuido(400, 300) }]);
+  await p.waitForSelector('[data-campo="retrato"] .arch[data-estado="listo"]');
+  await p.evaluate(() => { window.__rechazo = 'red'; });
+  await p.click('[data-accion="enviar"]');
+  const aviso = p.locator('[data-estado-envio]');
+  await aviso.waitFor({ state: 'visible' });
+  const antes = await p.locator('[data-accion="enviar"]').evaluate((b) => b.getBoundingClientRect().top + window.scrollY);
+  await p.focus('#materno');
+  assert.ok(await aviso.isVisible(), 'mover el foco no oculta el aviso');
+  assert.equal(await p.locator('[data-accion="enviar"]').evaluate((b) => b.getBoundingClientRect().top + window.scrollY), antes, 'y el botón no se mueve');
+  await p.keyboard.type('a');
+  assert.ok(await aviso.isHidden(), 'al cambiar un dato, el aviso se oculta');
+  await p.context().close();
+});

@@ -682,16 +682,17 @@
    "id": "FRM-44",
    "seccion": 6,
    "titulo": "Todo envío tiene límite de espera, clave de idempotencia y dice qué pasó",
-   "regla": "El envío lleva AbortController con plazo configurable y una clave de idempotencia por intento. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver».",
+   "regla": "El envío lleva AbortController con plazo configurable y una clave de idempotencia por intento. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver». El aviso de un envío fallido se queda hasta que la persona cambia un dato o vuelve a enviar: no se oculta al mover el foco, porque el botón de abajo subiría a media pulsación y el clic se perdería.",
    "porque": "Un giro eterno y una pantalla en blanco son el peor error posible; un reenvío sin idempotencia duplica registros.",
    "nivel": "BASE",
    "origen": [
     "A FRM-42",
     "A FRM-43",
-    "B FRM-SEG-02"
+    "B FRM-SEG-02",
+    "P87 (proyecto de acreditaciones, 17 oct 2026)"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "01-por-pasos: error simulado, límite y éxito"
+   "verificacion": "01-por-pasos: error simulado, límite y éxito; 07: aviso de envío fallido"
   },
   {
    "id": "FRM-45",

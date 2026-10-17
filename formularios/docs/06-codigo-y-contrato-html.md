@@ -101,7 +101,7 @@ Toda pregunta es una **envoltura** con `data-campo` que contiene etiqueta, ayuda
 | `data-sin-mostrar` | En un campo de contraseña, quita el botón «Mostrar contraseña». |
 | `min`, `max`, `step`, `minlength`, `maxlength`, `inputmode`, `autocomplete`, `enterkeyhint` (en el control) | Límites y teclado; el esquema del servidor los lee. |
 
-En el `<form>`: `data-formkit` (arranque automático), `data-borrador="clave"` y `data-borrador-version="n"` (borrador local), `action`/`method` (envío por omisión), `novalidate` lo pone el núcleo. Piezas del formulario: `[data-estado-envio]` (aviso de fallo de envío), `[data-franja-borrador]` con `[data-borrador="recuperar|descartar|descartar-si|conservar"]`, `[data-trampa]` (campo señuelo), `[data-accion="enviar|siguiente|atras"]`.
+En el `<form>`: `data-formkit` (arranque automático), `data-borrador="clave"` y `data-borrador-version="n"` (borrador local), `action`/`method` (envío por omisión), `novalidate` lo pone el núcleo. Piezas del formulario: `[data-estado-envio]` (aviso de fallo de envío; se oculta cuando la persona cambia un dato o vuelve a enviar, no al mover el foco), `[data-franja-borrador]` con `[data-borrador="recuperar|descartar|descartar-si|conservar"]`, `[data-trampa]` (campo señuelo), `[data-accion="enviar|siguiente|atras"]`.
 
 Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({indice, paso, total}), `formkit:pagina` ({pagina, tamano, desde, hasta}, en el nav), `formkit:tabla` (repintar tabla).
 

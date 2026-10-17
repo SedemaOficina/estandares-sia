@@ -472,13 +472,13 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-44 · Todo envío tiene límite de espera, clave de idempotencia y dice qué pasó
 
-**Regla.** El envío lleva AbortController con plazo configurable y una clave de idempotencia por intento. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver».
+**Regla.** El envío lleva AbortController con plazo configurable y una clave de idempotencia por intento. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver». El aviso de un envío fallido se queda hasta que la persona cambia un dato o vuelve a enviar: no se oculta al mover el foco, porque el botón de abajo subiría a media pulsación y el clic se perdería.
 
 **Por qué.** Un giro eterno y una pantalla en blanco son el peor error posible; un reenvío sin idempotencia duplica registros.
 
-**Nivel.** BASE · **Origen.** A FRM-42; A FRM-43; B FRM-SEG-02 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-42; A FRM-43; B FRM-SEG-02; P87 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
-**Verificación.** 01-por-pasos: error simulado, límite y éxito
+**Verificación.** 01-por-pasos: error simulado, límite y éxito; 07: aviso de envío fallido
 
 ### FRM-45 · El envío no se duplica
 

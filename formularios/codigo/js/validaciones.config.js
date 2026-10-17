@@ -503,7 +503,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.3.0',
+    version: '1.3.1',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
