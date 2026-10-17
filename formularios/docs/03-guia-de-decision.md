@@ -30,6 +30,7 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Dar un rango de fechas | `data-rango` + `data-atajos` (`fecha`) | OPCIONAL | — |
 | Dar una hora | `type=time` + «Ahora» (`fecha`) | OPCIONAL | — |
 | Dar su CURP o RFC | `identificadores`: mayúsculas, 18/13 caracteres, derivados en solo lectura; con nombre y apellidos, las cruzadas `curp-nombre` y `curp-segundo-apellido` (coherencia, no existencia) | OPCIONAL | No hay uso declarado para la CURP: no se pide. |
+| Dar el folio fiscal de una factura | `data-formato="folio-fiscal"` (UUID 8-4-4-4-12; acepta minúsculas y sin guiones) | OPCIONAL | Es un folio de la Secretaría o de un acuse: `folio`. |
 | Dar su fecha de nacimiento sin CURP | **Bloque listo «Fecha de nacimiento y edad»**: fecha escrita día/mes/año, sin calendario (`data-formato="fecha-dma"`, la escritura se acomoda sola), con `data-no-futura`, y edad calculada en solo lectura (`data-deriva="edad=…"`, módulo `fecha`) | OPCIONAL | Se pide la CURP: la fecha y la edad salen de ella. |
 | Saber la edad | Siempre calculada de una fecha, nunca escrita; si basta el grupo de edad, **bloque listo «Rango de edad»** (una opción, sin huecos ni encimados) | RECOMENDADO | — |
 | Confirmar un dato (correo, contraseña) | Dos campos + `data-cruzada="igual"` | RECOMENDADO | — |

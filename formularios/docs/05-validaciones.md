@@ -28,6 +28,7 @@ Qué se valida, cuándo, con qué mensaje y dónde vive la regla. Fuente única:
 | `texto` | `minlength`/`maxlength`; con `data-legible`, forma de texto (vocales, palabras, sin tecleo al azar) | Quita caracteres de control, colapsa espacios | Escribe al menos 40 caracteres; van 12 · Descríbelo con tus palabras, en una o dos frases completas | text |
 | `coordenadas` | «lat,lon» dentro de rango y del ámbito configurado | Sin espacios | Escribe latitud y longitud separadas por coma. Ejemplo: 19.4326,-99.1332 | decimal |
 | `folio` | Letras, números y guiones; hasta 40 | Mayúsculas, sin espacios | Escribe el folio tal como aparece en tu acuse | text |
+| `folio-fiscal` | Folio fiscal (UUID) de una factura: 32 dígitos hexadecimales en grupos 8-4-4-4-12 (36 caracteres). Comprueba la forma, no que la factura exista | Mayúsculas y con guiones; acepta minúsculas, sin guiones o con espacios alrededor | El folio fiscal tiene 36 caracteres: números y letras de la A a la F, en grupos de 8, 4, 4, 4 y 12 separados por guiones. Cópialo como aparece en la factura | text |
 | `contrasena` | Longitud mínima (12 por omisión); sin máximo restrictivo; no bloquea pegar | Ninguna | La contraseña necesita al menos 12 caracteres. Una frase larga es más segura… | text |
 
 Los campos sin `data-formato` se validan por obligatoriedad, longitud y, en opciones, pertenencia a la lista (`soloLista`), mínimo y máximo de opciones.

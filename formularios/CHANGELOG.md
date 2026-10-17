@@ -1,5 +1,14 @@
 # Historial de cambios
 
+## 1.3.0 · 2026-10-17
+
+Dos hallazgos más del sistema de acreditaciones (su versión 0.27, cotejo de documentos). Trae un formato nuevo, por eso es versión menor. El proyecto puede quitar `app/folio-fiscal.js` y, si lo desea, los `div` que envolvían cada sección condicional de `cotejo.html`.
+
+- **P81 · Condiciones en cualquier elemento** (`esquema-desde-html.mjs`, FRM-07): ya estaba resuelto desde la 1.1.0. Al corregir P38, el esquema empezó a leer las condiciones de todas las etiquetas abiertas que rodean al campo (`section`, `article`, `fieldset`, no sólo `div`), y el servidor las exige todas. El proyecto lo encontró con una copia anterior. Lo que seguía mal era la documentación: `docs/06` decía «en un `div` que agrupa varias»; ahora dice «en cualquier elemento». Prueba nueva en `06` con una `<section data-si>` y un `<article data-si>` dentro de ella.
+- **P82 · Formato «folio-fiscal»** (FRM-30): el folio fiscal (UUID) de una factura, 32 dígitos hexadecimales en grupos 8-4-4-4-12 (36 caracteres). Se acepta en minúsculas, sin guiones o con espacios alrededor, y se guarda en mayúsculas con guiones, igual en el navegador y en el servidor. Comprueba la forma, no que la factura exista. «folio» sigue siendo para folios de trámite o de acuse. Casos en el probador de la guía (también los de «fecha-dma», que no tenían), `docs/03` y `docs/05`.
+
+**Pruebas**: dos casos nuevos de servidor en `06` (26 en total).
+
 ## 1.2.1 · 2026-10-17
 
 Tres hallazgos más del sistema de acreditaciones (sus versiones 0.21 y 0.22). Son ajustes de piezas que ya existían, por eso es versión de parche. El proyecto puede quitar `app/archivos-lleno.js`, `app/ver-contrasena.js` y sus reglas en `apd.css` (`.tarjeta.acuse`, `.rev-dato-valor`, `.contrasena-caja`, `[data-lleno]`).

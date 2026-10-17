@@ -356,6 +356,20 @@
       normaliza: (v) => recorta(v).toUpperCase().replace(/\s/g, ''),
       valida: (v, a = {}) => (/^[A-Z0-9][A-Z0-9-]{2,}$/.test(v) && v.length <= (a.maxlength || 40) ? '' : 'Escribe el folio tal como aparece en tu acuse, con letras, números y guiones.')
     },
+    /* Folio fiscal (UUID) de una factura: 32 dígitos hexadecimales en grupos
+       8-4-4-4-12, 36 caracteres. Se acepta en minúsculas y sin guiones, y se
+       guarda en mayúsculas con ellos. Comprueba la forma, no que la factura exista. */
+    'folio-fiscal': {
+      descripcion: 'Folio fiscal (UUID) de una factura: 32 dígitos hexadecimales en grupos 8-4-4-4-12',
+      inputmode: 'text', autocomplete: 'off',
+      normaliza: (v) => {
+        const t = recorta(v).toUpperCase().replace(/\s/g, '');
+        const solo = t.replace(/-/g, '');
+        return /^[0-9A-F]{32}$/.test(solo) ? `${solo.slice(0, 8)}-${solo.slice(8, 12)}-${solo.slice(12, 16)}-${solo.slice(16, 20)}-${solo.slice(20)}` : t;
+      },
+      valida: (v) => (/^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/.test(v) ? ''
+        : 'El folio fiscal tiene 36 caracteres: números y letras de la A a la F, en grupos de 8, 4, 4, 4 y 12 separados por guiones. Cópialo como aparece en la factura.')
+    },
     contrasena: {
       descripcion: 'Contraseña: sin límite máximo restrictivo ni bloqueo del pegado',
       inputmode: 'text', autocomplete: 'new-password',
@@ -491,7 +505,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.2.1',
+    version: '1.3.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -620,7 +634,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.2.1
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma

@@ -266,6 +266,31 @@ test('servidor · fecha día/mes/año: variantes, fecha real, no futura y cruce 
   assert.ok(v('01/01/2999').errores.some((x) => x.campo === 'nac' && /posterior a hoy/.test(x.mensaje)), 'no futura en el servidor');
 });
 
+test('servidor · la condición de una <section> o un <article> con data-si llega al esquema, no sólo la de un <div> (P81)', () => {
+  const e = esquemaDe(`<fieldset class="grupo" data-campo="pedir" data-uso="x."><legend class="etiqueta">¿Pedir?</legend><label><input type="radio" name="pedir" value="si">Sí</label><label><input type="radio" name="pedir" value="no">No</label></fieldset>
+<section class="tarjeta" data-si="pedir=si"><h2>Sección</h2>
+  <div class="campo" data-campo="dentro" data-requerido data-uso="x."><label class="etiqueta" for="dentro">Dentro</label><input class="control" id="dentro" name="dentro"></div>
+  <article data-si="pedir=si"><div class="campo" data-campo="hondo" data-requerido data-uso="x."><label class="etiqueta" for="hondo">Hondo</label><input class="control" id="hondo" name="hondo"></div></article>
+</section>`);
+  assert.deepEqual(e.campos.dentro.condiciones, [{ campo: 'pedir', valores: ['si'] }], 'la sección condiciona su campo');
+  assert.equal(e.campos.hondo.condiciones.length, 2, 'y el artículo dentro de ella suma su condición');
+  const v = (datos) => validaPayload({ datos, meta: META }, e).errores;
+  assert.deepEqual(v({ pedir: 'no' }), [], 'con la sección oculta, el servidor no exige sus campos');
+  assert.ok(v({ pedir: 'si' }).some((x) => x.campo === 'dentro'), 'con la sección visible, sí');
+});
+
+test('servidor · folio fiscal (UUID) de una factura: minúsculas y sin guiones se aceptan y se guardan 8-4-4-4-12 (P82)', () => {
+  const f = globalThis.FORMKIT_VALIDACIONES.formatos['folio-fiscal'];
+  assert.equal(f.normaliza('6f1d0c5a2b3c4d5e8f90a1b2c3d4e5f6'), '6F1D0C5A-2B3C-4D5E-8F90-A1B2C3D4E5F6');
+  assert.match(f.valida(f.normaliza('6F1D0C5A-2B3C-4D5E-8F90')), /36 caracteres/);
+  assert.match(f.valida(f.normaliza('GF1D0C5A-2B3C-4D5E-8F90-A1B2C3D4E5F6')), /de la A a la F/);
+  const e = esquemaDe('<div class="campo" data-campo="factura" data-formato="folio-fiscal" data-requerido data-uso="x."><label class="etiqueta" for="factura">Folio fiscal</label><input class="control" id="factura" name="factura" maxlength="36"></div>');
+  const r = validaPayload({ datos: { factura: '6f1d0c5a-2b3c-4d5e-8f90-a1b2c3d4e5f6' }, meta: META }, e);
+  assert.deepEqual(r.errores, [], JSON.stringify(r.errores));
+  assert.equal(r.datos.factura, '6F1D0C5A-2B3C-4D5E-8F90-A1B2C3D4E5F6', 'el servidor lo guarda en mayúsculas');
+  assert.ok(validaPayload({ datos: { factura: '1234' }, meta: META }, e).errores.some((x) => x.campo === 'factura'), 'y rechaza uno incompleto');
+});
+
 const herramienta = (nombre, args) => test(`herramientas · ${nombre}`, () => {
   const r = spawnSync(process.execPath, args, { cwd: RAIZ, encoding: 'utf8' });
   assert.equal(r.status, 0, (r.stdout + r.stderr).split('\n').slice(-30).join('\n'));

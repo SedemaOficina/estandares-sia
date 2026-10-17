@@ -92,13 +92,13 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-07 · La pregunta condicional existe sólo mientras aplica
 
-**Regla.** Un bloque con data-si="campo=valor|valor2" se muestra sólo si la respuesta coincide. Mientras está oculto no se valida ni viaja en el envío; lo escrito se conserva por si la persona vuelve a cambiar de opinión. El servidor descarta con señal lo que llegue de un bloque cuya condición no se cumple.
+**Regla.** Un bloque con data-si="campo=valor|valor2" (en cualquier elemento: div, section, article, fieldset…) se muestra sólo si la respuesta coincide; dentro de otro bloque condicional, exige las dos. Mientras está oculto no se valida ni viaja en el envío; lo escrito se conserva por si la persona vuelve a cambiar de opinión. El servidor descarta con señal lo que llegue de un bloque cuya condición no se cumple. El esquema del servidor lee la condición de todos los elementos que rodean al campo, no sólo de los div.
 
 **Por qué.** Validar lo oculto bloquea sin motivo visible; borrar lo escrito castiga explorar; aceptar en el servidor lo que no se pidió es una puerta.
 
-**Nivel.** BASE · **Origen.** A FRM-11; B FRM-EST-05 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-11; B FRM-EST-05; P38 (proyecto de acreditaciones, 15 oct 2026); P81 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
-**Verificación.** 04-modulos.prueba.mjs: condicional; 06-servidor: condición incumplida
+**Verificación.** 04-modulos.prueba.mjs: condicional; 06-servidor: condición incumplida; 06: condiciones en section y article
 
 ### FRM-08 · Enlace de salto al contenido y una sola jerarquía de encabezados
 
@@ -326,13 +326,13 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Verificación.** auditor-css A10; 05-accesibilidad
 
-### FRM-30 · Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, contraseña
+### FRM-30 · Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, folio fiscal, contraseña
 
-**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed, y se vuelve a ocultar al enviar.
+**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed, y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos.
 
 **Por qué.** Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.
 
-**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026); P42 (proyecto de acreditaciones, 15 oct 2026); P73 (proyecto de acreditaciones, 17 oct 2026) · *decisión del encargo*
+**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026); P42 (proyecto de acreditaciones, 15 oct 2026); P73 (proyecto de acreditaciones, 17 oct 2026); P82 (proyecto de acreditaciones, 17 oct 2026) · *decisión del encargo*
 
 **Verificación.** guía: probador; 06-servidor; validaciones.config.js
 

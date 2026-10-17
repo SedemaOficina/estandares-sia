@@ -85,7 +85,7 @@ Toda pregunta es una **envoltura** con `data-campo` que contiene etiqueta, ayuda
 | `data-campo="nombre"` | Identifica el campo; es la clave en el payload. Obligatorio. |
 | `data-formato="…"` | Formato del catálogo (ver `docs/05`). |
 | `required` (en el control) o `data-requerido` | Obligatorio. |
-| `data-si="campo=valor\|valor2"` (en la envoltura o en un `div` que agrupa varias) | Condicional: existe sólo si la respuesta coincide. |
+| `data-si="campo=valor\|valor2"` (en la envoltura o en cualquier elemento que agrupe varias: `div`, `section`, `article`, `fieldset`…; el servidor exige todas las que rodean al campo) | Condicional: existe sólo si la respuesta coincide. |
 | `data-uso="…"` | Para qué se pide el dato. Obligatorio en todo campo (`auditar-campos.mjs`). |
 | `data-finalidad="…"` | Marca dato personal y dice su finalidad. |
 | `data-sensible` | No entra al borrador local; se pide de nuevo. |

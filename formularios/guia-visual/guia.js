@@ -375,10 +375,12 @@
     rfc: [['valido', 'XAXX010101000'], ['valido', 'ABC010101AB1'], ['invalido', 'XAXX0101'], ['limite', 'xaxx-010101-000']],
     numero: [['valido', '12.5'], ['valido', '12,5'], ['invalido', 'doce'], ['limite', '-0']],
     fecha: [['valido', '2026-03-15'], ['invalido', '2026-02-30'], ['invalido', '15/03/2026'], ['limite', '2000-02-29']],
+    'fecha-dma': [['valido', '23/07/1985'], ['valido', '23071985'], ['invalido', '31/02/1990'], ['limite', '1985-07-23']],
     hora: [['valido', '14:30'], ['valido', '00:00'], ['invalido', '24:00'], ['limite', '23:59']],
     texto: [['valido', 'El árbol de la banqueta está inclinado hacia la calle desde la lluvia del martes.'], ['invalido', 'asdfghjkl'], ['limite', 'Hola.']],
     coordenadas: [['valido', '19.4326,-99.1332'], ['invalido', '19.4326'], ['invalido', '91,0'], ['limite', '19.4326, -99.1332']],
     folio: [['valido', 'EJ-2026-000123'], ['valido', 'abc-123'], ['invalido', 'a'], ['limite', 'EJ 2026 000123']],
+    'folio-fiscal': [['valido', '6F1D0C5A-2B3C-4D5E-8F90-A1B2C3D4E5F6'], ['valido', '6f1d0c5a2b3c4d5e8f90a1b2c3d4e5f6'], ['invalido', '6F1D0C5A-2B3C-4D5E-8F90'], ['invalido', 'GF1D0C5A-2B3C-4D5E-8F90-A1B2C3D4E5F6']],
     contrasena: [['valido', 'una frase larga y memorable'], ['invalido', 'corta'], ['limite', 'exactamente12']]
   };
   const probador = $('[data-probador]');
