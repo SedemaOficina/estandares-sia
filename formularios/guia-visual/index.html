@@ -668,6 +668,7 @@
 
 <template data-demo="resultado">
 <p class="guia-fila-demo">Solicitud de acreditación EJ-2026-000123 (ficticia) <span class="estado estado-proceso" data-demo-estado-solicitud>En revisión</span></p>
+<p class="linea-datos"><span class="linea-datos-item">Folio EJ-2026-000123</span> · <span class="linea-datos-item">Recibida el 17 de octubre de 2026</span> · <span class="linea-datos-item">Revisión 2 de 3</span></p>
 <div data-demo-decision>
   <p class="texto-gris">Motivo que escribió quien revisa, por si rechaza: «La identificación oficial está vencida. Sube una vigente.»</p>
   <div class="acciones"><button type="button" class="btn btn-peligro-contorno" data-demo-decide="rechazo">Rechazar solicitud</button><button type="button" class="btn btn-primario" data-demo-decide="ok">Validar solicitud</button></div>
@@ -686,7 +687,7 @@
   <span class="estado estado-terminado">Concluida</span>
 </div>
 <div class="guia-fila-demo"><span class="estado estado-atencion">Requiere corrección de la identificación oficial y del comprobante de domicilio</span></div>
-<p class="texto-gris">Cinco familias, según a quién le toca qué, cada una con su tono y su icono: verde, hecho; ámbar, te toca actuar (también un borrador sin enviar); azul, en marcha; rojo, cerrado sin éxito (rechazado, cancelado o vencido); gris, terminado. Cada estado de un sistema cae en una de ellas. El icono lo pone el módulo. Una etiqueta larga se parte en renglones en lugar de ensanchar la pantalla; sólo en una tabla de computadora va en una línea.</p>
+<p class="texto-gris texto-corrido">Cinco familias, según a quién le toca qué, cada una con su tono y su icono: verde, hecho; ámbar, te toca actuar (también un borrador sin enviar); azul, en marcha; rojo, cerrado sin éxito (rechazado, cancelado o vencido); gris, terminado. Cada estado de un sistema cae en una de ellas. El icono lo pone el módulo. Una etiqueta larga se parte en renglones en lugar de ensanchar la pantalla; sólo en una tabla de computadora va en una línea.</p>
 </template>
 
 <template data-demo="tooltip">
@@ -968,7 +969,7 @@
 <template data-demo="chips">
 <div class="campo" data-campo="m_cat" data-requerido data-uso="Muestra." data-chips><label class="etiqueta" for="m_cat">Categoría (con sugerencias de uso frecuente)</label><p class="ayuda">Escribe un valor y sal del campo: aparece como sugerencia. El historial vive sólo en este dispositivo.</p><input class="control" id="m_cat" name="m_cat" type="text" maxlength="60" autocomplete="off"></div>
 <!-- Respuestas frecuentes fijas (data-chips-fijos): la misma lista siempre, sin guardar nada en el dispositivo. En un texto largo, cada chip agrega su texto al final para completarlo. -->
-<div class="campo" data-campo="m_observacion" data-uso="Muestra." data-chips-fijos="No se lee completo|Está vencido|No corresponde al requisito|Falta una página">
+<div class="campo" data-campo="m_observacion" data-uso="Muestra." data-chips-fijos="No se lee completo|Está vencido|No corresponde al requisito|No coincide con el nombre de la cuenta|Falta una página">
   <label class="etiqueta" for="m_observacion">¿Qué debe corregir la persona? (con respuestas frecuentes fijas)</label>
   <p class="ayuda">Elige un motivo frecuente y complétalo con tus palabras.</p>
   <textarea class="control control-texto" id="m_observacion" name="m_observacion" rows="3" maxlength="400" autocomplete="off"></textarea>

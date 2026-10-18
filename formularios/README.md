@@ -1,4 +1,4 @@
-# Estándar de formularios web del SIA · versión 1.4.3
+# Estándar de formularios web del SIA · versión 1.4.4
 
 Paquete genérico de estilos, componentes, validaciones y reglas para construir formularios web del Sistema de Información Ambiental de la Secretaría del Medio Ambiente de la Ciudad de México. Es un **manual para quien programa**: se copia lo que el formulario necesita, se declara cada campo con atributos y se verifica con las herramientas incluidas. Funciona en teléfono y en escritorio, sin dependencias y sin pedir nada a terceros.
 
@@ -23,8 +23,8 @@ Si prefieres no elegir módulos, `dist/formkit.css` y `dist/formkit.js` traen to
 |---|---|
 | `codigo/` | Núcleo (tokens, base, núcleo, validaciones, iconos, core), 30 módulos, tipografías, plantillas, catálogo de ejemplo, validador para el servidor, `manifiesto.json` |
 | `guia-visual/` | Guía interactiva: árbol de decisión, fundamentos, fichas vivas con HTML para copiar, probador de validaciones, pares «sí y no», cuatro formularios de ejemplo a distintos anchos. `artefacto.html` es la misma guía autocontenida |
-| `docs/` | 01 reglas (85, generado) · 02 guía de estilo · 03 guía de decisión · 04 catálogo de componentes (generado) · 05 validaciones · 06 código y contrato HTML · 07 bibliotecas y tipografías · 08 verificación y cierre · 09 trazabilidad y decisiones |
-| `reglas/reglas.json` | Fuente única de las reglas FRM-01 a FRM-85 con nivel BASE / RECOMENDADO / OPCIONAL |
+| `docs/` | 01 reglas (86, generado) · 02 guía de estilo · 03 guía de decisión · 04 catálogo de componentes (generado) · 05 validaciones · 06 código y contrato HTML · 07 bibliotecas y tipografías · 08 verificación y cierre · 09 trazabilidad y decisiones |
+| `reglas/reglas.json` | Fuente única de las reglas FRM-01 a FRM-86 con nivel BASE / RECOMENDADO / OPCIONAL |
 | `herramientas/` | Construcción, auditor de CSS, contraste, auditoría de campos, esquema desde HTML, generador de reglas, bibliotecas, verificación, capturas |
 | `pruebas/` | Pruebas automatizadas en Chromium: dos perfiles (teléfono táctil y escritorio), siete anchos, módulos, axe-core, servidor |
 | `vendor/` | Leaflet 1.9.4, leaflet-gesture-handling 1.2.2, axe-core 4.13.0, con sumas |
@@ -52,7 +52,7 @@ npm run probar              # sólo las pruebas
 npm run auditar             # sólo el auditor de CSS
 npm run construir           # regenera iconos, manifiesto, dist, esquemas y docs/04
 npm run artefacto           # además la guía autocontenida
-npm run zip                 # el paquete completo en ../estandar-formularios-v1.4.3.zip
+npm run zip                 # el paquete completo en ../estandar-formularios-v1.4.4.zip
 npm run capturas            # evidencia visual en verificacion/capturas/
 ```
 

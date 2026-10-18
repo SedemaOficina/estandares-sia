@@ -6,7 +6,7 @@ Los dos estándares viven juntos porque comparten lo mismo: colores, letra, boto
 
 | Estándar | Versión | Estado |
 |---|---|---|
-| [Formularios](formularios/README.md) | 1.4.3 | En uso |
+| [Formularios](formularios/README.md) | 1.4.4 | En uso |
 | [Geovisores (mapas)](geovisores/README.md) | 0.1.2 | Fase 1: reglas, estilo y tokens, en revisión |
 
 ## Ver la guía visual

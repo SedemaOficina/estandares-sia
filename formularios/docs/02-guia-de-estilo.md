@@ -157,7 +157,7 @@ Entre niveles cambia el tamaño o el peso, nunca sólo el color. No se inventan 
 | `--alto-opcion` | 40 px | Opción corta Sí/No con ratón; con dedo (`pointer: coarse`) sube a `--alto-control`. |
 | `--tam-casilla` | 20 px | Casilla y radio. |
 | `--ancho-pagina` | 980 px | Ancho máximo del contenido. |
-| `--ancho-lectura` | 70ch | Ancho máximo del texto corrido. |
+| `--ancho-lectura` | 70ch | Ancho máximo del texto corrido (`.texto-corrido`). La bajada, la ayuda de bloque y las líneas de datos ocupan su tarjeta. |
 
 ## 6. Puntos de quiebre: móvil primero
 

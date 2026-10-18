@@ -175,7 +175,7 @@ const abreGuia = (perfil = PERFILES.escritorio) => abrePagina(navegador, servido
 test('respuestas frecuentes fijas: el chip agrega su texto al texto largo y no guarda nada (P65)', async () => {
   const p = await abreGuia();
   const chips = p.locator('#m-chips [data-chip-fijo]');
-  assert.equal(await chips.count(), 4, 'la lista fija se ve siempre');
+  assert.equal(await chips.count(), 5, 'la lista fija se ve siempre');
   await chips.filter({ hasText: 'No se lee completo' }).click();
   assert.equal(await p.inputValue('#m_observacion'), 'No se lee completo.');
   await chips.filter({ hasText: 'Falta una página' }).click();
@@ -527,6 +527,46 @@ test('la secuencia «qué sigue» sirve fuera del acuse: en el resultado y en un
   const enAcuse = await t.locator('.acuse .secuencia').evaluate((ol) => { const c = getComputedStyle(ol); return { ancho: c.maxWidth !== 'none', filete: c.borderTopStyle }; });
   assert.deepEqual(enAcuse, { ancho: true, filete: 'solid' }, 'en el acuse conserva su ancho y su filete');
   await t.context().close();
+});
+
+/* ----- Versión 1.4.4: P134 y P135 (revisión de pantallas del 18 oct) ----- */
+
+test('la bajada y la ayuda de bloque ocupan su tarjeta; el límite de 70ch es del texto corrido; una línea de datos no parte sus datos (P134)', async () => {
+  const p = await abreDesenlace();
+  const r = await p.evaluate(() => {
+    const t = document.createElement('section'); t.className = 'tarjeta'; document.querySelector('main').append(t);
+    t.innerHTML = '<p class="bajada">Revisa cada documento de la solicitud y marca si cumple con lo que pide la convocatoria de acreditación.</p><p class="ayuda-bloque">Escríbelos como aparecen en tu identificación oficial, sin abreviaturas ni apodos.</p><p class="texto-corrido">Texto.</p>';
+    const linea = (kind) => parseFloat(getComputedStyle(t.querySelector(kind)).lineHeight);
+    const b = t.querySelector('.bajada');
+    return { bajada: getComputedStyle(b).maxWidth, ayuda: getComputedStyle(t.querySelector('.ayuda-bloque')).maxWidth, corrido: getComputedStyle(t.querySelector('.texto-corrido')).maxWidth, renglones: Math.round(b.getBoundingClientRect().height / linea('.bajada')) };
+  });
+  assert.deepEqual([r.bajada, r.ayuda], ['none', 'none'], 'sin límite de 70ch');
+  assert.notEqual(r.corrido, 'none', 'el texto corrido sí lo conserva');
+  assert.equal(r.renglones, 1, 'una bajada de una oración cabe en un renglón de una tarjeta ancha');
+  await p.context().close();
+  const tel = await abreDesenlace(PERFILES.movil);
+  const partidos = await tel.evaluate(() => {
+    const l = document.createElement('p'); l.className = 'linea-datos';
+    l.innerHTML = '<span class="linea-datos-item">Folio EJ-2026-000123</span> · <span class="linea-datos-item">Recibida el 17 de octubre de 2026</span> · <span class="linea-datos-item">Revisión 2 de 3</span>';
+    document.querySelector('main').append(l);
+    return [...l.querySelectorAll('.linea-datos-item')].map((s) => s.getClientRects().length);
+  });
+  assert.deepEqual(partidos, [1, 1, 1], 'en teléfono cada dato queda en un solo renglón');
+  await tel.context().close();
+});
+
+test('los motivos frecuentes no se parten ni se encogen, y al pasar el cursor no parecen elegidos (P135)', async () => {
+  const p = await abreGuia();
+  const largo = p.locator('#m-chips [data-chip-fijo]', { hasText: 'No coincide con el nombre de la cuenta' });
+  const m = await largo.evaluate((b) => { const c = getComputedStyle(b); return { encoge: c.flexShrink, ancho: c.maxWidth, alto: Math.round(b.getBoundingClientRect().height), min: parseFloat(c.minHeight) }; });
+  assert.deepEqual([m.encoge, m.ancho], ['0', '100%']);
+  assert.ok(m.alto <= m.min + 1, `el motivo largo va en un renglón: ${JSON.stringify(m)}`);
+  await largo.hover();
+  const encima = await largo.evaluate((b) => { const c = getComputedStyle(b); return [c.backgroundColor, c.borderColor]; });
+  assert.deepEqual(encima, ['rgb(255, 255, 255)', 'rgb(26, 86, 168)'], 'con el cursor encima sólo cambia el borde');
+  /* En un texto largo los chips no quedan elegidos; en un campo corto, sí (aria-pressed). */
+  assert.equal(await largo.evaluate((b) => { b.setAttribute('aria-pressed', 'true'); return getComputedStyle(b).backgroundColor; }), 'rgb(238, 243, 250)', 'elegido sí toma el fondo azul claro');
+  await p.context().close();
 });
 
 /* ----- Versión 1.4.2: P126 a P131 (auditoría integral del 17 oct) ----- */

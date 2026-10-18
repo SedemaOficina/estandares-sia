@@ -60,7 +60,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
 | `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 7.4 KB |
-| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 1.6 KB | 8.3 KB |
+| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 1.9 KB | 8.3 KB |
 
 ### Opciones elegibles (`opciones`) · BASE
 

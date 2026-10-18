@@ -1,7 +1,7 @@
 /* GENERADO: núcleo + todos los módulos. Para copiar sólo lo que se usa, toma los archivos de codigo/. */
 /* ===== codigo/css/tokens.css ===== */
 /* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.4.3
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.4.4
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -289,8 +289,16 @@ a{color:var(--azul)}
   color:var(--gris);
 }
 
-/* Bajada del título de paso: dice qué se pide y para qué. */
-.bajada{max-width:var(--ancho-lectura);margin-bottom:var(--e-5);font-size:var(--t-md);color:var(--gris)}
+/* Bajada del título de paso: dice qué se pide y para qué. Ocupa el ancho de su
+   tarjeta: limitada a 70ch, una bajada de una oración pasaba al segundo renglón
+   aunque sobrara espacio. El límite de lectura es para el texto corrido. */
+.bajada{margin-bottom:var(--e-5);font-size:var(--t-md);color:var(--gris)}
+/* Texto corrido (varios párrafos que se leen de seguido): hasta 70 caracteres por renglón. */
+.texto-corrido{max-width:var(--ancho-lectura)}
+/* Línea de datos (folio · fechas · revisión): cada dato, en .linea-datos-item, no se parte;
+   si no cabe, pasa completo al renglón siguiente. Los puntos medios van en el HTML. */
+.linea-datos{font-size:var(--t-sm);color:var(--gris)}
+.linea-datos-item{white-space:nowrap}
 
 /* ---------- Encabezado y pie institucionales ----------
    El logotipo es ancho (Gobierno · Secretaría): va en su renglón y el título
@@ -406,7 +414,7 @@ a{color:var(--azul)}
 .ayuda:empty{margin:0}
 /* Ayuda de bloque: va una vez bajo el título de la sección cuando vale igual
    para todos sus campos; la ayuda de cada campo queda para lo propio de él. */
-.ayuda-bloque{max-width:var(--ancho-lectura);margin-bottom:var(--e-4);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
+.ayuda-bloque{margin-bottom:var(--e-4);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
 .contador{margin-top:var(--e-1);font-size:var(--t-xs);text-align:right;color:var(--gris-cl)}
 
 /* Error del campo: icono + palabra «Error» + qué hacer. No depende del rojo. */
@@ -2223,8 +2231,10 @@ td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
   color:var(--texto);
 }
 .chip-texto{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* Respuesta frecuente fija: sin «quitar», redonda de los dos lados y con su texto completo. */
-.chip-fijo{border-radius:var(--r-pill);text-align:left;cursor:pointer}
+/* Respuesta frecuente fija: sin «quitar», redonda de los dos lados y con su texto completo.
+   No se encoge en la fila: si no cabe, pasa completa al renglón siguiente; sólo se parte
+   si es más larga que la fila entera. */
+.chip-fijo{flex-shrink:0;max-width:100%;border-radius:var(--r-pill);text-align:left;cursor:pointer}
 .chip-quitar{
   display:inline-flex;
   align-items:center;
@@ -2243,5 +2253,7 @@ td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
 
 /* @bloque estados */
 
-.chip:hover,.chip-quitar:hover{border-color:var(--azul);color:var(--azul)}
+/* Al pasar el cursor sólo cambia el borde: el fondo azul es de la respuesta elegida (aria-pressed). */
+.chip:hover{border-color:var(--azul)}
+.chip-quitar:hover{border-color:var(--azul);color:var(--azul)}
 .chip[aria-pressed="true"]{background:var(--azul-cl);border-color:var(--azul);color:var(--azul);font-weight:var(--peso-semi)}

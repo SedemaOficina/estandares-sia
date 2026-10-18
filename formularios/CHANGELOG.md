@@ -1,5 +1,14 @@
 # Historial de cambios
 
+## 1.4.4 · 2026-10-18
+
+Dos hallazgos de la revisión de pantallas del sistema de acreditaciones del 18 oct. 86 reglas (FRM-86 nueva).
+
+- **P134 · El límite de 70 caracteres es sólo del texto corrido** (núcleo, FRM-86 nueva): `.bajada` y `.ayuda-bloque` llevaban `max-width: 70ch`. En una tarjeta ancha, una bajada de una oración o una línea de datos pasaba al segundo renglón aunque sobrara espacio, y se leía como dos cosas distintas. Ahora ocupan el ancho de su tarjeta. El límite de lectura queda en la clase nueva `.texto-corrido`, para varios párrafos que se leen de seguido. Para las líneas de datos (folio · fechas · revisión) hay `.linea-datos` con cada dato en `.linea-datos-item`, que no se parte: si no cabe, pasa completo al renglón siguiente. El proyecto puede quitar de `apd.css` su `max-width: none` y cambiar `APD.meta` por este marcado.
+- **P135 · Motivos frecuentes completos y sin parecer elegidos** (módulo `chips`, FRM-25): los chips fijos tenían un ancho máximo de 240 px y se encogían en la fila, así que un motivo largo («No coincide con el nombre de la cuenta») se partía en dos renglones. Ahora no se encogen (si no caben, pasan completos al renglón siguiente) y sólo se parten si son más largos que la fila entera. Al pasar el cursor sólo cambia el borde: el fondo azul queda para la respuesta elegida. El proyecto puede quitar sus reglas de `.chip-fijo` en `apd.css`.
+
+**Pruebas**: dos casos nuevos en `07-correcciones` (37 en total). La muestra de chips de la guía suma un motivo largo y hay un par «sí y no» de la línea de datos.
+
 ## 1.4.3 · 2026-10-18
 
 - **P127 (ajuste, decisión de la Secretaría)** (módulo `archivos`, FRM-53): una foto a la que no se le pueden quitar los metadatos ya no se rechaza; se agrega como está, aunque lleve su ubicación. Lo demás de la 1.4.2 sigue: sin `conservarExif` la foto viaja siempre recodificada y sin EXIF, y si no se puede recodificar, al JPG se le quitan los metadatos. Sólo queda con metadatos una imagen que no es JPG y que el navegador no pudo recodificar, un caso raro. Se retira el mensaje `archRechazoExif` (156 mensajes).

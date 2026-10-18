@@ -1,6 +1,6 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -79,8 +79,8 @@
     ],
     "tamano": {
       "tokens.css": 8535,
-      "base.css": 6062,
-      "nucleo.css": 19344,
+      "base.css": 6632,
+      "nucleo.css": 19313,
       "validaciones.config.js": 42365,
       "formkit.core.js": 53666,
       "iconos.js": 6047
@@ -919,10 +919,10 @@
         "js": "codigo/modulos/chips/chips.js"
       },
       "tamano": {
-        "css": 1628,
+        "css": 1920,
         "js": 8490
       }
     }
   ],
-  "generado": "2026-10-18T14:45:19.311Z"
+  "generado": "2026-10-18T16:43:19.390Z"
 }

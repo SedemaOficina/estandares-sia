@@ -418,16 +418,17 @@
    "id": "FRM-25",
    "seccion": 3,
    "titulo": "Chips de uso frecuente con historial del propio dispositivo o con una lista fija",
-   "regla": "Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo los motivos para observar un documento) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete. Cada grupo de chips tiene un nombre distinto para el lector de pantalla, aunque los campos compartan etiqueta.",
+   "regla": "Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo los motivos para observar un documento) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete. Cada grupo de chips tiene un nombre distinto para el lector de pantalla, aunque los campos compartan etiqueta. Cada respuesta fija se ve completa: no se encoge en la fila (si no cabe, pasa completa al renglón siguiente) y al pasar el cursor sólo cambia su borde; el fondo azul es de la respuesta elegida.",
    "porque": "Un historial compartido o enviado es una fuga de datos; sugerir datos personales los expone en pantallas ajenas.",
    "nivel": "OPCIONAL",
    "origen": [
     "encargo 5.2",
     "P65 (proyecto de acreditaciones, 16 oct 2026)",
-    "P97 (proyecto de acreditaciones, 17 oct 2026)"
+    "P97 (proyecto de acreditaciones, 17 oct 2026)",
+    "P135 (proyecto de acreditaciones, 18 oct 2026)"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad; 07: chips fijos"
+   "verificacion": "04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad; 07: chips fijos; 07: motivos completos y cursor (P135)"
   },
   {
    "id": "FRM-26",
@@ -1306,6 +1307,19 @@
    ],
    "tipo": "mejor práctica adicional",
    "verificacion": "06: tamaño del logotipo y de su <img> (P130)"
+  },
+  {
+   "id": "FRM-86",
+   "seccion": 12,
+   "titulo": "El límite de 70 caracteres es del texto corrido; la bajada y las líneas de datos ocupan su tarjeta",
+   "regla": "Sólo el texto corrido (varios párrafos que se leen de seguido) se limita a 70 caracteres por renglón, con .texto-corrido. La bajada del título y la ayuda de bloque ocupan el ancho de su tarjeta: una oración no pasa al segundo renglón si sobra espacio. Una línea de datos (folio · fechas · revisión) va en .linea-datos con cada dato en .linea-datos-item, que no se parte: si no cabe, pasa completo al renglón siguiente.",
+   "porque": "Una bajada de una oración partida en dos, o un dato cortado a la mitad («Recibida el 17 / de octubre»), se leen como dos cosas distintas.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "P134 (proyecto de acreditaciones, 18 oct 2026)"
+   ],
+   "tipo": "mejor práctica adicional",
+   "verificacion": "guía: resultado y sí y no; 07: bajada, ayuda de bloque y línea de datos (P134)"
   }
  ]
 }

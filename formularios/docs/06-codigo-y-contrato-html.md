@@ -149,6 +149,8 @@ Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({
 
 **Secuencia «qué sigue».** Varias acciones en orden van en `<ol class="secuencia"><li class="secuencia-item">Abre «Mis documentos».</li>…</ol>`, cada una con su verbo, nunca en un párrafo. Es del núcleo: sirve en cualquier pantalla, dentro de un aviso (en un `<div class="aviso">` con `<div class="aviso-texto">`) y en el resultado (`pasos`); en el acuse va centrada, a su ancho y con su filete.
 
+**Anchos del texto.** La bajada (`.bajada`) y la ayuda de bloque (`.ayuda-bloque`) ocupan el ancho de su tarjeta. El texto corrido de varios párrafos lleva `.texto-corrido` (hasta 70 caracteres por renglón). Una línea de datos: `<p class="linea-datos"><span class="linea-datos-item">Folio EJ-123</span> · <span class="linea-datos-item">Recibida el 17 de octubre de 2026</span></p>`; cada dato pasa completo al renglón siguiente si no cabe.
+
 **Código postal de todo el país.** `data-ambito="nacional"` en un campo `data-formato="cp"` acepta cualquier código de cinco dígitos; sin él, sólo los del ámbito configurado (la Ciudad).
 
 **Bloques listos.** Las secciones «Datos de identificación» y «Domicilio» están en la guía visual (sección «Bloques listos», plantillas `bloque-identificacion` y `bloque-domicilio`): se copian completas y se cambian `data-uso`, `data-finalidad` y el prefijo `b_` de los nombres. Los bloques «Fecha de nacimiento y edad» (`bloque-nacimiento`, para formularios sin CURP) y «Rango de edad» (`bloque-rango-edad`) cubren la edad sin pedirla escrita. El bloque «Redes sociales» (plantilla `bloque-redes`, clases `.redes` y `.redes-enlace` del núcleo) va en el pie: cada enlace lleva `aria-label` con el nombre de la red y de la Secretaría, y el ícono `aria-hidden`.

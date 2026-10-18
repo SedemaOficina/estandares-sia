@@ -2,7 +2,7 @@
 
 > Este documento se **genera** de `reglas/reglas.json` (`node herramientas/generar-reglas.mjs`). No se edita a mano: se corrige la regla en el JSON y se vuelve a generar.
 
-El estándar tiene **85 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **55 BASE** (obligatorias en todo formulario), **22 RECOMENDADAS** (se cumplen salvo justificación escrita) y **8 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 4 son mejores prácticas adicionales.
+El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **55 BASE** (obligatorias en todo formulario), **23 RECOMENDADAS** (se cumplen salvo justificación escrita) y **8 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 5 son mejores prácticas adicionales.
 
 **Cómo leer cada regla.** *Regla*: qué se hace. *Por qué*: el daño que evita. *Nivel*: BASE, RECOMENDADO u OPCIONAL (quien programa elige los módulos, no el nivel). *Origen*: `A FRM-xx` regla del paquete A; `B FRM-XXX-xx` regla del paquete B; `Cn` conflicto decidido en la fase 0 (ver `docs/09-trazabilidad.md`); `encargo n` sección del encargo; `norma n` norma de construcción de sistemas. *Verificación*: la prueba, herramienta o revisión que la comprueba.
 
@@ -19,13 +19,13 @@ El estándar tiene **85 reglas** con numeración corrida FRM-NN (decisión C13).
 9. [Datos personales y protección contra el abuso](#9-datos-personales-y-protección-contra-el-abuso) · FRM-55 a FRM-59
 10. [Móvil y escritorio](#10-móvil-y-escritorio) · FRM-60 a FRM-85
 11. [Hojas de estilo y código](#11-hojas-de-estilo-y-código) · FRM-66 a FRM-72
-12. [Textos y pendientes visibles](#12-textos-y-pendientes-visibles) · FRM-73 a FRM-76
+12. [Textos y pendientes visibles](#12-textos-y-pendientes-visibles) · FRM-73 a FRM-86
 13. [Bibliotecas, tipografías y verificación](#13-bibliotecas-tipografías-y-verificación) · FRM-77 a FRM-81
 
 ## Resumen por nivel
 
 - **BASE**: FRM-07, FRM-08, FRM-09, FRM-10, FRM-11, FRM-12, FRM-13, FRM-14, FRM-15, FRM-16, FRM-17, FRM-26, FRM-27, FRM-28, FRM-29, FRM-30, FRM-32, FRM-33, FRM-34, FRM-35, FRM-36, FRM-37, FRM-39, FRM-40, FRM-44, FRM-45, FRM-48, FRM-51, FRM-54, FRM-55, FRM-56, FRM-59, FRM-60, FRM-61, FRM-62, FRM-63, FRM-64, FRM-65, FRM-66, FRM-67, FRM-68, FRM-69, FRM-70, FRM-71, FRM-72, FRM-73, FRM-74, FRM-75, FRM-76, FRM-77, FRM-78, FRM-79, FRM-80, FRM-81, FRM-84
-- **RECOMENDADO**: FRM-01, FRM-02, FRM-03, FRM-04, FRM-05, FRM-06, FRM-18, FRM-19, FRM-20, FRM-31, FRM-38, FRM-41, FRM-42, FRM-43, FRM-46, FRM-52, FRM-53, FRM-57, FRM-58, FRM-82, FRM-83, FRM-85
+- **RECOMENDADO**: FRM-01, FRM-02, FRM-03, FRM-04, FRM-05, FRM-06, FRM-18, FRM-19, FRM-20, FRM-31, FRM-38, FRM-41, FRM-42, FRM-43, FRM-46, FRM-52, FRM-53, FRM-57, FRM-58, FRM-82, FRM-83, FRM-85, FRM-86
 - **OPCIONAL**: FRM-21, FRM-22, FRM-23, FRM-24, FRM-25, FRM-47, FRM-49, FRM-50
 
 ## 1. Estructura y flujo
@@ -276,13 +276,13 @@ El estándar tiene **85 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-25 · Chips de uso frecuente con historial del propio dispositivo o con una lista fija
 
-**Regla.** Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo los motivos para observar un documento) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete. Cada grupo de chips tiene un nombre distinto para el lector de pantalla, aunque los campos compartan etiqueta.
+**Regla.** Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo los motivos para observar un documento) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete. Cada grupo de chips tiene un nombre distinto para el lector de pantalla, aunque los campos compartan etiqueta. Cada respuesta fija se ve completa: no se encoge en la fila (si no cabe, pasa completa al renglón siguiente) y al pasar el cursor sólo cambia su borde; el fondo azul es de la respuesta elegida.
 
 **Por qué.** Un historial compartido o enviado es una fuga de datos; sugerir datos personales los expone en pantallas ajenas.
 
-**Nivel.** OPCIONAL · **Origen.** encargo 5.2; P65 (proyecto de acreditaciones, 16 oct 2026); P97 (proyecto de acreditaciones, 17 oct 2026) · *decisión del encargo*
+**Nivel.** OPCIONAL · **Origen.** encargo 5.2; P65 (proyecto de acreditaciones, 16 oct 2026); P97 (proyecto de acreditaciones, 17 oct 2026); P135 (proyecto de acreditaciones, 18 oct 2026) · *decisión del encargo*
 
-**Verificación.** 04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad; 07: chips fijos
+**Verificación.** 04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad; 07: chips fijos; 07: motivos completos y cursor (P135)
 
 ## 4. Validación y errores
 
@@ -851,6 +851,16 @@ El estándar tiene **85 reglas** con numeración corrida FRM-NN (decisión C13).
 **Nivel.** BASE · **Origen.** norma 3; encargo · *decisión del encargo*
 
 **Verificación.** revisión; catálogo cdmx-ejemplo.js es_ficticio
+
+### FRM-86 · El límite de 70 caracteres es del texto corrido; la bajada y las líneas de datos ocupan su tarjeta
+
+**Regla.** Sólo el texto corrido (varios párrafos que se leen de seguido) se limita a 70 caracteres por renglón, con .texto-corrido. La bajada del título y la ayuda de bloque ocupan el ancho de su tarjeta: una oración no pasa al segundo renglón si sobra espacio. Una línea de datos (folio · fechas · revisión) va en .linea-datos con cada dato en .linea-datos-item, que no se parte: si no cabe, pasa completo al renglón siguiente.
+
+**Por qué.** Una bajada de una oración partida en dos, o un dato cortado a la mitad («Recibida el 17 / de octubre»), se leen como dos cosas distintas.
+
+**Nivel.** RECOMENDADO · **Origen.** P134 (proyecto de acreditaciones, 18 oct 2026) · *mejor práctica adicional*
+
+**Verificación.** guía: resultado y sí y no; 07: bajada, ayuda de bloque y línea de datos (P134)
 
 ## 13. Bibliotecas, tipografías y verificación
 
