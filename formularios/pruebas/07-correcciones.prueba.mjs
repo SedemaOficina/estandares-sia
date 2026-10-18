@@ -529,6 +529,76 @@ test('la secuencia «qué sigue» sirve fuera del acuse: en el resultado y en un
   await t.context().close();
 });
 
+/* ----- Versión 1.5.0: P145 a P148 (auditoría completa del 18 oct) ----- */
+
+test('en computadora la tabla no parte botones, folios ni fechas, y la columna de acciones toma el ancho de sus botones (P145)', async () => {
+  const p = await abrePagina(navegador, servidor.url, 'pruebas/paginas/consulta.html', { contexto: PERFILES.escritorio.contexto });
+  const r = await p.evaluate(() => {
+    const marco = document.createElement('div'); marco.className = 'tabla-marco'; marco.dataset.tabla = ''; marco.style.maxWidth = '760px';
+    marco.innerHTML = '<table class="tabla"><thead><tr><th scope="col">Folio</th><th scope="col">Fecha</th><th scope="col">Observaciones</th><th scope="col"><span class="solo-lector">Acciones</span></th></tr></thead><tbody><tr data-folio="EJ-2026-000123"><td><span class="mono">EJ-2026-000123</span></td><td>10/10/2026</td><td>' + 'Comentario largo de la revisión documental que ocupa mucho espacio en la fila. '.repeat(3) + '</td><td><div class="tabla-acciones"><button type="button" class="btn-enlace" data-accion-fila="revisar">Revisar</button><button type="button" class="btn-enlace" data-accion-fila="abrir">Abrir</button></div></td></tr></tbody></table>';
+    document.querySelector('main').append(marco);
+    FormKit.tabla.inicia();
+    const renglones = (nodo) => { const rg = document.createRange(); rg.selectNodeContents(nodo); /* Renglones distintos: un <span> dentro da su propia caja en el mismo renglón. */ return new Set([...rg.getClientRects()].filter((x) => x.width > 0).map((x) => Math.round(x.top))).size; };
+    const tds = marco.querySelectorAll('td');
+    const acc = tds[3];
+    return { folio: renglones(tds[0].querySelector('.tabla-valor')), fecha: renglones(tds[1].querySelector('.tabla-valor')), botones: [...acc.querySelectorAll('button')].map(renglones), ajuste: getComputedStyle(tds[0].querySelector('.tabla-valor')).overflowWrap, anchoAcciones: Math.round(acc.getBoundingClientRect().width), anchoBotones: Math.round(acc.querySelector('.tabla-acciones').scrollWidth) };
+  });
+  assert.deepEqual([r.folio, r.fecha, r.botones], [1, 1, [1, 1]], `folio, fecha y botones en un renglón: ${JSON.stringify(r)}`);
+  assert.equal(r.ajuste, 'break-word');
+  assert.ok(r.anchoAcciones <= r.anchoBotones + 40, `la columna de acciones mide lo de sus botones: ${JSON.stringify(r)}`);
+  await p.context().close();
+});
+
+test('el visor dice «Hoja 1 de 2» sólo en su barra, no otra vez debajo de cada hoja (P146)', async () => {
+  const p = await abreGuia(PERFILES.movil);
+  await p.click('#m-visor [data-visor-url$=".pdf"]');
+  await p.waitForFunction(() => document.querySelectorAll('#m-visor canvas').length === 2, null, { timeout: 15000 });
+  assert.equal((await p.locator('#m-visor [data-visor-pagina]').textContent()).trim(), 'Hoja 1 de 2', 'el contador de la barra sigue');
+  assert.equal(await p.locator('#m-visor [data-visor-hojas]').evaluate((h) => [...h.querySelectorAll('*')].filter((x) => x.children.length === 0 && /Hoja \d+ de \d+/.test(x.textContent)).length), 0, 'ningún texto visible lo repite bajo la hoja');
+  assert.equal(await p.locator('#m-visor canvas').first().getAttribute('aria-label'), 'Hoja 1 de 2', 'al lector se lo dice el nombre de la hoja');
+  await p.context().close();
+});
+
+test('el rótulo de la tabla en teléfono y el de la revisión se ven como en la ficha: gris, peso normal; el dato destaca (P147)', async () => {
+  const tel = await abrePagina(navegador, servidor.url, 'pruebas/paginas/consulta.html', { contexto: PERFILES.movil.contexto });
+  const tabla = await tel.locator('#grupos tr[data-folio="G-001"] td').first().evaluate((td) => { const r = getComputedStyle(td, '::before'), v = getComputedStyle(td.querySelector('.tabla-valor')); return { rotulo: [r.fontWeight, r.color], dato: v.fontWeight }; });
+  assert.deepEqual(tabla, { rotulo: ['400', 'rgb(85, 88, 90)'], dato: '600' });
+  await tel.context().close();
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  const rev = await p.evaluate(() => {
+    const d = document.createElement('dl'); d.className = 'rev-datos'; d.innerHTML = '<dt class="rev-dato-etq">Correo</dt><dd class="rev-dato-valor"><span>persona@ejemplo.mx</span></dd>';
+    document.querySelector('main').append(d);
+    const e = getComputedStyle(d.querySelector('dt')), v = getComputedStyle(d.querySelector('dd'));
+    return { rotulo: [e.fontWeight, e.color, e.backgroundColor], dato: v.fontWeight };
+  });
+  assert.deepEqual(rev, { rotulo: ['400', 'rgb(85, 88, 90)', 'rgb(255, 255, 255)'], dato: '600' }, 'en la revisión, sin el fondo gris del rótulo');
+  await p.context().close();
+});
+
+test('el borrador no guarda la precarga de la página, empieza con la persona y guarda los archivos con el proveedor de la página (P148)', async () => {
+  const p = await abrePagina(navegador, servidor.url, 'pruebas/paginas/borrador.html', { contexto: PERFILES.escritorio.contexto });
+  const borrador = () => p.evaluate(() => JSON.parse(localStorage.getItem('prueba-borrador')));
+  await p.evaluate(() => window.precarga());
+  await p.waitForTimeout(900);
+  assert.equal(await borrador(), null, 'lo que la página escribe sola no crea borrador');
+  await p.fill('#nombre', 'Grupo de la persona');
+  await p.setInputFiles('[data-campo="documento"] input[type="file"]', [{ name: 'comprobante.png', mimeType: 'image/png', buffer: pngRuido(400, 300) }]);
+  await p.waitForSelector('[data-campo="documento"] .arch[data-estado="listo"]');
+  await p.waitForFunction(() => window.__proveedor.guarda.some(([c, a]) => c === 'documento' && a.includes('comprobante.png')));
+  await p.waitForFunction(() => sessionStorage.getItem('arch-documento') && JSON.parse(localStorage.getItem('prueba-borrador') || 'null'));
+  assert.equal((await borrador()).datos.nombre, 'Grupo de la persona', 'con el primer gesto de la persona, sí');
+  assert.equal((await borrador()).datos.documento, undefined, 'el archivo no va al borrador del dispositivo');
+  await p.reload();
+  await p.waitForSelector('[data-campo="documento"] .arch[data-estado="listo"]');
+  assert.equal(await p.inputValue('#nombre'), 'Grupo de la persona', 'al volver, el borrador se recupera');
+  assert.equal((await p.locator('[data-campo="documento"] .arch-nombre').textContent()).trim(), 'comprobante.png', 'y el archivo vuelve del proveedor');
+  await p.click('[data-accion="enviar"]');
+  await p.waitForFunction(() => window.__proveedor.borra.includes('documento'));
+  assert.equal(await borrador(), null, 'al enviar se borra el borrador y se le avisa al proveedor');
+  assert.deepEqual(p.registro, [], 'consola limpia');
+  await p.context().close();
+});
+
 /* ----- Versión 1.4.4: P134 y P135 (revisión de pantallas del 18 oct) ----- */
 
 test('la bajada y la ayuda de bloque ocupan su tarjeta; el límite de 70ch es del texto corrido; una línea de datos no parte sus datos (P134)', async () => {

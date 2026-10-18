@@ -107,10 +107,9 @@
       const fig = document.createElement('figure');
       fig.className = 'visor-hoja-pdf';
       fig.dataset.hoja = String(n);
-      const pie = document.createElement('figcaption');
-      pie.className = 'visor-pie';
-      pie.textContent = hoja(n, doc.numPages);
-      fig.append(lienzo, pie);
+      /* Sin pie «Hoja n de total»: ya lo dice el contador de la barra, y repetido debajo
+         de la hoja confundía (P146). Al lector se lo dice el nombre del lienzo. */
+      fig.append(lienzo);
       figuras.push(fig);
       await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport: vista }).promise;
     }

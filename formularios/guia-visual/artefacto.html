@@ -8,7 +8,7 @@
 <link rel="icon" href="data:,">
 <style data-origen="codigo\css\tokens.css">
 /* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -1343,8 +1343,9 @@ a{color:var(--azul)}
   border-radius:var(--r-ctrl);
   font-size:var(--t-md);
 }
-.rev-dato-etq{padding:var(--e-2) var(--e-3) 0;background:var(--blanco);font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
-.rev-dato-valor{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--e-2);padding:0 var(--e-3) var(--e-2);background:var(--blanco);white-space:pre-wrap;word-break:break-word}
+/* Como en la ficha y en la tabla del teléfono (P147): rótulo gris de peso normal, dato que destaca. */
+.rev-dato-etq{padding:var(--e-2) var(--e-3) 0;background:var(--blanco);font-size:var(--t-sm);font-weight:var(--peso-normal);color:var(--gris)}
+.rev-dato-valor{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--e-2);padding:0 var(--e-3) var(--e-2);background:var(--blanco);font-weight:var(--peso-semi);white-space:pre-wrap;word-break:break-word}
 /* Con un valor largo, el valor se parte en renglones y «Editar» se queda a su lado, arriba. */
 .rev-dato-valor > span{flex:1 1 auto;min-width:0}
 .rev-dato-valor > .btn-enlace{flex:none}
@@ -1359,7 +1360,7 @@ a{color:var(--azul)}
 @media (min-width:760px){
   .rev-resumen{flex:1 1 auto}
   .rev-datos{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
-  .rev-dato-etq{padding:var(--e-3);background:var(--fondo)}
+  .rev-dato-etq{padding:var(--e-3)}
   .rev-dato-valor{padding:var(--e-3)}
 }
 
@@ -1829,8 +1830,11 @@ a{color:var(--azul)}
    .tabla-valor, que el módulo crea, y se parte en renglones sin bajar entero. */
 .tabla td{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:var(--e-1) var(--e-3);padding:var(--e-2) 0;border-bottom:var(--b-1) solid var(--linea);vertical-align:top}
 .tabla td:last-child{border-bottom:0}
-.tabla td::before{content:attr(data-etiqueta);font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
-.tabla-valor{min-width:0;overflow-wrap:anywhere}
+/* Rótulo y dato como en la ficha (P147): rótulo gris de peso normal, dato que destaca. */
+.tabla td::before{content:attr(data-etiqueta);font-size:var(--t-sm);font-weight:var(--peso-normal);color:var(--gris)}
+/* break-word, no anywhere: una palabra se parte sólo si no cabe en su renglón; anywhere dejaba encoger
+   la columna hasta partir botones, folios y fechas («Revisa / r», «10/10/20 / 26») (P145). */
+.tabla-valor{min-width:0;font-weight:var(--peso-semi);overflow-wrap:break-word}
 /* Columna cuyo encabezado es sólo para el lector de pantalla (acciones): en teléfono tampoco se ve su rótulo. */
 .tabla td[data-etiqueta-oculta]::before{display:none}
 /* Sin rótulo (acciones), el valor ocupa todo el ancho de la tarjeta. */
@@ -1861,6 +1865,11 @@ td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
   .tabla td{display:table-cell;padding:var(--e-2) var(--e-3);vertical-align:middle}
   .tabla td:last-child{border-bottom:var(--b-1) solid var(--linea)}
   .tabla td::before{display:none}
+  .tabla-valor{font-weight:var(--peso-normal)}
+  /* Botones, folios y etiquetas no se parten; la columna de acciones (encabezado sólo para el
+     lector) toma el ancho de sus botones y el resto queda para los datos (P145). */
+  .tabla .btn,.tabla .btn-enlace,.tabla .mono{white-space:nowrap}
+  .tabla td[data-etiqueta-oculta]{width:1%;white-space:nowrap}
   /* Filas alternas contadas sólo entre las visibles: al filtrar con [hidden], el rayado no pierde el ritmo. */
   .tabla tr:nth-child(even of :not([hidden])){background:var(--guinda-cl)}
 }
@@ -2167,7 +2176,6 @@ td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
 .visor-hojas{flex:1 1 auto;min-height:0;overflow:auto;padding:var(--e-3);background:var(--linea);border-radius:var(--r-ctrl)}
 .visor-hoja-pdf{margin:0 0 var(--e-4)}
 .visor-lienzo{display:block;width:100%;height:auto;margin:0 auto;background:var(--blanco);box-shadow:var(--sombra-lista)}
-.visor-pie{margin-top:var(--e-1);font-size:var(--t-xs);text-align:center;color:var(--texto)}
 /* Visor del navegador, cuando pdf.js no se pudo cargar. */
 .visor-marco{display:block;width:100%;min-height:var(--alto-mapa);height:100%;background:var(--blanco);border:0}
 .visor-nota{margin:0;font-size:var(--t-xs)}
@@ -3350,7 +3358,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <link rel=&quot;icon&quot; href=&quot;data:,&quot;>
 <!-- Núcleo (obligatorio) -->
 <style>/* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -5349,8 +5357,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   border-radius:var(--r-ctrl);
   font-size:var(--t-md);
 }
-.rev-dato-etq{padding:var(--e-2) var(--e-3) 0;background:var(--blanco);font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
-.rev-dato-valor{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--e-2);padding:0 var(--e-3) var(--e-2);background:var(--blanco);white-space:pre-wrap;word-break:break-word}
+/* Como en la ficha y en la tabla del teléfono (P147): rótulo gris de peso normal, dato que destaca. */
+.rev-dato-etq{padding:var(--e-2) var(--e-3) 0;background:var(--blanco);font-size:var(--t-sm);font-weight:var(--peso-normal);color:var(--gris)}
+.rev-dato-valor{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--e-2);padding:0 var(--e-3) var(--e-2);background:var(--blanco);font-weight:var(--peso-semi);white-space:pre-wrap;word-break:break-word}
 /* Con un valor largo, el valor se parte en renglones y «Editar» se queda a su lado, arriba. */
 .rev-dato-valor > span{flex:1 1 auto;min-width:0}
 .rev-dato-valor > .btn-enlace{flex:none}
@@ -5365,7 +5374,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 @media (min-width:760px){
   .rev-resumen{flex:1 1 auto}
   .rev-datos{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
-  .rev-dato-etq{padding:var(--e-3);background:var(--fondo)}
+  .rev-dato-etq{padding:var(--e-3)}
   .rev-dato-valor{padding:var(--e-3)}
 }
 </style>
@@ -6387,7 +6396,7 @@ window.FORMKIT_OPCIONES = {
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.4',
+    version: '1.5.0',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -6581,7 +6590,7 @@ window.FORMKIT_OPCIONES = {
 window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; hidden> <symbol id=\&quot;i-alerta\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3 2.5 20h19L12 3z\&quot;/><path d=\&quot;M12 9v5\&quot;/><path d=\&quot;M12 17.5h.01\&quot;/></symbol> <symbol id=\&quot;i-error\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v6\&quot;/><path d=\&quot;M12 16.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ok\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;m8 12.5 2.5 2.5L16 9.5\&quot;/></symbol> <symbol id=\&quot;i-info\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 11v6\&quot;/><path d=\&quot;M12 7.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ayuda\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7\&quot;/><path d=\&quot;M12 17h.01\&quot;/></symbol> <symbol id=\&quot;i-cerrar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 6 12 12\&quot;/><path d=\&quot;M18 6 6 18\&quot;/></symbol> <symbol id=\&quot;i-palomita\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m5 12.5 4.5 4.5L19 7.5\&quot;/></symbol> <symbol id=\&quot;i-flecha-izq\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M19 12H5\&quot;/><path d=\&quot;m11 6-6 6 6 6\&quot;/></symbol> <symbol id=\&quot;i-flecha-der\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M5 12h14\&quot;/><path d=\&quot;m13 6 6 6-6 6\&quot;/></symbol> <symbol id=\&quot;i-abajo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 9 6 6 6-6\&quot;/></symbol> <symbol id=\&quot;i-descarga\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 4v11\&quot;/><path d=\&quot;m7 10 5 5 5-5\&quot;/><path d=\&quot;M4 19h16\&quot;/></symbol> <symbol id=\&quot;i-copiar\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;9\&quot; y=\&quot;9\&quot; width=\&quot;11\&quot; height=\&quot;11\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M5 15V6a2 2 0 0 1 2-2h9\&quot;/></symbol> <symbol id=\&quot;i-compartir\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;18\&quot; cy=\&quot;5\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;6\&quot; cy=\&quot;12\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;18\&quot; cy=\&quot;19\&quot; r=\&quot;2.5\&quot;/><path d=\&quot;m8.3 10.8 7.4-4.6\&quot;/><path d=\&quot;m8.3 13.2 7.4 4.6\&quot;/></symbol> <symbol id=\&quot;i-eliminar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 7h16\&quot;/><path d=\&quot;M9 7V4h6v3\&quot;/><path d=\&quot;M6 7l1 13h10l1-13\&quot;/></symbol> <symbol id=\&quot;i-editar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 20h4l11-11-4-4L4 16v4z\&quot;/><path d=\&quot;m13 7 4 4\&quot;/></symbol> <symbol id=\&quot;i-ubicacion\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 21s-6-6.3-6-11a6 6 0 0 1 12 0c0 4.7-6 11-6 11z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;10\&quot; r=\&quot;2.2\&quot;/></symbol> <symbol id=\&quot;i-fecha\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;4\&quot; y=\&quot;5\&quot; width=\&quot;16\&quot; height=\&quot;15\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M4 10h16\&quot;/><path d=\&quot;M8 3v4\&quot;/><path d=\&quot;M16 3v4\&quot;/></symbol> <symbol id=\&quot;i-adjunto\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7L9.5 17a1.6 1.6 0 0 1-2.3-2.3L15 7\&quot;/></symbol> <symbol id=\&quot;i-camara\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 8h3l2-3h6l2 3h3v11H4z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;13\&quot; r=\&quot;3.5\&quot;/></symbol> <symbol id=\&quot;i-buscar\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;11\&quot; cy=\&quot;11\&quot; r=\&quot;6\&quot;/><path d=\&quot;m20 20-4.5-4.5\&quot;/></symbol> <symbol id=\&quot;i-mas\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 5v14\&quot;/><path d=\&quot;M5 12h14\&quot;/></symbol> <symbol id=\&quot;i-cargando\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3a9 9 0 1 0 9 9\&quot;/></symbol> <symbol id=\&quot;i-reloj\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v5l3 2\&quot;/></symbol> <symbol id=\&quot;i-externo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M14 4h6v6\&quot;/><path d=\&quot;M20 4 10 14\&quot;/><path d=\&quot;M19 14v5H5V5h5\&quot;/></symbol> <symbol id=\&quot;i-archivo\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;3\&quot; y=\&quot;4\&quot; width=\&quot;18\&quot; height=\&quot;5\&quot; rx=\&quot;1\&quot;/><path d=\&quot;M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9\&quot;/><path d=\&quot;M10 13h4\&quot;/></symbol> <symbol id=\&quot;i-facebook\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.93 8.44-9.94Z\&quot;/></symbol> <symbol id=\&quot;i-x\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M17.53 3h3.03l-6.62 7.57L21.75 21h-6.09l-4.77-6.24L5.42 21H2.38l7.08-8.09L2.25 3h6.24l4.31 5.7L17.53 3Zm-1.07 16.17h1.68L7.62 4.73H5.82l10.64 14.44Z\&quot;/></symbol> <symbol id=\&quot;i-instagram\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.29a6.55 6.55 0 1 0 0 13.1 6.55 6.55 0 0 0 0-13.1Zm0 10.8a4.25 4.25 0 1 1 0-8.5 4.25 4.25 0 0 1 0 8.5Zm8.34-11.06a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z\&quot;/></symbol> <symbol id=\&quot;i-tiktok\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.28a4.29 4.29 0 0 1-3.24-1.46Z\&quot;/></symbol> <symbol id=\&quot;i-youtube\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M23.5 6.5a3.02 3.02 0 0 0-2.12-2.14C19.5 3.85 12 3.85 12 3.85s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.5C0 8.39 0 12 0 12s0 3.61.5 5.5a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.61 24 12 24 12s0-3.61-.5-5.5ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z\&quot;/></symbol> </svg>&quot;;
 </script>
 <script>/* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -7247,7 +7256,8 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
     /* ----- Borrador local -----
        Se activa con data-borrador=&quot;clave&quot; en el <form>. Versionado con
-       data-borrador-version. Excluye campos data-sensible y archivos. */
+       data-borrador-version. Excluye campos data-sensible y archivos (éstos, sólo
+       con un proveedor que dé la página: opciones.borradorArchivos, en archivos.js). */
     const claveBorrador = form.dataset.borrador || '';
     const versionBorrador = form.dataset.borradorVersion || '1';
     let temporizadorBorrador = 0;
@@ -7256,9 +7266,21 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     let terminado = false;
     const indicador = $('[data-guardado]');
     const franja = $('[data-franja-borrador]');
+    /* Lo que la página escribe sola (al precargar una solicitud para continuarla) no es
+       un borrador de la persona: el borrador empieza con su primer gesto en el formulario
+       (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
+       después la página o los módulos entra en el mismo borrador (P148). */
+    let personaActuo = false;
+    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
+    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
+       módulo se suscribe y el núcleo le avisa al escribir, restaurar o borrar el borrador. */
+    const suscritosBorrador = [];
+    const alBorrador = (def) => { suscritosBorrador.push(def); };
+    const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
+    function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -7274,6 +7296,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     function escribeBorrador() {
       const extra = FormKit.ganchos.estadoBorrador ? FormKit.ganchos.estadoBorrador(form) : {};
       const ok = almacen.escribe(claveBorrador, JSON.stringify({ v: versionBorrador, t: Date.now(), datos: datosBorrador(), ...extra }));
+      avisaBorrador('escribe');
       if (ok &amp;&amp; indicador) {
         indicador.textContent = M.borradorGuardado;
         indicador.setAttribute('data-visible', '');
@@ -7290,9 +7313,9 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       if (!crudo) return null;
       try {
         const b = JSON.parse(crudo);
-        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { almacen.borra(claveBorrador); return null; }
+        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { borraBorrador(); return null; }
         return b;
-      } catch (e) { almacen.borra(claveBorrador); return null; }
+      } catch (e) { borraBorrador(); return null; }
     }
     function restauraBorrador(b) {
       for (const [n, v] of Object.entries(b.datos || {})) {
@@ -7308,6 +7331,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       aplicaCondicionales();
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
+      avisaBorrador('restaura', b);
       anuncia(M.borradorGuardado.replace('guardado', 'recuperado'));
     }
     function iniciaFranja(b) {
@@ -7319,8 +7343,8 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
         if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador=&quot;descartar-si&quot;]', franja); if (si) si.focus(); } else { almacen.borra(claveBorrador); franja.hidden = true; } }
-        else if (a.dataset.borrador === 'descartar-si') { almacen.borra(claveBorrador); franja.hidden = true; }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador=&quot;descartar-si&quot;]', franja); if (si) si.focus(); } else { borraBorrador(); franja.hidden = true; } }
+        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador=&quot;recuperar&quot;]', franja).focus(); }
       });
     }
@@ -7396,7 +7420,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         const respuesta = await enviarFn(arma(), { signal: control.signal });
         terminado = true;
         clearTimeout(temporizadorBorrador);
-        if (claveBorrador) almacen.borra(claveBorrador);
+        if (claveBorrador) borraBorrador();
         if (opciones.alEnviar) opciones.alEnviar(respuesta, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: respuesta }));
         return true;
       } catch (e) {
@@ -7516,7 +7540,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       $, $$, plantilla, icono, anuncia, almacen, idUnico, pesoTxt, normalizaBusqueda,
       envoltura, envolturas, nombres, tipoDe, controlesDe, controlPrincipal, valorDe, textoDeValor, etiquetaDe, esObligatorio, activo, atributosDe,
       validaCampo, validaYPinta, validaContenedor, marca, marcaError, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
-      aplicaCondicionales, programaBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
+      aplicaCondicionales, programaBorrador, alBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
     };
 
     /* ----- Arranque ----- */
@@ -8452,7 +8476,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
           if (f.size < A.minBytes) { rechazos.push({ nombre, motivo: M.archRechazoVacio }); continue; }
           const esFoto = A.optimiza.tipos.includes(ext(f.name));
           if (!esFoto &amp;&amp; f.size > c.mb * BYTES_POR_MB) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoPeso, { peso: pesoTxt(f.size), mb: c.mb }) }); continue; }
-          const a = { nombre, size: f.size, original: f.size, tipo: f.type };
+          const a = { nombre, size: f.size, original: f.size, tipo: f.type, fuente: f };
           lista.push(a);
           procesa(f, a, el, c);
         }
@@ -8566,6 +8590,19 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       /* Un archivo soltado fuera de la zona haría que el navegador lo abriera y la persona perdiera todo. */
       window.addEventListener('dragover', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
       window.addEventListener('drop', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
+
+      /* Archivos en el borrador (P148). El estándar no los guarda en el dispositivo (FRM-43); si la
+         página da un proveedor, FormKit.iniciar(form, { borradorArchivos: { guarda(campo, archivos),
+         lee(campo), borra(campo) } }), al escribir el borrador se le pasan los archivos originales
+         de cada campo, al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
+         El proveedor decide dónde guardarlos (en el servidor, en el almacén del sistema). */
+      const camposArchivo = () => $$('[data-archivos]', form).map((c) => c.closest('[data-campo]'));
+      const conProveedor = (fn) => { const p = ctx.opciones.borradorArchivos; if (!p) return; for (const el of camposArchivo()) Promise.resolve().then(() => fn(p, el)).catch(() => { /* un proveedor que falla no detiene el formulario */ }); };
+      ctx.alBorrador({
+        escribe: () => conProveedor((p, el) => p.guarda &amp;&amp; p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado !== 'error' &amp;&amp; a.fuente).map((a) => a.fuente))),
+        restaura: () => conProveedor((p, el) => p.lee &amp;&amp; Promise.resolve(p.lee(el.dataset.campo)).then((archivos) => { if (archivos &amp;&amp; archivos.length) agrega(Array.from(archivos), el); })),
+        borra: () => conProveedor((p, el) => p.borra &amp;&amp; p.borra(el.dataset.campo))
+      });
 
       FormKit.archivos = { de: (el) => archivosPorCampo.get(el) || [], agrega };
     }
@@ -9277,7 +9314,7 @@ globalThis.FORMKIT_CATALOGOS.alcaldias = [...new Set(globalThis.FORMKIT_CATALOGO
 <meta name=&quot;description&quot; content=&quot;Plantilla de formulario de una sola página del estándar de formularios del SIA (SEDEMA). Contenido ficticio.&quot;>
 <link rel=&quot;icon&quot; href=&quot;data:,&quot;>
 <style>/* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -11422,7 +11459,7 @@ window.FORMKIT_OPCIONES = {
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.4',
+    version: '1.5.0',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -11616,7 +11653,7 @@ window.FORMKIT_OPCIONES = {
 window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; hidden> <symbol id=\&quot;i-alerta\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3 2.5 20h19L12 3z\&quot;/><path d=\&quot;M12 9v5\&quot;/><path d=\&quot;M12 17.5h.01\&quot;/></symbol> <symbol id=\&quot;i-error\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v6\&quot;/><path d=\&quot;M12 16.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ok\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;m8 12.5 2.5 2.5L16 9.5\&quot;/></symbol> <symbol id=\&quot;i-info\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 11v6\&quot;/><path d=\&quot;M12 7.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ayuda\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7\&quot;/><path d=\&quot;M12 17h.01\&quot;/></symbol> <symbol id=\&quot;i-cerrar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 6 12 12\&quot;/><path d=\&quot;M18 6 6 18\&quot;/></symbol> <symbol id=\&quot;i-palomita\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m5 12.5 4.5 4.5L19 7.5\&quot;/></symbol> <symbol id=\&quot;i-flecha-izq\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M19 12H5\&quot;/><path d=\&quot;m11 6-6 6 6 6\&quot;/></symbol> <symbol id=\&quot;i-flecha-der\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M5 12h14\&quot;/><path d=\&quot;m13 6 6 6-6 6\&quot;/></symbol> <symbol id=\&quot;i-abajo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 9 6 6 6-6\&quot;/></symbol> <symbol id=\&quot;i-descarga\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 4v11\&quot;/><path d=\&quot;m7 10 5 5 5-5\&quot;/><path d=\&quot;M4 19h16\&quot;/></symbol> <symbol id=\&quot;i-copiar\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;9\&quot; y=\&quot;9\&quot; width=\&quot;11\&quot; height=\&quot;11\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M5 15V6a2 2 0 0 1 2-2h9\&quot;/></symbol> <symbol id=\&quot;i-compartir\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;18\&quot; cy=\&quot;5\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;6\&quot; cy=\&quot;12\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;18\&quot; cy=\&quot;19\&quot; r=\&quot;2.5\&quot;/><path d=\&quot;m8.3 10.8 7.4-4.6\&quot;/><path d=\&quot;m8.3 13.2 7.4 4.6\&quot;/></symbol> <symbol id=\&quot;i-eliminar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 7h16\&quot;/><path d=\&quot;M9 7V4h6v3\&quot;/><path d=\&quot;M6 7l1 13h10l1-13\&quot;/></symbol> <symbol id=\&quot;i-editar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 20h4l11-11-4-4L4 16v4z\&quot;/><path d=\&quot;m13 7 4 4\&quot;/></symbol> <symbol id=\&quot;i-ubicacion\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 21s-6-6.3-6-11a6 6 0 0 1 12 0c0 4.7-6 11-6 11z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;10\&quot; r=\&quot;2.2\&quot;/></symbol> <symbol id=\&quot;i-fecha\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;4\&quot; y=\&quot;5\&quot; width=\&quot;16\&quot; height=\&quot;15\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M4 10h16\&quot;/><path d=\&quot;M8 3v4\&quot;/><path d=\&quot;M16 3v4\&quot;/></symbol> <symbol id=\&quot;i-adjunto\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7L9.5 17a1.6 1.6 0 0 1-2.3-2.3L15 7\&quot;/></symbol> <symbol id=\&quot;i-camara\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 8h3l2-3h6l2 3h3v11H4z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;13\&quot; r=\&quot;3.5\&quot;/></symbol> <symbol id=\&quot;i-buscar\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;11\&quot; cy=\&quot;11\&quot; r=\&quot;6\&quot;/><path d=\&quot;m20 20-4.5-4.5\&quot;/></symbol> <symbol id=\&quot;i-mas\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 5v14\&quot;/><path d=\&quot;M5 12h14\&quot;/></symbol> <symbol id=\&quot;i-cargando\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3a9 9 0 1 0 9 9\&quot;/></symbol> <symbol id=\&quot;i-reloj\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v5l3 2\&quot;/></symbol> <symbol id=\&quot;i-externo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M14 4h6v6\&quot;/><path d=\&quot;M20 4 10 14\&quot;/><path d=\&quot;M19 14v5H5V5h5\&quot;/></symbol> <symbol id=\&quot;i-archivo\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;3\&quot; y=\&quot;4\&quot; width=\&quot;18\&quot; height=\&quot;5\&quot; rx=\&quot;1\&quot;/><path d=\&quot;M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9\&quot;/><path d=\&quot;M10 13h4\&quot;/></symbol> <symbol id=\&quot;i-facebook\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.93 8.44-9.94Z\&quot;/></symbol> <symbol id=\&quot;i-x\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M17.53 3h3.03l-6.62 7.57L21.75 21h-6.09l-4.77-6.24L5.42 21H2.38l7.08-8.09L2.25 3h6.24l4.31 5.7L17.53 3Zm-1.07 16.17h1.68L7.62 4.73H5.82l10.64 14.44Z\&quot;/></symbol> <symbol id=\&quot;i-instagram\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.29a6.55 6.55 0 1 0 0 13.1 6.55 6.55 0 0 0 0-13.1Zm0 10.8a4.25 4.25 0 1 1 0-8.5 4.25 4.25 0 0 1 0 8.5Zm8.34-11.06a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z\&quot;/></symbol> <symbol id=\&quot;i-tiktok\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.28a4.29 4.29 0 0 1-3.24-1.46Z\&quot;/></symbol> <symbol id=\&quot;i-youtube\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M23.5 6.5a3.02 3.02 0 0 0-2.12-2.14C19.5 3.85 12 3.85 12 3.85s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.5C0 8.39 0 12 0 12s0 3.61.5 5.5a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.61 24 12 24 12s0-3.61-.5-5.5ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z\&quot;/></symbol> </svg>&quot;;
 </script>
 <script>/* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -12282,7 +12319,8 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
     /* ----- Borrador local -----
        Se activa con data-borrador=&quot;clave&quot; en el <form>. Versionado con
-       data-borrador-version. Excluye campos data-sensible y archivos. */
+       data-borrador-version. Excluye campos data-sensible y archivos (éstos, sólo
+       con un proveedor que dé la página: opciones.borradorArchivos, en archivos.js). */
     const claveBorrador = form.dataset.borrador || '';
     const versionBorrador = form.dataset.borradorVersion || '1';
     let temporizadorBorrador = 0;
@@ -12291,9 +12329,21 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     let terminado = false;
     const indicador = $('[data-guardado]');
     const franja = $('[data-franja-borrador]');
+    /* Lo que la página escribe sola (al precargar una solicitud para continuarla) no es
+       un borrador de la persona: el borrador empieza con su primer gesto en el formulario
+       (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
+       después la página o los módulos entra en el mismo borrador (P148). */
+    let personaActuo = false;
+    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
+    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
+       módulo se suscribe y el núcleo le avisa al escribir, restaurar o borrar el borrador. */
+    const suscritosBorrador = [];
+    const alBorrador = (def) => { suscritosBorrador.push(def); };
+    const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
+    function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -12309,6 +12359,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     function escribeBorrador() {
       const extra = FormKit.ganchos.estadoBorrador ? FormKit.ganchos.estadoBorrador(form) : {};
       const ok = almacen.escribe(claveBorrador, JSON.stringify({ v: versionBorrador, t: Date.now(), datos: datosBorrador(), ...extra }));
+      avisaBorrador('escribe');
       if (ok &amp;&amp; indicador) {
         indicador.textContent = M.borradorGuardado;
         indicador.setAttribute('data-visible', '');
@@ -12325,9 +12376,9 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       if (!crudo) return null;
       try {
         const b = JSON.parse(crudo);
-        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { almacen.borra(claveBorrador); return null; }
+        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { borraBorrador(); return null; }
         return b;
-      } catch (e) { almacen.borra(claveBorrador); return null; }
+      } catch (e) { borraBorrador(); return null; }
     }
     function restauraBorrador(b) {
       for (const [n, v] of Object.entries(b.datos || {})) {
@@ -12343,6 +12394,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       aplicaCondicionales();
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
+      avisaBorrador('restaura', b);
       anuncia(M.borradorGuardado.replace('guardado', 'recuperado'));
     }
     function iniciaFranja(b) {
@@ -12354,8 +12406,8 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
         if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador=&quot;descartar-si&quot;]', franja); if (si) si.focus(); } else { almacen.borra(claveBorrador); franja.hidden = true; } }
-        else if (a.dataset.borrador === 'descartar-si') { almacen.borra(claveBorrador); franja.hidden = true; }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador=&quot;descartar-si&quot;]', franja); if (si) si.focus(); } else { borraBorrador(); franja.hidden = true; } }
+        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador=&quot;recuperar&quot;]', franja).focus(); }
       });
     }
@@ -12431,7 +12483,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         const respuesta = await enviarFn(arma(), { signal: control.signal });
         terminado = true;
         clearTimeout(temporizadorBorrador);
-        if (claveBorrador) almacen.borra(claveBorrador);
+        if (claveBorrador) borraBorrador();
         if (opciones.alEnviar) opciones.alEnviar(respuesta, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: respuesta }));
         return true;
       } catch (e) {
@@ -12551,7 +12603,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       $, $$, plantilla, icono, anuncia, almacen, idUnico, pesoTxt, normalizaBusqueda,
       envoltura, envolturas, nombres, tipoDe, controlesDe, controlPrincipal, valorDe, textoDeValor, etiquetaDe, esObligatorio, activo, atributosDe,
       validaCampo, validaYPinta, validaContenedor, marca, marcaError, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
-      aplicaCondicionales, programaBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
+      aplicaCondicionales, programaBorrador, alBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
     };
 
     /* ----- Arranque ----- */
@@ -13714,7 +13766,7 @@ globalThis.FORMKIT_CATALOGOS.alcaldias = [...new Set(globalThis.FORMKIT_CATALOGO
 <title>Encuesta de ejemplo</title>
 <link rel=&quot;icon&quot; href=&quot;data:,&quot;>
 <style>/* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -15354,7 +15406,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.4',
+    version: '1.5.0',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -15548,7 +15600,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
 window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; hidden> <symbol id=\&quot;i-alerta\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3 2.5 20h19L12 3z\&quot;/><path d=\&quot;M12 9v5\&quot;/><path d=\&quot;M12 17.5h.01\&quot;/></symbol> <symbol id=\&quot;i-error\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v6\&quot;/><path d=\&quot;M12 16.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ok\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;m8 12.5 2.5 2.5L16 9.5\&quot;/></symbol> <symbol id=\&quot;i-info\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 11v6\&quot;/><path d=\&quot;M12 7.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ayuda\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7\&quot;/><path d=\&quot;M12 17h.01\&quot;/></symbol> <symbol id=\&quot;i-cerrar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 6 12 12\&quot;/><path d=\&quot;M18 6 6 18\&quot;/></symbol> <symbol id=\&quot;i-palomita\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m5 12.5 4.5 4.5L19 7.5\&quot;/></symbol> <symbol id=\&quot;i-flecha-izq\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M19 12H5\&quot;/><path d=\&quot;m11 6-6 6 6 6\&quot;/></symbol> <symbol id=\&quot;i-flecha-der\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M5 12h14\&quot;/><path d=\&quot;m13 6 6 6-6 6\&quot;/></symbol> <symbol id=\&quot;i-abajo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 9 6 6 6-6\&quot;/></symbol> <symbol id=\&quot;i-descarga\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 4v11\&quot;/><path d=\&quot;m7 10 5 5 5-5\&quot;/><path d=\&quot;M4 19h16\&quot;/></symbol> <symbol id=\&quot;i-copiar\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;9\&quot; y=\&quot;9\&quot; width=\&quot;11\&quot; height=\&quot;11\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M5 15V6a2 2 0 0 1 2-2h9\&quot;/></symbol> <symbol id=\&quot;i-compartir\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;18\&quot; cy=\&quot;5\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;6\&quot; cy=\&quot;12\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;18\&quot; cy=\&quot;19\&quot; r=\&quot;2.5\&quot;/><path d=\&quot;m8.3 10.8 7.4-4.6\&quot;/><path d=\&quot;m8.3 13.2 7.4 4.6\&quot;/></symbol> <symbol id=\&quot;i-eliminar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 7h16\&quot;/><path d=\&quot;M9 7V4h6v3\&quot;/><path d=\&quot;M6 7l1 13h10l1-13\&quot;/></symbol> <symbol id=\&quot;i-editar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 20h4l11-11-4-4L4 16v4z\&quot;/><path d=\&quot;m13 7 4 4\&quot;/></symbol> <symbol id=\&quot;i-ubicacion\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 21s-6-6.3-6-11a6 6 0 0 1 12 0c0 4.7-6 11-6 11z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;10\&quot; r=\&quot;2.2\&quot;/></symbol> <symbol id=\&quot;i-fecha\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;4\&quot; y=\&quot;5\&quot; width=\&quot;16\&quot; height=\&quot;15\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M4 10h16\&quot;/><path d=\&quot;M8 3v4\&quot;/><path d=\&quot;M16 3v4\&quot;/></symbol> <symbol id=\&quot;i-adjunto\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7L9.5 17a1.6 1.6 0 0 1-2.3-2.3L15 7\&quot;/></symbol> <symbol id=\&quot;i-camara\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 8h3l2-3h6l2 3h3v11H4z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;13\&quot; r=\&quot;3.5\&quot;/></symbol> <symbol id=\&quot;i-buscar\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;11\&quot; cy=\&quot;11\&quot; r=\&quot;6\&quot;/><path d=\&quot;m20 20-4.5-4.5\&quot;/></symbol> <symbol id=\&quot;i-mas\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 5v14\&quot;/><path d=\&quot;M5 12h14\&quot;/></symbol> <symbol id=\&quot;i-cargando\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3a9 9 0 1 0 9 9\&quot;/></symbol> <symbol id=\&quot;i-reloj\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v5l3 2\&quot;/></symbol> <symbol id=\&quot;i-externo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M14 4h6v6\&quot;/><path d=\&quot;M20 4 10 14\&quot;/><path d=\&quot;M19 14v5H5V5h5\&quot;/></symbol> <symbol id=\&quot;i-archivo\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;3\&quot; y=\&quot;4\&quot; width=\&quot;18\&quot; height=\&quot;5\&quot; rx=\&quot;1\&quot;/><path d=\&quot;M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9\&quot;/><path d=\&quot;M10 13h4\&quot;/></symbol> <symbol id=\&quot;i-facebook\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.93 8.44-9.94Z\&quot;/></symbol> <symbol id=\&quot;i-x\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M17.53 3h3.03l-6.62 7.57L21.75 21h-6.09l-4.77-6.24L5.42 21H2.38l7.08-8.09L2.25 3h6.24l4.31 5.7L17.53 3Zm-1.07 16.17h1.68L7.62 4.73H5.82l10.64 14.44Z\&quot;/></symbol> <symbol id=\&quot;i-instagram\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.29a6.55 6.55 0 1 0 0 13.1 6.55 6.55 0 0 0 0-13.1Zm0 10.8a4.25 4.25 0 1 1 0-8.5 4.25 4.25 0 0 1 0 8.5Zm8.34-11.06a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z\&quot;/></symbol> <symbol id=\&quot;i-tiktok\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.28a4.29 4.29 0 0 1-3.24-1.46Z\&quot;/></symbol> <symbol id=\&quot;i-youtube\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M23.5 6.5a3.02 3.02 0 0 0-2.12-2.14C19.5 3.85 12 3.85 12 3.85s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.5C0 8.39 0 12 0 12s0 3.61.5 5.5a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.61 24 12 24 12s0-3.61-.5-5.5ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z\&quot;/></symbol> </svg>&quot;;
 </script>
 <script>/* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -16214,7 +16266,8 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
     /* ----- Borrador local -----
        Se activa con data-borrador=&quot;clave&quot; en el <form>. Versionado con
-       data-borrador-version. Excluye campos data-sensible y archivos. */
+       data-borrador-version. Excluye campos data-sensible y archivos (éstos, sólo
+       con un proveedor que dé la página: opciones.borradorArchivos, en archivos.js). */
     const claveBorrador = form.dataset.borrador || '';
     const versionBorrador = form.dataset.borradorVersion || '1';
     let temporizadorBorrador = 0;
@@ -16223,9 +16276,21 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     let terminado = false;
     const indicador = $('[data-guardado]');
     const franja = $('[data-franja-borrador]');
+    /* Lo que la página escribe sola (al precargar una solicitud para continuarla) no es
+       un borrador de la persona: el borrador empieza con su primer gesto en el formulario
+       (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
+       después la página o los módulos entra en el mismo borrador (P148). */
+    let personaActuo = false;
+    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
+    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
+       módulo se suscribe y el núcleo le avisa al escribir, restaurar o borrar el borrador. */
+    const suscritosBorrador = [];
+    const alBorrador = (def) => { suscritosBorrador.push(def); };
+    const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
+    function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -16241,6 +16306,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     function escribeBorrador() {
       const extra = FormKit.ganchos.estadoBorrador ? FormKit.ganchos.estadoBorrador(form) : {};
       const ok = almacen.escribe(claveBorrador, JSON.stringify({ v: versionBorrador, t: Date.now(), datos: datosBorrador(), ...extra }));
+      avisaBorrador('escribe');
       if (ok &amp;&amp; indicador) {
         indicador.textContent = M.borradorGuardado;
         indicador.setAttribute('data-visible', '');
@@ -16257,9 +16323,9 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       if (!crudo) return null;
       try {
         const b = JSON.parse(crudo);
-        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { almacen.borra(claveBorrador); return null; }
+        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { borraBorrador(); return null; }
         return b;
-      } catch (e) { almacen.borra(claveBorrador); return null; }
+      } catch (e) { borraBorrador(); return null; }
     }
     function restauraBorrador(b) {
       for (const [n, v] of Object.entries(b.datos || {})) {
@@ -16275,6 +16341,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       aplicaCondicionales();
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
+      avisaBorrador('restaura', b);
       anuncia(M.borradorGuardado.replace('guardado', 'recuperado'));
     }
     function iniciaFranja(b) {
@@ -16286,8 +16353,8 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
         if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador=&quot;descartar-si&quot;]', franja); if (si) si.focus(); } else { almacen.borra(claveBorrador); franja.hidden = true; } }
-        else if (a.dataset.borrador === 'descartar-si') { almacen.borra(claveBorrador); franja.hidden = true; }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador=&quot;descartar-si&quot;]', franja); if (si) si.focus(); } else { borraBorrador(); franja.hidden = true; } }
+        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador=&quot;recuperar&quot;]', franja).focus(); }
       });
     }
@@ -16363,7 +16430,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         const respuesta = await enviarFn(arma(), { signal: control.signal });
         terminado = true;
         clearTimeout(temporizadorBorrador);
-        if (claveBorrador) almacen.borra(claveBorrador);
+        if (claveBorrador) borraBorrador();
         if (opciones.alEnviar) opciones.alEnviar(respuesta, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: respuesta }));
         return true;
       } catch (e) {
@@ -16483,7 +16550,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       $, $$, plantilla, icono, anuncia, almacen, idUnico, pesoTxt, normalizaBusqueda,
       envoltura, envolturas, nombres, tipoDe, controlesDe, controlPrincipal, valorDe, textoDeValor, etiquetaDe, esObligatorio, activo, atributosDe,
       validaCampo, validaYPinta, validaContenedor, marca, marcaError, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
-      aplicaCondicionales, programaBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
+      aplicaCondicionales, programaBorrador, alBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
     };
 
     /* ----- Arranque ----- */
@@ -16762,7 +16829,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 <title>Captura interna de ejemplo</title>
 <link rel=&quot;icon&quot; href=&quot;data:,&quot;>
 <style>/* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -17645,8 +17712,11 @@ a{color:var(--azul)}
    .tabla-valor, que el módulo crea, y se parte en renglones sin bajar entero. */
 .tabla td{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:var(--e-1) var(--e-3);padding:var(--e-2) 0;border-bottom:var(--b-1) solid var(--linea);vertical-align:top}
 .tabla td:last-child{border-bottom:0}
-.tabla td::before{content:attr(data-etiqueta);font-size:var(--t-sm);font-weight:var(--peso-semi);color:var(--gris)}
-.tabla-valor{min-width:0;overflow-wrap:anywhere}
+/* Rótulo y dato como en la ficha (P147): rótulo gris de peso normal, dato que destaca. */
+.tabla td::before{content:attr(data-etiqueta);font-size:var(--t-sm);font-weight:var(--peso-normal);color:var(--gris)}
+/* break-word, no anywhere: una palabra se parte sólo si no cabe en su renglón; anywhere dejaba encoger
+   la columna hasta partir botones, folios y fechas («Revisa / r», «10/10/20 / 26») (P145). */
+.tabla-valor{min-width:0;font-weight:var(--peso-semi);overflow-wrap:break-word}
 /* Columna cuyo encabezado es sólo para el lector de pantalla (acciones): en teléfono tampoco se ve su rótulo. */
 .tabla td[data-etiqueta-oculta]::before{display:none}
 /* Sin rótulo (acciones), el valor ocupa todo el ancho de la tarjeta. */
@@ -17677,6 +17747,11 @@ td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
   .tabla td{display:table-cell;padding:var(--e-2) var(--e-3);vertical-align:middle}
   .tabla td:last-child{border-bottom:var(--b-1) solid var(--linea)}
   .tabla td::before{display:none}
+  .tabla-valor{font-weight:var(--peso-normal)}
+  /* Botones, folios y etiquetas no se parten; la columna de acciones (encabezado sólo para el
+     lector) toma el ancho de sus botones y el resto queda para los datos (P145). */
+  .tabla .btn,.tabla .btn-enlace,.tabla .mono{white-space:nowrap}
+  .tabla td[data-etiqueta-oculta]{width:1%;white-space:nowrap}
   /* Filas alternas contadas sólo entre las visibles: al filtrar con [hidden], el rayado no pierde el ritmo. */
   .tabla tr:nth-child(even of :not([hidden])){background:var(--guinda-cl)}
 }
@@ -18564,7 +18639,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.4',
+    version: '1.5.0',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -18758,7 +18833,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
 window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; hidden> <symbol id=\&quot;i-alerta\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3 2.5 20h19L12 3z\&quot;/><path d=\&quot;M12 9v5\&quot;/><path d=\&quot;M12 17.5h.01\&quot;/></symbol> <symbol id=\&quot;i-error\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v6\&quot;/><path d=\&quot;M12 16.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ok\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;m8 12.5 2.5 2.5L16 9.5\&quot;/></symbol> <symbol id=\&quot;i-info\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 11v6\&quot;/><path d=\&quot;M12 7.5h.01\&quot;/></symbol> <symbol id=\&quot;i-ayuda\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7\&quot;/><path d=\&quot;M12 17h.01\&quot;/></symbol> <symbol id=\&quot;i-cerrar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 6 12 12\&quot;/><path d=\&quot;M18 6 6 18\&quot;/></symbol> <symbol id=\&quot;i-palomita\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m5 12.5 4.5 4.5L19 7.5\&quot;/></symbol> <symbol id=\&quot;i-flecha-izq\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M19 12H5\&quot;/><path d=\&quot;m11 6-6 6 6 6\&quot;/></symbol> <symbol id=\&quot;i-flecha-der\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M5 12h14\&quot;/><path d=\&quot;m13 6 6 6-6 6\&quot;/></symbol> <symbol id=\&quot;i-abajo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m6 9 6 6 6-6\&quot;/></symbol> <symbol id=\&quot;i-descarga\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 4v11\&quot;/><path d=\&quot;m7 10 5 5 5-5\&quot;/><path d=\&quot;M4 19h16\&quot;/></symbol> <symbol id=\&quot;i-copiar\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;9\&quot; y=\&quot;9\&quot; width=\&quot;11\&quot; height=\&quot;11\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M5 15V6a2 2 0 0 1 2-2h9\&quot;/></symbol> <symbol id=\&quot;i-compartir\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;18\&quot; cy=\&quot;5\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;6\&quot; cy=\&quot;12\&quot; r=\&quot;2.5\&quot;/><circle cx=\&quot;18\&quot; cy=\&quot;19\&quot; r=\&quot;2.5\&quot;/><path d=\&quot;m8.3 10.8 7.4-4.6\&quot;/><path d=\&quot;m8.3 13.2 7.4 4.6\&quot;/></symbol> <symbol id=\&quot;i-eliminar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 7h16\&quot;/><path d=\&quot;M9 7V4h6v3\&quot;/><path d=\&quot;M6 7l1 13h10l1-13\&quot;/></symbol> <symbol id=\&quot;i-editar\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 20h4l11-11-4-4L4 16v4z\&quot;/><path d=\&quot;m13 7 4 4\&quot;/></symbol> <symbol id=\&quot;i-ubicacion\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 21s-6-6.3-6-11a6 6 0 0 1 12 0c0 4.7-6 11-6 11z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;10\&quot; r=\&quot;2.2\&quot;/></symbol> <symbol id=\&quot;i-fecha\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;4\&quot; y=\&quot;5\&quot; width=\&quot;16\&quot; height=\&quot;15\&quot; rx=\&quot;2\&quot;/><path d=\&quot;M4 10h16\&quot;/><path d=\&quot;M8 3v4\&quot;/><path d=\&quot;M16 3v4\&quot;/></symbol> <symbol id=\&quot;i-adjunto\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7L9.5 17a1.6 1.6 0 0 1-2.3-2.3L15 7\&quot;/></symbol> <symbol id=\&quot;i-camara\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M4 8h3l2-3h6l2 3h3v11H4z\&quot;/><circle cx=\&quot;12\&quot; cy=\&quot;13\&quot; r=\&quot;3.5\&quot;/></symbol> <symbol id=\&quot;i-buscar\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;11\&quot; cy=\&quot;11\&quot; r=\&quot;6\&quot;/><path d=\&quot;m20 20-4.5-4.5\&quot;/></symbol> <symbol id=\&quot;i-mas\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 5v14\&quot;/><path d=\&quot;M5 12h14\&quot;/></symbol> <symbol id=\&quot;i-cargando\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M12 3a9 9 0 1 0 9 9\&quot;/></symbol> <symbol id=\&quot;i-reloj\&quot; viewBox=\&quot;0 0 24 24\&quot;><circle cx=\&quot;12\&quot; cy=\&quot;12\&quot; r=\&quot;9\&quot;/><path d=\&quot;M12 7v5l3 2\&quot;/></symbol> <symbol id=\&quot;i-externo\&quot; viewBox=\&quot;0 0 24 24\&quot;><path d=\&quot;M14 4h6v6\&quot;/><path d=\&quot;M20 4 10 14\&quot;/><path d=\&quot;M19 14v5H5V5h5\&quot;/></symbol> <symbol id=\&quot;i-archivo\&quot; viewBox=\&quot;0 0 24 24\&quot;><rect x=\&quot;3\&quot; y=\&quot;4\&quot; width=\&quot;18\&quot; height=\&quot;5\&quot; rx=\&quot;1\&quot;/><path d=\&quot;M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9\&quot;/><path d=\&quot;M10 13h4\&quot;/></symbol> <symbol id=\&quot;i-facebook\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.93 8.44-9.94Z\&quot;/></symbol> <symbol id=\&quot;i-x\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M17.53 3h3.03l-6.62 7.57L21.75 21h-6.09l-4.77-6.24L5.42 21H2.38l7.08-8.09L2.25 3h6.24l4.31 5.7L17.53 3Zm-1.07 16.17h1.68L7.62 4.73H5.82l10.64 14.44Z\&quot;/></symbol> <symbol id=\&quot;i-instagram\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.29a6.55 6.55 0 1 0 0 13.1 6.55 6.55 0 0 0 0-13.1Zm0 10.8a4.25 4.25 0 1 1 0-8.5 4.25 4.25 0 0 1 0 8.5Zm8.34-11.06a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z\&quot;/></symbol> <symbol id=\&quot;i-tiktok\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.28a4.29 4.29 0 0 1-3.24-1.46Z\&quot;/></symbol> <symbol id=\&quot;i-youtube\&quot; viewBox=\&quot;0 0 24 24\&quot;><path fill=\&quot;currentColor\&quot; stroke=\&quot;none\&quot; d=\&quot;M23.5 6.5a3.02 3.02 0 0 0-2.12-2.14C19.5 3.85 12 3.85 12 3.85s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.5C0 8.39 0 12 0 12s0 3.61.5 5.5a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.61 24 12 24 12s0-3.61-.5-5.5ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z\&quot;/></symbol> </svg>&quot;;
 </script>
 <script>/* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -19424,7 +19499,8 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
     /* ----- Borrador local -----
        Se activa con data-borrador=&quot;clave&quot; en el <form>. Versionado con
-       data-borrador-version. Excluye campos data-sensible y archivos. */
+       data-borrador-version. Excluye campos data-sensible y archivos (éstos, sólo
+       con un proveedor que dé la página: opciones.borradorArchivos, en archivos.js). */
     const claveBorrador = form.dataset.borrador || '';
     const versionBorrador = form.dataset.borradorVersion || '1';
     let temporizadorBorrador = 0;
@@ -19433,9 +19509,21 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     let terminado = false;
     const indicador = $('[data-guardado]');
     const franja = $('[data-franja-borrador]');
+    /* Lo que la página escribe sola (al precargar una solicitud para continuarla) no es
+       un borrador de la persona: el borrador empieza con su primer gesto en el formulario
+       (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
+       después la página o los módulos entra en el mismo borrador (P148). */
+    let personaActuo = false;
+    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
+    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
+       módulo se suscribe y el núcleo le avisa al escribir, restaurar o borrar el borrador. */
+    const suscritosBorrador = [];
+    const alBorrador = (def) => { suscritosBorrador.push(def); };
+    const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
+    function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -19451,6 +19539,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
     function escribeBorrador() {
       const extra = FormKit.ganchos.estadoBorrador ? FormKit.ganchos.estadoBorrador(form) : {};
       const ok = almacen.escribe(claveBorrador, JSON.stringify({ v: versionBorrador, t: Date.now(), datos: datosBorrador(), ...extra }));
+      avisaBorrador('escribe');
       if (ok &amp;&amp; indicador) {
         indicador.textContent = M.borradorGuardado;
         indicador.setAttribute('data-visible', '');
@@ -19467,9 +19556,9 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       if (!crudo) return null;
       try {
         const b = JSON.parse(crudo);
-        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { almacen.borra(claveBorrador); return null; }
+        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { borraBorrador(); return null; }
         return b;
-      } catch (e) { almacen.borra(claveBorrador); return null; }
+      } catch (e) { borraBorrador(); return null; }
     }
     function restauraBorrador(b) {
       for (const [n, v] of Object.entries(b.datos || {})) {
@@ -19485,6 +19574,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       aplicaCondicionales();
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
+      avisaBorrador('restaura', b);
       anuncia(M.borradorGuardado.replace('guardado', 'recuperado'));
     }
     function iniciaFranja(b) {
@@ -19496,8 +19586,8 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
         if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador=&quot;descartar-si&quot;]', franja); if (si) si.focus(); } else { almacen.borra(claveBorrador); franja.hidden = true; } }
-        else if (a.dataset.borrador === 'descartar-si') { almacen.borra(claveBorrador); franja.hidden = true; }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador=&quot;descartar-si&quot;]', franja); if (si) si.focus(); } else { borraBorrador(); franja.hidden = true; } }
+        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador=&quot;recuperar&quot;]', franja).focus(); }
       });
     }
@@ -19573,7 +19663,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
         const respuesta = await enviarFn(arma(), { signal: control.signal });
         terminado = true;
         clearTimeout(temporizadorBorrador);
-        if (claveBorrador) almacen.borra(claveBorrador);
+        if (claveBorrador) borraBorrador();
         if (opciones.alEnviar) opciones.alEnviar(respuesta, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: respuesta }));
         return true;
       } catch (e) {
@@ -19693,7 +19783,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
       $, $$, plantilla, icono, anuncia, almacen, idUnico, pesoTxt, normalizaBusqueda,
       envoltura, envolturas, nombres, tipoDe, controlesDe, controlPrincipal, valorDe, textoDeValor, etiquetaDe, esObligatorio, activo, atributosDe,
       validaCampo, validaYPinta, validaContenedor, marca, marcaError, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
-      aplicaCondicionales, programaBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
+      aplicaCondicionales, programaBorrador, alBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
     };
 
     /* ----- Arranque ----- */
@@ -22067,7 +22157,7 @@ window.FORMKIT_ICONOS = &quot;<svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.4',
+    version: '1.5.0',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -22841,7 +22931,7 @@ window.GUIA_PARES = [
 </script>
 <script data-origen="guia-visual\manifiesto.js">
 /* GENERADO por herramientas/construir.mjs desde codigo/manifiesto.json. No se edita a mano. */
-window.GUIA_MANIFIESTO = {"_nota":"Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).","version":"1.4.4","nucleo":{"archivos":["codigo/css/tokens.css","codigo/css/base.css","codigo/css/nucleo.css","codigo/js/validaciones.config.js","codigo/js/formkit.core.js","codigo/js/iconos.js"],"orden":"tokens.css → base.css → nucleo.css → (CSS de módulos) … validaciones.config.js → iconos.js → formkit.core.js → (JS de módulos)","incluye":[{"pieza":"Campo (etiqueta, ayuda, control, error)","nivel":"BASE"},{"pieza":"Texto corto, correo, teléfono, numérico, texto largo con contador","nivel":"BASE"},{"pieza":"Lista desplegable simple (select)","nivel":"BASE"},{"pieza":"Casilla de declaración o consentimiento","nivel":"BASE"},{"pieza":"Solo lectura frente a deshabilitado","nivel":"BASE"},{"pieza":"Pregunta condicional (data-si)","nivel":"BASE"},{"pieza":"Autocompletado, inputmode y enterkeyhint","nivel":"BASE"},{"pieza":"Validación individual, cruzada y resumen de errores con foco, contexto (data-contexto) y título propio del rechazo del servidor","nivel":"BASE"},{"pieza":"Botones (principal, secundario, peligro relleno y de contorno, atrás, enlace, icono)","nivel":"BASE"},{"pieza":"Avisos (neutro, advertencia, bloqueo, éxito) con título e icono por tono, FormKit.aviso() con texto, enlace y pasos, y pendiente visible","nivel":"BASE"},{"pieza":"Secuencia «qué sigue» (ol.secuencia) para varias acciones en orden, en cualquier pantalla","nivel":"BASE"},{"pieza":"Iconografía (sprite SVG)","nivel":"BASE"},{"pieza":"Anuncios que también se ven (FormKit.anuncia con el elemento visible)","nivel":"BASE"},{"pieza":"Estados de envío (enviando, error, plazo, límite) sin duplicados","nivel":"BASE"},{"pieza":"Borrador local versionado","nivel":"RECOMENDADO"},{"pieza":"Encabezado y pie institucionales, enlace de salto","nivel":"BASE"}],"tamano":{"tokens.css":8535,"base.css":6632,"nucleo.css":19313,"validaciones.config.js":42365,"formkit.core.js":53666,"iconos.js":6047}},"modulos":[{"nombre":"opciones","titulo":"Opciones elegibles","nivel":"BASE","tipo":"pregunta","proposito":"Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con descripción y la variante corta Sí/No, sobre controles nativos. Para una sola respuesta, la lista (.opciones-lista, una por renglón con el círculo visible) es la forma por omisión; dos o tres opciones cortas sin descripción (Sí/No) van en línea (.opciones-en-linea). La opción deshabilitada se ve atenuada.","cuando":"Elegir una o varias respuestas entre 2 y 7 opciones conocidas.","cuandoNo":"Más de 7 opciones (usa combo); ajustes inmediatos (usa toggle); escalas (usa escala).","dependencias":[],"js":false,"accesibilidad":"Input nativo cubriendo la tarjeta: flechas, espacio, anuncio «botón de opción 1 de 3»; lo elegido se marca con fondo, sombra interior y palomita.","movil":"Una columna, también la lista en línea; Sí/No con botones a 48 px con puntero grueso.","escritorio":"Lista con el círculo visible; en línea, una columna por opción con el hueco de las filas de campos; Sí/No con botones a 40 px con ratón.","errores":["Usar div con onclick en lugar de radio.","Marcar lo elegido sólo con color.","Premarcar una opción.","Más de siete tarjetas.","Tarjetas en rejilla para una sola respuesta: en escritorio no se ve que hay que elegir una.","Sí/No apilado a todo lo ancho: dos o tres opciones cortas van en línea."],"archivos":{"css":"codigo/modulos/opciones/opciones.css","js":null},"tamano":{"css":5175,"js":0}},{"nombre":"otro","titulo":"Opción «Otro» con especificación","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Campo de texto que aparece al elegir «Otro» en radios, casillas, select o tarjetas; obligatorio sólo mientras exista; conserva lo escrito.","cuando":"La lista puede no cubrir el caso de la persona.","cuandoNo":"El detalle no se va a usar (usa «Otro» simple, que es una opción más).","dependencias":["opciones"],"js":true,"accesibilidad":"aria-expanded y aria-controls en el control que gobierna; sin mover el foco; mensaje propio de obligatorio.","movil":"Igual que el campo de texto.","escritorio":"Igual.","errores":["Poner «Otro» al inicio de la lista.","Enviar el texto aunque «Otro» no esté elegida.","Borrar lo escrito al desmarcar."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/otro/otro.js"},"tamano":{"css":0,"js":4313}},{"nombre":"combo","titulo":"Lista desplegable con búsqueda","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, anuncia resultados; cerrado por omisión, libre con data-libre.","cuando":"Catálogos de 8 o más valores (alcaldías, giros, especies).","cuandoNo":"Listas cortas (usa select u opciones).","dependencias":[],"js":true,"accesibilidad":"role=combobox, aria-expanded, aria-activedescendant, flechas, Inicio/Fin, Enter, Escape; no abre al recibir foco para no tapar el error.","movil":"Lista bajo el campo, 44 px por opción.","escritorio":"Igual, 8 resultados máximo.","errores":["Mezclar select nativo y combo en el mismo formulario.","Escribir el catálogo a mano en el código.","Aceptar valor libre sin decirlo."],"archivos":{"css":"codigo/modulos/combo/combo.css","js":"codigo/modulos/combo/combo.js"},"tamano":{"css":1466,"js":8081}},{"nombre":"fecha","titulo":"Fecha y hora con «Hoy» y atajos","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria de la Ciudad de México, límites por atributo, atajos de rango y edad calculada desde la fecha de nacimiento (data-deriva=\"edad=…\"), que nunca se escribe a mano. Para la fecha de nacimiento, sin calendario: formato «fecha-dma», escrita día/mes/año (23/07/1985) con la escritura acomodada sola.","cuando":"Cualquier fecha u hora.","cuandoNo":"Fecha de nacimiento cuando ya se pide CURP (se deriva).","dependencias":[],"js":true,"accesibilidad":"Botón con texto; el valor nuevo se anuncia; la validación cruzada de rango se declara sola.","movil":"Botón bajo el campo a todo lo ancho; rueda nativa del sistema.","escritorio":"Botón al lado del campo.","errores":["Tomar «hoy» del reloj del dispositivo sin zona horaria.","Permitir fecha de hechos futura.","Rango sin validación cruzada.","Pedir la edad escrita además de la fecha de nacimiento.","Pedir la fecha de nacimiento con el calendario: obliga a recorrer décadas; se escribe día/mes/año («fecha-dma»)."],"archivos":{"css":"codigo/modulos/fecha/fecha.css","js":"codigo/modulos/fecha/fecha.js"},"tamano":{"css":1003,"js":7213}},{"nombre":"identificadores","titulo":"CURP, RFC y folios","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Campos con formato cerrado: mayúsculas al escribir, validación por capas desde la configuración, derivación de fecha de nacimiento y sexo desde la CURP a campos de solo lectura, enmascarado en revisión.","cuando":"El formulario necesita identificar a la persona.","cuandoNo":"Cuando el dato no tiene uso declarado: la CURP es dato personal.","dependencias":[],"js":true,"accesibilidad":"Los derivados se anuncian («tomado de la CURP»); el mensaje dice qué posición falló.","movil":"autocapitalize=characters; teclado de texto.","escritorio":"Igual.","errores":["Pedir fecha de nacimiento y CURP por separado sin cruzarlas.","Registrar la CURP en bitácoras o en la URL.","Dar por verificada la existencia con el formato."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/identificadores/identificadores.js"},"tamano":{"css":0,"js":4129}},{"nombre":"repetibles","titulo":"Grupos repetibles («Agregar otro»)","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos.","cuando":"La cantidad de elementos la decide la persona.","cuandoNo":"Siempre son exactamente N (ponlos fijos).","dependencias":["modal"],"js":true,"accesibilidad":"Cada fila tiene título numerado y botón «Quitar fila N»; el foco va al primer campo al agregar y a un lugar sensato al quitar.","movil":"Filas apiladas como tarjetas.","escritorio":"Igual; en tabla de captura, por renglones.","errores":["Nombres de campo repetidos entre filas.","Quitar sin confirmar una fila con datos.","Sin máximo."],"archivos":{"css":"codigo/modulos/repetibles/repetibles.css","js":"codigo/modulos/repetibles/repetibles.js"},"tamano":{"css":1103,"js":7589}},{"nombre":"toggle","titulo":"Interruptor","nivel":"OPCIONAL","tipo":"pregunta","proposito":"role=switch para ajustes que surten efecto de inmediato.","cuando":"Activar o desactivar algo al momento (mostrar mapa, recibir avisos).","cuandoNo":"Una respuesta del formulario (usa casilla o Sí/No).","dependencias":[],"js":true,"accesibilidad":"aria-checked es el estado; texto «Sí/No» visible; 44 px.","movil":"Igual.","escritorio":"Igual.","errores":["Usarlo como consentimiento.","Estado sólo por color."],"archivos":{"css":"codigo/modulos/toggle/toggle.css","js":"codigo/modulos/toggle/toggle.js"},"tamano":{"css":1458,"js":2633}},{"nombre":"escala","titulo":"Escala o valoración","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Radios en fila (1 a 5) con extremos rotulados.","cuando":"Encuestas y valoraciones.","cuandoNo":"Más de 7 puntos; respuestas con descripción (usa opciones).","dependencias":["opciones"],"js":false,"accesibilidad":"fieldset/legend; extremos en texto oculto en el primer y último radio.","movil":"Puntos a 48 px repartidos a lo ancho.","escritorio":"Igual.","errores":["Escala sin extremos rotulados.","Puntos menores de 44 px."],"archivos":{"css":"codigo/modulos/escala/escala.css","js":null},"tamano":{"css":2215,"js":0}},{"nombre":"pasos","titulo":"Formulario por pasos y barra de avance","nivel":"RECOMENDADO","tipo":"navegacion","proposito":"Pasos con barra fija navegable que valida igual que «Continuar»; estados completado, actual, pendiente y con error; «Paso X de N» en teléfono; recordatorio; barra de acciones fija opcional.","cuando":"Más de una pantalla de preguntas.","cuandoNo":"Formularios de 5 campos o menos (una página).","dependencias":[],"js":true,"accesibilidad":"Botones con aria-current=step y nombre «Paso N de M: título, completado»; el foco va al título al cambiar; Enter avanza, no envía.","movil":"Círculos sin etiqueta + «Paso X de N · Título»; acciones en columna, principal arriba. Opcional: la clase acciones-fijas en el bloque de acciones del paso lo deja fijo al pie, respetando las áreas seguras del teléfono.","escritorio":"Etiquetas bajo cada círculo; acciones en fila.","errores":["Deshabilitar los pasos futuros (el teclado no puede inspeccionarlos).","Barra que deja saltar sobre errores.","Mover el foco en cada cambio de campo."],"archivos":{"css":"codigo/modulos/pasos/pasos.css","js":"codigo/modulos/pasos/pasos.js"},"tamano":{"css":4892,"js":8961}},{"nombre":"revision","titulo":"Pantalla de revisión","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el campo y enmascarado de identificadores.","cuando":"Siempre que haya más de un paso o datos personales.","cuandoNo":"Formularios de una pregunta.","dependencias":["pasos"],"js":true,"accesibilidad":"details/summary nativos; «Editar» con el nombre del campo para el lector.","movil":"Etiqueta y valor apilados.","escritorio":"Dos columnas.","errores":["«Editar» que lleva al inicio del paso.","Mostrar campos ocultos por condicional.","«Editar» que baja de renglón con un valor largo."],"archivos":{"css":"codigo/modulos/revision/revision.css","js":"codigo/modulos/revision/revision.js"},"tamano":{"css":2342,"js":3292}},{"nombre":"acuse","titulo":"Acuse y «qué sigue»","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones).","cuando":"Todo envío que genere folio.","cuandoNo":"Capturas internas sin acuse.","dependencias":["copiar"],"js":true,"accesibilidad":"Foco al título del acuse; folio en tarjeta, no en botón; la secuencia es una lista ordenada.","movil":"Acciones en columna.","escritorio":"Acciones en fila centradas.","errores":["Prometer plazos que el sistema no controla.","Folio con aspecto de botón.","No borrar el borrador al recibir.","Acuse sin una acción para seguir.","Quitarle el relleno lateral a la tarjeta del acuse: en teléfono los botones quedan pegados a la orilla."],"archivos":{"css":"codigo/modulos/acuse/acuse.css","js":"codigo/modulos/acuse/acuse.js"},"tamano":{"css":2250,"js":3540}},{"nombre":"resultado","titulo":"Resultado de una decisión","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"El desenlace de lo que decide el personal (validar, rechazar, devolver, turnar, cerrar): título con el resultado, «Quedó guardado a las HH:MM · quien», el motivo citado tal cual, lo que sigue como secuencia numerada y la acción para seguir. Usa las cinco familias de «estado». FormKit.resultado(lugar, {tono, titulo, hora, quien, motivo, pasos}).","cuando":"Pantallas del personal después de validar, rechazar, devolver para corregir o cerrar un trámite.","cuandoNo":"Lo que envía la ciudadanía (usa el acuse); cambios menores que basta con anunciar, como guardar una nota.","dependencias":[],"js":true,"accesibilidad":"El foco va al título del resultado y se anuncia con la hora y quién decidió; el tono va en icono y palabras, nunca sólo en color.","movil":"Tarjeta a todo lo ancho con su relleno lateral.","escritorio":"Tarjeta con más relleno.","errores":["Dejar la pantalla igual tras decidir, sin decir qué pasó.","Un resultado sin hora ni quién lo registró.","Reescribir el motivo en lugar de citarlo.","Dejar a la vista el panel de decisión que ya no aplica (opción oculta).","Encadenar lo que sigue en un párrafo («Abra el expediente… El siguiente paso es…»)."],"archivos":{"css":"codigo/modulos/resultado/resultado.css","js":"codigo/modulos/resultado/resultado.js"},"tamano":{"css":2546,"js":5836}},{"nombre":"modal","titulo":"Diálogo y confirmación","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"<dialog> nativo para contenido que hay que leer y FormKit.confirma() para acciones con efecto: pregunta por la acción, lista sus consecuencias, dice si no se puede deshacer y su botón repite el verbo; hoja inferior en teléfono.","cuando":"Aviso de privacidad; confirmar rechazar, cancelar, cerrar un trámite, descartar o quitar.","cuandoNo":"Errores de campo; avisos sin decisión; acciones recuperables, como guardar una nota.","dependencias":[],"js":true,"accesibilidad":"Trampa de foco nativa, Escape cierra, el foco vuelve a quien abrió; foco inicial en «Volver sin cambios»; las consecuencias y «No se puede deshacer» forman la descripción que oye el lector.","movil":"Hoja inferior a todo lo ancho con dvh y franja segura.","escritorio":"Caja centrada de 560 px.","errores":["confirm()/alert() nativos.","Foco inicial en la acción destructiva.","Diálogo para instrucciones que deberían estar en pantalla.","Preguntar igual para guardar una nota que para cerrar un trámite.","Botón «Aceptar» o «Confirmar» en lugar del verbo de la acción.","Callar las consecuencias o que no se puede deshacer."],"archivos":{"css":"codigo/modulos/modal/modal.css","js":"codigo/modulos/modal/modal.js"},"tamano":{"css":2194,"js":5887}},{"nombre":"copiar","titulo":"Copiar y compartir","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Botones de copiar (folio, campo de solo lectura) y compartir, con confirmación visible y anunciada y alternativa sin portapapeles.","cuando":"Todo dato que la persona deba transcribir.","cuandoNo":"Datos sensibles que no deban salir de la pantalla.","dependencias":[],"js":true,"accesibilidad":"El botón cambia su texto a «Copiado» y se anuncia; sin portapapeles selecciona el texto.","movil":"navigator.share cuando existe.","escritorio":"Copia el enlace.","errores":["Confirmar sólo con un color.","Icono solo sin texto."],"archivos":{"css":"codigo/modulos/copiar/copiar.css","js":"codigo/modulos/copiar/copiar.js"},"tamano":{"css":542,"js":4052}},{"nombre":"descarga","titulo":"Botón de descarga","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Enlace o botón de descarga con icono, acción, formato y peso; estado de preparación; aviso de otra pestaña.","cuando":"Acuse en PDF, plantillas, resultados.","cuandoNo":"Abrir un sitio (es un enlace normal).","dependencias":[],"js":true,"accesibilidad":"Texto dice formato y peso; «se abre en otra pestaña» para el lector; aria-busy mientras se genera.","movil":"Igual.","escritorio":"Igual.","errores":["Nombre de archivo con datos personales.","Icono sin texto."],"archivos":{"css":"codigo/modulos/descarga/descarga.css","js":"codigo/modulos/descarga/descarga.js"},"tamano":{"css":434,"js":3805}},{"nombre":"acordeon","titulo":"Acordeón y secciones plegables","nivel":"OPCIONAL","tipo":"navegacion","proposito":"details/summary para datos accesorios y preguntas frecuentes.","cuando":"Información de apoyo que no todos necesitan.","cuandoNo":"Campos obligatorios o contenido necesario para decidir.","dependencias":[],"js":false,"accesibilidad":"Nativo: Enter/espacio, estado expandido anunciado.","movil":"Igual.","escritorio":"Igual.","errores":["Plegar lo obligatorio.","Flecha con imagen (color fuera de :root)."],"archivos":{"css":"codigo/modulos/acordeon/acordeon.css","js":null},"tamano":{"css":2029,"js":0}},{"nombre":"pestanas","titulo":"Pestañas","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Vistas alternativas del mismo contenido con patrón ARIA tabs y teclado completo.","cuando":"Consulta interna con varias vistas.","cuandoNo":"Dividir un formulario que debe llenarse completo (usa pasos).","dependencias":[],"js":true,"accesibilidad":"role=tab/tabpanel, aria-selected, tabindex rotatorio, flechas e Inicio/Fin.","movil":"Lista con desplazamiento horizontal.","escritorio":"Igual.","errores":["Pestañas con campos obligatorios ocultos.","Más de 5 pestañas."],"archivos":{"css":"codigo/modulos/pestanas/pestanas.css","js":"codigo/modulos/pestanas/pestanas.js"},"tamano":{"css":1101,"js":2941}},{"nombre":"migas","titulo":"Migas de pan","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Ubicación dentro del sitio o del sistema.","cuando":"Consulta interna con niveles.","cuandoNo":"Dentro de un formulario por pasos.","dependencias":[],"js":false,"accesibilidad":"nav con aria-label; aria-current=page; separadores dibujados, no leídos.","movil":"Sólo el nivel anterior con flecha.","escritorio":"Ruta completa.","errores":["Separador con carácter que el lector lee.","Último nivel como enlace a sí mismo."],"archivos":{"css":"codigo/modulos/migas/migas.css","js":null},"tamano":{"css":2540,"js":0}},{"nombre":"progreso","titulo":"Barra de progreso","nivel":"OPCIONAL","tipo":"navegacion","proposito":"<progress> nativo con porcentaje en texto; indeterminado dice «Cargando…».","cuando":"Cargas y formularios largos de una página.","cuandoNo":"Formularios por pasos.","dependencias":[],"js":true,"accesibilidad":"Etiqueta asociada; aria-valuetext con el porcentaje.","movil":"Igual.","escritorio":"Igual.","errores":["Porcentaje sólo visual.","Barra que nunca termina sin mensaje."],"archivos":{"css":"codigo/modulos/progreso/progreso.css","js":"codigo/modulos/progreso/progreso.js"},"tamano":{"css":1126,"js":1810}},{"nombre":"paginacion","titulo":"Paginación de resultados","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Paginación numerada o «Cargar más» con rango visible, tamaño de página, anuncio y foco al inicio de la lista.","cuando":"Listas y tablas de más de una pantalla.","cuandoNo":"Menos de 20 resultados.","dependencias":[],"js":true,"accesibilidad":"nav con etiqueta; aria-current=page; Anterior/Siguiente con aria-disabled; anuncio «Página N de M».","movil":"Anterior · «Página X de N» · Siguiente.","escritorio":"Números, rango y selector.","errores":["Desplazamiento infinito.","Perder filtros al cambiar de página.","Foco que se queda en el botón pulsado."],"archivos":{"css":"codigo/modulos/paginacion/paginacion.css","js":"codigo/modulos/paginacion/paginacion.js"},"tamano":{"css":2189,"js":6129}},{"nombre":"version","titulo":"Distintivo de versión","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Distintivo pequeño y siempre visible, fijo abajo a la izquierda, que dice qué versión del sitio se tiene enfrente: de prueba (dorado), instalada en el SIA (gris) o sin leer (guinda). Es la hoja de la plantilla de versión del SIA hecha con los tokens del estándar.","cuando":"Sitios que se prueban antes de instalarse en el SIA, o que deben mostrar su versión en pantalla.","cuandoNo":"Para avisos a la persona (usa los avisos del núcleo): el distintivo no recibe toques ni se anuncia como estado.","dependencias":[],"js":false,"accesibilidad":"Va dentro del pie (<footer>), para quedar en una región de la página; no recibe toques (pointer-events: none), así que nunca tapa un control; texto de 4.5:1 o más en sus tres estados.","movil":"Abajo a la izquierda, respetando el área segura de la pantalla.","escritorio":"Igual; al imprimir va en su lugar, sin flotar.","errores":["Ponerlo fuera del pie: axe lo marca como contenido fuera de una región.","Escribir colores o medidas a mano en lugar de los tokens (el auditor de CSS lo rechaza).","Usarlo para avisar algo a la persona."],"archivos":{"css":"codigo/modulos/version/version.css","js":null},"tamano":{"css":2244,"js":0}},{"nombre":"tooltip","titulo":"Ayuda desplegable","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Botón «?» que muestra un texto corto, por clic y teclado, con Escape.","cuando":"Aclaración breve junto a una etiqueta.","cuandoNo":"Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay ícono).","dependencias":[],"js":true,"accesibilidad":"aria-expanded, aria-describedby mientras está abierto, role=tooltip; no depende de hover.","movil":"Texto bajo la etiqueta, dentro del ancho del campo (no se sale de la pantalla aunque el «?» esté al borde), no flotante sobre otros controles.","escritorio":"Igual.","errores":["Sólo con hover.","Texto largo.","Repetir la ayuda visible del mismo campo (auditar-campos D5)."],"archivos":{"css":"codigo/modulos/tooltip/tooltip.css","js":"codigo/modulos/tooltip/tooltip.js"},"tamano":{"css":1511,"js":2737}},{"nombre":"tabla","titulo":"Tabla de consulta y de captura","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Tabla con caption, orden por columna accesible, estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.","cuando":"Consulta interna de registros.","cuandoNo":"Maquetar.","dependencias":["repetibles"],"js":true,"accesibilidad":"th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123».","movil":"Cada fila es una tarjeta.","escritorio":"Tabla con desplazamiento controlado.","errores":["Tabla sin encabezados.","«Eliminar» sin decir qué.","Desplazamiento horizontal libre en teléfono.","Filtrar ocultando filas y que el rayado alterno se descuadre (cuenta sólo las filas visibles).","Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla."],"archivos":{"css":"codigo/modulos/tabla/tabla.css","js":"codigo/modulos/tabla/tabla.js"},"tamano":{"css":3856,"js":6807}},{"nombre":"estado","titulo":"Etiquetas de estado","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Cinco familias con significado fijo para el estado de un trámite o registro, según a quién le toca qué: hecho (ok, verde), te toca actuar (atencion, ámbar), en marcha (proceso, azul), cerrado sin éxito (rechazo, rojo) y terminado (gris), cada una con su icono y su palabra. FormKit.estado(el, {tono, texto}) lo cambia.","cuando":"Bandejas, tablas y fichas que muestran en qué va un trámite.","cuandoNo":"Avisos a la persona (usa los avisos del núcleo); botones o filtros (no se tocan).","dependencias":[],"js":true,"accesibilidad":"La palabra dice el estado; el icono y el color sólo lo refuerzan. Texto de 4.5:1 o más en los cinco tonos. Al cambiar por una acción, se anuncia.","movil":"Una etiqueta larga se parte en renglones; no ensancha su tarjeta ni su tabla.","escritorio":"En una tabla, en una sola línea.","errores":["Inventar tonos por sistema (nueve colores sin regla).","Etiqueta sólo de color, sin icono ni palabra.","Usar el rojo para «En revisión» o el verde para «Enviado».","Una etiqueta sin familia (la consola lo avisa y queda como terminado).","Una etiqueta que no se parte y ensancha su tarjeta o su tabla en teléfono."],"archivos":{"css":"codigo/modulos/estado/estado.css","js":"codigo/modulos/estado/estado.js"},"tamano":{"css":1490,"js":2923}},{"nombre":"archivos","titulo":"Carga de archivos y fotografías","nivel":"RECOMENDADO","tipo":"archivos","proposito":"Zona de carga (botón real + arrastre), cámara en móvil, validación por extensión, firma, peso, total, duplicados y dimensiones; optimización; huella SHA-256; EXIF configurable; estado, vista previa, quitar y reintentar por archivo.","cuando":"Evidencia, documentos, fotografías.","cuandoNo":"Un solo archivo pequeño sin optimizar (basta el input nativo con ayuda).","dependencias":[],"js":true,"accesibilidad":"La zona es un botón con nombre; cada archivo dice su estado; rechazos con role=alert que nombran el archivo y el motivo.","movil":"Botón de cámara con capture (environment para evidencias; user para una fotografía de frente); vista previa de 96 px; con un solo archivo, los textos en singular.","escritorio":"Arrastrar y soltar; guardia global de drop. Con el máximo cargado no se ofrece «Elegir archivo»; el archivo listo se ve en verde.","errores":["Validar sólo por extensión.","Medir el peso antes de optimizar.","Enviar la ubicación de la foto sin que la persona lo sepa.","Dejar «Elegir archivo» a la vista con el máximo ya cargado: la persona cree que no subió nada.","Enviar la foto original, con su EXIF y su ubicación, porque recodificada pesaba más."],"archivos":{"css":"codigo/modulos/archivos/archivos.css","js":"codigo/modulos/archivos/archivos.js"},"tamano":{"css":3211,"js":21873}},{"nombre":"visor","titulo":"Visor de documentos","nivel":"OPCIONAL","tipo":"archivos","proposito":"Para quien revisa lo que se cargó: muestra todas las hojas de un PDF, una debajo de otra, con contador de hoja, acercar y alejar, ajustar al ancho, girar y abrir en otra pestaña; también imágenes. En computadora queda fijo junto a lo que se revisa, para decidir viendo el documento; en teléfono se abre a pantalla completa. Usa pdf.js (vendor/pdfjs-dist), que se carga sólo al abrir el primer PDF.","cuando":"Revisión documental: personal que acepta u observa los documentos que la persona cargó.","cuandoNo":"Para que la persona vea lo que ella misma adjuntó (la vista previa de «archivos» basta) o para un solo documento corto (basta «Abrir en otra pestaña»).","dependencias":[],"js":true,"accesibilidad":"Diálogo con título; en teléfono es modal y Escape cierra con el foco de vuelta al botón «Ver documento»; en computadora no le quita el foco a quien revisa. Cada hoja es una imagen con nombre («Hoja 1 de 2»); el contador y el acercamiento se anuncian; barra de herramientas con nombre.","movil":"Pantalla completa, con «Cerrar»; la barra se parte en dos renglones si no cabe.","escritorio":"Columna fija a la derecha de lo que se revisa (.visor-area), del alto de la pantalla.","errores":["Abrir el documento en otra pestaña como única forma de revisarlo: quien revisa pierde lo que estaba decidiendo.","Mostrar sólo la primera hoja.","Cargar pdf.js de una CDN.","Usar una versión de pdf.js anterior a la 4.2.67, que deja ejecutar código desde un PDF malicioso."],"archivos":{"css":"codigo/modulos/visor/visor.css","js":"codigo/modulos/visor/visor.js"},"tamano":{"css":3321,"js":11942}},{"nombre":"mapa","titulo":"Mapa con selección de punto","nivel":"OPCIONAL","tipo":"archivos","proposito":"Leaflet autoalojado con gestos que no atrapan la página, marcador propio, ámbito acotado, confirmación del punto, alternativa manual y sin mapa base.","cuando":"Se necesita un punto además de la dirección.","cuandoNo":"Basta la dirección escrita; coordenadas exactas que identifiquen un domicilio sin uso declarado.","dependencias":[],"js":true,"accesibilidad":"role=application con nombre; coordenadas en texto con aria-live; Enter coloca el punto; alternativa de coordenadas manuales.","movil":"Un dedo desplaza la página, dos el mapa; alto fluido.","escritorio":"Clic y arrastre.","errores":["Mapa como único camino.","Teselas con clave escrita en el código.","Punto fuera del ámbito aceptado hasta el envío."],"archivos":{"css":"codigo/modulos/mapa/mapa.css","js":"codigo/modulos/mapa/mapa.js"},"tamano":{"css":2754,"js":9846}},{"nombre":"enlace-mapa","titulo":"Coordenadas desde un enlace de Google Maps","nivel":"OPCIONAL","tipo":"archivos","proposito":"La persona pega el enlace de Google Maps del lugar y el módulo escribe sus coordenadas en el campo de coordenadas, que valida el núcleo. También acomoda lo que se escribe directo: latitud y longitud al revés, grados-minutos-segundos, coma decimal o la longitud sin signo menos. El enlace no se envía; sólo viajan las coordenadas.","cuando":"Se pide la ubicación exacta de un domicilio o de un sitio y la persona puede tenerla en Google Maps (por ejemplo, la que le llegó por WhatsApp).","cuandoNo":"Como única vía para dar la ubicación: la dirección va primero (FRM-46). Tampoco para resolver enlaces cortos, que obligarían a la página a consultar a Google (FRM-77).","dependencias":[],"js":true,"accesibilidad":"Lo que se toma del enlace o se corrige se dice con palabras y se anuncia («Coordenadas tomadas del enlace: …»); los avisos llevan icono y texto, no sólo color.","movil":"Lee el enlace en cuanto se pega, sin salir del campo. Agrega el signo menos que el teclado numérico del iPhone no trae.","escritorio":"Igual; también al salir del campo.","errores":["Tomar el centro de la pantalla (@) como si fuera el lugar: el punto puede caer a cientos de metros.","Tomar el primer punto del enlace en lugar del último.","Rechazar coordenadas que vienen al revés o sin el signo menos.","Pedirle a Google desde la página que resuelva un enlace corto."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/enlace-mapa/enlace-mapa.js"},"tamano":{"css":0,"js":8196}},{"nombre":"cascadas","titulo":"Campos dependientes en cascada","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Alcaldía → colonia → código postal desde un catálogo oficial versionado; relación inversa desde el código postal; captura manual si el catálogo no carga.","cuando":"Domicilio dentro de un ámbito con catálogo.","cuandoNo":"Sin catálogo oficial disponible (captura libre).","dependencias":[],"js":true,"accesibilidad":"El hijo deshabilitado explica por qué; cada reinicio y cada autocompletado se anuncian.","movil":"Selects nativos (rueda del sistema).","escritorio":"Selects.","errores":["Catálogo escrito a mano.","Reiniciar al hijo sin anunciarlo.","Bloquear si el cp no coincide (es advertencia)."],"archivos":{"css":"codigo/modulos/cascadas/cascadas.css","js":"codigo/modulos/cascadas/cascadas.js"},"tamano":{"css":539,"js":7583}},{"nombre":"chips","titulo":"Chips de uso frecuente","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Sugerencias de un toque desde el historial del dispositivo (nunca al servidor; quitar y borrar historial; se niega en datos personales) y respuestas frecuentes fijas (data-chips-fijos), que no guardan nada y sirven en cualquier campo: en un texto largo, el chip agrega su texto para completarlo.","cuando":"Captura por personal con respuestas repetidas.","cuandoNo":"Historial: formularios ciudadanos de una sola vez y datos personales (para ellos, la lista fija).","dependencias":[],"js":true,"accesibilidad":"Botones con aria-pressed; «Quitar X de las sugerencias»; grupo con nombre.","movil":"Chips de 44 px que se envuelven.","escritorio":"Igual.","errores":["Guardar historial de nombre o correo.","Chips sin forma de borrarlos."],"archivos":{"css":"codigo/modulos/chips/chips.css","js":"codigo/modulos/chips/chips.js"},"tamano":{"css":1920,"js":8490}}],"generado":"2026-10-18T16:43:19.390Z"};
+window.GUIA_MANIFIESTO = {"_nota":"Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).","version":"1.5.0","nucleo":{"archivos":["codigo/css/tokens.css","codigo/css/base.css","codigo/css/nucleo.css","codigo/js/validaciones.config.js","codigo/js/formkit.core.js","codigo/js/iconos.js"],"orden":"tokens.css → base.css → nucleo.css → (CSS de módulos) … validaciones.config.js → iconos.js → formkit.core.js → (JS de módulos)","incluye":[{"pieza":"Campo (etiqueta, ayuda, control, error)","nivel":"BASE"},{"pieza":"Texto corto, correo, teléfono, numérico, texto largo con contador","nivel":"BASE"},{"pieza":"Lista desplegable simple (select)","nivel":"BASE"},{"pieza":"Casilla de declaración o consentimiento","nivel":"BASE"},{"pieza":"Solo lectura frente a deshabilitado","nivel":"BASE"},{"pieza":"Pregunta condicional (data-si)","nivel":"BASE"},{"pieza":"Autocompletado, inputmode y enterkeyhint","nivel":"BASE"},{"pieza":"Validación individual, cruzada y resumen de errores con foco, contexto (data-contexto) y título propio del rechazo del servidor","nivel":"BASE"},{"pieza":"Botones (principal, secundario, peligro relleno y de contorno, atrás, enlace, icono)","nivel":"BASE"},{"pieza":"Avisos (neutro, advertencia, bloqueo, éxito) con título e icono por tono, FormKit.aviso() con texto, enlace y pasos, y pendiente visible","nivel":"BASE"},{"pieza":"Secuencia «qué sigue» (ol.secuencia) para varias acciones en orden, en cualquier pantalla","nivel":"BASE"},{"pieza":"Iconografía (sprite SVG)","nivel":"BASE"},{"pieza":"Anuncios que también se ven (FormKit.anuncia con el elemento visible)","nivel":"BASE"},{"pieza":"Estados de envío (enviando, error, plazo, límite) sin duplicados","nivel":"BASE"},{"pieza":"Borrador local versionado, que empieza con la persona (no con la precarga de la página) y guarda archivos con el proveedor de la página","nivel":"RECOMENDADO"},{"pieza":"Encabezado y pie institucionales, enlace de salto","nivel":"BASE"}],"tamano":{"tokens.css":8535,"base.css":6632,"nucleo.css":19313,"validaciones.config.js":42365,"formkit.core.js":54804,"iconos.js":6047}},"modulos":[{"nombre":"opciones","titulo":"Opciones elegibles","nivel":"BASE","tipo":"pregunta","proposito":"Opción única (radio), opción múltiple (casilla), tarjetas seleccionables con descripción y la variante corta Sí/No, sobre controles nativos. Para una sola respuesta, la lista (.opciones-lista, una por renglón con el círculo visible) es la forma por omisión; dos o tres opciones cortas sin descripción (Sí/No) van en línea (.opciones-en-linea). La opción deshabilitada se ve atenuada.","cuando":"Elegir una o varias respuestas entre 2 y 7 opciones conocidas.","cuandoNo":"Más de 7 opciones (usa combo); ajustes inmediatos (usa toggle); escalas (usa escala).","dependencias":[],"js":false,"accesibilidad":"Input nativo cubriendo la tarjeta: flechas, espacio, anuncio «botón de opción 1 de 3»; lo elegido se marca con fondo, sombra interior y palomita.","movil":"Una columna, también la lista en línea; Sí/No con botones a 48 px con puntero grueso.","escritorio":"Lista con el círculo visible; en línea, una columna por opción con el hueco de las filas de campos; Sí/No con botones a 40 px con ratón.","errores":["Usar div con onclick en lugar de radio.","Marcar lo elegido sólo con color.","Premarcar una opción.","Más de siete tarjetas.","Tarjetas en rejilla para una sola respuesta: en escritorio no se ve que hay que elegir una.","Sí/No apilado a todo lo ancho: dos o tres opciones cortas van en línea."],"archivos":{"css":"codigo/modulos/opciones/opciones.css","js":null},"tamano":{"css":5175,"js":0}},{"nombre":"otro","titulo":"Opción «Otro» con especificación","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Campo de texto que aparece al elegir «Otro» en radios, casillas, select o tarjetas; obligatorio sólo mientras exista; conserva lo escrito.","cuando":"La lista puede no cubrir el caso de la persona.","cuandoNo":"El detalle no se va a usar (usa «Otro» simple, que es una opción más).","dependencias":["opciones"],"js":true,"accesibilidad":"aria-expanded y aria-controls en el control que gobierna; sin mover el foco; mensaje propio de obligatorio.","movil":"Igual que el campo de texto.","escritorio":"Igual.","errores":["Poner «Otro» al inicio de la lista.","Enviar el texto aunque «Otro» no esté elegida.","Borrar lo escrito al desmarcar."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/otro/otro.js"},"tamano":{"css":0,"js":4313}},{"nombre":"combo","titulo":"Lista desplegable con búsqueda","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, anuncia resultados; cerrado por omisión, libre con data-libre.","cuando":"Catálogos de 8 o más valores (alcaldías, giros, especies).","cuandoNo":"Listas cortas (usa select u opciones).","dependencias":[],"js":true,"accesibilidad":"role=combobox, aria-expanded, aria-activedescendant, flechas, Inicio/Fin, Enter, Escape; no abre al recibir foco para no tapar el error.","movil":"Lista bajo el campo, 44 px por opción.","escritorio":"Igual, 8 resultados máximo.","errores":["Mezclar select nativo y combo en el mismo formulario.","Escribir el catálogo a mano en el código.","Aceptar valor libre sin decirlo."],"archivos":{"css":"codigo/modulos/combo/combo.css","js":"codigo/modulos/combo/combo.js"},"tamano":{"css":1466,"js":8081}},{"nombre":"fecha","titulo":"Fecha y hora con «Hoy» y atajos","nivel":"RECOMENDADO","tipo":"pregunta","proposito":"Control nativo de fecha u hora con botón «Hoy»/«Ahora» en la zona horaria de la Ciudad de México, límites por atributo, atajos de rango y edad calculada desde la fecha de nacimiento (data-deriva=\"edad=…\"), que nunca se escribe a mano. Para la fecha de nacimiento, sin calendario: formato «fecha-dma», escrita día/mes/año (23/07/1985) con la escritura acomodada sola.","cuando":"Cualquier fecha u hora.","cuandoNo":"Fecha de nacimiento cuando ya se pide CURP (se deriva).","dependencias":[],"js":true,"accesibilidad":"Botón con texto; el valor nuevo se anuncia; la validación cruzada de rango se declara sola.","movil":"Botón bajo el campo a todo lo ancho; rueda nativa del sistema.","escritorio":"Botón al lado del campo.","errores":["Tomar «hoy» del reloj del dispositivo sin zona horaria.","Permitir fecha de hechos futura.","Rango sin validación cruzada.","Pedir la edad escrita además de la fecha de nacimiento.","Pedir la fecha de nacimiento con el calendario: obliga a recorrer décadas; se escribe día/mes/año («fecha-dma»)."],"archivos":{"css":"codigo/modulos/fecha/fecha.css","js":"codigo/modulos/fecha/fecha.js"},"tamano":{"css":1003,"js":7213}},{"nombre":"identificadores","titulo":"CURP, RFC y folios","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Campos con formato cerrado: mayúsculas al escribir, validación por capas desde la configuración, derivación de fecha de nacimiento y sexo desde la CURP a campos de solo lectura, enmascarado en revisión.","cuando":"El formulario necesita identificar a la persona.","cuandoNo":"Cuando el dato no tiene uso declarado: la CURP es dato personal.","dependencias":[],"js":true,"accesibilidad":"Los derivados se anuncian («tomado de la CURP»); el mensaje dice qué posición falló.","movil":"autocapitalize=characters; teclado de texto.","escritorio":"Igual.","errores":["Pedir fecha de nacimiento y CURP por separado sin cruzarlas.","Registrar la CURP en bitácoras o en la URL.","Dar por verificada la existencia con el formato."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/identificadores/identificadores.js"},"tamano":{"css":0,"js":4129}},{"nombre":"repetibles","titulo":"Grupos repetibles («Agregar otro»)","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos.","cuando":"La cantidad de elementos la decide la persona.","cuandoNo":"Siempre son exactamente N (ponlos fijos).","dependencias":["modal"],"js":true,"accesibilidad":"Cada fila tiene título numerado y botón «Quitar fila N»; el foco va al primer campo al agregar y a un lugar sensato al quitar.","movil":"Filas apiladas como tarjetas.","escritorio":"Igual; en tabla de captura, por renglones.","errores":["Nombres de campo repetidos entre filas.","Quitar sin confirmar una fila con datos.","Sin máximo."],"archivos":{"css":"codigo/modulos/repetibles/repetibles.css","js":"codigo/modulos/repetibles/repetibles.js"},"tamano":{"css":1103,"js":7589}},{"nombre":"toggle","titulo":"Interruptor","nivel":"OPCIONAL","tipo":"pregunta","proposito":"role=switch para ajustes que surten efecto de inmediato.","cuando":"Activar o desactivar algo al momento (mostrar mapa, recibir avisos).","cuandoNo":"Una respuesta del formulario (usa casilla o Sí/No).","dependencias":[],"js":true,"accesibilidad":"aria-checked es el estado; texto «Sí/No» visible; 44 px.","movil":"Igual.","escritorio":"Igual.","errores":["Usarlo como consentimiento.","Estado sólo por color."],"archivos":{"css":"codigo/modulos/toggle/toggle.css","js":"codigo/modulos/toggle/toggle.js"},"tamano":{"css":1458,"js":2633}},{"nombre":"escala","titulo":"Escala o valoración","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Radios en fila (1 a 5) con extremos rotulados.","cuando":"Encuestas y valoraciones.","cuandoNo":"Más de 7 puntos; respuestas con descripción (usa opciones).","dependencias":["opciones"],"js":false,"accesibilidad":"fieldset/legend; extremos en texto oculto en el primer y último radio.","movil":"Puntos a 48 px repartidos a lo ancho.","escritorio":"Igual.","errores":["Escala sin extremos rotulados.","Puntos menores de 44 px."],"archivos":{"css":"codigo/modulos/escala/escala.css","js":null},"tamano":{"css":2215,"js":0}},{"nombre":"pasos","titulo":"Formulario por pasos y barra de avance","nivel":"RECOMENDADO","tipo":"navegacion","proposito":"Pasos con barra fija navegable que valida igual que «Continuar»; estados completado, actual, pendiente y con error; «Paso X de N» en teléfono; recordatorio; barra de acciones fija opcional.","cuando":"Más de una pantalla de preguntas.","cuandoNo":"Formularios de 5 campos o menos (una página).","dependencias":[],"js":true,"accesibilidad":"Botones con aria-current=step y nombre «Paso N de M: título, completado»; el foco va al título al cambiar; Enter avanza, no envía.","movil":"Círculos sin etiqueta + «Paso X de N · Título»; acciones en columna, principal arriba. Opcional: la clase acciones-fijas en el bloque de acciones del paso lo deja fijo al pie, respetando las áreas seguras del teléfono.","escritorio":"Etiquetas bajo cada círculo; acciones en fila.","errores":["Deshabilitar los pasos futuros (el teclado no puede inspeccionarlos).","Barra que deja saltar sobre errores.","Mover el foco en cada cambio de campo."],"archivos":{"css":"codigo/modulos/pasos/pasos.css","js":"codigo/modulos/pasos/pasos.js"},"tamano":{"css":4892,"js":8961}},{"nombre":"revision","titulo":"Pantalla de revisión","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el campo y enmascarado de identificadores.","cuando":"Siempre que haya más de un paso o datos personales.","cuandoNo":"Formularios de una pregunta.","dependencias":["pasos"],"js":true,"accesibilidad":"details/summary nativos; «Editar» con el nombre del campo para el lector.","movil":"Etiqueta y valor apilados.","escritorio":"Dos columnas.","errores":["«Editar» que lleva al inicio del paso.","Mostrar campos ocultos por condicional.","«Editar» que baja de renglón con un valor largo.","Rótulo con fondo gris y en negritas: el rótulo va gris y de peso normal, y el dato destaca."],"archivos":{"css":"codigo/modulos/revision/revision.css","js":"codigo/modulos/revision/revision.js"},"tamano":{"css":2455,"js":3292}},{"nombre":"acuse","titulo":"Acuse y «qué sigue»","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones).","cuando":"Todo envío que genere folio.","cuandoNo":"Capturas internas sin acuse.","dependencias":["copiar"],"js":true,"accesibilidad":"Foco al título del acuse; folio en tarjeta, no en botón; la secuencia es una lista ordenada.","movil":"Acciones en columna.","escritorio":"Acciones en fila centradas.","errores":["Prometer plazos que el sistema no controla.","Folio con aspecto de botón.","No borrar el borrador al recibir.","Acuse sin una acción para seguir.","Quitarle el relleno lateral a la tarjeta del acuse: en teléfono los botones quedan pegados a la orilla."],"archivos":{"css":"codigo/modulos/acuse/acuse.css","js":"codigo/modulos/acuse/acuse.js"},"tamano":{"css":2250,"js":3540}},{"nombre":"resultado","titulo":"Resultado de una decisión","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"El desenlace de lo que decide el personal (validar, rechazar, devolver, turnar, cerrar): título con el resultado, «Quedó guardado a las HH:MM · quien», el motivo citado tal cual, lo que sigue como secuencia numerada y la acción para seguir. Usa las cinco familias de «estado». FormKit.resultado(lugar, {tono, titulo, hora, quien, motivo, pasos}).","cuando":"Pantallas del personal después de validar, rechazar, devolver para corregir o cerrar un trámite.","cuandoNo":"Lo que envía la ciudadanía (usa el acuse); cambios menores que basta con anunciar, como guardar una nota.","dependencias":[],"js":true,"accesibilidad":"El foco va al título del resultado y se anuncia con la hora y quién decidió; el tono va en icono y palabras, nunca sólo en color.","movil":"Tarjeta a todo lo ancho con su relleno lateral.","escritorio":"Tarjeta con más relleno.","errores":["Dejar la pantalla igual tras decidir, sin decir qué pasó.","Un resultado sin hora ni quién lo registró.","Reescribir el motivo en lugar de citarlo.","Dejar a la vista el panel de decisión que ya no aplica (opción oculta).","Encadenar lo que sigue en un párrafo («Abra el expediente… El siguiente paso es…»)."],"archivos":{"css":"codigo/modulos/resultado/resultado.css","js":"codigo/modulos/resultado/resultado.js"},"tamano":{"css":2546,"js":5836}},{"nombre":"modal","titulo":"Diálogo y confirmación","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"<dialog> nativo para contenido que hay que leer y FormKit.confirma() para acciones con efecto: pregunta por la acción, lista sus consecuencias, dice si no se puede deshacer y su botón repite el verbo; hoja inferior en teléfono.","cuando":"Aviso de privacidad; confirmar rechazar, cancelar, cerrar un trámite, descartar o quitar.","cuandoNo":"Errores de campo; avisos sin decisión; acciones recuperables, como guardar una nota.","dependencias":[],"js":true,"accesibilidad":"Trampa de foco nativa, Escape cierra, el foco vuelve a quien abrió; foco inicial en «Volver sin cambios»; las consecuencias y «No se puede deshacer» forman la descripción que oye el lector.","movil":"Hoja inferior a todo lo ancho con dvh y franja segura.","escritorio":"Caja centrada de 560 px.","errores":["confirm()/alert() nativos.","Foco inicial en la acción destructiva.","Diálogo para instrucciones que deberían estar en pantalla.","Preguntar igual para guardar una nota que para cerrar un trámite.","Botón «Aceptar» o «Confirmar» en lugar del verbo de la acción.","Callar las consecuencias o que no se puede deshacer."],"archivos":{"css":"codigo/modulos/modal/modal.css","js":"codigo/modulos/modal/modal.js"},"tamano":{"css":2194,"js":5887}},{"nombre":"copiar","titulo":"Copiar y compartir","nivel":"RECOMENDADO","tipo":"retroalimentacion","proposito":"Botones de copiar (folio, campo de solo lectura) y compartir, con confirmación visible y anunciada y alternativa sin portapapeles.","cuando":"Todo dato que la persona deba transcribir.","cuandoNo":"Datos sensibles que no deban salir de la pantalla.","dependencias":[],"js":true,"accesibilidad":"El botón cambia su texto a «Copiado» y se anuncia; sin portapapeles selecciona el texto.","movil":"navigator.share cuando existe.","escritorio":"Copia el enlace.","errores":["Confirmar sólo con un color.","Icono solo sin texto."],"archivos":{"css":"codigo/modulos/copiar/copiar.css","js":"codigo/modulos/copiar/copiar.js"},"tamano":{"css":542,"js":4052}},{"nombre":"descarga","titulo":"Botón de descarga","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Enlace o botón de descarga con icono, acción, formato y peso; estado de preparación; aviso de otra pestaña.","cuando":"Acuse en PDF, plantillas, resultados.","cuandoNo":"Abrir un sitio (es un enlace normal).","dependencias":[],"js":true,"accesibilidad":"Texto dice formato y peso; «se abre en otra pestaña» para el lector; aria-busy mientras se genera.","movil":"Igual.","escritorio":"Igual.","errores":["Nombre de archivo con datos personales.","Icono sin texto."],"archivos":{"css":"codigo/modulos/descarga/descarga.css","js":"codigo/modulos/descarga/descarga.js"},"tamano":{"css":434,"js":3805}},{"nombre":"acordeon","titulo":"Acordeón y secciones plegables","nivel":"OPCIONAL","tipo":"navegacion","proposito":"details/summary para datos accesorios y preguntas frecuentes.","cuando":"Información de apoyo que no todos necesitan.","cuandoNo":"Campos obligatorios o contenido necesario para decidir.","dependencias":[],"js":false,"accesibilidad":"Nativo: Enter/espacio, estado expandido anunciado.","movil":"Igual.","escritorio":"Igual.","errores":["Plegar lo obligatorio.","Flecha con imagen (color fuera de :root)."],"archivos":{"css":"codigo/modulos/acordeon/acordeon.css","js":null},"tamano":{"css":2029,"js":0}},{"nombre":"pestanas","titulo":"Pestañas","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Vistas alternativas del mismo contenido con patrón ARIA tabs y teclado completo.","cuando":"Consulta interna con varias vistas.","cuandoNo":"Dividir un formulario que debe llenarse completo (usa pasos).","dependencias":[],"js":true,"accesibilidad":"role=tab/tabpanel, aria-selected, tabindex rotatorio, flechas e Inicio/Fin.","movil":"Lista con desplazamiento horizontal.","escritorio":"Igual.","errores":["Pestañas con campos obligatorios ocultos.","Más de 5 pestañas."],"archivos":{"css":"codigo/modulos/pestanas/pestanas.css","js":"codigo/modulos/pestanas/pestanas.js"},"tamano":{"css":1101,"js":2941}},{"nombre":"migas","titulo":"Migas de pan","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Ubicación dentro del sitio o del sistema.","cuando":"Consulta interna con niveles.","cuandoNo":"Dentro de un formulario por pasos.","dependencias":[],"js":false,"accesibilidad":"nav con aria-label; aria-current=page; separadores dibujados, no leídos.","movil":"Sólo el nivel anterior con flecha.","escritorio":"Ruta completa.","errores":["Separador con carácter que el lector lee.","Último nivel como enlace a sí mismo."],"archivos":{"css":"codigo/modulos/migas/migas.css","js":null},"tamano":{"css":2540,"js":0}},{"nombre":"progreso","titulo":"Barra de progreso","nivel":"OPCIONAL","tipo":"navegacion","proposito":"<progress> nativo con porcentaje en texto; indeterminado dice «Cargando…».","cuando":"Cargas y formularios largos de una página.","cuandoNo":"Formularios por pasos.","dependencias":[],"js":true,"accesibilidad":"Etiqueta asociada; aria-valuetext con el porcentaje.","movil":"Igual.","escritorio":"Igual.","errores":["Porcentaje sólo visual.","Barra que nunca termina sin mensaje."],"archivos":{"css":"codigo/modulos/progreso/progreso.css","js":"codigo/modulos/progreso/progreso.js"},"tamano":{"css":1126,"js":1810}},{"nombre":"paginacion","titulo":"Paginación de resultados","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Paginación numerada o «Cargar más» con rango visible, tamaño de página, anuncio y foco al inicio de la lista.","cuando":"Listas y tablas de más de una pantalla.","cuandoNo":"Menos de 20 resultados.","dependencias":[],"js":true,"accesibilidad":"nav con etiqueta; aria-current=page; Anterior/Siguiente con aria-disabled; anuncio «Página N de M».","movil":"Anterior · «Página X de N» · Siguiente.","escritorio":"Números, rango y selector.","errores":["Desplazamiento infinito.","Perder filtros al cambiar de página.","Foco que se queda en el botón pulsado."],"archivos":{"css":"codigo/modulos/paginacion/paginacion.css","js":"codigo/modulos/paginacion/paginacion.js"},"tamano":{"css":2189,"js":6129}},{"nombre":"version","titulo":"Distintivo de versión","nivel":"OPCIONAL","tipo":"navegacion","proposito":"Distintivo pequeño y siempre visible, fijo abajo a la izquierda, que dice qué versión del sitio se tiene enfrente: de prueba (dorado), instalada en el SIA (gris) o sin leer (guinda). Es la hoja de la plantilla de versión del SIA hecha con los tokens del estándar.","cuando":"Sitios que se prueban antes de instalarse en el SIA, o que deben mostrar su versión en pantalla.","cuandoNo":"Para avisos a la persona (usa los avisos del núcleo): el distintivo no recibe toques ni se anuncia como estado.","dependencias":[],"js":false,"accesibilidad":"Va dentro del pie (<footer>), para quedar en una región de la página; no recibe toques (pointer-events: none), así que nunca tapa un control; texto de 4.5:1 o más en sus tres estados.","movil":"Abajo a la izquierda, respetando el área segura de la pantalla.","escritorio":"Igual; al imprimir va en su lugar, sin flotar.","errores":["Ponerlo fuera del pie: axe lo marca como contenido fuera de una región.","Escribir colores o medidas a mano en lugar de los tokens (el auditor de CSS lo rechaza).","Usarlo para avisar algo a la persona."],"archivos":{"css":"codigo/modulos/version/version.css","js":null},"tamano":{"css":2244,"js":0}},{"nombre":"tooltip","titulo":"Ayuda desplegable","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Botón «?» que muestra un texto corto, por clic y teclado, con Escape.","cuando":"Aclaración breve junto a una etiqueta.","cuandoNo":"Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay ícono).","dependencias":[],"js":true,"accesibilidad":"aria-expanded, aria-describedby mientras está abierto, role=tooltip; no depende de hover.","movil":"Texto bajo la etiqueta, dentro del ancho del campo (no se sale de la pantalla aunque el «?» esté al borde), no flotante sobre otros controles.","escritorio":"Igual.","errores":["Sólo con hover.","Texto largo.","Repetir la ayuda visible del mismo campo (auditar-campos D5)."],"archivos":{"css":"codigo/modulos/tooltip/tooltip.css","js":"codigo/modulos/tooltip/tooltip.js"},"tamano":{"css":1511,"js":2737}},{"nombre":"tabla","titulo":"Tabla de consulta y de captura","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Tabla con caption, orden por columna accesible, estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.","cuando":"Consulta interna de registros.","cuandoNo":"Maquetar.","dependencias":["repetibles"],"js":true,"accesibilidad":"th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123».","movil":"Cada fila es una tarjeta: rótulo gris de peso normal y dato que destaca.","escritorio":"Tabla con desplazamiento controlado; botones, folios y etiquetas no se parten y la columna de acciones toma el ancho de sus botones.","errores":["Tabla sin encabezados.","«Eliminar» sin decir qué.","Desplazamiento horizontal libre en teléfono.","Filtrar ocultando filas y que el rayado alterno se descuadre (cuenta sólo las filas visibles).","Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla.","Dejar que una columna se encoja hasta partir botones, folios o fechas («Revisa / r», «10/10/20 / 26»)."],"archivos":{"css":"codigo/modulos/tabla/tabla.css","js":"codigo/modulos/tabla/tabla.js"},"tamano":{"css":4544,"js":6807}},{"nombre":"estado","titulo":"Etiquetas de estado","nivel":"OPCIONAL","tipo":"retroalimentacion","proposito":"Cinco familias con significado fijo para el estado de un trámite o registro, según a quién le toca qué: hecho (ok, verde), te toca actuar (atencion, ámbar), en marcha (proceso, azul), cerrado sin éxito (rechazo, rojo) y terminado (gris), cada una con su icono y su palabra. FormKit.estado(el, {tono, texto}) lo cambia.","cuando":"Bandejas, tablas y fichas que muestran en qué va un trámite.","cuandoNo":"Avisos a la persona (usa los avisos del núcleo); botones o filtros (no se tocan).","dependencias":[],"js":true,"accesibilidad":"La palabra dice el estado; el icono y el color sólo lo refuerzan. Texto de 4.5:1 o más en los cinco tonos. Al cambiar por una acción, se anuncia.","movil":"Una etiqueta larga se parte en renglones; no ensancha su tarjeta ni su tabla.","escritorio":"En una tabla, en una sola línea.","errores":["Inventar tonos por sistema (nueve colores sin regla).","Etiqueta sólo de color, sin icono ni palabra.","Usar el rojo para «En revisión» o el verde para «Enviado».","Una etiqueta sin familia (la consola lo avisa y queda como terminado).","Una etiqueta que no se parte y ensancha su tarjeta o su tabla en teléfono."],"archivos":{"css":"codigo/modulos/estado/estado.css","js":"codigo/modulos/estado/estado.js"},"tamano":{"css":1490,"js":2923}},{"nombre":"archivos","titulo":"Carga de archivos y fotografías","nivel":"RECOMENDADO","tipo":"archivos","proposito":"Zona de carga (botón real + arrastre), cámara en móvil, validación por extensión, firma, peso, total, duplicados y dimensiones; optimización; huella SHA-256; EXIF configurable; estado, vista previa, quitar y reintentar por archivo.","cuando":"Evidencia, documentos, fotografías.","cuandoNo":"Un solo archivo pequeño sin optimizar (basta el input nativo con ayuda).","dependencias":[],"js":true,"accesibilidad":"La zona es un botón con nombre; cada archivo dice su estado; rechazos con role=alert que nombran el archivo y el motivo.","movil":"Botón de cámara con capture (environment para evidencias; user para una fotografía de frente); vista previa de 96 px; con un solo archivo, los textos en singular.","escritorio":"Arrastrar y soltar; guardia global de drop. Con el máximo cargado no se ofrece «Elegir archivo»; el archivo listo se ve en verde.","errores":["Validar sólo por extensión.","Medir el peso antes de optimizar.","Enviar la ubicación de la foto sin que la persona lo sepa.","Dejar «Elegir archivo» a la vista con el máximo ya cargado: la persona cree que no subió nada.","Enviar la foto original, con su EXIF y su ubicación, porque recodificada pesaba más.","Guardar los archivos del borrador en el dispositivo: vuelven sólo con el proveedor de la página (borradorArchivos)."],"archivos":{"css":"codigo/modulos/archivos/archivos.css","js":"codigo/modulos/archivos/archivos.js"},"tamano":{"css":3211,"js":23231}},{"nombre":"visor","titulo":"Visor de documentos","nivel":"OPCIONAL","tipo":"archivos","proposito":"Para quien revisa lo que se cargó: muestra todas las hojas de un PDF, una debajo de otra, con contador de hoja, acercar y alejar, ajustar al ancho, girar y abrir en otra pestaña; también imágenes. En computadora queda fijo junto a lo que se revisa, para decidir viendo el documento; en teléfono se abre a pantalla completa. Usa pdf.js (vendor/pdfjs-dist), que se carga sólo al abrir el primer PDF.","cuando":"Revisión documental: personal que acepta u observa los documentos que la persona cargó.","cuandoNo":"Para que la persona vea lo que ella misma adjuntó (la vista previa de «archivos» basta) o para un solo documento corto (basta «Abrir en otra pestaña»).","dependencias":[],"js":true,"accesibilidad":"Diálogo con título; en teléfono es modal y Escape cierra con el foco de vuelta al botón «Ver documento»; en computadora no le quita el foco a quien revisa. Cada hoja es una imagen con nombre («Hoja 1 de 2»); el contador y el acercamiento se anuncian; barra de herramientas con nombre.","movil":"Pantalla completa, con «Cerrar»; la barra se parte en dos renglones si no cabe.","escritorio":"Columna fija a la derecha de lo que se revisa (.visor-area), del alto de la pantalla.","errores":["Abrir el documento en otra pestaña como única forma de revisarlo: quien revisa pierde lo que estaba decidiendo.","Mostrar sólo la primera hoja.","Cargar pdf.js de una CDN.","Usar una versión de pdf.js anterior a la 4.2.67, que deja ejecutar código desde un PDF malicioso.","Repetir «Hoja n de total» debajo de cada hoja: el contador va sólo en la barra."],"archivos":{"css":"codigo/modulos/visor/visor.css","js":"codigo/modulos/visor/visor.js"},"tamano":{"css":3228,"js":11976}},{"nombre":"mapa","titulo":"Mapa con selección de punto","nivel":"OPCIONAL","tipo":"archivos","proposito":"Leaflet autoalojado con gestos que no atrapan la página, marcador propio, ámbito acotado, confirmación del punto, alternativa manual y sin mapa base.","cuando":"Se necesita un punto además de la dirección.","cuandoNo":"Basta la dirección escrita; coordenadas exactas que identifiquen un domicilio sin uso declarado.","dependencias":[],"js":true,"accesibilidad":"role=application con nombre; coordenadas en texto con aria-live; Enter coloca el punto; alternativa de coordenadas manuales.","movil":"Un dedo desplaza la página, dos el mapa; alto fluido.","escritorio":"Clic y arrastre.","errores":["Mapa como único camino.","Teselas con clave escrita en el código.","Punto fuera del ámbito aceptado hasta el envío."],"archivos":{"css":"codigo/modulos/mapa/mapa.css","js":"codigo/modulos/mapa/mapa.js"},"tamano":{"css":2754,"js":9846}},{"nombre":"enlace-mapa","titulo":"Coordenadas desde un enlace de Google Maps","nivel":"OPCIONAL","tipo":"archivos","proposito":"La persona pega el enlace de Google Maps del lugar y el módulo escribe sus coordenadas en el campo de coordenadas, que valida el núcleo. También acomoda lo que se escribe directo: latitud y longitud al revés, grados-minutos-segundos, coma decimal o la longitud sin signo menos. El enlace no se envía; sólo viajan las coordenadas.","cuando":"Se pide la ubicación exacta de un domicilio o de un sitio y la persona puede tenerla en Google Maps (por ejemplo, la que le llegó por WhatsApp).","cuandoNo":"Como única vía para dar la ubicación: la dirección va primero (FRM-46). Tampoco para resolver enlaces cortos, que obligarían a la página a consultar a Google (FRM-77).","dependencias":[],"js":true,"accesibilidad":"Lo que se toma del enlace o se corrige se dice con palabras y se anuncia («Coordenadas tomadas del enlace: …»); los avisos llevan icono y texto, no sólo color.","movil":"Lee el enlace en cuanto se pega, sin salir del campo. Agrega el signo menos que el teclado numérico del iPhone no trae.","escritorio":"Igual; también al salir del campo.","errores":["Tomar el centro de la pantalla (@) como si fuera el lugar: el punto puede caer a cientos de metros.","Tomar el primer punto del enlace en lugar del último.","Rechazar coordenadas que vienen al revés o sin el signo menos.","Pedirle a Google desde la página que resuelva un enlace corto."],"css":false,"archivos":{"css":null,"js":"codigo/modulos/enlace-mapa/enlace-mapa.js"},"tamano":{"css":0,"js":8196}},{"nombre":"cascadas","titulo":"Campos dependientes en cascada","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Alcaldía → colonia → código postal desde un catálogo oficial versionado; relación inversa desde el código postal; captura manual si el catálogo no carga.","cuando":"Domicilio dentro de un ámbito con catálogo.","cuandoNo":"Sin catálogo oficial disponible (captura libre).","dependencias":[],"js":true,"accesibilidad":"El hijo deshabilitado explica por qué; cada reinicio y cada autocompletado se anuncian.","movil":"Selects nativos (rueda del sistema).","escritorio":"Selects.","errores":["Catálogo escrito a mano.","Reiniciar al hijo sin anunciarlo.","Bloquear si el cp no coincide (es advertencia)."],"archivos":{"css":"codigo/modulos/cascadas/cascadas.css","js":"codigo/modulos/cascadas/cascadas.js"},"tamano":{"css":539,"js":7583}},{"nombre":"chips","titulo":"Chips de uso frecuente","nivel":"OPCIONAL","tipo":"pregunta","proposito":"Sugerencias de un toque desde el historial del dispositivo (nunca al servidor; quitar y borrar historial; se niega en datos personales) y respuestas frecuentes fijas (data-chips-fijos), que no guardan nada y sirven en cualquier campo: en un texto largo, el chip agrega su texto para completarlo.","cuando":"Captura por personal con respuestas repetidas.","cuandoNo":"Historial: formularios ciudadanos de una sola vez y datos personales (para ellos, la lista fija).","dependencias":[],"js":true,"accesibilidad":"Botones con aria-pressed; «Quitar X de las sugerencias»; grupo con nombre.","movil":"Chips de 44 px que se envuelven.","escritorio":"Igual.","errores":["Guardar historial de nombre o correo.","Chips sin forma de borrarlos."],"archivos":{"css":"codigo/modulos/chips/chips.css","js":"codigo/modulos/chips/chips.js"},"tamano":{"css":1920,"js":8490}}],"generado":"2026-10-18T23:29:00.171Z"};
 
 </script>
 <script data-origen="guia-visual\guia-config.js">
@@ -22887,7 +22977,7 @@ window.FORMKIT_OPCIONES = {
 </script>
 <script data-origen="codigo\js\formkit.core.js">
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -23553,7 +23643,8 @@ window.FORMKIT_OPCIONES = {
 
     /* ----- Borrador local -----
        Se activa con data-borrador="clave" en el <form>. Versionado con
-       data-borrador-version. Excluye campos data-sensible y archivos. */
+       data-borrador-version. Excluye campos data-sensible y archivos (éstos, sólo
+       con un proveedor que dé la página: opciones.borradorArchivos, en archivos.js). */
     const claveBorrador = form.dataset.borrador || '';
     const versionBorrador = form.dataset.borradorVersion || '1';
     let temporizadorBorrador = 0;
@@ -23562,9 +23653,21 @@ window.FORMKIT_OPCIONES = {
     let terminado = false;
     const indicador = $('[data-guardado]');
     const franja = $('[data-franja-borrador]');
+    /* Lo que la página escribe sola (al precargar una solicitud para continuarla) no es
+       un borrador de la persona: el borrador empieza con su primer gesto en el formulario
+       (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
+       después la página o los módulos entra en el mismo borrador (P148). */
+    let personaActuo = false;
+    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
+    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
+       módulo se suscribe y el núcleo le avisa al escribir, restaurar o borrar el borrador. */
+    const suscritosBorrador = [];
+    const alBorrador = (def) => { suscritosBorrador.push(def); };
+    const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
+    function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -23580,6 +23683,7 @@ window.FORMKIT_OPCIONES = {
     function escribeBorrador() {
       const extra = FormKit.ganchos.estadoBorrador ? FormKit.ganchos.estadoBorrador(form) : {};
       const ok = almacen.escribe(claveBorrador, JSON.stringify({ v: versionBorrador, t: Date.now(), datos: datosBorrador(), ...extra }));
+      avisaBorrador('escribe');
       if (ok && indicador) {
         indicador.textContent = M.borradorGuardado;
         indicador.setAttribute('data-visible', '');
@@ -23596,9 +23700,9 @@ window.FORMKIT_OPCIONES = {
       if (!crudo) return null;
       try {
         const b = JSON.parse(crudo);
-        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { almacen.borra(claveBorrador); return null; }
+        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { borraBorrador(); return null; }
         return b;
-      } catch (e) { almacen.borra(claveBorrador); return null; }
+      } catch (e) { borraBorrador(); return null; }
     }
     function restauraBorrador(b) {
       for (const [n, v] of Object.entries(b.datos || {})) {
@@ -23614,6 +23718,7 @@ window.FORMKIT_OPCIONES = {
       aplicaCondicionales();
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
+      avisaBorrador('restaura', b);
       anuncia(M.borradorGuardado.replace('guardado', 'recuperado'));
     }
     function iniciaFranja(b) {
@@ -23625,8 +23730,8 @@ window.FORMKIT_OPCIONES = {
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
         if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador="descartar-si"]', franja); if (si) si.focus(); } else { almacen.borra(claveBorrador); franja.hidden = true; } }
-        else if (a.dataset.borrador === 'descartar-si') { almacen.borra(claveBorrador); franja.hidden = true; }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador="descartar-si"]', franja); if (si) si.focus(); } else { borraBorrador(); franja.hidden = true; } }
+        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador="recuperar"]', franja).focus(); }
       });
     }
@@ -23702,7 +23807,7 @@ window.FORMKIT_OPCIONES = {
         const respuesta = await enviarFn(arma(), { signal: control.signal });
         terminado = true;
         clearTimeout(temporizadorBorrador);
-        if (claveBorrador) almacen.borra(claveBorrador);
+        if (claveBorrador) borraBorrador();
         if (opciones.alEnviar) opciones.alEnviar(respuesta, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: respuesta }));
         return true;
       } catch (e) {
@@ -23822,7 +23927,7 @@ window.FORMKIT_OPCIONES = {
       $, $$, plantilla, icono, anuncia, almacen, idUnico, pesoTxt, normalizaBusqueda,
       envoltura, envolturas, nombres, tipoDe, controlesDe, controlPrincipal, valorDe, textoDeValor, etiquetaDe, esObligatorio, activo, atributosDe,
       validaCampo, validaYPinta, validaContenedor, marca, marcaError, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
-      aplicaCondicionales, programaBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
+      aplicaCondicionales, programaBorrador, alBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
     };
 
     /* ----- Arranque ----- */
@@ -25984,7 +26089,7 @@ window.FORMKIT_OPCIONES = {
           if (f.size < A.minBytes) { rechazos.push({ nombre, motivo: M.archRechazoVacio }); continue; }
           const esFoto = A.optimiza.tipos.includes(ext(f.name));
           if (!esFoto && f.size > c.mb * BYTES_POR_MB) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoPeso, { peso: pesoTxt(f.size), mb: c.mb }) }); continue; }
-          const a = { nombre, size: f.size, original: f.size, tipo: f.type };
+          const a = { nombre, size: f.size, original: f.size, tipo: f.type, fuente: f };
           lista.push(a);
           procesa(f, a, el, c);
         }
@@ -26098,6 +26203,19 @@ window.FORMKIT_OPCIONES = {
       /* Un archivo soltado fuera de la zona haría que el navegador lo abriera y la persona perdiera todo. */
       window.addEventListener('dragover', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
       window.addEventListener('drop', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
+
+      /* Archivos en el borrador (P148). El estándar no los guarda en el dispositivo (FRM-43); si la
+         página da un proveedor, FormKit.iniciar(form, { borradorArchivos: { guarda(campo, archivos),
+         lee(campo), borra(campo) } }), al escribir el borrador se le pasan los archivos originales
+         de cada campo, al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
+         El proveedor decide dónde guardarlos (en el servidor, en el almacén del sistema). */
+      const camposArchivo = () => $$('[data-archivos]', form).map((c) => c.closest('[data-campo]'));
+      const conProveedor = (fn) => { const p = ctx.opciones.borradorArchivos; if (!p) return; for (const el of camposArchivo()) Promise.resolve().then(() => fn(p, el)).catch(() => { /* un proveedor que falla no detiene el formulario */ }); };
+      ctx.alBorrador({
+        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado !== 'error' && a.fuente).map((a) => a.fuente))),
+        restaura: () => conProveedor((p, el) => p.lee && Promise.resolve(p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); })),
+        borra: () => conProveedor((p, el) => p.borra && p.borra(el.dataset.campo))
+      });
 
       FormKit.archivos = { de: (el) => archivosPorCampo.get(el) || [], agrega };
     }
@@ -26653,10 +26771,9 @@ window.FORMKIT_OPCIONES = {
       const fig = document.createElement('figure');
       fig.className = 'visor-hoja-pdf';
       fig.dataset.hoja = String(n);
-      const pie = document.createElement('figcaption');
-      pie.className = 'visor-pie';
-      pie.textContent = hoja(n, doc.numPages);
-      fig.append(lienzo, pie);
+      /* Sin pie «Hoja n de total»: ya lo dice el contador de la barra, y repetido debajo
+         de la hoja confundía (P146). Al lector se lo dice el nombre del lienzo. */
+      fig.append(lienzo);
       figuras.push(fig);
       await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport: vista }).promise;
     }

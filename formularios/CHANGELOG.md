@@ -1,5 +1,16 @@
 # Historial de cambios
 
+## 1.5.0 · 2026-10-18
+
+Cuatro hallazgos de la auditoría completa del sistema de acreditaciones del 18 oct. El borrador gana un proveedor de archivos, por eso es versión menor.
+
+- **P145 · La tabla no parte botones, folios ni fechas** (módulo `tabla`, FRM-24): `.tabla-valor` llevaba `overflow-wrap: anywhere`, así que en computadora una columna se encogía hasta partir palabras dentro de botones, folios y fechas («Revisa / r», «Abr / ir», «10/10/20 / 26»). Ahora es `break-word`: una palabra se parte sólo si no cabe en su renglón. En computadora, `.btn`, `.btn-enlace` y `.mono` de la tabla no se parten, y la columna de acciones (la de encabezado sólo para el lector) toma el ancho de sus botones. El folio va en `<span class="mono">`. El proyecto puede quitar de `apd.css` sus reglas de `.tabla-bandeja .tabla-valor`, `.mono`, `.btn` y `.btn-enlace`.
+- **P146 · Un solo «Hoja 1 de 2» en el visor** (módulo `visor`, FRM-24): el contador aparecía en la barra y otra vez debajo de cada hoja. Ahora va sólo en la barra; al lector se lo sigue diciendo el nombre de cada hoja.
+- **P147 · Rótulos como en la ficha** (módulos `tabla` y `revision`, FRM-24 y FRM-05): en la tarjeta del teléfono y en «Revisa antes de enviar» el rótulo iba en negritas, y en la revisión, sobre fondo gris. Ahora, como en la ficha, el rótulo va en gris y peso normal, sin fondo, y el dato destaca (semi negritas). En la tabla de computadora el dato sigue en peso normal.
+- **P148 · Borrador que empieza con la persona y archivos con proveedor** (núcleo y módulo `archivos`, FRM-42 y FRM-43): el borrador guardaba también lo que la página escribía al precargar una solicitud, como si lo hubiera capturado la persona, y no conservaba los archivos. Ahora el borrador empieza con el primer gesto de la persona en el formulario (un evento confiable: escribir, elegir, tocar, soltar un archivo); lo que la página escriba antes no lo crea. Los archivos siguen fuera del almacén del dispositivo, pero la página puede dar un proveedor: `FormKit.iniciar(form, { borradorArchivos: { guarda(campo, archivos), lee(campo), borra(campo) } })`. Al escribir el borrador recibe los archivos originales, al recuperarlo los devuelve y al descartarlo o enviar se le avisa. Los módulos se suscriben con `ctx.alBorrador`. El proyecto puede quitar su borrador propio de `app/solicitud.js` y pasar su almacén de documentos como proveedor.
+
+**Pruebas**: cuatro casos nuevos en `07-correcciones` (41 en total), con una página nueva que precarga una solicitud y guarda sus documentos con un proveedor (`pruebas/paginas/borrador.html`).
+
 ## 1.4.4 · 2026-10-18
 
 Dos hallazgos de la revisión de pantallas del sistema de acreditaciones del 18 oct. 86 reglas (FRM-86 nueva).

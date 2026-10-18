@@ -24,7 +24,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | Iconografía (sprite SVG) | BASE |
 | Anuncios que también se ven (FormKit.anuncia con el elemento visible) | BASE |
 | Estados de envío (enviando, error, plazo, límite) sin duplicados | BASE |
-| Borrador local versionado | RECOMENDADO |
+| Borrador local versionado, que empieza con la persona (no con la precarga de la página) y guarda archivos con el proveedor de la página | RECOMENDADO |
 | Encabezado y pie institucionales, enlace de salto | BASE |
 
 ## Módulos
@@ -40,7 +40,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.6 KB |
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
 | `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.8 KB |
-| `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.3 KB | 3.2 KB |
+| `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.4 KB | 3.2 KB |
 | `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.2 KB | 3.5 KB |
 | `resultado` | Resultado de una decisión | RECOMENDADO | retroalimentacion | — | 2.5 KB | 5.7 KB |
 | `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 2.1 KB | 5.7 KB |
@@ -53,9 +53,9 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `paginacion` | Paginación de resultados | OPCIONAL | navegacion | — | 2.1 KB | 6.0 KB |
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
-| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.8 KB | 6.6 KB |
+| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 4.4 KB | 6.6 KB |
 | `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.9 KB |
-| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 21.4 KB |
+| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 22.7 KB |
 | `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.7 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
@@ -274,6 +274,7 @@ Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el camp
 - «Editar» que lleva al inicio del paso.
 - Mostrar campos ocultos por condicional.
 - «Editar» que baja de renglón con un valor largo.
+- Rótulo con fondo gris y en negritas: el rótulo va gris y de peso normal, y el dato destaca.
 
 ### Acuse y «qué sigue» (`acuse`) · RECOMENDADO
 
@@ -540,9 +541,9 @@ Tabla con caption, orden por columna accesible, estados vacío/carga/error, acci
 
 **Accesibilidad.** th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123».
 
-**En teléfono.** Cada fila es una tarjeta.
+**En teléfono.** Cada fila es una tarjeta: rótulo gris de peso normal y dato que destaca.
 
-**En escritorio.** Tabla con desplazamiento controlado.
+**En escritorio.** Tabla con desplazamiento controlado; botones, folios y etiquetas no se parten y la columna de acciones toma el ancho de sus botones.
 
 **Errores frecuentes que evita.**
 - Tabla sin encabezados.
@@ -550,6 +551,7 @@ Tabla con caption, orden por columna accesible, estados vacío/carga/error, acci
 - Desplazamiento horizontal libre en teléfono.
 - Filtrar ocultando filas y que el rayado alterno se descuadre (cuenta sólo las filas visibles).
 - Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla.
+- Dejar que una columna se encoja hasta partir botones, folios o fechas («Revisa / r», «10/10/20 / 26»).
 
 ### Etiquetas de estado (`estado`) · OPCIONAL
 
@@ -596,6 +598,7 @@ Zona de carga (botón real + arrastre), cámara en móvil, validación por exten
 - Enviar la ubicación de la foto sin que la persona lo sepa.
 - Dejar «Elegir archivo» a la vista con el máximo ya cargado: la persona cree que no subió nada.
 - Enviar la foto original, con su EXIF y su ubicación, porque recodificada pesaba más.
+- Guardar los archivos del borrador en el dispositivo: vuelven sólo con el proveedor de la página (borradorArchivos).
 
 ### Visor de documentos (`visor`) · OPCIONAL
 
@@ -618,6 +621,7 @@ Para quien revisa lo que se cargó: muestra todas las hojas de un PDF, una debaj
 - Mostrar sólo la primera hoja.
 - Cargar pdf.js de una CDN.
 - Usar una versión de pdf.js anterior a la 4.2.67, que deja ejecutar código desde un PDF malicioso.
+- Repetir «Hoja n de total» debajo de cada hoja: el contador va sólo en la barra.
 
 ### Mapa con selección de punto (`mapa`) · OPCIONAL
 

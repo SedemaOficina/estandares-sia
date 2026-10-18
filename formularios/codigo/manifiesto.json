@@ -1,6 +1,6 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.4.4",
+  "version": "1.5.0",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -69,7 +69,7 @@
         "nivel": "BASE"
       },
       {
-        "pieza": "Borrador local versionado",
+        "pieza": "Borrador local versionado, que empieza con la persona (no con la precarga de la página) y guarda archivos con el proveedor de la página",
         "nivel": "RECOMENDADO"
       },
       {
@@ -82,7 +82,7 @@
       "base.css": 6632,
       "nucleo.css": 19313,
       "validaciones.config.js": 42365,
-      "formkit.core.js": 53666,
+      "formkit.core.js": 54804,
       "iconos.js": 6047
     }
   },
@@ -359,14 +359,15 @@
       "errores": [
         "«Editar» que lleva al inicio del paso.",
         "Mostrar campos ocultos por condicional.",
-        "«Editar» que baja de renglón con un valor largo."
+        "«Editar» que baja de renglón con un valor largo.",
+        "Rótulo con fondo gris y en negritas: el rótulo va gris y de peso normal, y el dato destaca."
       ],
       "archivos": {
         "css": "codigo/modulos/revision/revision.css",
         "js": "codigo/modulos/revision/revision.js"
       },
       "tamano": {
-        "css": 2342,
+        "css": 2455,
         "js": 3292
       }
     },
@@ -710,21 +711,22 @@
       ],
       "js": true,
       "accesibilidad": "th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123».",
-      "movil": "Cada fila es una tarjeta.",
-      "escritorio": "Tabla con desplazamiento controlado.",
+      "movil": "Cada fila es una tarjeta: rótulo gris de peso normal y dato que destaca.",
+      "escritorio": "Tabla con desplazamiento controlado; botones, folios y etiquetas no se parten y la columna de acciones toma el ancho de sus botones.",
       "errores": [
         "Tabla sin encabezados.",
         "«Eliminar» sin decir qué.",
         "Desplazamiento horizontal libre en teléfono.",
         "Filtrar ocultando filas y que el rayado alterno se descuadre (cuenta sólo las filas visibles).",
-        "Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla."
+        "Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla.",
+        "Dejar que una columna se encoja hasta partir botones, folios o fechas («Revisa / r», «10/10/20 / 26»)."
       ],
       "archivos": {
         "css": "codigo/modulos/tabla/tabla.css",
         "js": "codigo/modulos/tabla/tabla.js"
       },
       "tamano": {
-        "css": 3856,
+        "css": 4544,
         "js": 6807
       }
     },
@@ -775,7 +777,8 @@
         "Medir el peso antes de optimizar.",
         "Enviar la ubicación de la foto sin que la persona lo sepa.",
         "Dejar «Elegir archivo» a la vista con el máximo ya cargado: la persona cree que no subió nada.",
-        "Enviar la foto original, con su EXIF y su ubicación, porque recodificada pesaba más."
+        "Enviar la foto original, con su EXIF y su ubicación, porque recodificada pesaba más.",
+        "Guardar los archivos del borrador en el dispositivo: vuelven sólo con el proveedor de la página (borradorArchivos)."
       ],
       "archivos": {
         "css": "codigo/modulos/archivos/archivos.css",
@@ -783,7 +786,7 @@
       },
       "tamano": {
         "css": 3211,
-        "js": 21873
+        "js": 23231
       }
     },
     {
@@ -803,15 +806,16 @@
         "Abrir el documento en otra pestaña como única forma de revisarlo: quien revisa pierde lo que estaba decidiendo.",
         "Mostrar sólo la primera hoja.",
         "Cargar pdf.js de una CDN.",
-        "Usar una versión de pdf.js anterior a la 4.2.67, que deja ejecutar código desde un PDF malicioso."
+        "Usar una versión de pdf.js anterior a la 4.2.67, que deja ejecutar código desde un PDF malicioso.",
+        "Repetir «Hoja n de total» debajo de cada hoja: el contador va sólo en la barra."
       ],
       "archivos": {
         "css": "codigo/modulos/visor/visor.css",
         "js": "codigo/modulos/visor/visor.js"
       },
       "tamano": {
-        "css": 3321,
-        "js": 11942
+        "css": 3228,
+        "js": 11976
       }
     },
     {
@@ -924,5 +928,5 @@
       }
     }
   ],
-  "generado": "2026-10-18T16:43:19.390Z"
+  "generado": "2026-10-18T23:29:00.171Z"
 }

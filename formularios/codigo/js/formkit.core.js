@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -665,7 +665,8 @@
 
     /* ----- Borrador local -----
        Se activa con data-borrador="clave" en el <form>. Versionado con
-       data-borrador-version. Excluye campos data-sensible y archivos. */
+       data-borrador-version. Excluye campos data-sensible y archivos (éstos, sólo
+       con un proveedor que dé la página: opciones.borradorArchivos, en archivos.js). */
     const claveBorrador = form.dataset.borrador || '';
     const versionBorrador = form.dataset.borradorVersion || '1';
     let temporizadorBorrador = 0;
@@ -674,9 +675,21 @@
     let terminado = false;
     const indicador = $('[data-guardado]');
     const franja = $('[data-franja-borrador]');
+    /* Lo que la página escribe sola (al precargar una solicitud para continuarla) no es
+       un borrador de la persona: el borrador empieza con su primer gesto en el formulario
+       (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
+       después la página o los módulos entra en el mismo borrador (P148). */
+    let personaActuo = false;
+    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
+    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
+       módulo se suscribe y el núcleo le avisa al escribir, restaurar o borrar el borrador. */
+    const suscritosBorrador = [];
+    const alBorrador = (def) => { suscritosBorrador.push(def); };
+    const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
+    function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -692,6 +705,7 @@
     function escribeBorrador() {
       const extra = FormKit.ganchos.estadoBorrador ? FormKit.ganchos.estadoBorrador(form) : {};
       const ok = almacen.escribe(claveBorrador, JSON.stringify({ v: versionBorrador, t: Date.now(), datos: datosBorrador(), ...extra }));
+      avisaBorrador('escribe');
       if (ok && indicador) {
         indicador.textContent = M.borradorGuardado;
         indicador.setAttribute('data-visible', '');
@@ -708,9 +722,9 @@
       if (!crudo) return null;
       try {
         const b = JSON.parse(crudo);
-        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { almacen.borra(claveBorrador); return null; }
+        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { borraBorrador(); return null; }
         return b;
-      } catch (e) { almacen.borra(claveBorrador); return null; }
+      } catch (e) { borraBorrador(); return null; }
     }
     function restauraBorrador(b) {
       for (const [n, v] of Object.entries(b.datos || {})) {
@@ -726,6 +740,7 @@
       aplicaCondicionales();
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
+      avisaBorrador('restaura', b);
       anuncia(M.borradorGuardado.replace('guardado', 'recuperado'));
     }
     function iniciaFranja(b) {
@@ -737,8 +752,8 @@
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
         if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador="descartar-si"]', franja); if (si) si.focus(); } else { almacen.borra(claveBorrador); franja.hidden = true; } }
-        else if (a.dataset.borrador === 'descartar-si') { almacen.borra(claveBorrador); franja.hidden = true; }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador="descartar-si"]', franja); if (si) si.focus(); } else { borraBorrador(); franja.hidden = true; } }
+        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador="recuperar"]', franja).focus(); }
       });
     }
@@ -814,7 +829,7 @@
         const respuesta = await enviarFn(arma(), { signal: control.signal });
         terminado = true;
         clearTimeout(temporizadorBorrador);
-        if (claveBorrador) almacen.borra(claveBorrador);
+        if (claveBorrador) borraBorrador();
         if (opciones.alEnviar) opciones.alEnviar(respuesta, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: respuesta }));
         return true;
       } catch (e) {
@@ -934,7 +949,7 @@
       $, $$, plantilla, icono, anuncia, almacen, idUnico, pesoTxt, normalizaBusqueda,
       envoltura, envolturas, nombres, tipoDe, controlesDe, controlPrincipal, valorDe, textoDeValor, etiquetaDe, esObligatorio, activo, atributosDe,
       validaCampo, validaYPinta, validaContenedor, marca, marcaError, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
-      aplicaCondicionales, programaBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
+      aplicaCondicionales, programaBorrador, alBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
     };
 
     /* ----- Arranque ----- */

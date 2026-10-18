@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba del borrador con precarga y archivos</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../codigo/css/tokens.css">
+<link rel="stylesheet" href="../../codigo/css/base.css">
+<link rel="stylesheet" href="../../codigo/css/nucleo.css">
+<link rel="stylesheet" href="../../codigo/modulos/archivos/archivos.css">
+</head>
+<body>
+<main class="pagina" id="contenido">
+  <h1 class="titulo-pagina">Continuar una solicitud (P148)</h1>
+  <!-- Página sólo para pruebas automáticas: la página precarga datos y el borrador guarda los documentos con un proveedor. Datos ficticios. -->
+  <form id="solicitud" class="tarjeta" data-formkit="manual" data-borrador="prueba-borrador" action="#" method="post">
+    <div class="campo" data-campo="nombre" data-requerido data-uso="Prueba."><label class="etiqueta" for="nombre">Nombre del grupo</label><input class="control" id="nombre" name="nombre" type="text" maxlength="80" autocomplete="off"></div>
+    <div class="campo" data-campo="documento" data-max="1" data-extensiones="png" data-uso="Prueba.">
+      <span class="etiqueta" id="et-documento">Comprobante</span>
+      <div data-archivos>
+        <button type="button" class="zona-carga" aria-labelledby="et-documento"><span class="zona-carga-texto">Elegir archivo</span><span class="zona-carga-limite" data-limite-texto></span></button>
+        <input type="file" hidden>
+        <div data-rechazos></div>
+        <ul class="lista-arch"></ul>
+      </div>
+    </div>
+    <p class="guardado" data-guardado aria-live="polite"></p>
+    <div class="acciones"><button type="submit" class="btn btn-primario" data-accion="enviar">Enviar solicitud</button></div>
+  </form>
+</main>
+<script src="../../codigo/js/validaciones.config.js"></script>
+<script src="../../codigo/js/iconos.js"></script>
+<script src="../../codigo/js/formkit.core.js"></script>
+<script src="../../codigo/modulos/archivos/archivos.js"></script>
+<script src="borrador-pagina.js"></script>
+</body>
+</html>

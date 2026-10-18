@@ -226,7 +226,7 @@
           if (f.size < A.minBytes) { rechazos.push({ nombre, motivo: M.archRechazoVacio }); continue; }
           const esFoto = A.optimiza.tipos.includes(ext(f.name));
           if (!esFoto && f.size > c.mb * BYTES_POR_MB) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoPeso, { peso: pesoTxt(f.size), mb: c.mb }) }); continue; }
-          const a = { nombre, size: f.size, original: f.size, tipo: f.type };
+          const a = { nombre, size: f.size, original: f.size, tipo: f.type, fuente: f };
           lista.push(a);
           procesa(f, a, el, c);
         }
@@ -340,6 +340,19 @@
       /* Un archivo soltado fuera de la zona haría que el navegador lo abriera y la persona perdiera todo. */
       window.addEventListener('dragover', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
       window.addEventListener('drop', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
+
+      /* Archivos en el borrador (P148). El estándar no los guarda en el dispositivo (FRM-43); si la
+         página da un proveedor, FormKit.iniciar(form, { borradorArchivos: { guarda(campo, archivos),
+         lee(campo), borra(campo) } }), al escribir el borrador se le pasan los archivos originales
+         de cada campo, al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
+         El proveedor decide dónde guardarlos (en el servidor, en el almacén del sistema). */
+      const camposArchivo = () => $$('[data-archivos]', form).map((c) => c.closest('[data-campo]'));
+      const conProveedor = (fn) => { const p = ctx.opciones.borradorArchivos; if (!p) return; for (const el of camposArchivo()) Promise.resolve().then(() => fn(p, el)).catch(() => { /* un proveedor que falla no detiene el formulario */ }); };
+      ctx.alBorrador({
+        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado !== 'error' && a.fuente).map((a) => a.fuente))),
+        restaura: () => conProveedor((p, el) => p.lee && Promise.resolve(p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); })),
+        borra: () => conProveedor((p, el) => p.borra && p.borra(el.dataset.campo))
+      });
 
       FormKit.archivos = { de: (el) => archivosPorCampo.get(el) || [], agrega };
     }

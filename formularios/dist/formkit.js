@@ -518,7 +518,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.4',
+    version: '1.5.0',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -716,7 +716,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.4
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -1382,7 +1382,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
     /* ----- Borrador local -----
        Se activa con data-borrador="clave" en el <form>. Versionado con
-       data-borrador-version. Excluye campos data-sensible y archivos. */
+       data-borrador-version. Excluye campos data-sensible y archivos (éstos, sólo
+       con un proveedor que dé la página: opciones.borradorArchivos, en archivos.js). */
     const claveBorrador = form.dataset.borrador || '';
     const versionBorrador = form.dataset.borradorVersion || '1';
     let temporizadorBorrador = 0;
@@ -1391,9 +1392,21 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     let terminado = false;
     const indicador = $('[data-guardado]');
     const franja = $('[data-franja-borrador]');
+    /* Lo que la página escribe sola (al precargar una solicitud para continuarla) no es
+       un borrador de la persona: el borrador empieza con su primer gesto en el formulario
+       (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
+       después la página o los módulos entra en el mismo borrador (P148). */
+    let personaActuo = false;
+    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
+    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
+       módulo se suscribe y el núcleo le avisa al escribir, restaurar o borrar el borrador. */
+    const suscritosBorrador = [];
+    const alBorrador = (def) => { suscritosBorrador.push(def); };
+    const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
+    function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -1409,6 +1422,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     function escribeBorrador() {
       const extra = FormKit.ganchos.estadoBorrador ? FormKit.ganchos.estadoBorrador(form) : {};
       const ok = almacen.escribe(claveBorrador, JSON.stringify({ v: versionBorrador, t: Date.now(), datos: datosBorrador(), ...extra }));
+      avisaBorrador('escribe');
       if (ok && indicador) {
         indicador.textContent = M.borradorGuardado;
         indicador.setAttribute('data-visible', '');
@@ -1425,9 +1439,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       if (!crudo) return null;
       try {
         const b = JSON.parse(crudo);
-        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { almacen.borra(claveBorrador); return null; }
+        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { borraBorrador(); return null; }
         return b;
-      } catch (e) { almacen.borra(claveBorrador); return null; }
+      } catch (e) { borraBorrador(); return null; }
     }
     function restauraBorrador(b) {
       for (const [n, v] of Object.entries(b.datos || {})) {
@@ -1443,6 +1457,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       aplicaCondicionales();
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
+      avisaBorrador('restaura', b);
       anuncia(M.borradorGuardado.replace('guardado', 'recuperado'));
     }
     function iniciaFranja(b) {
@@ -1454,8 +1469,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
         if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador="descartar-si"]', franja); if (si) si.focus(); } else { almacen.borra(claveBorrador); franja.hidden = true; } }
-        else if (a.dataset.borrador === 'descartar-si') { almacen.borra(claveBorrador); franja.hidden = true; }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador="descartar-si"]', franja); if (si) si.focus(); } else { borraBorrador(); franja.hidden = true; } }
+        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador="recuperar"]', franja).focus(); }
       });
     }
@@ -1531,7 +1546,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const respuesta = await enviarFn(arma(), { signal: control.signal });
         terminado = true;
         clearTimeout(temporizadorBorrador);
-        if (claveBorrador) almacen.borra(claveBorrador);
+        if (claveBorrador) borraBorrador();
         if (opciones.alEnviar) opciones.alEnviar(respuesta, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: respuesta }));
         return true;
       } catch (e) {
@@ -1651,7 +1666,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       $, $$, plantilla, icono, anuncia, almacen, idUnico, pesoTxt, normalizaBusqueda,
       envoltura, envolturas, nombres, tipoDe, controlesDe, controlPrincipal, valorDe, textoDeValor, etiquetaDe, esObligatorio, activo, atributosDe,
       validaCampo, validaYPinta, validaContenedor, marca, marcaError, limpia, muestraResumen, quitaResumen, revisaResumen, enfocaCampo,
-      aplicaCondicionales, programaBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
+      aplicaCondicionales, programaBorrador, alBorrador, leeBorrador, restauraBorrador, enviar, arma, preparaCampo, estadoDe, datosActuales
     };
 
     /* ----- Arranque ----- */
@@ -3688,7 +3703,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           if (f.size < A.minBytes) { rechazos.push({ nombre, motivo: M.archRechazoVacio }); continue; }
           const esFoto = A.optimiza.tipos.includes(ext(f.name));
           if (!esFoto && f.size > c.mb * BYTES_POR_MB) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoPeso, { peso: pesoTxt(f.size), mb: c.mb }) }); continue; }
-          const a = { nombre, size: f.size, original: f.size, tipo: f.type };
+          const a = { nombre, size: f.size, original: f.size, tipo: f.type, fuente: f };
           lista.push(a);
           procesa(f, a, el, c);
         }
@@ -3802,6 +3817,19 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       /* Un archivo soltado fuera de la zona haría que el navegador lo abriera y la persona perdiera todo. */
       window.addEventListener('dragover', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
       window.addEventListener('drop', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
+
+      /* Archivos en el borrador (P148). El estándar no los guarda en el dispositivo (FRM-43); si la
+         página da un proveedor, FormKit.iniciar(form, { borradorArchivos: { guarda(campo, archivos),
+         lee(campo), borra(campo) } }), al escribir el borrador se le pasan los archivos originales
+         de cada campo, al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
+         El proveedor decide dónde guardarlos (en el servidor, en el almacén del sistema). */
+      const camposArchivo = () => $$('[data-archivos]', form).map((c) => c.closest('[data-campo]'));
+      const conProveedor = (fn) => { const p = ctx.opciones.borradorArchivos; if (!p) return; for (const el of camposArchivo()) Promise.resolve().then(() => fn(p, el)).catch(() => { /* un proveedor que falla no detiene el formulario */ }); };
+      ctx.alBorrador({
+        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado !== 'error' && a.fuente).map((a) => a.fuente))),
+        restaura: () => conProveedor((p, el) => p.lee && Promise.resolve(p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); })),
+        borra: () => conProveedor((p, el) => p.borra && p.borra(el.dataset.campo))
+      });
 
       FormKit.archivos = { de: (el) => archivosPorCampo.get(el) || [], agrega };
     }
@@ -3919,10 +3947,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       const fig = document.createElement('figure');
       fig.className = 'visor-hoja-pdf';
       fig.dataset.hoja = String(n);
-      const pie = document.createElement('figcaption');
-      pie.className = 'visor-pie';
-      pie.textContent = hoja(n, doc.numPages);
-      fig.append(lienzo, pie);
+      /* Sin pie «Hoja n de total»: ya lo dice el contador de la barra, y repetido debajo
+         de la hoja confundía (P146). Al lector se lo dice el nombre del lienzo. */
+      fig.append(lienzo);
       figuras.push(fig);
       await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport: vista }).promise;
     }
