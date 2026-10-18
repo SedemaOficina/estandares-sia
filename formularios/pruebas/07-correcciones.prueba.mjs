@@ -549,7 +549,7 @@ test('una etiqueta de estado larga se parte en renglones en teléfono; en una ta
   await esc.context().close();
 });
 
-test('la foto viaja sin EXIF ni ubicación aunque recodificada pese más o no se pueda recodificar; otra imagen sin recodificar no se agrega (P127)', async () => {
+test('la foto viaja sin EXIF ni ubicación aunque recodificada pese más o no se pueda recodificar; la que no se puede limpiar se agrega como está (P127)', async () => {
   const p = await abre();
   /* Un JPG ya muy comprimido: recodificado pesa más que el original, que trae EXIF con GPS. */
   const base = Buffer.from(await p.evaluate(() => { const c = document.createElement('canvas'); c.width = 400; c.height = 300; const x = c.getContext('2d'); const g = x.createLinearGradient(0, 0, 400, 300); g.addColorStop(0, '#2a6'); g.addColorStop(1, '#a26'); x.fillStyle = g; x.fillRect(0, 0, 400, 300); return c.toDataURL('image/jpeg', 0.2).split(',')[1]; }), 'base64');
@@ -571,8 +571,7 @@ test('la foto viaja sin EXIF ni ubicación aunque recodificada pese más o no se
   assert.deepEqual(await enviado(), { exif: false, lat: undefined, tipo: 'image/jpeg', jpg: true }, 'sin poder recodificar, al JPG se le quitan los metadatos');
   await p.click('[data-campo="retrato"] .arch-quitar');
   await sube({ name: 'foto.png', mimeType: 'image/png', buffer: pngRuido(400, 300) });
-  assert.equal(await p.locator('[data-campo="retrato"] .arch').getAttribute('data-estado'), 'error', 'un PNG que no se pudo recodificar no se agrega');
-  assert.match(await p.locator('[data-campo="retrato"] .arch-estado').textContent(), /datos de ubicación/);
+  assert.equal(await p.locator('[data-campo="retrato"] .arch').getAttribute('data-estado'), 'listo', 'un PNG que no se pudo recodificar se agrega como está (decisión de la Secretaría, 18 oct 2026)');
   await p.context().close();
 });
 

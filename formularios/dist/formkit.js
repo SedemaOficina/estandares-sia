@@ -518,7 +518,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.2',
+    version: '1.4.3',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -657,7 +657,6 @@
       archRechazoTotal: 'con él se superan los {mb} MB en total.',
       archRechazoVacio: 'el archivo está vacío.',
       archRechazoDuplicado: 'ya adjuntaste ese mismo archivo.',
-      archRechazoExif: 'no se pudieron quitar los datos de ubicación de la imagen. Guárdala como JPG o elige otra.',
       archRechazoDimension: 'la imagen es demasiado pequeña (mínimo {ancho} × {alto} píxeles).',
       archRechazoOptimizada: 'aun optimizada pesa {peso} y el máximo es {mb} MB.',
       archLimite: '{admitidos}: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
@@ -717,7 +716,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.2
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.3
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -3481,7 +3480,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
      · imágenes: dimensiones mínimas; optimización a --lado px / calidad;
        los metadatos EXIF (fecha y GPS) se leen y viajan sólo si la
        configuración lo pide (archivos.conservarExif, decisión C6); si no,
-       la foto viaja siempre sin ellos, o no se agrega.
+       la foto viaja sin ellos siempre que se puedan quitar.
    Un archivo soltado fuera de la zona no abre el navegador sobre él.
 
    Contrato HTML:
@@ -3655,12 +3654,12 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
             if (opt && (opt.origen.ancho < A.imagen.anchoMin || opt.origen.alto < A.imagen.altoMin)) throw Object.assign(new Error('dimension'), { motivo: plantilla(M.archRechazoDimension, { ancho: A.imagen.anchoMin, alto: A.imagen.altoMin }) });
             /* Sin conservarExif (decisión C6), la foto viaja siempre recodificada, sin EXIF ni ubicación,
                aunque así pese más que la original. Si no se pudo recodificar, al JPG se le quitan los
-               metadatos y otra imagen se rechaza: la ubicación nunca sale del dispositivo sin pedirla. */
+               metadatos; si tampoco se puede, la foto se agrega como está: la Secretaría decidió no
+               rechazar una foto por sus metadatos (18 oct 2026). */
             if (opt && (opt.blob.size < f.size || !c.conservarExif)) { a.blob = opt.blob; a.size = opt.blob.size; a.tipo = 'image/jpeg'; a.optimizada = opt.blob.size < f.size; a.dimensiones = `${opt.ancho}x${opt.alto}`; }
             else if (!c.conservarExif) {
               const limpio = ['jpg', 'jpeg'].includes(e) ? sinExif(buf) : null;
-              if (!limpio) throw Object.assign(new Error('exif'), { motivo: M.archRechazoExif });
-              a.blob = limpio; a.size = limpio.size; a.optimizada = false;
+              a.blob = limpio || f; a.size = a.blob.size; a.optimizada = false;
             } else { a.blob = f; a.optimizada = false; }
             a.vista = URL.createObjectURL(a.blob);
           } else a.blob = f;
@@ -3729,7 +3728,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           cuerpo.append(n, e);
           li.appendChild(cuerpo);
           /* Reintentar sólo tiene sentido ante un fallo de proceso, no ante un rechazo de regla. */
-          if (a.estado === 'error' && a.archivoOriginal && !['firma', 'duplicado', 'dimension', 'peso', 'total', 'exif'].includes(a.codigo)) {
+          if (a.estado === 'error' && a.archivoOriginal && !['firma', 'duplicado', 'dimension', 'peso', 'total'].includes(a.codigo)) {
             const r = document.createElement('button'); r.type = 'button'; r.className = 'btn-enlace'; r.dataset.reintentar = String(i); r.textContent = M.archReintentar; li.appendChild(r);
           }
           const q = document.createElement('button'); q.type = 'button'; q.className = 'btn-icono arch-quitar'; q.dataset.quitar = String(i);

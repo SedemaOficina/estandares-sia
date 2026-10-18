@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.2
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.3
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma

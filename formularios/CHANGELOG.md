@@ -1,5 +1,9 @@
 # Historial de cambios
 
+## 1.4.3 · 2026-10-18
+
+- **P127 (ajuste, decisión de la Secretaría)** (módulo `archivos`, FRM-53): una foto a la que no se le pueden quitar los metadatos ya no se rechaza; se agrega como está, aunque lleve su ubicación. Lo demás de la 1.4.2 sigue: sin `conservarExif` la foto viaja siempre recodificada y sin EXIF, y si no se puede recodificar, al JPG se le quitan los metadatos. Sólo queda con metadatos una imagen que no es JPG y que el navegador no pudo recodificar, un caso raro. Se retira el mensaje `archRechazoExif` (156 mensajes).
+
 ## 1.4.2 · 2026-10-18
 
 Seis hallazgos del sistema de acreditaciones: su auditoría integral del 17 oct (P127 a P130) y su paso a la 1.4.1 (P126 y P131). 85 reglas (FRM-85 nueva).

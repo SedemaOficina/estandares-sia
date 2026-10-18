@@ -596,13 +596,13 @@ El estándar tiene **85 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-53 · Las fotografías se optimizan en el navegador y se conserva la huella del original
 
-**Regla.** Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6). Sin conservarExif, la foto viaja siempre recodificada, sin EXIF ni ubicación, aunque así pese más que la original; si no se puede recodificar, al JPG se le quitan los metadatos (EXIF, XMP e IPTC) y otra imagen no se agrega, con su motivo. La ubicación nunca sale del dispositivo sin pedirla.
+**Regla.** Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6). Sin conservarExif, la foto viaja siempre recodificada, sin EXIF ni ubicación, aunque así pese más que la original; si no se puede recodificar, al JPG se le quitan los metadatos (EXIF, XMP e IPTC). Si tampoco se pueden quitar, la foto se agrega como está: la Secretaría decidió no rechazar una foto por sus metadatos (18 oct 2026).
 
 **Por qué.** Una foto de 12 MB desde la calle no sube; sin huella no se prueba que la imagen es la que se tomó; el EXIF revela la ubicación de quien denuncia.
 
 **Nivel.** RECOMENDADO · **Origen.** A FRM-62; A FRM-63; B FRM-ARC-02; C6; P127 (proyecto de acreditaciones, 18 oct 2026) · *decisión heredada*
 
-**Verificación.** 01-por-pasos: sha256 en payload; validaciones.config.js ARCHIVOS; 07: foto sin EXIF aunque la recodificada pese más o no se pueda recodificar (P127)
+**Verificación.** 01-por-pasos: sha256 en payload; validaciones.config.js ARCHIVOS; 07: foto sin EXIF aunque la recodificada pese más o no se pueda recodificar; la que no se puede limpiar se agrega (P127)
 
 ### FRM-54 · El servidor revalida los archivos
 

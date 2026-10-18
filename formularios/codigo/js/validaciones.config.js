@@ -516,7 +516,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.2',
+    version: '1.4.3',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -655,7 +655,6 @@
       archRechazoTotal: 'con él se superan los {mb} MB en total.',
       archRechazoVacio: 'el archivo está vacío.',
       archRechazoDuplicado: 'ya adjuntaste ese mismo archivo.',
-      archRechazoExif: 'no se pudieron quitar los datos de ubicación de la imagen. Guárdala como JPG o elige otra.',
       archRechazoDimension: 'la imagen es demasiado pequeña (mínimo {ancho} × {alto} píxeles).',
       archRechazoOptimizada: 'aun optimizada pesa {peso} y el máximo es {mb} MB.',
       archLimite: '{admitidos}: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
