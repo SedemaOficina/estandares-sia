@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.1
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.2
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -39,6 +39,13 @@
   const normalizaBusqueda = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   let contadorIds = 0;
   const idUnico = (p) => `${p}-${++contadorIds}`;
+
+  /* Fecha y hora para leer («17 de octubre de 2026 a las 23:27»), en la zona de la
+     configuración y con su reloj: 24 horas salvo fechas.horas24 = false. */
+  const relojDe = (cfg) => ((cfg.fechas || {}).horas24 === false ? 'h12' : 'h23');
+  function fechaHora(valor, cfg = FormKit.config) {
+    return new Date(valor).toLocaleString(cfg.idioma, { dateStyle: 'long', timeStyle: 'short', timeZone: (cfg.fechas || {}).zonaHoraria, hourCycle: relojDe(cfg) });
+  }
 
   /* Fusión profunda de la configuración base con los ajustes del formulario
      (window.FORMKIT_CONFIG): el formulario sólo escribe lo que cambia. */
@@ -106,33 +113,45 @@
   }
 
   /* ---------- Avisos (FRM-39) ----------
-     FormKit.aviso(lugar, { tono, titulo, texto, foco }) pinta un aviso con el
-     icono y el rol de su tono, su título y su texto. Si lugar ya es un .aviso,
-     se pinta ahí; si no, va al principio de lugar y sustituye al que haya
-     puesto antes. foco: true cuando responde a una acción de la persona. El
-     marcado es el del contrato (<span class="aviso-texto">), así que sirve
-     también dentro de un <p class="aviso">. */
+     FormKit.aviso(lugar, { tono, titulo, texto, pasos, foco }) pinta un aviso
+     con el icono y el rol de su tono, su título, su texto y, si hay varias
+     acciones en orden, su secuencia «qué sigue» (FRM-84). texto es una cadena
+     (va en un <p>) o un nodo, por ejemplo un <p> con un enlace; pasos, una
+     lista de cadenas o nodos. Si lugar ya es un .aviso, se pinta ahí; si no,
+     va al principio de lugar y sustituye al que haya puesto antes. El cuerpo
+     es un <div class="aviso-texto">: una lista no cabe en un <p>, así que un
+     <p class="aviso"> se cambia por un <div> con sus mismos atributos (la
+     función devuelve el aviso pintado). foco: true cuando responde a una
+     acción de la persona. */
   const TONOS_AVISO = {
     neutro: { clase: '', icono: 'info', rol: '' },
     advertencia: { clase: 'aviso-advertencia', icono: 'alerta', rol: '' },
     bloqueo: { clase: 'aviso-bloqueo', icono: 'error', rol: 'alert' },
     ok: { clase: 'aviso-ok', icono: 'ok', rol: 'status' }
   };
-  function aviso(lugar, { tono = 'neutro', titulo = '', texto = '', foco = false } = {}) {
+  function aviso(lugar, { tono = 'neutro', titulo = '', texto = '', pasos = [], foco = false } = {}) {
     const t = TONOS_AVISO[tono] || TONOS_AVISO.neutro;
     let a = lugar.classList.contains('aviso') ? lugar : $(':scope > [data-aviso-formkit]', lugar);
     if (!a) { a = document.createElement('div'); a.dataset.avisoFormkit = ''; lugar.prepend(a); }
+    if (a.tagName === 'P') { const d = document.createElement('div'); for (const at of [...a.attributes]) d.setAttribute(at.name, at.value); a.replaceWith(d); a = d; }
     a.className = ['aviso', t.clase, ...[...a.classList].filter((c) => !/^aviso(-|$)/.test(c))].filter(Boolean).join(' ');
     if (t.rol) a.setAttribute('role', t.rol); else a.removeAttribute('role');
-    const cuerpo = document.createElement('span');
+    const cuerpo = document.createElement('div');
     cuerpo.className = 'aviso-texto';
     if (titulo) { const h = document.createElement('strong'); h.className = 'aviso-titulo'; h.textContent = titulo; cuerpo.appendChild(h); }
-    if (texto) cuerpo.appendChild(document.createTextNode(texto));
+    for (const x of [].concat(texto)) if (x || x === 0) cuerpo.appendChild(x instanceof Node ? x : Object.assign(document.createElement('p'), { textContent: x }));
+    const lista = [].concat(pasos).filter(Boolean);
+    if (lista.length) {
+      const ol = document.createElement('ol');
+      ol.className = 'secuencia';
+      for (const x of lista) { const li = document.createElement('li'); li.className = 'secuencia-item'; li.append(x instanceof Node ? x : String(x)); ol.appendChild(li); }
+      cuerpo.appendChild(ol);
+    }
     a.replaceChildren(icono(t.icono), cuerpo);
     a.hidden = false;
     if (foco) { a.tabIndex = -1; a.focus(); }
     /* Sin rol ni foco nadie lo leería: se anuncia, y ya está a la vista. */
-    else if (!t.rol) anuncia([titulo, texto].filter(Boolean).join(' '));
+    else if (!t.rol) anuncia([...cuerpo.querySelectorAll(':scope > *, li')].filter((e) => e.tagName !== 'OL').map((e) => e.textContent.trim()).join(' '));
     return a;
   }
 
@@ -712,7 +731,7 @@
     function iniciaFranja(b) {
       franja.hidden = false;
       const f = $('[data-borrador-fecha]', franja);
-      if (f) f.textContent = new Date(b.t).toLocaleString(cfg.idioma, { dateStyle: 'long', timeStyle: 'short' });
+      if (f) f.textContent = fechaHora(b.t, cfg);
       franja.addEventListener('click', (e) => {
         const a = e.target.closest('[data-borrador]');
         if (!a) return;
@@ -963,7 +982,7 @@
     registra, iniciar, anuncia, aviso, icono, almacen,
     /* FormKit.marcaError(campo, mensaje): pinta el error junto al campo, en el formulario que lo tenga. */
     marcaError: marcaErrorGlobal,
-    utilidades: { $, $$, plantilla, pesoTxt, normalizaBusqueda, idUnico, fusiona },
+    utilidades: { $, $$, plantilla, pesoTxt, normalizaBusqueda, idUnico, fusiona, fechaHora, relojDe },
     /* Ganchos que un módulo puede ocupar: validaTodo (pasos), submit, estadoBorrador, restauraBorrador, erroresServidor. */
     ganchos: {}
   };

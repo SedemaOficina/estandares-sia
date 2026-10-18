@@ -59,7 +59,7 @@
           anuncia(M.descargaLista);
         } catch (err) {
           let av = previo;
-          if (!av) { av = document.createElement('p'); av.className = 'aviso'; av.dataset.descargaAviso = ''; b.after(av); }
+          if (!av) { av = document.createElement('div'); av.className = 'aviso'; av.dataset.descargaAviso = ''; b.after(av); }
           FormKit.aviso(av, { tono: 'advertencia', texto: M.descargaError });
         }
         finally { b.removeAttribute('aria-busy'); b.removeAttribute('aria-disabled'); if (texto) texto.textContent = original; }

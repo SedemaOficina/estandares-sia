@@ -2,7 +2,7 @@
 
 > Este documento se **genera** de `reglas/reglas.json` (`node herramientas/generar-reglas.mjs`). No se edita a mano: se corrige la regla en el JSON y se vuelve a generar.
 
-El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **55 BASE** (obligatorias en todo formulario), **21 RECOMENDADAS** (se cumplen salvo justificación escrita) y **8 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 3 son mejores prácticas adicionales.
+El estándar tiene **85 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **55 BASE** (obligatorias en todo formulario), **22 RECOMENDADAS** (se cumplen salvo justificación escrita) y **8 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 4 son mejores prácticas adicionales.
 
 **Cómo leer cada regla.** *Regla*: qué se hace. *Por qué*: el daño que evita. *Nivel*: BASE, RECOMENDADO u OPCIONAL (quien programa elige los módulos, no el nivel). *Origen*: `A FRM-xx` regla del paquete A; `B FRM-XXX-xx` regla del paquete B; `Cn` conflicto decidido en la fase 0 (ver `docs/09-trazabilidad.md`); `encargo n` sección del encargo; `norma n` norma de construcción de sistemas. *Verificación*: la prueba, herramienta o revisión que la comprueba.
 
@@ -17,7 +17,7 @@ El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13).
 7. [Ubicación y domicilio](#7-ubicación-y-domicilio) · FRM-46 a FRM-50
 8. [Archivos y evidencia](#8-archivos-y-evidencia) · FRM-51 a FRM-54
 9. [Datos personales y protección contra el abuso](#9-datos-personales-y-protección-contra-el-abuso) · FRM-55 a FRM-59
-10. [Móvil y escritorio](#10-móvil-y-escritorio) · FRM-60 a FRM-65
+10. [Móvil y escritorio](#10-móvil-y-escritorio) · FRM-60 a FRM-85
 11. [Hojas de estilo y código](#11-hojas-de-estilo-y-código) · FRM-66 a FRM-72
 12. [Textos y pendientes visibles](#12-textos-y-pendientes-visibles) · FRM-73 a FRM-76
 13. [Bibliotecas, tipografías y verificación](#13-bibliotecas-tipografías-y-verificación) · FRM-77 a FRM-81
@@ -25,7 +25,7 @@ El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13).
 ## Resumen por nivel
 
 - **BASE**: FRM-07, FRM-08, FRM-09, FRM-10, FRM-11, FRM-12, FRM-13, FRM-14, FRM-15, FRM-16, FRM-17, FRM-26, FRM-27, FRM-28, FRM-29, FRM-30, FRM-32, FRM-33, FRM-34, FRM-35, FRM-36, FRM-37, FRM-39, FRM-40, FRM-44, FRM-45, FRM-48, FRM-51, FRM-54, FRM-55, FRM-56, FRM-59, FRM-60, FRM-61, FRM-62, FRM-63, FRM-64, FRM-65, FRM-66, FRM-67, FRM-68, FRM-69, FRM-70, FRM-71, FRM-72, FRM-73, FRM-74, FRM-75, FRM-76, FRM-77, FRM-78, FRM-79, FRM-80, FRM-81, FRM-84
-- **RECOMENDADO**: FRM-01, FRM-02, FRM-03, FRM-04, FRM-05, FRM-06, FRM-18, FRM-19, FRM-20, FRM-31, FRM-38, FRM-41, FRM-42, FRM-43, FRM-46, FRM-52, FRM-53, FRM-57, FRM-58, FRM-82, FRM-83
+- **RECOMENDADO**: FRM-01, FRM-02, FRM-03, FRM-04, FRM-05, FRM-06, FRM-18, FRM-19, FRM-20, FRM-31, FRM-38, FRM-41, FRM-42, FRM-43, FRM-46, FRM-52, FRM-53, FRM-57, FRM-58, FRM-82, FRM-83, FRM-85
 - **OPCIONAL**: FRM-21, FRM-22, FRM-23, FRM-24, FRM-25, FRM-47, FRM-49, FRM-50
 
 ## 1. Estructura y flujo
@@ -82,13 +82,13 @@ El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-06 · Un acuse con folio al terminar
 
-**Regla.** Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue como secuencia numerada (FRM-84), si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia.
+**Regla.** Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue como secuencia numerada (FRM-84), si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia. La fecha y la hora de recepción se escriben en la zona de la Ciudad y en 24 horas («17 de octubre de 2026 a las 23:27»); con fechas.horas24 = false, en 12 horas con a. m. y p. m.
 
 **Por qué.** Sin acuse la persona no sabe si terminó; sin folio no puede dar seguimiento.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-09; B FRM-EST-03; P72 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-09; B FRM-EST-03; P72 (proyecto de acreditaciones, 17 oct 2026); P128 (proyecto de acreditaciones, 18 oct 2026) · *decisión heredada*
 
-**Verificación.** 01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs; 07: relleno y acción del acuse
+**Verificación.** 01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs; 07: relleno y acción del acuse; 07: fecha en 24 horas (P128)
 
 ### FRM-07 · La pregunta condicional existe sólo mientras aplica
 
@@ -328,13 +328,13 @@ El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-30 · Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, folio fiscal, contraseña
 
-**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año, y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos.
+**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el RFC conserva la Ñ (se quitan los acentos, no la tilde de la Ñ); el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año, y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos.
 
 **Por qué.** Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.
 
-**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026); P42 (proyecto de acreditaciones, 15 oct 2026); P73 (proyecto de acreditaciones, 17 oct 2026); P82 (proyecto de acreditaciones, 17 oct 2026); P98 (proyecto de acreditaciones, 17 oct 2026); P112 (proyecto de acreditaciones, 17 oct 2026) · *decisión del encargo*
+**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026); P42 (proyecto de acreditaciones, 15 oct 2026); P73 (proyecto de acreditaciones, 17 oct 2026); P82 (proyecto de acreditaciones, 17 oct 2026); P98 (proyecto de acreditaciones, 17 oct 2026); P112 (proyecto de acreditaciones, 17 oct 2026); P129 (proyecto de acreditaciones, 18 oct 2026) · *decisión del encargo*
 
-**Verificación.** guía: probador; 06-servidor; validaciones.config.js
+**Verificación.** guía: probador; 06-servidor; validaciones.config.js; 06: RFC con Ñ (P129)
 
 ### FRM-31 · Las validaciones cruzadas marcan los campos implicados y pueden ser advertencia
 
@@ -420,13 +420,13 @@ El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-39 · Cuatro avisos, cada uno con el icono de su tono, título, texto y rol
 
-**Regla.** Neutro (informa, sin rol, icono info), advertencia (ámbar, sin bloqueo, icono alerta), bloqueo (rojo, role=alert, icono error) y éxito (verde, role=status, icono ok). El icono de su tono va siempre. Un aviso de más de una frase lleva título (.aviso-titulo) que dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. Lo que impide continuar es asertivo; lo demás es cortés. El aviso que responde a una acción de la persona recibe el foco; FormKit.aviso(lugar, {tono, titulo, texto, foco}) lo pinta así. Un aviso nunca sustituye al mensaje del campo.
+**Regla.** Neutro (informa, sin rol, icono info), advertencia (ámbar, sin bloqueo, icono alerta), bloqueo (rojo, role=alert, icono error) y éxito (verde, role=status, icono ok). El icono de su tono va siempre. Un aviso de más de una frase lleva título (.aviso-titulo) que dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. Lo que impide continuar es asertivo; lo demás es cortés. El aviso que responde a una acción de la persona recibe el foco; FormKit.aviso(lugar, {tono, titulo, texto, pasos, foco}) lo pinta así, con su cuerpo en <div class="aviso-texto">: texto puede ser un nodo (un párrafo con un enlace) y pasos, la secuencia «qué sigue». Un aviso nunca sustituye al mensaje del campo.
 
 **Por qué.** Un aviso rojo para todo entrena a ignorarlo; un alert cortés no se oye; una frase larga sin título no deja ver si algo salió bien o mal.
 
-**Nivel.** BASE · **Origen.** encargo 5.4; P115 (proyecto de acreditaciones, 17 oct 2026) · *decisión del encargo*
+**Nivel.** BASE · **Origen.** encargo 5.4; P115 (proyecto de acreditaciones, 17 oct 2026); P131 (proyecto de acreditaciones, 18 oct 2026) · *decisión del encargo*
 
-**Verificación.** guía: botones y avisos; 05-accesibilidad; 07: FormKit.aviso (P115)
+**Verificación.** guía: botones y avisos; 05-accesibilidad; 07: FormKit.aviso (P115); 07: aviso con pasos y enlace (P131)
 
 ### FRM-40 · Lo que cambia sin recargar se anuncia, y todo anuncio también se ve
 
@@ -460,21 +460,21 @@ El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-83 · Las etiquetas de estado usan cinco familias con significado fijo, icono y palabra
 
-**Regla.** El estado de un trámite o un registro se muestra con el módulo «estado», en cinco familias según a quién le toca qué: hecho (estado-ok, verde: validado, aprobado), te toca actuar (estado-atencion, ámbar: corregir, completar, un borrador sin enviar), en marcha (estado-proceso, azul: en revisión, en trámite), cerrado sin éxito (estado-rechazo, rojo: rechazado, cancelado, vencido) y terminado (estado-terminado, gris: concluido, archivado). Cada una lleva su icono y la palabra dice el estado. Cada estado de un sistema cae en una de las cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia.
+**Regla.** El estado de un trámite o un registro se muestra con el módulo «estado», en cinco familias según a quién le toca qué: hecho (estado-ok, verde: validado, aprobado), te toca actuar (estado-atencion, ámbar: corregir, completar, un borrador sin enviar), en marcha (estado-proceso, azul: en revisión, en trámite), cerrado sin éxito (estado-rechazo, rojo: rechazado, cancelado, vencido) y terminado (estado-terminado, gris: concluido, archivado). Cada una lleva su icono y la palabra dice el estado. Cada estado de un sistema cae en una de las cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia. Una etiqueta larga se parte en renglones y nunca ensancha su tarjeta ni su tabla en teléfono; sólo en una tabla de computadora va en una línea.
 
 **Por qué.** Nueve tonos sin regla obligan a aprender una leyenda por sistema, y una etiqueta sólo de color no dice nada a quien no distingue colores.
 
-**Nivel.** RECOMENDADO · **Origen.** P118 (proyecto de acreditaciones, 17 oct 2026) · *mejor práctica adicional*
+**Nivel.** RECOMENDADO · **Origen.** P118 (proyecto de acreditaciones, 17 oct 2026); P126 (proyecto de acreditaciones, 18 oct 2026) · *mejor práctica adicional*
 
-**Verificación.** guía: etiquetas de estado; contraste C45 a C49; 07: familias e iconos (P118)
+**Verificación.** guía: etiquetas de estado; contraste C45 a C49; 07: familias e iconos (P118); 07: etiqueta larga en teléfono (P126)
 
 ### FRM-84 · Varias acciones en orden van en una secuencia numerada, no en un párrafo
 
-**Regla.** Cuando hay que decir dos o más acciones en orden (qué sigue después del acuse o de una decisión, qué hacer para corregir, los pasos de un trámite en su ficha), van en una lista numerada <ol class="secuencia"> con un <li class="secuencia-item"> por acción, cada una empezando con su verbo. Nunca encadenadas en un párrafo («Abra el expediente… El siguiente paso es… La persona ve…»). La secuencia es del núcleo: sirve en el acuse (centrada), en el resultado (pasos), en un aviso y en cualquier pantalla.
+**Regla.** Cuando hay que decir dos o más acciones en orden (qué sigue después del acuse o de una decisión, qué hacer para corregir, los pasos de un trámite en su ficha), van en una lista numerada <ol class="secuencia"> con un <li class="secuencia-item"> por acción, cada una empezando con su verbo. Nunca encadenadas en un párrafo («Abra el expediente… El siguiente paso es… La persona ve…»). La secuencia es del núcleo: sirve en el acuse (centrada), en el resultado y en FormKit.aviso (pasos), en un aviso escrito en el HTML y en cualquier pantalla.
 
 **Por qué.** En un párrafo, quien lee pierde la cuenta de cuántas acciones son, en qué orden van y cuál le toca.
 
-**Nivel.** BASE · **Origen.** P119 (proyecto de acreditaciones, 17 oct 2026) · *mejor práctica adicional*
+**Nivel.** BASE · **Origen.** P119 (proyecto de acreditaciones, 17 oct 2026); P131 (proyecto de acreditaciones, 18 oct 2026) · *mejor práctica adicional*
 
 **Verificación.** guía: botones y avisos, resultado y sí y no; 07: secuencia fuera del acuse (P119)
 
@@ -482,11 +482,11 @@ El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-42 · Todo formulario largo guarda borrador en el dispositivo y lo ofrece al volver
 
-**Regla.** Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja «Tienes un borrador» con Recuperar y Descartar (con confirmación). El aviso dice que el borrador aún no se presenta.
+**Regla.** Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja «Tienes un borrador» con Recuperar y Descartar (con confirmación). El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas.
 
 **Por qué.** Perder diez minutos de captura por cerrar la pestaña es la causa principal de abandono.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-14; A FRM-17; B FRM-EST-04 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-14; A FRM-17; B FRM-EST-04; P128 (proyecto de acreditaciones, 18 oct 2026) · *decisión heredada*
 
 **Verificación.** 01-por-pasos: borrador se guarda, se ofrece y se restaura
 
@@ -596,13 +596,13 @@ El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-53 · Las fotografías se optimizan en el navegador y se conserva la huella del original
 
-**Regla.** Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6).
+**Regla.** Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6). Sin conservarExif, la foto viaja siempre recodificada, sin EXIF ni ubicación, aunque así pese más que la original; si no se puede recodificar, al JPG se le quitan los metadatos (EXIF, XMP e IPTC) y otra imagen no se agrega, con su motivo. La ubicación nunca sale del dispositivo sin pedirla.
 
 **Por qué.** Una foto de 12 MB desde la calle no sube; sin huella no se prueba que la imagen es la que se tomó; el EXIF revela la ubicación de quien denuncia.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-62; A FRM-63; B FRM-ARC-02; C6 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-62; A FRM-63; B FRM-ARC-02; C6; P127 (proyecto de acreditaciones, 18 oct 2026) · *decisión heredada*
 
-**Verificación.** 01-por-pasos: sha256 en payload; validaciones.config.js ARCHIVOS
+**Verificación.** 01-por-pasos: sha256 en payload; validaciones.config.js ARCHIVOS; 07: foto sin EXIF aunque la recodificada pese más o no se pueda recodificar (P127)
 
 ### FRM-54 · El servidor revalida los archivos
 
@@ -727,6 +727,16 @@ El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13).
 **Nivel.** BASE · **Origen.** A FRM-48; B FRM-A11Y-04 · *decisión heredada*
 
 **Verificación.** 03-anchos: movimiento reducido; nucleo.css adaptaciones
+
+### FRM-85 · Cada imagen pesa lo que se muestra
+
+**Regla.** Una imagen del paquete se guarda a lo más al doble del tamaño en que se muestra (para pantallas de alta densidad) y su <img> lleva width y height con su tamaño real, para que la página no salte al cargar. El logotipo se muestra a 48 px de alto y se guarda a 96 (477 × 96 px, 27 KB). Una imagen de miles de píxeles que se ve a 200 se descarga entera en cada pantalla, también en el teléfono con red limitada.
+
+**Por qué.** El logotipo a 3829 px pesaba 110 KB en cada pantalla para verse a unos 200 px.
+
+**Nivel.** RECOMENDADO · **Origen.** P130 (proyecto de acreditaciones, 18 oct 2026) · *mejor práctica adicional*
+
+**Verificación.** 06: tamaño del logotipo y de su <img> (P130)
 
 ## 11. Hojas de estilo y código
 

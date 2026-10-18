@@ -17,7 +17,8 @@
        asigna el nombre definitivo);
      · imágenes: dimensiones mínimas; optimización a --lado px / calidad;
        los metadatos EXIF (fecha y GPS) se leen y viajan sólo si la
-       configuración lo pide (archivos.conservarExif, decisión C6).
+       configuración lo pide (archivos.conservarExif, decisión C6); si no,
+       la foto viaja siempre sin ellos, o no se agrega.
    Un archivo soltado fuera de la zona no abre el navegador sobre él.
 
    Contrato HTML:
@@ -138,6 +139,25 @@
         return r;
       }
 
+      /* Quita de un JPG sus metadatos (APP1: EXIF y XMP; APP13: IPTC) sin tocar
+         la imagen. null si el archivo no se puede leer como JPG. */
+      function sinExif(buf) {
+        const v = new DataView(buf);
+        if (v.byteLength < 4 || v.getUint16(0) !== 0xFFD8) return null;
+        const partes = [buf.slice(0, 2)];
+        let o = 2;
+        while (o + 4 <= v.byteLength) {
+          const m = v.getUint16(o);
+          if ((m & 0xFF00) !== 0xFF00) return null;
+          if (m === 0xFFDA) { partes.push(buf.slice(o)); return new Blob(partes, { type: 'image/jpeg' }); }
+          const fin = o + 2 + v.getUint16(o + 2);
+          if (fin > v.byteLength) return null;
+          if (m !== 0xFFE1 && m !== 0xFFED) partes.push(buf.slice(o, fin));
+          o = fin;
+        }
+        return null;
+      }
+
       /* Reduce y recodifica (lo que además retira el EXIF de la imagen). */
       function optimizaFoto(file) {
         const o = A.optimiza;
@@ -170,8 +190,15 @@
             if (c.conservarExif) { if (meta.fecha) a.fecha_captura = meta.fecha; if (meta.lat !== undefined) { a.lat_captura = meta.lat; a.lon_captura = meta.lon; } }
             const opt = await optimizaFoto(f).catch(() => null);
             if (opt && (opt.origen.ancho < A.imagen.anchoMin || opt.origen.alto < A.imagen.altoMin)) throw Object.assign(new Error('dimension'), { motivo: plantilla(M.archRechazoDimension, { ancho: A.imagen.anchoMin, alto: A.imagen.altoMin }) });
-            if (opt && opt.blob.size < f.size) { a.blob = opt.blob; a.size = opt.blob.size; a.tipo = 'image/jpeg'; a.optimizada = true; a.dimensiones = `${opt.ancho}x${opt.alto}`; }
-            else { a.blob = f; a.optimizada = false; }
+            /* Sin conservarExif (decisión C6), la foto viaja siempre recodificada, sin EXIF ni ubicación,
+               aunque así pese más que la original. Si no se pudo recodificar, al JPG se le quitan los
+               metadatos y otra imagen se rechaza: la ubicación nunca sale del dispositivo sin pedirla. */
+            if (opt && (opt.blob.size < f.size || !c.conservarExif)) { a.blob = opt.blob; a.size = opt.blob.size; a.tipo = 'image/jpeg'; a.optimizada = opt.blob.size < f.size; a.dimensiones = `${opt.ancho}x${opt.alto}`; }
+            else if (!c.conservarExif) {
+              const limpio = ['jpg', 'jpeg'].includes(e) ? sinExif(buf) : null;
+              if (!limpio) throw Object.assign(new Error('exif'), { motivo: M.archRechazoExif });
+              a.blob = limpio; a.size = limpio.size; a.optimizada = false;
+            } else { a.blob = f; a.optimizada = false; }
             a.vista = URL.createObjectURL(a.blob);
           } else a.blob = f;
           /* El límite se mide DESPUÉS de optimizar: una foto de 30 MB que queda en 1 MB no se rechaza por lo que pesaba. */
@@ -239,7 +266,7 @@
           cuerpo.append(n, e);
           li.appendChild(cuerpo);
           /* Reintentar sólo tiene sentido ante un fallo de proceso, no ante un rechazo de regla. */
-          if (a.estado === 'error' && a.archivoOriginal && !['firma', 'duplicado', 'dimension', 'peso', 'total'].includes(a.codigo)) {
+          if (a.estado === 'error' && a.archivoOriginal && !['firma', 'duplicado', 'dimension', 'peso', 'total', 'exif'].includes(a.codigo)) {
             const r = document.createElement('button'); r.type = 'button'; r.className = 'btn-enlace'; r.dataset.reintentar = String(i); r.textContent = M.archReintentar; li.appendChild(r);
           }
           const q = document.createElement('button'); q.type = 'button'; q.className = 'btn-icono arch-quitar'; q.dataset.quitar = String(i);

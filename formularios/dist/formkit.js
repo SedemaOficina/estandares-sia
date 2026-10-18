@@ -34,6 +34,8 @@
   /* Formatos de archivo para leerlos: en mayúsculas y sin repetir JPEG (jpg y jpeg son el mismo). */
   const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+  /* La Ñ es letra, no acento: el RFC la admite y no se cambia por N. */
+  const sinAcentosSalvoEnie = (v) => [...String(v ?? '').normalize('NFC')].map((c) => (c === 'Ñ' || c === 'ñ' ? c : sinAcentos(c))).join('');
   const esFechaReal = (a, m, d) => { const f = new Date(Date.UTC(a, m - 1, d)); return f.getUTCFullYear() === a && f.getUTCMonth() === m - 1 && f.getUTCDate() === d; };
 
   /* Fecha escrita como día/mes/año (formato «fecha-dma»): 23/07/1985,
@@ -274,7 +276,7 @@
     rfc: {
       descripcion: 'RFC: 12 caracteres (persona moral) o 13 (persona física). Estructura a confirmar con el emisor [Fuente: __]',
       inputmode: 'text', autocomplete: 'off',
-      normaliza: (v) => sinAcentos(recorta(v)).toUpperCase().replace(/[\s-]/g, ''),
+      normaliza: (v) => sinAcentosSalvoEnie(recorta(v)).toUpperCase().replace(/[\s-]/g, ''),
       valida: (v, a = {}, cfg = CONFIG) => {
         if (!/^([A-ZÑ&]{3,4})(\d{6})([A-Z0-9]{3})$/.test(v)) return cfg.mensajes.fmtRfc;
         const aa = Number(v.slice(-9, -7)), mm = Number(v.slice(-7, -5)), dd = Number(v.slice(-5, -3));
@@ -516,9 +518,10 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.1',
+    version: '1.4.2',
     idioma: 'es-MX',
-    fechas: { zonaHoraria: 'America/Mexico_City' },
+    /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
+    fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
        rectángulo envolvente. Un formulario de alcance nacional pone null. */
     ambito: {
@@ -654,6 +657,7 @@
       archRechazoTotal: 'con él se superan los {mb} MB en total.',
       archRechazoVacio: 'el archivo está vacío.',
       archRechazoDuplicado: 'ya adjuntaste ese mismo archivo.',
+      archRechazoExif: 'no se pudieron quitar los datos de ubicación de la imagen. Guárdala como JPG o elige otra.',
       archRechazoDimension: 'la imagen es demasiado pequeña (mínimo {ancho} × {alto} píxeles).',
       archRechazoOptimizada: 'aun optimizada pesa {peso} y el máximo es {mb} MB.',
       archLimite: '{admitidos}: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
@@ -713,7 +717,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.1
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.2
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -753,6 +757,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   const normalizaBusqueda = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   let contadorIds = 0;
   const idUnico = (p) => `${p}-${++contadorIds}`;
+
+  /* Fecha y hora para leer («17 de octubre de 2026 a las 23:27»), en la zona de la
+     configuración y con su reloj: 24 horas salvo fechas.horas24 = false. */
+  const relojDe = (cfg) => ((cfg.fechas || {}).horas24 === false ? 'h12' : 'h23');
+  function fechaHora(valor, cfg = FormKit.config) {
+    return new Date(valor).toLocaleString(cfg.idioma, { dateStyle: 'long', timeStyle: 'short', timeZone: (cfg.fechas || {}).zonaHoraria, hourCycle: relojDe(cfg) });
+  }
 
   /* Fusión profunda de la configuración base con los ajustes del formulario
      (window.FORMKIT_CONFIG): el formulario sólo escribe lo que cambia. */
@@ -820,33 +831,45 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   }
 
   /* ---------- Avisos (FRM-39) ----------
-     FormKit.aviso(lugar, { tono, titulo, texto, foco }) pinta un aviso con el
-     icono y el rol de su tono, su título y su texto. Si lugar ya es un .aviso,
-     se pinta ahí; si no, va al principio de lugar y sustituye al que haya
-     puesto antes. foco: true cuando responde a una acción de la persona. El
-     marcado es el del contrato (<span class="aviso-texto">), así que sirve
-     también dentro de un <p class="aviso">. */
+     FormKit.aviso(lugar, { tono, titulo, texto, pasos, foco }) pinta un aviso
+     con el icono y el rol de su tono, su título, su texto y, si hay varias
+     acciones en orden, su secuencia «qué sigue» (FRM-84). texto es una cadena
+     (va en un <p>) o un nodo, por ejemplo un <p> con un enlace; pasos, una
+     lista de cadenas o nodos. Si lugar ya es un .aviso, se pinta ahí; si no,
+     va al principio de lugar y sustituye al que haya puesto antes. El cuerpo
+     es un <div class="aviso-texto">: una lista no cabe en un <p>, así que un
+     <p class="aviso"> se cambia por un <div> con sus mismos atributos (la
+     función devuelve el aviso pintado). foco: true cuando responde a una
+     acción de la persona. */
   const TONOS_AVISO = {
     neutro: { clase: '', icono: 'info', rol: '' },
     advertencia: { clase: 'aviso-advertencia', icono: 'alerta', rol: '' },
     bloqueo: { clase: 'aviso-bloqueo', icono: 'error', rol: 'alert' },
     ok: { clase: 'aviso-ok', icono: 'ok', rol: 'status' }
   };
-  function aviso(lugar, { tono = 'neutro', titulo = '', texto = '', foco = false } = {}) {
+  function aviso(lugar, { tono = 'neutro', titulo = '', texto = '', pasos = [], foco = false } = {}) {
     const t = TONOS_AVISO[tono] || TONOS_AVISO.neutro;
     let a = lugar.classList.contains('aviso') ? lugar : $(':scope > [data-aviso-formkit]', lugar);
     if (!a) { a = document.createElement('div'); a.dataset.avisoFormkit = ''; lugar.prepend(a); }
+    if (a.tagName === 'P') { const d = document.createElement('div'); for (const at of [...a.attributes]) d.setAttribute(at.name, at.value); a.replaceWith(d); a = d; }
     a.className = ['aviso', t.clase, ...[...a.classList].filter((c) => !/^aviso(-|$)/.test(c))].filter(Boolean).join(' ');
     if (t.rol) a.setAttribute('role', t.rol); else a.removeAttribute('role');
-    const cuerpo = document.createElement('span');
+    const cuerpo = document.createElement('div');
     cuerpo.className = 'aviso-texto';
     if (titulo) { const h = document.createElement('strong'); h.className = 'aviso-titulo'; h.textContent = titulo; cuerpo.appendChild(h); }
-    if (texto) cuerpo.appendChild(document.createTextNode(texto));
+    for (const x of [].concat(texto)) if (x || x === 0) cuerpo.appendChild(x instanceof Node ? x : Object.assign(document.createElement('p'), { textContent: x }));
+    const lista = [].concat(pasos).filter(Boolean);
+    if (lista.length) {
+      const ol = document.createElement('ol');
+      ol.className = 'secuencia';
+      for (const x of lista) { const li = document.createElement('li'); li.className = 'secuencia-item'; li.append(x instanceof Node ? x : String(x)); ol.appendChild(li); }
+      cuerpo.appendChild(ol);
+    }
     a.replaceChildren(icono(t.icono), cuerpo);
     a.hidden = false;
     if (foco) { a.tabIndex = -1; a.focus(); }
     /* Sin rol ni foco nadie lo leería: se anuncia, y ya está a la vista. */
-    else if (!t.rol) anuncia([titulo, texto].filter(Boolean).join(' '));
+    else if (!t.rol) anuncia([...cuerpo.querySelectorAll(':scope > *, li')].filter((e) => e.tagName !== 'OL').map((e) => e.textContent.trim()).join(' '));
     return a;
   }
 
@@ -1426,7 +1449,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     function iniciaFranja(b) {
       franja.hidden = false;
       const f = $('[data-borrador-fecha]', franja);
-      if (f) f.textContent = new Date(b.t).toLocaleString(cfg.idioma, { dateStyle: 'long', timeStyle: 'short' });
+      if (f) f.textContent = fechaHora(b.t, cfg);
       franja.addEventListener('click', (e) => {
         const a = e.target.closest('[data-borrador]');
         if (!a) return;
@@ -1677,7 +1700,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     registra, iniciar, anuncia, aviso, icono, almacen,
     /* FormKit.marcaError(campo, mensaje): pinta el error junto al campo, en el formulario que lo tenga. */
     marcaError: marcaErrorGlobal,
-    utilidades: { $, $$, plantilla, pesoTxt, normalizaBusqueda, idUnico, fusiona },
+    utilidades: { $, $$, plantilla, pesoTxt, normalizaBusqueda, idUnico, fusiona, fechaHora, relojDe },
     /* Ganchos que un módulo puede ocupar: validaTodo (pasos), submit, estadoBorrador, restauraBorrador, erroresServidor. */
     ganchos: {}
   };
@@ -2613,7 +2636,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const folio = $('[data-acuse-folio]', sec);
         if (folio) folio.textContent = respuesta.folio || '';
         const fecha = $('[data-acuse-fecha]', sec);
-        if (fecha) fecha.textContent = respuesta.fecha ? new Date(respuesta.fecha).toLocaleString(cfg.idioma, { dateStyle: 'long', timeStyle: 'short', timeZone: cfg.fechas.zonaHoraria }) : '';
+        if (fecha) fecha.textContent = respuesta.fecha ? FormKit.utilidades.fechaHora(respuesta.fecha, cfg) : '';
         const desc = $('[data-acuse-descarga]', sec);
         if (desc) {
           desc.hidden = !respuesta.acuseUrl;
@@ -2706,7 +2729,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     /* «Quedó guardado a las 14:30 · Ana López»: la hora en la zona del formulario. */
     const cuando = hora ? new Date(hora) : new Date();
     const zona = { timeZone: cfg.fechas.zonaHoraria };
-    const horaTxt = cuando.toLocaleTimeString(cfg.idioma, { ...zona, hour: '2-digit', minute: '2-digit', hour12: false });
+    const horaTxt = cuando.toLocaleTimeString(cfg.idioma, { ...zona, hour: '2-digit', minute: '2-digit', hourCycle: FormKit.utilidades.relojDe(cfg) });
     const dia = (d) => d.toLocaleDateString(cfg.idioma, { ...zona, dateStyle: 'long' });
     const esHoy = dia(cuando) === dia(new Date());
     const meta = document.createElement('p');
@@ -2989,7 +3012,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           anuncia(M.descargaLista);
         } catch (err) {
           let av = previo;
-          if (!av) { av = document.createElement('p'); av.className = 'aviso'; av.dataset.descargaAviso = ''; b.after(av); }
+          if (!av) { av = document.createElement('div'); av.className = 'aviso'; av.dataset.descargaAviso = ''; b.after(av); }
           FormKit.aviso(av, { tono: 'advertencia', texto: M.descargaError });
         }
         finally { b.removeAttribute('aria-busy'); b.removeAttribute('aria-disabled'); if (texto) texto.textContent = original; }
@@ -3457,7 +3480,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
        asigna el nombre definitivo);
      · imágenes: dimensiones mínimas; optimización a --lado px / calidad;
        los metadatos EXIF (fecha y GPS) se leen y viajan sólo si la
-       configuración lo pide (archivos.conservarExif, decisión C6).
+       configuración lo pide (archivos.conservarExif, decisión C6); si no,
+       la foto viaja siempre sin ellos, o no se agrega.
    Un archivo soltado fuera de la zona no abre el navegador sobre él.
 
    Contrato HTML:
@@ -3578,6 +3602,25 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         return r;
       }
 
+      /* Quita de un JPG sus metadatos (APP1: EXIF y XMP; APP13: IPTC) sin tocar
+         la imagen. null si el archivo no se puede leer como JPG. */
+      function sinExif(buf) {
+        const v = new DataView(buf);
+        if (v.byteLength < 4 || v.getUint16(0) !== 0xFFD8) return null;
+        const partes = [buf.slice(0, 2)];
+        let o = 2;
+        while (o + 4 <= v.byteLength) {
+          const m = v.getUint16(o);
+          if ((m & 0xFF00) !== 0xFF00) return null;
+          if (m === 0xFFDA) { partes.push(buf.slice(o)); return new Blob(partes, { type: 'image/jpeg' }); }
+          const fin = o + 2 + v.getUint16(o + 2);
+          if (fin > v.byteLength) return null;
+          if (m !== 0xFFE1 && m !== 0xFFED) partes.push(buf.slice(o, fin));
+          o = fin;
+        }
+        return null;
+      }
+
       /* Reduce y recodifica (lo que además retira el EXIF de la imagen). */
       function optimizaFoto(file) {
         const o = A.optimiza;
@@ -3610,8 +3653,15 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
             if (c.conservarExif) { if (meta.fecha) a.fecha_captura = meta.fecha; if (meta.lat !== undefined) { a.lat_captura = meta.lat; a.lon_captura = meta.lon; } }
             const opt = await optimizaFoto(f).catch(() => null);
             if (opt && (opt.origen.ancho < A.imagen.anchoMin || opt.origen.alto < A.imagen.altoMin)) throw Object.assign(new Error('dimension'), { motivo: plantilla(M.archRechazoDimension, { ancho: A.imagen.anchoMin, alto: A.imagen.altoMin }) });
-            if (opt && opt.blob.size < f.size) { a.blob = opt.blob; a.size = opt.blob.size; a.tipo = 'image/jpeg'; a.optimizada = true; a.dimensiones = `${opt.ancho}x${opt.alto}`; }
-            else { a.blob = f; a.optimizada = false; }
+            /* Sin conservarExif (decisión C6), la foto viaja siempre recodificada, sin EXIF ni ubicación,
+               aunque así pese más que la original. Si no se pudo recodificar, al JPG se le quitan los
+               metadatos y otra imagen se rechaza: la ubicación nunca sale del dispositivo sin pedirla. */
+            if (opt && (opt.blob.size < f.size || !c.conservarExif)) { a.blob = opt.blob; a.size = opt.blob.size; a.tipo = 'image/jpeg'; a.optimizada = opt.blob.size < f.size; a.dimensiones = `${opt.ancho}x${opt.alto}`; }
+            else if (!c.conservarExif) {
+              const limpio = ['jpg', 'jpeg'].includes(e) ? sinExif(buf) : null;
+              if (!limpio) throw Object.assign(new Error('exif'), { motivo: M.archRechazoExif });
+              a.blob = limpio; a.size = limpio.size; a.optimizada = false;
+            } else { a.blob = f; a.optimizada = false; }
             a.vista = URL.createObjectURL(a.blob);
           } else a.blob = f;
           /* El límite se mide DESPUÉS de optimizar: una foto de 30 MB que queda en 1 MB no se rechaza por lo que pesaba. */
@@ -3679,7 +3729,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           cuerpo.append(n, e);
           li.appendChild(cuerpo);
           /* Reintentar sólo tiene sentido ante un fallo de proceso, no ante un rechazo de regla. */
-          if (a.estado === 'error' && a.archivoOriginal && !['firma', 'duplicado', 'dimension', 'peso', 'total'].includes(a.codigo)) {
+          if (a.estado === 'error' && a.archivoOriginal && !['firma', 'duplicado', 'dimension', 'peso', 'total', 'exif'].includes(a.codigo)) {
             const r = document.createElement('button'); r.type = 'button'; r.className = 'btn-enlace'; r.dataset.reintentar = String(i); r.textContent = M.archReintentar; li.appendChild(r);
           }
           const q = document.createElement('button'); q.type = 'button'; q.className = 'btn-icono arch-quitar'; q.dataset.quitar = String(i);

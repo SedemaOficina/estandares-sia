@@ -14,7 +14,7 @@
    ========================================================= */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sirve, abreNavegador, abrePagina, abrePlantilla, PERFILES, PAGINAS, pngRuido } from './ayudas.mjs';
+import { sirve, abreNavegador, abrePagina, abrePlantilla, PERFILES, PAGINAS, pngRuido, jpegConExif } from './ayudas.mjs';
 
 let servidor, navegador;
 test.before(async () => { servidor = await sirve(); navegador = await abreNavegador(); });
@@ -527,4 +527,80 @@ test('la secuencia «qué sigue» sirve fuera del acuse: en el resultado y en un
   const enAcuse = await t.locator('.acuse .secuencia').evaluate((ol) => { const c = getComputedStyle(ol); return { ancho: c.maxWidth !== 'none', filete: c.borderTopStyle }; });
   assert.deepEqual(enAcuse, { ancho: true, filete: 'solid' }, 'en el acuse conserva su ancho y su filete');
   await t.context().close();
+});
+
+/* ----- Versión 1.4.2: P126 a P131 (auditoría integral del 17 oct) ----- */
+
+test('una etiqueta de estado larga se parte en renglones en teléfono; en una tabla de computadora va en una línea (P126)', async () => {
+  const largo = 'Requiere corrección de la identificación oficial y del comprobante de domicilio';
+  const mide = (p) => p.evaluate((t) => {
+    const el = FormKit.estado(document.getElementById('estado-solicitud'), { tono: 'atencion', texto: t });
+    const tabla = document.createElement('table'); tabla.className = 'tabla'; tabla.innerHTML = '<tbody><tr><td><span class="estado estado-ok">Validada</span></td></tr></tbody>'; document.body.append(tabla);
+    return { derecha: el.getBoundingClientRect().right, ancho: document.documentElement.clientWidth, desborde: document.documentElement.scrollWidth - document.documentElement.clientWidth, enTabla: getComputedStyle(tabla.querySelector('.estado')).whiteSpace };
+  }, largo);
+  const tel = await abreDesenlace(PERFILES.movil);
+  const m = await mide(tel);
+  assert.ok(m.derecha <= m.ancho, `la etiqueta cabe en la pantalla: ${JSON.stringify(m)}`);
+  assert.equal(m.desborde, 0, 'y la página no se desborda');
+  assert.equal(m.enTabla, 'normal', 'en teléfono, también en la tabla se parte');
+  await tel.context().close();
+  const esc = await abreDesenlace();
+  assert.equal((await mide(esc)).enTabla, 'nowrap', 'en una tabla de computadora va en una línea');
+  await esc.context().close();
+});
+
+test('la foto viaja sin EXIF ni ubicación aunque recodificada pese más o no se pueda recodificar; otra imagen sin recodificar no se agrega (P127)', async () => {
+  const p = await abre();
+  /* Un JPG ya muy comprimido: recodificado pesa más que el original, que trae EXIF con GPS. */
+  const base = Buffer.from(await p.evaluate(() => { const c = document.createElement('canvas'); c.width = 400; c.height = 300; const x = c.getContext('2d'); const g = x.createLinearGradient(0, 0, 400, 300); g.addColorStop(0, '#2a6'); g.addColorStop(1, '#a26'); x.fillStyle = g; x.fillRect(0, 0, 400, 300); return c.toDataURL('image/jpeg', 0.2).split(',')[1]; }), 'base64');
+  const foto = jpegConExif(base);
+  const entrada = '[data-campo="retrato"] input[type="file"]:not([data-entrada-camara])';
+  const sube = async (archivo) => { await p.setInputFiles(entrada, [archivo]); await p.waitForSelector('[data-campo="retrato"] .arch:not([data-estado="procesando"]):not([data-estado="espera"])'); };
+  const enviado = () => p.evaluate(async () => {
+    const a = FormKit.iniciar(document.getElementById('formulario')).payload().archivos[0];
+    const b = new Uint8Array(await a.blob.arrayBuffer());
+    let exif = false; for (let i = 0; i + 5 < b.length; i++) if (b[i] === 0x45 && b[i + 1] === 0x78 && b[i + 2] === 0x69 && b[i + 3] === 0x66 && b[i + 4] === 0) { exif = true; break; }
+    return { exif, lat: a.lat_captura, tipo: a.tipo, jpg: b[0] === 0xFF && b[1] === 0xD8 };
+  });
+  assert.ok(foto.includes(Buffer.from('Exif\0')), 'la foto de prueba trae EXIF');
+  await sube({ name: 'foto.jpg', mimeType: 'image/jpeg', buffer: foto });
+  assert.deepEqual(await enviado(), { exif: false, lat: undefined, tipo: 'image/jpeg', jpg: true }, 'recodificada, aunque pese más que la original');
+  await p.click('[data-campo="retrato"] .arch-quitar');
+  await p.evaluate(() => { window.createImageBitmap = undefined; });
+  await sube({ name: 'foto.jpg', mimeType: 'image/jpeg', buffer: foto });
+  assert.deepEqual(await enviado(), { exif: false, lat: undefined, tipo: 'image/jpeg', jpg: true }, 'sin poder recodificar, al JPG se le quitan los metadatos');
+  await p.click('[data-campo="retrato"] .arch-quitar');
+  await sube({ name: 'foto.png', mimeType: 'image/png', buffer: pngRuido(400, 300) });
+  assert.equal(await p.locator('[data-campo="retrato"] .arch').getAttribute('data-estado'), 'error', 'un PNG que no se pudo recodificar no se agrega');
+  assert.match(await p.locator('[data-campo="retrato"] .arch-estado').textContent(), /datos de ubicación/);
+  await p.context().close();
+});
+
+test('la fecha del acuse va en 24 horas, en la hora de la Ciudad, salvo que la configuración pida 12 (P128)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  const r = await p.evaluate(() => {
+    FormKit.acuse.pinta({ folio: 'EJ-1', fecha: '2026-10-18T05:27:00Z' });
+    const doce = { ...FormKit.config, fechas: { ...FormKit.config.fechas, horas24: false } };
+    return { acuse: document.querySelector('[data-acuse-fecha]').textContent, medianoche: FormKit.utilidades.fechaHora('2026-10-18T06:05:00Z'), doce: FormKit.utilidades.fechaHora('2026-10-18T05:27:00Z', doce) };
+  });
+  assert.match(r.acuse, /^17 de octubre de 2026(,| a las) 23:27$/);
+  assert.match(r.medianoche, /^18 de octubre de 2026(,| a las) 00:05$/, 'la medianoche es 00, no 24');
+  assert.match(r.doce, /11:27\s?p\.\s?m\./, 'con horas24 = false, en 12 horas');
+  await p.context().close();
+});
+
+test('FormKit.aviso lleva pasos y un párrafo con enlace, con su cuerpo en un div; un <p class="aviso"> se vuelve <div> (P131)', async () => {
+  const p = await abreDesenlace();
+  const r = await p.evaluate(() => {
+    const enlace = Object.assign(document.createElement('a'), { href: '#resultado', textContent: 'el expediente' });
+    const parrafo = document.createElement('p'); parrafo.append('Revisa ', enlace, '.');
+    const a = FormKit.aviso(document.getElementById('avisos'), { tono: 'advertencia', titulo: 'Devuelta para corregir', texto: parrafo, pasos: ['Abre «Mis documentos».', 'Sube la identificación.'] });
+    const viejo = Object.assign(document.createElement('p'), { className: 'aviso', id: 'aviso-p' }); viejo.dataset.dato = 'x'; document.body.append(viejo);
+    const b = FormKit.aviso(viejo, { tono: 'ok', texto: 'Listo.', pasos: ['Uno', 'Dos'] });
+    return { cuerpo: a.querySelector(':scope > .aviso-texto').tagName, enlace: a.querySelector('.aviso-texto a').textContent, pasos: [...a.querySelectorAll('ol.secuencia > li.secuencia-item')].map((l) => l.textContent), b: [b.tagName, b.id, b.dataset.dato, b.className, document.getElementById('aviso-p') === b, b.querySelectorAll('li').length] };
+  });
+  assert.deepEqual(r, { cuerpo: 'DIV', enlace: 'el expediente', pasos: ['Abre «Mis documentos».', 'Sube la identificación.'], b: ['DIV', 'aviso-p', 'x', 'aviso aviso-ok', true, 2] });
+  await p.waitForFunction(() => document.querySelector('[data-anuncios]').textContent === 'Devuelta para corregir Revisa el expediente. Abre «Mis documentos». Sube la identificación.');
+  assert.deepEqual(p.registro, [], 'consola limpia');
+  await p.context().close();
 });

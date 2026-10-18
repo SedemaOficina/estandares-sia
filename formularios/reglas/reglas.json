@@ -130,16 +130,17 @@
    "id": "FRM-06",
    "seccion": 1,
    "titulo": "Un acuse con folio al terminar",
-   "regla": "Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue como secuencia numerada (FRM-84), si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia.",
+   "regla": "Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue como secuencia numerada (FRM-84), si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia. La fecha y la hora de recepción se escriben en la zona de la Ciudad y en 24 horas («17 de octubre de 2026 a las 23:27»); con fechas.horas24 = false, en 12 horas con a. m. y p. m.",
    "porque": "Sin acuse la persona no sabe si terminó; sin folio no puede dar seguimiento.",
    "nivel": "RECOMENDADO",
    "origen": [
     "A FRM-09",
     "B FRM-EST-03",
-    "P72 (proyecto de acreditaciones, 17 oct 2026)"
+    "P72 (proyecto de acreditaciones, 17 oct 2026)",
+    "P128 (proyecto de acreditaciones, 18 oct 2026)"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs; 07: relleno y acción del acuse"
+   "verificacion": "01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs; 07: relleno y acción del acuse; 07: fecha en 24 horas (P128)"
   },
   {
    "id": "FRM-07",
@@ -492,7 +493,7 @@
    "id": "FRM-30",
    "seccion": 4,
    "titulo": "Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, folio fiscal, contraseña",
-   "regla": "Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año, y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos.",
+   "regla": "Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el RFC conserva la Ñ (se quitan los acentos, no la tilde de la Ñ); el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año, y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos.",
    "porque": "Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.",
    "nivel": "BASE",
    "origen": [
@@ -503,10 +504,11 @@
     "P73 (proyecto de acreditaciones, 17 oct 2026)",
     "P82 (proyecto de acreditaciones, 17 oct 2026)",
     "P98 (proyecto de acreditaciones, 17 oct 2026)",
-    "P112 (proyecto de acreditaciones, 17 oct 2026)"
+    "P112 (proyecto de acreditaciones, 17 oct 2026)",
+    "P129 (proyecto de acreditaciones, 18 oct 2026)"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "guía: probador; 06-servidor; validaciones.config.js"
+   "verificacion": "guía: probador; 06-servidor; validaciones.config.js; 06: RFC con Ñ (P129)"
   },
   {
    "id": "FRM-31",
@@ -626,15 +628,16 @@
    "id": "FRM-39",
    "seccion": 5,
    "titulo": "Cuatro avisos, cada uno con el icono de su tono, título, texto y rol",
-   "regla": "Neutro (informa, sin rol, icono info), advertencia (ámbar, sin bloqueo, icono alerta), bloqueo (rojo, role=alert, icono error) y éxito (verde, role=status, icono ok). El icono de su tono va siempre. Un aviso de más de una frase lleva título (.aviso-titulo) que dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. Lo que impide continuar es asertivo; lo demás es cortés. El aviso que responde a una acción de la persona recibe el foco; FormKit.aviso(lugar, {tono, titulo, texto, foco}) lo pinta así. Un aviso nunca sustituye al mensaje del campo.",
+   "regla": "Neutro (informa, sin rol, icono info), advertencia (ámbar, sin bloqueo, icono alerta), bloqueo (rojo, role=alert, icono error) y éxito (verde, role=status, icono ok). El icono de su tono va siempre. Un aviso de más de una frase lleva título (.aviso-titulo) que dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. Lo que impide continuar es asertivo; lo demás es cortés. El aviso que responde a una acción de la persona recibe el foco; FormKit.aviso(lugar, {tono, titulo, texto, pasos, foco}) lo pinta así, con su cuerpo en <div class=\"aviso-texto\">: texto puede ser un nodo (un párrafo con un enlace) y pasos, la secuencia «qué sigue». Un aviso nunca sustituye al mensaje del campo.",
    "porque": "Un aviso rojo para todo entrena a ignorarlo; un alert cortés no se oye; una frase larga sin título no deja ver si algo salió bien o mal.",
    "nivel": "BASE",
    "origen": [
     "encargo 5.4",
-    "P115 (proyecto de acreditaciones, 17 oct 2026)"
+    "P115 (proyecto de acreditaciones, 17 oct 2026)",
+    "P131 (proyecto de acreditaciones, 18 oct 2026)"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "guía: botones y avisos; 05-accesibilidad; 07: FormKit.aviso (P115)"
+   "verificacion": "guía: botones y avisos; 05-accesibilidad; 07: FormKit.aviso (P115); 07: aviso con pasos y enlace (P131)"
   },
   {
    "id": "FRM-40",
@@ -667,13 +670,14 @@
    "id": "FRM-42",
    "seccion": 6,
    "titulo": "Todo formulario largo guarda borrador en el dispositivo y lo ofrece al volver",
-   "regla": "Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja «Tienes un borrador» con Recuperar y Descartar (con confirmación). El aviso dice que el borrador aún no se presenta.",
+   "regla": "Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja «Tienes un borrador» con Recuperar y Descartar (con confirmación). El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas.",
    "porque": "Perder diez minutos de captura por cerrar la pestaña es la causa principal de abandono.",
    "nivel": "RECOMENDADO",
    "origen": [
     "A FRM-14",
     "A FRM-17",
-    "B FRM-EST-04"
+    "B FRM-EST-04",
+    "P128 (proyecto de acreditaciones, 18 oct 2026)"
    ],
    "tipo": "decisión heredada",
    "verificacion": "01-por-pasos: borrador se guarda, se ofrece y se restaura"
@@ -831,17 +835,18 @@
    "id": "FRM-53",
    "seccion": 8,
    "titulo": "Las fotografías se optimizan en el navegador y se conserva la huella del original",
-   "regla": "Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6).",
+   "regla": "Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6). Sin conservarExif, la foto viaja siempre recodificada, sin EXIF ni ubicación, aunque así pese más que la original; si no se puede recodificar, al JPG se le quitan los metadatos (EXIF, XMP e IPTC) y otra imagen no se agrega, con su motivo. La ubicación nunca sale del dispositivo sin pedirla.",
    "porque": "Una foto de 12 MB desde la calle no sube; sin huella no se prueba que la imagen es la que se tomó; el EXIF revela la ubicación de quien denuncia.",
    "nivel": "RECOMENDADO",
    "origen": [
     "A FRM-62",
     "A FRM-63",
     "B FRM-ARC-02",
-    "C6"
+    "C6",
+    "P127 (proyecto de acreditaciones, 18 oct 2026)"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "01-por-pasos: sha256 en payload; validaciones.config.js ARCHIVOS"
+   "verificacion": "01-por-pasos: sha256 en payload; validaciones.config.js ARCHIVOS; 07: foto sin EXIF aunque la recodificada pese más o no se pueda recodificar (P127)"
   },
   {
    "id": "FRM-54",
@@ -1265,27 +1270,42 @@
    "id": "FRM-83",
    "seccion": 5,
    "titulo": "Las etiquetas de estado usan cinco familias con significado fijo, icono y palabra",
-   "regla": "El estado de un trámite o un registro se muestra con el módulo «estado», en cinco familias según a quién le toca qué: hecho (estado-ok, verde: validado, aprobado), te toca actuar (estado-atencion, ámbar: corregir, completar, un borrador sin enviar), en marcha (estado-proceso, azul: en revisión, en trámite), cerrado sin éxito (estado-rechazo, rojo: rechazado, cancelado, vencido) y terminado (estado-terminado, gris: concluido, archivado). Cada una lleva su icono y la palabra dice el estado. Cada estado de un sistema cae en una de las cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia.",
+   "regla": "El estado de un trámite o un registro se muestra con el módulo «estado», en cinco familias según a quién le toca qué: hecho (estado-ok, verde: validado, aprobado), te toca actuar (estado-atencion, ámbar: corregir, completar, un borrador sin enviar), en marcha (estado-proceso, azul: en revisión, en trámite), cerrado sin éxito (estado-rechazo, rojo: rechazado, cancelado, vencido) y terminado (estado-terminado, gris: concluido, archivado). Cada una lleva su icono y la palabra dice el estado. Cada estado de un sistema cae en una de las cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia. Una etiqueta larga se parte en renglones y nunca ensancha su tarjeta ni su tabla en teléfono; sólo en una tabla de computadora va en una línea.",
    "porque": "Nueve tonos sin regla obligan a aprender una leyenda por sistema, y una etiqueta sólo de color no dice nada a quien no distingue colores.",
    "nivel": "RECOMENDADO",
    "origen": [
-    "P118 (proyecto de acreditaciones, 17 oct 2026)"
+    "P118 (proyecto de acreditaciones, 17 oct 2026)",
+    "P126 (proyecto de acreditaciones, 18 oct 2026)"
    ],
    "tipo": "mejor práctica adicional",
-   "verificacion": "guía: etiquetas de estado; contraste C45 a C49; 07: familias e iconos (P118)"
+   "verificacion": "guía: etiquetas de estado; contraste C45 a C49; 07: familias e iconos (P118); 07: etiqueta larga en teléfono (P126)"
   },
   {
    "id": "FRM-84",
    "seccion": 5,
    "titulo": "Varias acciones en orden van en una secuencia numerada, no en un párrafo",
-   "regla": "Cuando hay que decir dos o más acciones en orden (qué sigue después del acuse o de una decisión, qué hacer para corregir, los pasos de un trámite en su ficha), van en una lista numerada <ol class=\"secuencia\"> con un <li class=\"secuencia-item\"> por acción, cada una empezando con su verbo. Nunca encadenadas en un párrafo («Abra el expediente… El siguiente paso es… La persona ve…»). La secuencia es del núcleo: sirve en el acuse (centrada), en el resultado (pasos), en un aviso y en cualquier pantalla.",
+   "regla": "Cuando hay que decir dos o más acciones en orden (qué sigue después del acuse o de una decisión, qué hacer para corregir, los pasos de un trámite en su ficha), van en una lista numerada <ol class=\"secuencia\"> con un <li class=\"secuencia-item\"> por acción, cada una empezando con su verbo. Nunca encadenadas en un párrafo («Abra el expediente… El siguiente paso es… La persona ve…»). La secuencia es del núcleo: sirve en el acuse (centrada), en el resultado y en FormKit.aviso (pasos), en un aviso escrito en el HTML y en cualquier pantalla.",
    "porque": "En un párrafo, quien lee pierde la cuenta de cuántas acciones son, en qué orden van y cuál le toca.",
    "nivel": "BASE",
    "origen": [
-    "P119 (proyecto de acreditaciones, 17 oct 2026)"
+    "P119 (proyecto de acreditaciones, 17 oct 2026)",
+    "P131 (proyecto de acreditaciones, 18 oct 2026)"
    ],
    "tipo": "mejor práctica adicional",
    "verificacion": "guía: botones y avisos, resultado y sí y no; 07: secuencia fuera del acuse (P119)"
+  },
+  {
+   "id": "FRM-85",
+   "seccion": 10,
+   "titulo": "Cada imagen pesa lo que se muestra",
+   "regla": "Una imagen del paquete se guarda a lo más al doble del tamaño en que se muestra (para pantallas de alta densidad) y su <img> lleva width y height con su tamaño real, para que la página no salte al cargar. El logotipo se muestra a 48 px de alto y se guarda a 96 (477 × 96 px, 27 KB). Una imagen de miles de píxeles que se ve a 200 se descarga entera en cada pantalla, también en el teléfono con red limitada.",
+   "porque": "El logotipo a 3829 px pesaba 110 KB en cada pantalla para verse a unos 200 px.",
+   "nivel": "RECOMENDADO",
+   "origen": [
+    "P130 (proyecto de acreditaciones, 18 oct 2026)"
+   ],
+   "tipo": "mejor práctica adicional",
+   "verificacion": "06: tamaño del logotipo y de su <img> (P130)"
   }
  ]
 }

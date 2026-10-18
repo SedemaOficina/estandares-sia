@@ -1,6 +1,6 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -49,7 +49,7 @@
         "nivel": "BASE"
       },
       {
-        "pieza": "Avisos (neutro, advertencia, bloqueo, éxito) con título e icono por tono, FormKit.aviso() y pendiente visible",
+        "pieza": "Avisos (neutro, advertencia, bloqueo, éxito) con título e icono por tono, FormKit.aviso() con texto, enlace y pasos, y pendiente visible",
         "nivel": "BASE"
       },
       {
@@ -81,8 +81,8 @@
       "tokens.css": 8535,
       "base.css": 6062,
       "nucleo.css": 19344,
-      "validaciones.config.js": 42012,
-      "formkit.core.js": 52226,
+      "validaciones.config.js": 42484,
+      "formkit.core.js": 53666,
       "iconos.js": 6047
     }
   },
@@ -398,7 +398,7 @@
       },
       "tamano": {
         "css": 2250,
-        "js": 3619
+        "js": 3540
       }
     },
     {
@@ -427,7 +427,7 @@
       },
       "tamano": {
         "css": 2546,
-        "js": 5807
+        "js": 5836
       }
     },
     {
@@ -509,7 +509,7 @@
       },
       "tamano": {
         "css": 434,
-        "js": 3803
+        "js": 3805
       }
     },
     {
@@ -739,20 +739,21 @@
       "dependencias": [],
       "js": true,
       "accesibilidad": "La palabra dice el estado; el icono y el color sólo lo refuerzan. Texto de 4.5:1 o más en los cinco tonos. Al cambiar por una acción, se anuncia.",
-      "movil": "Etiqueta en una sola línea; en la tabla va en la celda con su rótulo.",
-      "escritorio": "Igual.",
+      "movil": "Una etiqueta larga se parte en renglones; no ensancha su tarjeta ni su tabla.",
+      "escritorio": "En una tabla, en una sola línea.",
       "errores": [
         "Inventar tonos por sistema (nueve colores sin regla).",
         "Etiqueta sólo de color, sin icono ni palabra.",
         "Usar el rojo para «En revisión» o el verde para «Enviado».",
-        "Una etiqueta sin familia (la consola lo avisa y queda como terminado)."
+        "Una etiqueta sin familia (la consola lo avisa y queda como terminado).",
+        "Una etiqueta que no se parte y ensancha su tarjeta o su tabla en teléfono."
       ],
       "archivos": {
         "css": "codigo/modulos/estado/estado.css",
         "js": "codigo/modulos/estado/estado.js"
       },
       "tamano": {
-        "css": 1208,
+        "css": 1490,
         "js": 2923
       }
     },
@@ -773,7 +774,8 @@
         "Validar sólo por extensión.",
         "Medir el peso antes de optimizar.",
         "Enviar la ubicación de la foto sin que la persona lo sepa.",
-        "Dejar «Elegir archivo» a la vista con el máximo ya cargado: la persona cree que no subió nada."
+        "Dejar «Elegir archivo» a la vista con el máximo ya cargado: la persona cree que no subió nada.",
+        "Enviar la foto original, con su EXIF y su ubicación, porque recodificada pesaba más."
       ],
       "archivos": {
         "css": "codigo/modulos/archivos/archivos.css",
@@ -781,7 +783,7 @@
       },
       "tamano": {
         "css": 3211,
-        "js": 20357
+        "js": 21904
       }
     },
     {
@@ -922,5 +924,5 @@
       }
     }
   ],
-  "generado": "2026-10-18T02:40:07.347Z"
+  "generado": "2026-10-18T14:31:56.663Z"
 }

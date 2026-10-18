@@ -1,5 +1,18 @@
 # Historial de cambios
 
+## 1.4.2 · 2026-10-18
+
+Seis hallazgos del sistema de acreditaciones: su auditoría integral del 17 oct (P127 a P130) y su paso a la 1.4.1 (P126 y P131). 85 reglas (FRM-85 nueva).
+
+- **P126 · Una etiqueta de estado larga se parte en renglones** (módulo `estado`, FRM-83): llevaba `white-space: nowrap`, así que en teléfono una etiqueta larga ensanchaba su tarjeta o su tabla más allá de la pantalla. Ahora se parte, con `max-width: 100%`. Sólo dentro de una `.tabla` en computadora (desde 760 px) va en una línea. El proyecto puede quitar sus reglas de `.estado` y `.tabla-bandeja .estado` en `apd.css`.
+- **P127 · La ubicación de una foto ya no se cuela** (módulo `archivos`, FRM-53): la versión recodificada, sin EXIF, sólo se usaba si pesaba menos que la original. Si la foto ya venía comprimida o no se podía recodificar, viajaba la original con su EXIF y su ubicación GPS aunque `conservarExif` fuera falso. Ahora, sin `conservarExif`, la foto viaja siempre recodificada, aunque pese más. Si no se puede recodificar, al JPG se le quitan los metadatos (EXIF, XMP e IPTC) y otra imagen no se agrega, con su motivo (mensaje `archRechazoExif`, 157 en total).
+- **P128 · Fechas en 24 horas** (núcleo, acuse y resultado; FRM-06 y FRM-42): la fecha del acuse y la del borrador salían en 12 horas con «p.m.». Ahora una sola función, `FormKit.utilidades.fechaHora`, las escribe en la zona de la Ciudad y en 24 horas («17 de octubre de 2026 a las 23:27»). El resultado usa el mismo reloj. Con `FORMKIT_CONFIG.fechas.horas24 = false` vuelven las 12 horas. El borrador ya usa también la zona de la Ciudad.
+- **P129 · El RFC conserva la Ñ** (formato `rfc`, FRM-30): al quitar los acentos se quitaba también la tilde de la Ñ, y un RFC con Ñ se guardaba con N, sin aviso, en el navegador y en el servidor. Ahora se quitan los acentos y la Ñ se queda, también si llega descompuesta. Caso nuevo en el probador de la guía.
+- **P130 · Logotipo ligero** (FRM-85 nueva): `logotipo-sedema.png` medía 3829 px de ancho (110 KB) para mostrarse a 48 px de alto. Ahora mide 477 × 96 px, el doble de lo que se muestra (27 KB). Los `<img>` de las plantillas, los ejemplos y las tres guías dicen su tamaño real. El original quedó fuera del paquete.
+- **P131 · `FormKit.aviso` con pasos y enlaces** (núcleo, FRM-39 y FRM-84): sólo recibía texto, y armaba el cuerpo como `span.aviso-texto`, donde una lista no es válida. Ahora el cuerpo es `div.aviso-texto`, `texto` puede ser un nodo (un párrafo con un enlace) y `pasos` pone la secuencia «qué sigue». Un `<p class="aviso">` que se le pase se cambia por un `<div>` con sus mismos atributos. El proyecto puede quitar `APD.aviso`.
+
+**Pruebas**: cuatro casos nuevos en `07-correcciones` (35 en total) y dos en `06` (RFC con Ñ y tamaño del logotipo).
+
 ## 1.4.1 · 2026-10-17
 
 Dos hallazgos más del sistema de acreditaciones: P118 completo (con las familias que propuso el proyecto) y P119. 84 reglas (FRM-84 nueva) y 30 iconos (`archivo`, nuevo).

@@ -300,6 +300,31 @@ test('servidor · el mensaje de límite de una fecha AAAA-MM-DD da la fecha en d
   assert.ok(r.errores.some((x) => x.campo === 'inicio' && x.mensaje.includes('21/10/2026')), JSON.stringify(r.errores));
 });
 
+test('servidor · el RFC conserva la Ñ; se quitan los acentos, no la tilde de la Ñ (P129)', () => {
+  const f = globalThis.FORMKIT_VALIDACIONES.formatos.rfc;
+  assert.equal(f.normaliza('muño-800101-ab1'), 'MUÑO800101AB1');
+  assert.equal(f.normaliza('MUÑO800101AB1'), 'MUÑO800101AB1', 'también si la Ñ llega descompuesta (N más tilde)');
+  assert.equal(f.normaliza('pérez'), 'PEREZ', 'los acentos sí se quitan');
+  const e = esquemaDe('<div class="campo" data-campo="rfc" data-formato="rfc" data-requerido data-uso="x."><label class="etiqueta" for="rfc">RFC</label><input class="control" id="rfc" name="rfc" maxlength="13"></div>');
+  const r = validaPayload({ datos: { rfc: 'muño800101ab1' }, meta: META }, e);
+  assert.deepEqual(r.errores, [], JSON.stringify(r.errores));
+  assert.equal(r.datos.rfc, 'MUÑO800101AB1', 'el servidor lo guarda con Ñ');
+});
+
+test('imágenes · el logotipo mide a lo más el doble de lo que se muestra y cada <img> dice su tamaño real (P130)', () => {
+  const png = readFileSync(resolve(RAIZ, 'codigo/imagenes/logotipo-sedema.png'));
+  const ancho = png.readUInt32BE(16), alto = png.readUInt32BE(20);
+  const altoVisible = Number(/--alto-logo:(\d+)px/.exec(readFileSync(resolve(RAIZ, 'codigo/css/tokens.css'), 'utf8'))[1]);
+  assert.ok(alto <= altoVisible * 2, `alto ${alto} px para mostrarse a ${altoVisible} px`);
+  assert.ok(png.length < 40 * 1024, `pesa ${Math.round(png.length / 1024)} KB`);
+  const paginas = ['codigo/plantillas/por-pasos.html', 'codigo/plantillas/una-pagina.html', 'guia-visual/index.html', 'guia-visual/ejemplos/encuesta.html', 'guia-visual/ejemplos/captura-interna.html', '../guia-visual/index.html', '../geovisores/guia-visual/index.html'];
+  for (const pag of paginas) {
+    const m = /logotipo-sedema\.png" width="(\d+)" height="(\d+)"/.exec(readFileSync(resolve(RAIZ, pag), 'utf8'));
+    assert.ok(m, `${pag} usa el logotipo con width y height`);
+    assert.deepEqual([Number(m[1]), Number(m[2])], [ancho, alto], `${pag}: el <img> dice el tamaño real`);
+  }
+});
+
 test('esquema · sólo lee lo que está dentro del <form>: un control de la página no cambia el último campo (P90)', () => {
   const archivo = join(TEMPORAL, `prueba-${++cuentaTemporal}.html`);
   writeFileSync(archivo, `<main>

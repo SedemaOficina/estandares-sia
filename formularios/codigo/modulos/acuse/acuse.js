@@ -43,7 +43,7 @@
         const folio = $('[data-acuse-folio]', sec);
         if (folio) folio.textContent = respuesta.folio || '';
         const fecha = $('[data-acuse-fecha]', sec);
-        if (fecha) fecha.textContent = respuesta.fecha ? new Date(respuesta.fecha).toLocaleString(cfg.idioma, { dateStyle: 'long', timeStyle: 'short', timeZone: cfg.fechas.zonaHoraria }) : '';
+        if (fecha) fecha.textContent = respuesta.fecha ? FormKit.utilidades.fechaHora(respuesta.fecha, cfg) : '';
         const desc = $('[data-acuse-descarga]', sec);
         if (desc) {
           desc.hidden = !respuesta.acuseUrl;

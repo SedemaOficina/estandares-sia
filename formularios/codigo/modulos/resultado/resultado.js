@@ -65,7 +65,7 @@
     /* «Quedó guardado a las 14:30 · Ana López»: la hora en la zona del formulario. */
     const cuando = hora ? new Date(hora) : new Date();
     const zona = { timeZone: cfg.fechas.zonaHoraria };
-    const horaTxt = cuando.toLocaleTimeString(cfg.idioma, { ...zona, hour: '2-digit', minute: '2-digit', hour12: false });
+    const horaTxt = cuando.toLocaleTimeString(cfg.idioma, { ...zona, hour: '2-digit', minute: '2-digit', hourCycle: FormKit.utilidades.relojDe(cfg) });
     const dia = (d) => d.toLocaleDateString(cfg.idioma, { ...zona, dateStyle: 'long' });
     const esHoy = dia(cuando) === dia(new Date());
     const meta = document.createElement('p');

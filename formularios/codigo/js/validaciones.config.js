@@ -32,6 +32,8 @@
   /* Formatos de archivo para leerlos: en mayúsculas y sin repetir JPEG (jpg y jpeg son el mismo). */
   const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+  /* La Ñ es letra, no acento: el RFC la admite y no se cambia por N. */
+  const sinAcentosSalvoEnie = (v) => [...String(v ?? '').normalize('NFC')].map((c) => (c === 'Ñ' || c === 'ñ' ? c : sinAcentos(c))).join('');
   const esFechaReal = (a, m, d) => { const f = new Date(Date.UTC(a, m - 1, d)); return f.getUTCFullYear() === a && f.getUTCMonth() === m - 1 && f.getUTCDate() === d; };
 
   /* Fecha escrita como día/mes/año (formato «fecha-dma»): 23/07/1985,
@@ -272,7 +274,7 @@
     rfc: {
       descripcion: 'RFC: 12 caracteres (persona moral) o 13 (persona física). Estructura a confirmar con el emisor [Fuente: __]',
       inputmode: 'text', autocomplete: 'off',
-      normaliza: (v) => sinAcentos(recorta(v)).toUpperCase().replace(/[\s-]/g, ''),
+      normaliza: (v) => sinAcentosSalvoEnie(recorta(v)).toUpperCase().replace(/[\s-]/g, ''),
       valida: (v, a = {}, cfg = CONFIG) => {
         if (!/^([A-ZÑ&]{3,4})(\d{6})([A-Z0-9]{3})$/.test(v)) return cfg.mensajes.fmtRfc;
         const aa = Number(v.slice(-9, -7)), mm = Number(v.slice(-7, -5)), dd = Number(v.slice(-5, -3));
@@ -514,9 +516,10 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.1',
+    version: '1.4.2',
     idioma: 'es-MX',
-    fechas: { zonaHoraria: 'America/Mexico_City' },
+    /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
+    fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
        rectángulo envolvente. Un formulario de alcance nacional pone null. */
     ambito: {
@@ -652,6 +655,7 @@
       archRechazoTotal: 'con él se superan los {mb} MB en total.',
       archRechazoVacio: 'el archivo está vacío.',
       archRechazoDuplicado: 'ya adjuntaste ese mismo archivo.',
+      archRechazoExif: 'no se pudieron quitar los datos de ubicación de la imagen. Guárdala como JPG o elige otra.',
       archRechazoDimension: 'la imagen es demasiado pequeña (mínimo {ancho} × {alto} píxeles).',
       archRechazoOptimizada: 'aun optimizada pesa {peso} y el máximo es {mb} MB.',
       archLimite: '{admitidos}: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',

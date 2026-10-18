@@ -364,8 +364,12 @@
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-demo-aviso]');
     if (!b) return;
-    const hora = new Date().toLocaleTimeString(cfg.idioma, { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: cfg.fechas.zonaHoraria });
-    FormKit.aviso($('[data-demo-aviso-lugar]', b.closest('.guia-demo-form')), { tono: 'ok', titulo: 'Nota guardada', texto: `Quedó guardada a las ${hora}. Sólo la ve el personal.`, foco: true });
+    const hora = new Date().toLocaleTimeString(cfg.idioma, { hour: '2-digit', minute: '2-digit', hourCycle: FormKit.utilidades.relojDe(cfg), timeZone: cfg.fechas.zonaHoraria });
+    const lugar = $('[data-demo-aviso-lugar]', b.closest('.guia-demo-form'));
+    if (b.dataset.demoAviso !== 'pasos') { FormKit.aviso(lugar, { tono: 'ok', titulo: 'Nota guardada', texto: `Quedó guardada a las ${hora}. Sólo la ve el personal.`, foco: true }); return; }
+    /* Con pasos y un enlace: el texto puede ser un nodo y los pasos van como secuencia. */
+    const p = el('p', {}, [texto('Le avisamos por correo. El detalle está en '), el('a', { href: '#m-resultado', texto: 'el resultado de la revisión' }), texto('.')]);
+    FormKit.aviso(lugar, { tono: 'advertencia', titulo: 'Solicitud devuelta para corregir', texto: p, pasos: ['La persona abre «Mis documentos».', 'Sube de nuevo la identificación oficial.', 'Envía la solicitud: la Secretaría la revisa otra vez.'], foco: true });
   });
   /* Resultado de una decisión del personal: confirma con consecuencias y luego dice qué pasó, a qué hora y quién. */
   document.addEventListener('click', async (e) => {
@@ -401,7 +405,7 @@
     telefono: [['valido', '55 1234 5678'], ['valido', '+52 5512345678'], ['invalido', '123'], ['limite', '(55) 1234-5678']],
     cp: [['valido', '01000'], ['valido', '16999'], ['invalido', '1234'], ['limite', '17000']],
     curp: [['valido', 'PEGJ900515HDFRRN09'], ['invalido', 'PEGJ900515HDFRRN0'], ['invalido', 'PEGJ901345HDFRRN09'], ['limite', 'pegj900515hdfrrn09']],
-    rfc: [['valido', 'XAXX010101000'], ['valido', 'ABC010101AB1'], ['invalido', 'XAXX0101'], ['limite', 'xaxx-010101-000']],
+    rfc: [['valido', 'XAXX010101000'], ['valido', 'ABC010101AB1'], ['invalido', 'XAXX0101'], ['limite', 'xaxx-010101-000'], ['limite', 'muño-800101-ab1']],
     numero: [['valido', '12.5'], ['valido', '12,5'], ['invalido', 'doce'], ['limite', '-0']],
     fecha: [['valido', '2026-03-15'], ['invalido', '2026-02-30'], ['invalido', '15/03/2026'], ['limite', '2000-02-29']],
     'fecha-dma': [['valido', '23/07/1985'], ['valido', '23071985'], ['invalido', '31/02/1990'], ['limite', '1985-07-23']],

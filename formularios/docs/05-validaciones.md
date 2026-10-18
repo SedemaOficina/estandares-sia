@@ -71,13 +71,13 @@ Un formulario agrega cruzadas propias en `FORMKIT_CONFIG.cruzadas.<clave> = { ca
 | Firma real | primeros bytes por tipo | Tras leer | el contenido del archivo no corresponde a su extensión |
 | Dimensión mínima | 320 × 240 px | Tras decodificar | la imagen es demasiado pequeña |
 | Optimización | lado mayor 2048 px, calidad .82 | Imágenes | «Optimizando…» → «1.2 MB · optimizada» |
-| EXIF | `conservarExif: false` (C6) | Imágenes | Fecha y GPS sólo si el formulario lo activa |
+| EXIF | `conservarExif: false` (C6) | Imágenes | Fecha y GPS sólo si el formulario lo activa; si no, la foto viaja siempre recodificada o sin metadatos, o no se agrega |
 
 Lo que se sabe sin leer el archivo se rechaza en el acto (`.arch-rechazo`); lo que exige leerlo queda en la lista con estado de error y motivo. El servidor repite tipo, peso, número y total.
 
 ## 5. Mensajes
 
-Los 156 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc., también los de cada formato (`fmt…`) y de cada cruzada (`cz…`). Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo, y el servidor recibe los mismos en `validaPayload(…, { mensajes })`. Registro: tuteo, frase corta, qué hacer primero. Un sistema que habla de usted cambia ahí los que se vean; por ejemplo, `FORMKIT_CONFIG.mensajes = { fmtTelefono: 'Escriba 10 dígitos, sin lada internacional.' }`. Formatos y cruzadas leen también de la configuración del formulario el ámbito (`ambito.cp`, `ambito.coordenadas`) y la CURP (`curp.verificarDigito`). También van ahí los títulos del resumen de errores (`resumenUno`, `resumenServidorVarios`…), los de la confirmación (`confirmaNo`, `confirmaIrreversible`…) y los del resultado (`resultadoHora`, `resultadoMotivo`, `resultadoQueSigue`).
+Los 157 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc., también los de cada formato (`fmt…`) y de cada cruzada (`cz…`). Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo, y el servidor recibe los mismos en `validaPayload(…, { mensajes })`. Registro: tuteo, frase corta, qué hacer primero. Un sistema que habla de usted cambia ahí los que se vean; por ejemplo, `FORMKIT_CONFIG.mensajes = { fmtTelefono: 'Escriba 10 dígitos, sin lada internacional.' }`. Formatos y cruzadas leen también de la configuración del formulario el ámbito (`ambito.cp`, `ambito.coordenadas`) y la CURP (`curp.verificarDigito`). También van ahí los títulos del resumen de errores (`resumenUno`, `resumenServidorVarios`…), los de la confirmación (`confirmaNo`, `confirmaIrreversible`…) y los del resultado (`resultadoHora`, `resultadoMotivo`, `resultadoQueSigue`).
 
 ## 6. Configuración por formulario (`FORMKIT_CONFIG`)
 
@@ -85,7 +85,8 @@ Los 156 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.
 |---|---|---|
 | `ambito.cp` | 01000–16999 | Rango de CP admitido y su mensaje; `null` para no acotar. |
 | `ambito.coordenadas` | Ciudad de México | Rectángulo envolvente para mapa y coordenadas. |
-| `fechas.zonaHoraria` | America/Mexico_City | «Hoy» y `data-no-futura`. |
+| `fechas.zonaHoraria` | America/Mexico_City | «Hoy», `data-no-futura` y la hora del acuse, del borrador y del resultado. |
+| `fechas.horas24` | true | Reloj de esas fechas: «17 de octubre de 2026 a las 23:27»; con `false`, «11:27 p.m.». |
 | `curp.verificarDigito` | true | Dígito verificador de la CURP. |
 | `archivos.*` | tabla anterior | Límites, firmas, optimización, EXIF. |
 | `borrador` | 14 días, 600 ms, 2.5 s visible | Caducidad, retardo de guardado, duración de «Guardado». |
@@ -96,7 +97,7 @@ Los 156 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.
 | `chips` | 5, `sia-chips` | Máximo de chips del historial y clave del almacén local (la lista fija no guarda nada). |
 | `visor` | pdf.js junto al paquete; fijo desde 1024 px | Dónde está pdf.js (`pdfjs`), desde qué ancho el visor queda fijo junto a la revisión (`fijoDesde`) y la espera para repintar (`retardoMs`). |
 | `mapa` | sin teselas | Proveedor, atribución, centro, zoom. |
-| `mensajes` | 156 textos | Cualquier mensaje, también los de formatos y cruzadas. |
+| `mensajes` | 157 textos | Cualquier mensaje, también los de formatos y cruzadas. |
 
 ## 7. En el servidor
 

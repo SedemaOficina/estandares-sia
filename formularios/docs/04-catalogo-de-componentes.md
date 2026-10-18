@@ -19,7 +19,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | Autocompletado, inputmode y enterkeyhint | BASE |
 | Validación individual, cruzada y resumen de errores con foco, contexto (data-contexto) y título propio del rechazo del servidor | BASE |
 | Botones (principal, secundario, peligro relleno y de contorno, atrás, enlace, icono) | BASE |
-| Avisos (neutro, advertencia, bloqueo, éxito) con título e icono por tono, FormKit.aviso() y pendiente visible | BASE |
+| Avisos (neutro, advertencia, bloqueo, éxito) con título e icono por tono, FormKit.aviso() con texto, enlace y pasos, y pendiente visible | BASE |
 | Secuencia «qué sigue» (ol.secuencia) para varias acciones en orden, en cualquier pantalla | BASE |
 | Iconografía (sprite SVG) | BASE |
 | Anuncios que también se ven (FormKit.anuncia con el elemento visible) | BASE |
@@ -54,8 +54,8 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
 | `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.8 KB | 6.6 KB |
-| `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.2 KB | 2.9 KB |
-| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 19.9 KB |
+| `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.9 KB |
+| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 21.4 KB |
 | `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.7 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
@@ -563,15 +563,16 @@ Cinco familias con significado fijo para el estado de un trámite o registro, se
 
 **Accesibilidad.** La palabra dice el estado; el icono y el color sólo lo refuerzan. Texto de 4.5:1 o más en los cinco tonos. Al cambiar por una acción, se anuncia.
 
-**En teléfono.** Etiqueta en una sola línea; en la tabla va en la celda con su rótulo.
+**En teléfono.** Una etiqueta larga se parte en renglones; no ensancha su tarjeta ni su tabla.
 
-**En escritorio.** Igual.
+**En escritorio.** En una tabla, en una sola línea.
 
 **Errores frecuentes que evita.**
 - Inventar tonos por sistema (nueve colores sin regla).
 - Etiqueta sólo de color, sin icono ni palabra.
 - Usar el rojo para «En revisión» o el verde para «Enviado».
 - Una etiqueta sin familia (la consola lo avisa y queda como terminado).
+- Una etiqueta que no se parte y ensancha su tarjeta o su tabla en teléfono.
 
 ### Carga de archivos y fotografías (`archivos`) · RECOMENDADO
 
@@ -594,6 +595,7 @@ Zona de carga (botón real + arrastre), cámara en móvil, validación por exten
 - Medir el peso antes de optimizar.
 - Enviar la ubicación de la foto sin que la persona lo sepa.
 - Dejar «Elegir archivo» a la vista con el máximo ya cargado: la persona cree que no subió nada.
+- Enviar la foto original, con su EXIF y su ubicación, porque recodificada pesaba más.
 
 ### Visor de documentos (`visor`) · OPCIONAL
 
