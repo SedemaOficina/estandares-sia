@@ -1,5 +1,20 @@
 # Historial de cambios
 
+## 1.4.0 · 2026-10-17
+
+Seis hallazgos del sistema de acreditaciones al revisar sus avisos y confirmaciones. Trae dos módulos nuevos, «resultado» y «estado», por eso es versión menor. 30 módulos y 83 reglas (FRM-82 y FRM-83 nuevas).
+
+- **P113 · Confirmación con consecuencias y resultado de una decisión** (módulos `modal` y `resultado`, FRM-38 y FRM-82 nueva): `FormKit.confirma` preguntaba igual para guardar una nota que para cerrar un trámite. Ahora recibe `consecuencias` (lista de lo que pasará) e `irreversible` («No se puede deshacer.», con su icono), las dos dentro de la descripción que oye el lector. «Volver sin cambios» es la salida por omisión. La consola avisa si el botón no repite el verbo. El foco inicial ya iba a la opción segura; ahora una prueba lo comprueba. El módulo nuevo `resultado` (`FormKit.resultado`) muestra el desenlace para el personal: un título con el resultado, «Quedó guardado a las HH:MM · quien» en la hora de la Ciudad (con la fecha si no fue hoy), el motivo citado tal cual y la acción para seguir. Además oculta el panel de decisión y lleva el foco al título. El proyecto puede quitar `APD.pintaDesenlace` y `APD.confirma`.
+- **P114 · Botón de peligro relleno** (núcleo, FRM-34): `.btn-peligro` pasa a rojo relleno con texto blanco (pares C42 y C43), para el botón que hace el daño dentro de su confirmación. Variante nueva `.btn-peligro-contorno` (la de antes) para el botón que la abre. Los sistemas que usaban `.btn-peligro` fuera de una confirmación lo cambian a `.btn-peligro-contorno`. El proyecto puede quitar su regla de `.btn-peligro` en `apd.css`.
+- **P115 · Avisos con título e icono por tono** (núcleo, FRM-39): `.aviso-titulo` (en su propio renglón) dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. El icono de su tono va siempre. `FormKit.aviso(lugar, { tono, titulo, texto, foco })` lo pinta con su icono y su rol, y recibe el foco cuando responde a una acción. El proyecto puede quitar `APD.aviso`.
+- **P116 · Resumen de errores con contexto** (núcleo, FRM-28): `data-contexto` en el campo o en un elemento que lo rodea pone de cuál se trata antes de cada mensaje («Identificación oficial: …»). Los títulos hablan de respuestas, no de campos («Para continuar, revisa 2 respuestas.»). Cuando rechaza el servidor, el título lo dice («No se pudo enviar: revisa 1 respuesta.», mensajes `resumenServidorUno` y `resumenServidorVarios`). El proyecto puede quitar sus `span.contexto-resumen` y sus `resumenUno`/`resumenVarios` propios.
+- **P117 · Todo anuncio también se ve** (núcleo, FRM-40): `FormKit.anuncia(texto, { visible: elemento })` escribe el texto en ese elemento, lo muestra y lo anuncia. El segundo argumento `true` sigue valiendo. Tres piezas del estándar que sólo se oían ya se ven: el límite de filas de `repetibles` (al tocar «Agregar» con el máximo, ahora dice por qué), el campo de `archivos` lleno y la descarga que falla. Los textos de `descarga` pasan a `mensajes`.
+- **P118 · Etiquetas de estado** (módulo `estado` nuevo, FRM-83 nueva): cinco tonos con significado fijo, cada uno con su icono: borrador, proceso, atención, ok y rechazo. Texto de 4.5:1 o más (pares C45 a C49). El icono lo pone el módulo; `FormKit.estado(el, { tono, texto, anuncia })` lo cambia. El proyecto pasa sus nueve tonos a estos cinco y quita los suyos de `apd.css`.
+
+Mensajes nuevos (155 en total): `resumenServidorUno`, `resumenServidorVarios`, `resumenContexto`, `confirmaTitulo`, `confirmaSi`, `confirmaNo`, `confirmaConsecuencias`, `confirmaIrreversible`, `resultadoHora`, `resultadoFechaHora`, `resultadoMotivo`, `descargaPreparando`, `descargaLista` y `descargaError`. Cambian `resumenUno` y `resumenVarios`.
+
+**Pruebas**: seis casos nuevos en `07-correcciones` (30 en total), sobre una página nueva de revisión documental (`pruebas/paginas/desenlace.html`). El de archivos llenos (P71) comprueba también la frase visible.
+
 ## 1.3.4 · 2026-10-17
 
 Tres hallazgos del sistema de acreditaciones (sus pantallas de grupos y su configuración en «usted»). P110 y P111 son los que el proyecto registró primero como P106 y P107.

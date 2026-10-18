@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de avisos, confirmaciones y desenlaces</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../codigo/css/tokens.css">
+<link rel="stylesheet" href="../../codigo/css/base.css">
+<link rel="stylesheet" href="../../codigo/css/nucleo.css">
+<link rel="stylesheet" href="../../codigo/modulos/repetibles/repetibles.css">
+<link rel="stylesheet" href="../../codigo/modulos/resultado/resultado.css">
+<link rel="stylesheet" href="../../codigo/modulos/modal/modal.css">
+<link rel="stylesheet" href="../../codigo/modulos/descarga/descarga.css">
+<link rel="stylesheet" href="../../codigo/modulos/estado/estado.css">
+</head>
+<body>
+<main class="pagina" id="contenido">
+  <h1 class="titulo-pagina">Revisión documental (P113 a P118)</h1>
+  <!-- Página sólo para pruebas automáticas. Datos ficticios. -->
+  <p>Solicitud EJ-2026-000123 <span class="estado estado-proceso" id="estado-solicitud">En revisión</span> <span class="estado" id="estado-sin-tono">Sin enviar</span></p>
+
+  <div id="avisos"></div>
+
+  <div id="decision">
+    <div class="acciones">
+      <button type="button" class="btn btn-peligro-contorno" id="rechazar">Rechazar solicitud</button>
+      <button type="button" class="btn btn-primario" id="validar">Validar solicitud</button>
+    </div>
+  </div>
+  <section class="resultado" id="resultado" hidden>
+    <div class="acciones" data-resultado-acciones><a class="btn btn-primario" href="#contenido">Volver a la bandeja</a></div>
+  </section>
+
+  <form id="revision" class="tarjeta" data-formkit action="#" method="post">
+    <section data-contexto="Identificación oficial">
+      <h2 class="titulo-bloque">Identificación oficial</h2>
+      <div class="campo" data-campo="obs_ine" data-requerido data-uso="Prueba."><label class="etiqueta" for="obs_ine">Observación</label><input class="control" id="obs_ine" name="obs_ine" type="text" maxlength="200" autocomplete="off"></div>
+    </section>
+    <section>
+      <h2 class="titulo-bloque">Comprobante de domicilio</h2>
+      <div class="campo" data-campo="obs_dom" data-requerido data-uso="Prueba." data-contexto="Comprobante de domicilio"><label class="etiqueta" for="obs_dom">Observación</label><input class="control" id="obs_dom" name="obs_dom" type="text" maxlength="200" autocomplete="off"></div>
+    </section>
+    <div class="repetible" data-repetible="personas" data-max="2" data-requerido data-etiqueta="Personas">
+      <ol class="repetible-lista" data-repetible-lista></ol>
+      <template data-repetible-plantilla><li><div class="campo" data-campo="personas.#.nombre" data-uso="Prueba."><label class="etiqueta" for="personas-#-nombre">Nombre</label><input class="control" id="personas-#-nombre" name="personas[#][nombre]" type="text" maxlength="80" autocomplete="off"></div></li></template>
+      <button type="button" class="btn btn-secundario" data-repetible-agregar>Agregar persona</button>
+    </div>
+    <div class="acciones"><button type="submit" class="btn btn-primario" data-accion="enviar">Guardar revisión</button></div>
+  </form>
+
+  <p><button type="button" class="btn btn-secundario descarga" data-descarga data-generar="falla" data-formato="PDF">Descargar dictamen</button></p>
+  <p class="texto-gris" id="codigo-visible" hidden></p>
+</main>
+<script src="../../codigo/js/validaciones.config.js"></script>
+<script src="../../codigo/js/iconos.js"></script>
+<script src="../../codigo/js/formkit.core.js"></script>
+<script src="../../codigo/modulos/repetibles/repetibles.js"></script>
+<script src="../../codigo/modulos/modal/modal.js"></script>
+<script src="../../codigo/modulos/descarga/descarga.js"></script>
+<script src="../../codigo/modulos/resultado/resultado.js"></script>
+<script src="../../codigo/modulos/estado/estado.js"></script>
+<script src="desenlace-pagina.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 > Este documento se **genera** de `codigo/manifiesto.json` (`node herramientas/construir.mjs`). No se edita a mano: se corrige el manifiesto y se vuelve a construir. La versión interactiva, con muestras vivas y HTML para copiar, es `guia-visual/index.html`.
 
-El paquete tiene un **núcleo** obligatorio y **28 módulos** que se copian sólo si el formulario los usa. Niveles: **BASE** obligatorio en todo formulario; **RECOMENDADO** salvo justificación escrita; **OPCIONAL** si el formulario necesita la pieza. Quien programa elige los módulos, no el nivel.
+El paquete tiene un **núcleo** obligatorio y **30 módulos** que se copian sólo si el formulario los usa. Niveles: **BASE** obligatorio en todo formulario; **RECOMENDADO** salvo justificación escrita; **OPCIONAL** si el formulario necesita la pieza. Quien programa elige los módulos, no el nivel.
 
 ## Núcleo (BASE)
 
@@ -17,10 +17,11 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | Solo lectura frente a deshabilitado | BASE |
 | Pregunta condicional (data-si) | BASE |
 | Autocompletado, inputmode y enterkeyhint | BASE |
-| Validación individual, cruzada y resumen de errores con foco | BASE |
-| Botones (principal, secundario, peligro, atrás, enlace, icono) | BASE |
-| Avisos (neutro, advertencia, bloqueo, éxito) y pendiente visible | BASE |
+| Validación individual, cruzada y resumen de errores con foco, contexto (data-contexto) y título propio del rechazo del servidor | BASE |
+| Botones (principal, secundario, peligro relleno y de contorno, atrás, enlace, icono) | BASE |
+| Avisos (neutro, advertencia, bloqueo, éxito) con título e icono por tono, FormKit.aviso() y pendiente visible | BASE |
 | Iconografía (sprite SVG) | BASE |
+| Anuncios que también se ven (FormKit.anuncia con el elemento visible) | BASE |
 | Estados de envío (enviando, error, plazo, límite) sin duplicados | BASE |
 | Borrador local versionado | RECOMENDADO |
 | Encabezado y pie institucionales, enlace de salto | BASE |
@@ -34,15 +35,16 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 7.9 KB |
 | `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.0 KB |
 | `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 4.0 KB |
-| `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 929 B | 6.8 KB |
+| `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 1.1 KB | 7.4 KB |
 | `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.6 KB |
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
-| `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.7 KB |
+| `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.8 KB |
 | `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.3 KB | 3.2 KB |
 | `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.9 KB | 3.5 KB |
-| `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 1.7 KB | 4.0 KB |
+| `resultado` | Resultado de una decisión | RECOMENDADO | retroalimentacion | — | 2.2 KB | 4.6 KB |
+| `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 2.1 KB | 5.7 KB |
 | `copiar` | Copiar y compartir | RECOMENDADO | retroalimentacion | — | 542 B | 4.0 KB |
-| `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 3.3 KB |
+| `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 3.7 KB |
 | `acordeon` | Acordeón y secciones plegables | OPCIONAL | navegacion | — | 2.0 KB | — |
 | `pestanas` | Pestañas | OPCIONAL | navegacion | — | 1.1 KB | 2.9 KB |
 | `migas` | Migas de pan | OPCIONAL | navegacion | — | 2.5 KB | — |
@@ -51,7 +53,8 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
 | `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.8 KB | 6.6 KB |
-| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.0 KB | 19.5 KB |
+| `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.1 KB | 2.5 KB |
+| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 19.9 KB |
 | `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.7 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
@@ -294,17 +297,39 @@ Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descar
 - Acuse sin una acción para seguir.
 - Quitarle el relleno lateral a la tarjeta del acuse: en teléfono los botones quedan pegados a la orilla.
 
+### Resultado de una decisión (`resultado`) · RECOMENDADO
+
+El desenlace de lo que decide el personal (validar, rechazar, devolver, cerrar): título con el resultado, «Quedó guardado a las HH:MM · quien», el motivo citado tal cual y la acción para seguir. FormKit.resultado(lugar, {tono, titulo, hora, quien, motivo}).
+
+**Cuándo.** Pantallas del personal después de validar, rechazar, devolver para corregir o cerrar un trámite.
+
+**Cuándo no.** Lo que envía la ciudadanía (usa el acuse); cambios menores que basta con anunciar, como guardar una nota.
+
+**Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/resultado/resultado.css`, `codigo/modulos/resultado/resultado.js`
+
+**Accesibilidad.** El foco va al título del resultado y se anuncia con la hora y quién decidió; el tono va en icono y palabras, nunca sólo en color.
+
+**En teléfono.** Tarjeta a todo lo ancho con su relleno lateral.
+
+**En escritorio.** Tarjeta con más relleno.
+
+**Errores frecuentes que evita.**
+- Dejar la pantalla igual tras decidir, sin decir qué pasó.
+- Un resultado sin hora ni quién lo registró.
+- Reescribir el motivo en lugar de citarlo.
+- Dejar a la vista el panel de decisión que ya no aplica (opción oculta).
+
 ### Diálogo y confirmación (`modal`) · RECOMENDADO
 
-<dialog> nativo para contenido que hay que leer y FormKit.confirma() para acciones irreversibles; hoja inferior en teléfono.
+<dialog> nativo para contenido que hay que leer y FormKit.confirma() para acciones con efecto: pregunta por la acción, lista sus consecuencias, dice si no se puede deshacer y su botón repite el verbo; hoja inferior en teléfono.
 
-**Cuándo.** Aviso de privacidad; confirmar descartar, quitar o enviar sin vuelta atrás.
+**Cuándo.** Aviso de privacidad; confirmar rechazar, cancelar, cerrar un trámite, descartar o quitar.
 
-**Cuándo no.** Errores de campo; avisos sin decisión; acciones recuperables.
+**Cuándo no.** Errores de campo; avisos sin decisión; acciones recuperables, como guardar una nota.
 
 **Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/modal/modal.css`, `codigo/modulos/modal/modal.js`
 
-**Accesibilidad.** Trampa de foco nativa, Escape cierra, el foco vuelve a quien abrió; foco inicial en la opción segura.
+**Accesibilidad.** Trampa de foco nativa, Escape cierra, el foco vuelve a quien abrió; foco inicial en «Volver sin cambios»; las consecuencias y «No se puede deshacer» forman la descripción que oye el lector.
 
 **En teléfono.** Hoja inferior a todo lo ancho con dvh y franja segura.
 
@@ -314,6 +339,9 @@ Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descar
 - confirm()/alert() nativos.
 - Foco inicial en la acción destructiva.
 - Diálogo para instrucciones que deberían estar en pantalla.
+- Preguntar igual para guardar una nota que para cerrar un trámite.
+- Botón «Aceptar» o «Confirmar» en lugar del verbo de la acción.
+- Callar las consecuencias o que no se puede deshacer.
 
 ### Copiar y compartir (`copiar`) · RECOMENDADO
 
@@ -520,6 +548,27 @@ Tabla con caption, orden por columna accesible, estados vacío/carga/error, acci
 - Desplazamiento horizontal libre en teléfono.
 - Filtrar ocultando filas y que el rayado alterno se descuadre (cuenta sólo las filas visibles).
 - Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla.
+
+### Etiquetas de estado (`estado`) · OPCIONAL
+
+Cinco tonos con significado fijo para el estado de un trámite o registro: borrador (gris), proceso (azul), atención (ámbar), ok (verde) y rechazo (rojo), cada uno con su icono y su palabra. FormKit.estado(el, {tono, texto}) lo cambia.
+
+**Cuándo.** Bandejas, tablas y fichas que muestran en qué va un trámite.
+
+**Cuándo no.** Avisos a la persona (usa los avisos del núcleo); botones o filtros (no se tocan).
+
+**Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/estado/estado.css`, `codigo/modulos/estado/estado.js`
+
+**Accesibilidad.** La palabra dice el estado; el icono y el color sólo lo refuerzan. Texto de 4.5:1 o más en los cinco tonos. Al cambiar por una acción, se anuncia.
+
+**En teléfono.** Etiqueta en una sola línea; en la tabla va en la celda con su rótulo.
+
+**En escritorio.** Igual.
+
+**Errores frecuentes que evita.**
+- Inventar tonos por sistema (nueve colores sin regla).
+- Etiqueta sólo de color, sin icono ni palabra.
+- Usar el rojo para «En revisión» o el verde para «Enviado».
 
 ### Carga de archivos y fotografías (`archivos`) · RECOMENDADO
 

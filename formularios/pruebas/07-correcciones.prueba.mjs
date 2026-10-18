@@ -255,10 +255,13 @@ test('archivos: con el máximo cargado se oculta «Elegir archivo», el listo se
   await p.setInputFiles('[data-campo="retrato"] input[type="file"]:not([data-entrada-camara])', [{ name: 'retrato.png', mimeType: 'image/png', buffer: pngRuido(400, 300) }]);
   await p.waitForSelector('[data-campo="retrato"] .arch[data-estado="listo"]');
   assert.ok(await zona.isHidden(), 'con el máximo (1) ya no se ofrece');
+  const nota = p.locator('[data-campo="retrato"] .arch-lleno');
+  assert.match((await nota.textContent()).trim(), /^Ya adjuntaste el archivo/, 'y lo que se anuncia también se lee en pantalla (P117)');
   const fondo = await p.locator('[data-campo="retrato"] .arch').evaluate((li) => getComputedStyle(li).backgroundColor);
   assert.equal(fondo, 'rgb(241, 248, 244)', 'el archivo listo se ve en verde (--ok-bg)');
   await p.click('[data-campo="retrato"] .arch-quitar');
   assert.ok(await zona.isVisible(), 'al quitarlo, vuelve');
+  assert.ok(await nota.isHidden(), 'y la frase de lleno se va');
   await p.context().close();
 });
 
@@ -395,5 +398,110 @@ test('un formulario que ya arrancó solo no se inicia otra vez: la llamada de la
   await p.waitForFunction(() => window.__envios > 0);
   await p.waitForTimeout(200);
   assert.equal(await p.evaluate(() => window.__envios), 1, 'un clic, un envío, con la función que pasó la página');
+  await p.context().close();
+});
+
+/* ----- Versión 1.4.0: P113 a P118 (avisos, confirmaciones y desenlaces) ----- */
+
+const abreDesenlace = (perfil = PERFILES.escritorio) => abrePagina(navegador, servidor.url, 'pruebas/paginas/desenlace.html', { contexto: perfil.contexto });
+
+test('confirmar con consecuencias y foco en «Volver sin cambios»; el resultado dice qué pasó, a qué hora y quién (P113)', async () => {
+  const p = await abreDesenlace();
+  await p.click('#rechazar');
+  const d = p.locator('dialog[role="alertdialog"][open]');
+  await d.waitFor();
+  assert.equal(await p.evaluate(() => document.activeElement.textContent), 'Volver sin cambios', 'el foco inicial va a la salida segura');
+  assert.deepEqual(await d.locator('.dialogo-consecuencias li').allTextContents(), ['La persona recibe el motivo por correo.', 'La solicitud pasa a «Rechazada» y ya no se puede editar.'], 'lista las consecuencias');
+  assert.ok(await d.locator('.dialogo-irreversible', { hasText: 'No se puede deshacer.' }).isVisible(), 'dice que no se puede deshacer');
+  const desc = await d.evaluate((x) => document.getElementById(x.getAttribute('aria-describedby')).textContent);
+  assert.match(desc, /Qué pasará:.*correo.*No se puede deshacer/, 'y el lector lo oye como descripción del diálogo');
+  assert.equal(await d.locator('[data-r="si"]').textContent(), 'Rechazar solicitud', 'el botón repite el verbo');
+  await d.locator('[data-r="si"]').click();
+  const res = p.locator('#resultado');
+  await res.waitFor();
+  assert.equal(await p.evaluate(() => document.activeElement.className), 'resultado-titulo', 'el foco va al título del resultado');
+  assert.equal(await res.locator('.resultado-titulo').textContent(), 'Solicitud EJ-2026-000123 rechazada');
+  assert.match(await res.locator('.resultado-meta').textContent(), /^Quedó guardado a las \d{2}:\d{2} · Ana Revisora$/, 'hora y quién');
+  assert.equal(await res.locator('.resultado-motivo-texto').textContent(), 'La identificación oficial está vencida.', 'el motivo, citado tal cual');
+  assert.equal(await res.locator('[data-resultado-acciones] .btn-primario').textContent(), 'Volver a la bandeja', 'la acción para seguir se conserva');
+  assert.ok(await res.evaluate((x) => x.classList.contains('resultado-rechazo')), 'con el tono del rechazo');
+  assert.ok(await p.locator('#decision').isHidden(), 'el panel de decisión ya no se ofrece');
+  const otroDia = await p.evaluate(() => { const el = document.createElement('section'); document.body.append(el); FormKit.resultado(el, { tono: 'ok', titulo: 'Validada', hora: '2026-01-05T17:30:00Z' }); return el.querySelector('.resultado-meta').textContent; });
+  assert.equal(otroDia, 'Quedó guardado el 5 de enero de 2026 a las 11:30', 'si no fue hoy, también dice la fecha, en la hora de la Ciudad');
+  assert.deepEqual(p.registro, [], 'consola limpia');
+  await p.context().close();
+});
+
+test('el botón de peligro es rojo relleno dentro de la confirmación y de contorno fuera de ella (P114)', async () => {
+  const p = await abreDesenlace();
+  const color = (sel) => p.locator(sel).first().evaluate((b) => { const c = getComputedStyle(b); return [c.backgroundColor, c.color]; });
+  assert.deepEqual(await color('#rechazar'), ['rgb(255, 255, 255)', 'rgb(140, 29, 24)'], 'el que abre la confirmación va con contorno');
+  await p.click('#rechazar');
+  assert.deepEqual(await color('dialog[open] .btn-peligro'), ['rgb(179, 38, 30)', 'rgb(255, 255, 255)'], 'el que hace el daño, relleno rojo con texto blanco');
+  await p.keyboard.press('Escape');
+  assert.equal(await p.evaluate(() => document.activeElement.id), 'rechazar', 'Escape vuelve sin cambios al botón que abrió');
+  await p.context().close();
+});
+
+test('avisos con título y el icono de su tono; el que responde a una acción recibe el foco (P115)', async () => {
+  const p = await abreDesenlace();
+  const leer = () => p.evaluate(() => { const a = document.querySelectorAll('#avisos > .aviso'); const x = a[0]; return { n: a.length, clase: x.className, rol: x.getAttribute('role'), titulo: x.querySelector('.aviso-titulo').textContent, icono: x.querySelector('svg use').getAttribute('href'), foco: document.activeElement === x, texto: x.textContent }; });
+  await p.evaluate(() => FormKit.aviso(document.getElementById('avisos'), { tono: 'ok', titulo: 'Nota guardada', texto: 'Sólo la ve el personal.', foco: true }));
+  const ok = await leer();
+  assert.deepEqual([ok.n, ok.clase, ok.rol, ok.titulo, ok.icono, ok.foco], [1, 'aviso aviso-ok', 'status', 'Nota guardada', '#i-ok', true]);
+  assert.equal(ok.texto, 'Nota guardadaSólo la ve el personal.');
+  assert.equal(await p.locator('#avisos .aviso-titulo').evaluate((t) => getComputedStyle(t).display), 'block', 'el título va en su propio renglón');
+  await p.evaluate(() => FormKit.aviso(document.getElementById('avisos'), { tono: 'bloqueo', titulo: 'No se pudo guardar', texto: 'Intenta de nuevo.' }));
+  const bloqueo = await leer();
+  assert.deepEqual([bloqueo.n, bloqueo.clase, bloqueo.rol, bloqueo.icono], [1, 'aviso aviso-bloqueo', 'alert', '#i-error'], 'el mismo lugar se vuelve a pintar con otro tono, sin acumular avisos');
+  await p.context().close();
+});
+
+test('el resumen dice de qué respuesta se trata, no habla de «campos» y tiene su título cuando rechaza el servidor (P116)', async () => {
+  const p = await abreDesenlace();
+  await p.click('[data-accion="enviar"]');
+  const resumen = p.locator('.resumen-errores');
+  await resumen.waitFor();
+  assert.equal(await resumen.locator('.resumen-errores-titulo').textContent(), 'Para continuar, revisa 2 respuestas.');
+  assert.deepEqual(await resumen.locator('a').allTextContents(), ['Identificación oficial: Completa «Observación».', 'Comprobante de domicilio: Completa «Observación».'], 'cada enlace con su contexto, del campo o de su sección');
+  assert.doesNotMatch(await resumen.textContent(), /campo/i);
+  await p.fill('#obs_ine', 'Legible');
+  await p.fill('#obs_dom', 'Folio repetido');
+  await p.evaluate(() => FormKit.iniciar(document.getElementById('revision'), { enviar: () => Promise.reject({ errores: [{ campo: 'obs_dom', mensaje: 'Ese comprobante ya se usó en otra solicitud.' }] }) }));
+  await p.click('[data-accion="enviar"]');
+  await p.waitForFunction(() => /No se pudo enviar/.test((document.querySelector('.resumen-errores-titulo') || {}).textContent || ''));
+  assert.equal(await resumen.locator('.resumen-errores-titulo').textContent(), 'No se pudo enviar: revisa 1 respuesta.', 'el rechazo del servidor tiene su propio título');
+  assert.deepEqual(await resumen.locator('a').allTextContents(), ['Comprobante de domicilio: Ese comprobante ya se usó en otra solicitud.']);
+  await p.context().close();
+});
+
+test('lo que se anuncia también se ve: anuncio con su elemento, límite de filas y descarga fallida (P117)', async () => {
+  const p = await abreDesenlace();
+  await p.evaluate(() => FormKit.anuncia('Enviamos un código nuevo a tu correo.', { visible: document.getElementById('codigo-visible') }));
+  assert.equal(await p.locator('#codigo-visible').textContent(), 'Enviamos un código nuevo a tu correo.', 'el texto anunciado queda en pantalla');
+  assert.ok(await p.locator('#codigo-visible').isVisible());
+  await p.waitForFunction(() => document.querySelector('[data-anuncios]').textContent === 'Enviamos un código nuevo a tu correo.');
+  const agregar = p.locator('[data-repetible-agregar]');
+  await agregar.click();
+  assert.equal(await agregar.getAttribute('aria-disabled'), 'true', 'con el máximo, «Agregar» queda deshabilitado accesible');
+  await agregar.click({ force: true }); /* aria-disabled: sigue enfocable y se puede tocar */
+  assert.equal((await p.locator('.repetible-limite').textContent()).trim(), 'Como máximo se admiten 2 elementos en «Personas».', 'al tocarlo dice por qué no agrega, en pantalla');
+  await p.click('[data-generar="falla"]');
+  const av = p.locator('[data-descarga-aviso]');
+  await av.waitFor();
+  assert.match(await av.textContent(), /No se pudo preparar el archivo\. Intenta de nuevo\./, 'la descarga fallida se dice junto al botón');
+  assert.equal(await av.locator('use').getAttribute('href'), '#i-alerta', 'con el icono de su tono');
+  assert.deepEqual(p.registro, [], 'consola limpia');
+  await p.context().close();
+});
+
+test('etiquetas de estado: cinco tonos, cada uno con su icono, y FormKit.estado las cambia (P118)', async () => {
+  const p = await abreDesenlace();
+  const leer = (id) => p.locator(`#${id}`).evaluate((x) => ({ clase: x.className, iconos: x.querySelectorAll('.icono').length, icono: x.querySelector('use').getAttribute('href'), texto: x.textContent, color: getComputedStyle(x).color }));
+  assert.deepEqual(await leer('estado-solicitud'), { clase: 'estado estado-proceso', iconos: 1, icono: '#i-reloj', texto: 'En revisión', color: 'rgb(26, 86, 168)' }, 'el módulo pone el icono de su tono');
+  assert.equal((await leer('estado-sin-tono')).clase, 'estado estado-borrador', 'sin tono, queda en borrador');
+  await p.evaluate(() => FormKit.estado(document.getElementById('estado-solicitud'), { tono: 'ok', texto: 'Validada', anuncia: true }));
+  assert.deepEqual(await leer('estado-solicitud'), { clase: 'estado estado-ok', iconos: 1, icono: '#i-ok', texto: 'Validada', color: 'rgb(20, 80, 50)' }, 'cambia de tono, de icono y de palabra, sin acumular iconos');
+  await p.waitForFunction(() => document.querySelector('[data-anuncios]').textContent === 'Validada');
   await p.context().close();
 });

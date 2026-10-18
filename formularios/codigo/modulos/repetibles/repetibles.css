@@ -16,6 +16,8 @@
 }
 .repetible-cabecera{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3);margin-bottom:var(--e-3)}
 .repetible-titulo{font-family:var(--fuente-titulo);font-weight:var(--peso-semi);color:var(--guinda)}
+/* «Como máximo se admiten…»: el límite se lee en pantalla, no sólo con lector. */
+.repetible-limite{margin-bottom:var(--e-2);font-size:var(--t-sm);color:var(--gris)}
 
 /* @bloque estados */
 

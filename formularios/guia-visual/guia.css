@@ -122,6 +122,8 @@
 .guia-par-lado{min-width:0;padding:var(--e-3);border-radius:var(--r-ctrl);border-left:var(--foco-ancho) solid var(--guia-c)}
 .guia-par-rotulo{display:block;margin-bottom:var(--e-2);font-family:var(--fuente-titulo);font-size:var(--t-sm);font-weight:var(--peso-fuerte);text-transform:uppercase;letter-spacing:var(--tracking-rotulo);color:var(--guia-c)}
 .guia-par-muestra{margin-bottom:var(--e-2);padding:var(--e-3);background:var(--fondo);border-radius:var(--r-ctrl)}
+/* Una confirmación dibujada dentro del par «sí y no», sin abrir el diálogo. */
+.guia-confirma-muestra{padding:var(--e-4);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
 .guia-par-porque{margin:0;font-size:var(--t-sm);color:var(--gris)}
 /* Marcos de los formularios de ejemplo */
 .guia-ejemplos-barra{display:flex;flex-wrap:wrap;gap:var(--e-2);align-items:center;margin-bottom:var(--e-3)}

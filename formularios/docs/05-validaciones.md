@@ -77,7 +77,7 @@ Lo que se sabe sin leer el archivo se rechaza en el acto (`.arch-rechazo`); lo q
 
 ## 5. Mensajes
 
-Los 141 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc., también los de cada formato (`fmt…`) y de cada cruzada (`cz…`). Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo, y el servidor recibe los mismos en `validaPayload(…, { mensajes })`. Registro: tuteo, frase corta, qué hacer primero. Un sistema que habla de usted cambia ahí los que se vean; por ejemplo, `FORMKIT_CONFIG.mensajes = { fmtTelefono: 'Escriba 10 dígitos, sin lada internacional.' }`. Formatos y cruzadas leen también de la configuración del formulario el ámbito (`ambito.cp`, `ambito.coordenadas`) y la CURP (`curp.verificarDigito`).
+Los 155 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc., también los de cada formato (`fmt…`) y de cada cruzada (`cz…`). Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo, y el servidor recibe los mismos en `validaPayload(…, { mensajes })`. Registro: tuteo, frase corta, qué hacer primero. Un sistema que habla de usted cambia ahí los que se vean; por ejemplo, `FORMKIT_CONFIG.mensajes = { fmtTelefono: 'Escriba 10 dígitos, sin lada internacional.' }`. Formatos y cruzadas leen también de la configuración del formulario el ámbito (`ambito.cp`, `ambito.coordenadas`) y la CURP (`curp.verificarDigito`). También van ahí los títulos del resumen de errores (`resumenUno`, `resumenServidorVarios`…), los de la confirmación (`confirmaNo`, `confirmaIrreversible`…) y los del resultado (`resultadoHora`, `resultadoMotivo`).
 
 ## 6. Configuración por formulario (`FORMKIT_CONFIG`)
 
@@ -96,7 +96,7 @@ Los 141 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.
 | `chips` | 5, `sia-chips` | Máximo de chips del historial y clave del almacén local (la lista fija no guarda nada). |
 | `visor` | pdf.js junto al paquete; fijo desde 1024 px | Dónde está pdf.js (`pdfjs`), desde qué ancho el visor queda fijo junto a la revisión (`fijoDesde`) y la espera para repintar (`retardoMs`). |
 | `mapa` | sin teselas | Proveedor, atribución, centro, zoom. |
-| `mensajes` | 141 textos | Cualquier mensaje, también los de formatos y cruzadas. |
+| `mensajes` | 155 textos | Cualquier mensaje, también los de formatos y cruzadas. |
 
 ## 7. En el servidor
 

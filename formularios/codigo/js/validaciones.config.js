@@ -514,7 +514,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.3.4',
+    version: '1.4.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -600,8 +600,22 @@
       minimoCaracteres: 'Escribe al menos {min} caracteres en «{etiqueta}»; van {n}.',
       maximoCaracteres: 'Usa hasta {max} caracteres en «{etiqueta}».',
       advertencia: 'Advertencia:',
-      resumenUno: 'Falta revisar 1 campo para continuar.',
-      resumenVarios: 'Faltan por revisar {n} campos para continuar.',
+      resumenUno: 'Para continuar, revisa 1 respuesta.',
+      resumenVarios: 'Para continuar, revisa {n} respuestas.',
+      resumenServidorUno: 'No se pudo enviar: revisa 1 respuesta.',
+      resumenServidorVarios: 'No se pudo enviar: revisa {n} respuestas.',
+      resumenContexto: '{contexto}: {mensaje}',
+      confirmaTitulo: '¿Confirmas?',
+      confirmaSi: 'Confirmar',
+      confirmaNo: 'Volver sin cambios',
+      confirmaConsecuencias: 'Qué pasará:',
+      confirmaIrreversible: 'No se puede deshacer.',
+      resultadoHora: 'Quedó guardado a las {hora}',
+      resultadoFechaHora: 'Quedó guardado el {fecha} a las {hora}',
+      resultadoMotivo: 'Motivo',
+      descargaPreparando: 'Preparando el archivo…',
+      descargaLista: 'Descarga iniciada.',
+      descargaError: 'No se pudo preparar el archivo. Intenta de nuevo.',
       pasoAnuncio: 'Paso {n} de {total}: {titulo}.',
       pasoTexto: 'Paso {n} de {total}',
       pasoHecho: 'completado',

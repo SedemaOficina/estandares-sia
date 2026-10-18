@@ -426,5 +426,96 @@ window.GUIA_PARES = [
   "fondo": "--ok-bg",
   "minimo": 4.5,
   "donde": "Nombre de un archivo listo (su estado va en --ok-txt, C27)"
+ },
+ {
+  "id": "C42",
+  "texto": "--blanco",
+  "fondo": "--error",
+  "minimo": 4.5,
+  "donde": "Botón de peligro (relleno), dentro de su confirmación"
+ },
+ {
+  "id": "C43",
+  "texto": "--blanco",
+  "fondo": "--error-txt",
+  "minimo": 4.5,
+  "donde": "Botón de peligro al pasar el cursor"
+ },
+ {
+  "id": "C44",
+  "texto": "--error-txt",
+  "fondo": "--blanco",
+  "minimo": 4.5,
+  "donde": "Botón de peligro de contorno y «No se puede deshacer» en la confirmación"
+ },
+ {
+  "id": "C45",
+  "texto": "--texto",
+  "fondo": "--aviso-bg",
+  "minimo": 4.5,
+  "donde": "Etiqueta de estado «borrador»"
+ },
+ {
+  "id": "C46",
+  "texto": "--azul",
+  "fondo": "--azul-cl",
+  "minimo": 4.5,
+  "donde": "Etiqueta de estado «proceso»"
+ },
+ {
+  "id": "C47",
+  "texto": "--pend-txt",
+  "fondo": "--pend-bg",
+  "minimo": 4.5,
+  "donde": "Etiqueta de estado «atención»"
+ },
+ {
+  "id": "C48",
+  "texto": "--ok-txt",
+  "fondo": "--ok-bg",
+  "minimo": 4.5,
+  "donde": "Etiqueta de estado «ok»"
+ },
+ {
+  "id": "C49",
+  "texto": "--error-txt",
+  "fondo": "--error-bg",
+  "minimo": 4.5,
+  "donde": "Etiqueta de estado «rechazo»"
+ },
+ {
+  "id": "C50",
+  "texto": "--gris",
+  "fondo": "--aviso-bg",
+  "minimo": 4.5,
+  "donde": "Rótulo «Motivo» del resultado"
+ },
+ {
+  "id": "N19",
+  "texto": "--pend",
+  "fondo": "--blanco",
+  "minimo": 3,
+  "donde": "Filete del resultado «atención»"
+ },
+ {
+  "id": "N20",
+  "texto": "--blanco",
+  "fondo": "--ok",
+  "minimo": 3,
+  "donde": "Icono de la marca del resultado «ok» y del acuse"
+ },
+ {
+  "id": "N21",
+  "texto": "--blanco",
+  "fondo": "--pend",
+  "minimo": 3,
+  "donde": "Icono de la marca del resultado «atención»"
+ },
+ {
+  "id": "N22",
+  "texto": "--blanco",
+  "fondo": "--gris",
+  "minimo": 3,
+  "donde": "Icono de la marca del resultado neutro"
  }
 ];

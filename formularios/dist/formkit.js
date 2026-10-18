@@ -516,7 +516,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.3.4',
+    version: '1.4.0',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -602,8 +602,22 @@
       minimoCaracteres: 'Escribe al menos {min} caracteres en «{etiqueta}»; van {n}.',
       maximoCaracteres: 'Usa hasta {max} caracteres en «{etiqueta}».',
       advertencia: 'Advertencia:',
-      resumenUno: 'Falta revisar 1 campo para continuar.',
-      resumenVarios: 'Faltan por revisar {n} campos para continuar.',
+      resumenUno: 'Para continuar, revisa 1 respuesta.',
+      resumenVarios: 'Para continuar, revisa {n} respuestas.',
+      resumenServidorUno: 'No se pudo enviar: revisa 1 respuesta.',
+      resumenServidorVarios: 'No se pudo enviar: revisa {n} respuestas.',
+      resumenContexto: '{contexto}: {mensaje}',
+      confirmaTitulo: '¿Confirmas?',
+      confirmaSi: 'Confirmar',
+      confirmaNo: 'Volver sin cambios',
+      confirmaConsecuencias: 'Qué pasará:',
+      confirmaIrreversible: 'No se puede deshacer.',
+      resultadoHora: 'Quedó guardado a las {hora}',
+      resultadoFechaHora: 'Quedó guardado el {fecha} a las {hora}',
+      resultadoMotivo: 'Motivo',
+      descargaPreparando: 'Preparando el archivo…',
+      descargaLista: 'Descarga iniciada.',
+      descargaError: 'No se pudo preparar el archivo. Intenta de nuevo.',
       pasoAnuncio: 'Paso {n} de {total}: {titulo}.',
       pasoTexto: 'Paso {n} de {total}',
       pasoHecho: 'completado',
@@ -698,7 +712,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.4
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -781,10 +795,17 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     document.body.prepend(cont);
   }
 
-  /* ---------- Anuncios para lector de pantalla ---------- */
+  /* ---------- Anuncios para lector de pantalla ----------
+     Todo anuncio también se ve (FRM-40): lo que sólo oye el lector no existe
+     para quien ve la pantalla. anuncia(texto, { visible: elemento }) escribe
+     el texto también en ese elemento y lo muestra; sin él, lo anunciado ya
+     debe estar en pantalla. El segundo argumento también puede ser true
+     (asertivo), como antes. */
   let regionAnuncios = null;
   let temporizadorAnuncio = 0;
-  function anuncia(texto, cortes = false) {
+  function anuncia(texto, opciones = false) {
+    const { cortes = false, visible = null } = opciones && typeof opciones === 'object' ? opciones : { cortes: opciones };
+    if (visible) { ($('.aviso-texto', visible) || visible).textContent = texto; visible.hidden = false; }
     if (!regionAnuncios) {
       regionAnuncios = $('[data-anuncios]') || document.createElement('div');
       regionAnuncios.className = 'solo-lector';
@@ -795,6 +816,37 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     clearTimeout(temporizadorAnuncio);
     regionAnuncios.textContent = '';
     temporizadorAnuncio = setTimeout(() => { regionAnuncios.textContent = texto; }, FormKit.config.anuncios.retardoMs);
+  }
+
+  /* ---------- Avisos (FRM-39) ----------
+     FormKit.aviso(lugar, { tono, titulo, texto, foco }) pinta un aviso con el
+     icono y el rol de su tono, su título y su texto. Si lugar ya es un .aviso,
+     se pinta ahí; si no, va al principio de lugar y sustituye al que haya
+     puesto antes. foco: true cuando responde a una acción de la persona. El
+     marcado es el del contrato (<span class="aviso-texto">), así que sirve
+     también dentro de un <p class="aviso">. */
+  const TONOS_AVISO = {
+    neutro: { clase: '', icono: 'info', rol: '' },
+    advertencia: { clase: 'aviso-advertencia', icono: 'alerta', rol: '' },
+    bloqueo: { clase: 'aviso-bloqueo', icono: 'error', rol: 'alert' },
+    ok: { clase: 'aviso-ok', icono: 'ok', rol: 'status' }
+  };
+  function aviso(lugar, { tono = 'neutro', titulo = '', texto = '', foco = false } = {}) {
+    const t = TONOS_AVISO[tono] || TONOS_AVISO.neutro;
+    let a = lugar.classList.contains('aviso') ? lugar : $(':scope > [data-aviso-formkit]', lugar);
+    if (!a) { a = document.createElement('div'); a.dataset.avisoFormkit = ''; lugar.prepend(a); }
+    a.className = ['aviso', t.clase, ...[...a.classList].filter((c) => !/^aviso(-|$)/.test(c))].filter(Boolean).join(' ');
+    if (t.rol) a.setAttribute('role', t.rol); else a.removeAttribute('role');
+    const cuerpo = document.createElement('span');
+    cuerpo.className = 'aviso-texto';
+    if (titulo) { const h = document.createElement('strong'); h.className = 'aviso-titulo'; h.textContent = titulo; cuerpo.appendChild(h); }
+    if (texto) cuerpo.appendChild(document.createTextNode(texto));
+    a.replaceChildren(icono(t.icono), cuerpo);
+    a.hidden = false;
+    if (foco) { a.tabIndex = -1; a.focus(); }
+    /* Sin rol ni foco nadie lo leería: se anuncia, y ya está a la vista. */
+    else if (!t.rol) anuncia([titulo, texto].filter(Boolean).join(' '));
+    return a;
   }
 
   /* ---------- Registro de módulos ----------
@@ -1215,7 +1267,17 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     /* ----- Resumen de errores (FRM-28) ----- */
     function quitaResumen(cont = form) { for (const r of $$('.resumen-errores', cont)) r.remove(); }
 
-    function muestraResumen(cont, fallos) {
+    /* El resumen dice de qué respuesta se trata: si varias tienen la misma
+       etiqueta («Decisión» en cada documento), data-contexto en el campo o en
+       un elemento que lo rodea («Identificación oficial») va antes del mensaje. */
+    function contextoDe(n) {
+      const e = envoltura(n);
+      const c = e && e.closest('[data-contexto]');
+      return c ? c.dataset.contexto.trim() : '';
+    }
+
+    /* origen 'servidor': el título dice que el envío no se completó. */
+    function muestraResumen(cont, fallos, origen = '') {
       quitaResumen(cont);
       if (!fallos.length) return null;
       const r = document.createElement('div');
@@ -1224,7 +1286,11 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       r.tabIndex = -1;
       const tit = document.createElement('p');
       tit.className = 'resumen-errores-titulo';
-      tit.append(icono('error'), document.createTextNode(fallos.length === 1 ? M.resumenUno : plantilla(M.resumenVarios, { n: fallos.length })));
+      const n = fallos.length;
+      const titulo = origen === 'servidor'
+        ? (n === 1 ? M.resumenServidorUno : plantilla(M.resumenServidorVarios, { n }))
+        : (n === 1 ? M.resumenUno : plantilla(M.resumenVarios, { n }));
+      tit.append(icono('error'), document.createTextNode(titulo));
       const ul = document.createElement('ul');
       ul.className = 'resumen-errores-lista';
       for (const f of fallos) {
@@ -1235,7 +1301,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (c && !c.id) c.id = idUnico(`c-${f.campo}`);
         a.href = `#${c ? c.id : ''}`;
         a.dataset.irCampo = f.campo;
-        a.textContent = f.mensaje;
+        const contexto = contextoDe(f.campo);
+        a.textContent = contexto ? plantilla(M.resumenContexto, { contexto, mensaje: f.mensaje }) : f.mensaje;
         li.appendChild(a);
         ul.appendChild(li);
       }
@@ -1449,7 +1516,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const porCampo = e && Array.isArray(e.errores) ? e.errores.filter((x) => x && marcaError(x.campo, x.mensaje)) : [];
         if (porCampo.length) {
           const fallos = porCampo.map((x) => ({ campo: x.campo, mensaje: x.mensaje }));
-          if (!(FormKit.ganchos.erroresServidor && FormKit.ganchos.erroresServidor(form, fallos))) muestraResumen(form, fallos);
+          if (!(FormKit.ganchos.erroresServidor && FormKit.ganchos.erroresServidor(form, fallos))) muestraResumen(form, fallos, 'servidor');
           if (opciones.alFallar) opciones.alFallar(e, form);
           return false;
         }
@@ -1606,7 +1673,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   const FormKit = {
     version: BASE.version,
     config: fusiona(BASE, global.FORMKIT_CONFIG || {}),
-    registra, iniciar, anuncia, icono, almacen,
+    registra, iniciar, anuncia, aviso, icono, almacen,
     /* FormKit.marcaError(campo, mensaje): pinta el error junto al campo, en el formulario que lo tenga. */
     marcaError: marcaErrorGlobal,
     utilidades: { $, $$, plantilla, pesoTxt, normalizaBusqueda, idUnico, fusiona },
@@ -2106,6 +2173,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (btnAgregar && !btnAgregar.textContent.trim()) btnAgregar.textContent = M.filaAgregar;
 
         function filas() { return $$(':scope > .repetible-fila', lista); }
+        /* El límite de filas se dice también en pantalla, junto a «Agregar» (FRM-40). */
+        let notaLimite = null;
+        function avisaLimite(texto) {
+          if (!notaLimite) { notaLimite = document.createElement('p'); notaLimite.className = 'repetible-limite'; if (btnAgregar) btnAgregar.before(notaLimite); else rep.appendChild(notaLimite); }
+          anuncia(texto, { visible: notaLimite });
+        }
+        const quitaLimite = () => { if (notaLimite) notaLimite.hidden = true; };
         function renumera() {
           filas().forEach((fila, i) => {
             const cab = $('.repetible-titulo', fila);
@@ -2116,7 +2190,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           if (btnAgregar) { const lleno = max && filas().length >= max; btnAgregar.setAttribute('aria-disabled', String(!!lleno)); }
         }
         function agrega(foco = true) {
-          if (max && filas().length >= max) { anuncia(plantilla(M.repetibleMax, { max, etiqueta: rep.dataset.etiqueta || '' })); return null; }
+          if (max && filas().length >= max) { avisaLimite(plantilla(M.repetibleMax, { max, etiqueta: rep.dataset.etiqueta || '' })); return null; }
+          quitaLimite();
           const i = filas().length;
           const html = tpl.innerHTML.replace(/#/g, String(i));
           const cont = document.createElement('div'); cont.innerHTML = html;
@@ -2141,7 +2216,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         function tieneDatos(fila) { return $$('[data-campo]', fila).some((c) => { const v = valorDe(c.dataset.campo); return Array.isArray(v) ? v.length : v; }); }
         function quita(fila) {
           const idx = filas().indexOf(fila);
-          if (min && filas().length <= min) { anuncia(plantilla(M.repetibleMin, { min, etiqueta: rep.dataset.etiqueta || '' })); return; }
+          if (min && filas().length <= min) { avisaLimite(plantilla(M.repetibleMin, { min, etiqueta: rep.dataset.etiqueta || '' })); return; }
+          quitaLimite();
           for (const c of $$('[data-campo]', fila)) limpia(c.dataset.campo);
           fila.remove();
           renumera();
@@ -2153,7 +2229,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
         rep.addEventListener('click', (e) => {
           const ag = e.target.closest('[data-repetible-agregar]');
-          if (ag && ag.getAttribute('aria-disabled') !== 'true') { agrega(); return; }
+          /* Con el máximo, «Agregar» sigue enfocable (aria-disabled): al tocarlo se dice por qué no agrega. */
+          if (ag) { agrega(); return; }
           const q = e.target.closest('[data-repetible-quitar]');
           if (!q) return;
           const fila = q.closest('.repetible-fila');
@@ -2381,7 +2458,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (f !== form) return false;
         const i = pasos.findIndex((p) => fallos.some((x) => p.contains(envoltura(x.campo))));
         if (i < 0) return false;
-        conError.add(i); ir(i, { foco: false }); muestraResumen(pasos[i], fallos.filter((x) => pasos[i].contains(envoltura(x.campo)))); pintaBarra();
+        conError.add(i); ir(i, { foco: false }); muestraResumen(pasos[i], fallos.filter((x) => pasos[i].contains(envoltura(x.campo))), 'servidor'); pintaBarra();
         return true;
       };
       /* Enter en un campo intermedio avanza; sólo en el último paso envía. */
@@ -2560,6 +2637,108 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 }());
 
 
+/* ===== codigo/modulos/resultado/resultado.js ===== */
+/* =========================================================
+   resultado.js · Módulo «resultado» · nivel RECOMENDADO
+
+   El desenlace de una decisión del personal: validar, rechazar, devolver
+   para corregir o cerrar un trámite. El acuse es para quien envía; esto es
+   para quien decide. Dice con claridad qué pasó, a qué hora y quién lo
+   hizo, y cita el motivo si lo hay. El foco va al título y se anuncia.
+
+   FormKit.resultado(lugar, { tono, titulo, texto, hora, quien, motivo, nivel, oculta })
+     · tono: ok (validado, aprobado), atencion (devuelto, en espera),
+       rechazo (rechazado, cancelado) o neutro (cerrado, archivado);
+     · titulo con el resultado y su objeto («Solicitud EJ-123 validada»);
+     · hora: Date o fecha ISO del servidor (sin ella, ahora); si no es de
+       hoy, también se dice la fecha;
+     · quien: nombre de quien decidió, tal como lo da el servidor;
+     · motivo: el texto que escribió quien decidió, citado tal cual;
+     · nivel del título (2 por omisión);
+     · oculta: elemento o lista de elementos que ya no aplican (el panel de
+       decisión), que se ocultan.
+   Lo que la página ponga en lugar con data-resultado-acciones (por ejemplo,
+   «Volver a la bandeja») se conserva al final.
+
+   Contrato HTML:
+     <section class="resultado" data-resultado hidden>
+       <div class="acciones" data-resultado-acciones>
+         <a class="btn btn-primario" href="bandeja.html">Volver a la bandeja</a>
+       </div>
+     </section>
+   ========================================================= */
+(function () {
+  'use strict';
+  const TONOS = {
+    ok: { icono: 'ok', clase: 'resultado-ok' },
+    atencion: { icono: 'alerta', clase: 'resultado-atencion' },
+    rechazo: { icono: 'error', clase: 'resultado-rechazo' },
+    neutro: { icono: 'info', clase: '' }
+  };
+
+  function resultado(lugar, opciones = {}) {
+    const cfg = FormKit.config;
+    const M = cfg.mensajes;
+    const { plantilla } = FormKit.utilidades;
+    const { tono = 'neutro', titulo = '', texto = '', hora, quien = '', motivo = '', nivel = 2, oculta } = opciones;
+    const t = TONOS[tono] ? tono : 'neutro';
+    const acciones = [...lugar.querySelectorAll(':scope > [data-resultado-acciones]')];
+
+    const cabeza = document.createElement('div');
+    cabeza.className = 'resultado-cabeza';
+    const marca = document.createElement('span');
+    marca.className = 'resultado-marca';
+    marca.appendChild(FormKit.icono(TONOS[t].icono));
+    const h = document.createElement(`h${Math.min(6, Math.max(2, nivel))}`);
+    h.className = 'resultado-titulo';
+    h.tabIndex = -1;
+    h.textContent = titulo;
+    cabeza.append(marca, h);
+
+    /* «Quedó guardado a las 14:30 · Ana López»: la hora en la zona del formulario. */
+    const cuando = hora ? new Date(hora) : new Date();
+    const zona = { timeZone: cfg.fechas.zonaHoraria };
+    const horaTxt = cuando.toLocaleTimeString(cfg.idioma, { ...zona, hour: '2-digit', minute: '2-digit', hour12: false });
+    const dia = (d) => d.toLocaleDateString(cfg.idioma, { ...zona, dateStyle: 'long' });
+    const esHoy = dia(cuando) === dia(new Date());
+    const meta = document.createElement('p');
+    meta.className = 'resultado-meta';
+    const tiempo = document.createElement('time');
+    tiempo.dateTime = cuando.toISOString();
+    tiempo.textContent = esHoy ? plantilla(M.resultadoHora, { hora: horaTxt }) : plantilla(M.resultadoFechaHora, { fecha: dia(cuando), hora: horaTxt });
+    meta.appendChild(tiempo);
+    if (quien) meta.append(document.createTextNode(' · '), Object.assign(document.createElement('span'), { className: 'resultado-quien', textContent: quien }));
+
+    const partes = [cabeza, meta];
+    if (texto) partes.push(Object.assign(document.createElement('p'), { className: 'resultado-texto', textContent: texto }));
+    if (motivo) {
+      const fig = document.createElement('figure');
+      fig.className = 'resultado-motivo';
+      const rot = document.createElement('figcaption');
+      rot.className = 'resultado-motivo-rotulo';
+      rot.textContent = M.resultadoMotivo;
+      const cita = document.createElement('blockquote');
+      cita.className = 'resultado-motivo-texto';
+      cita.textContent = motivo;
+      fig.append(rot, cita);
+      partes.push(fig);
+    }
+
+    lugar.classList.add('resultado');
+    for (const x of Object.values(TONOS)) if (x.clase) lugar.classList.remove(x.clase);
+    if (TONOS[t].clase) lugar.classList.add(TONOS[t].clase);
+    lugar.replaceChildren(...partes, ...acciones);
+    for (const el of [].concat(oculta || [])) if (el) el.hidden = true;
+    lugar.hidden = false;
+    h.focus();
+    FormKit.anuncia(`${titulo}. ${meta.textContent}.`);
+    return lugar;
+  }
+
+  FormKit.resultado = resultado;
+}());
+
+
 /* ===== codigo/modulos/modal/modal.js ===== */
 /* =========================================================
    modal.js · Módulo «modal» · nivel RECOMENDADO
@@ -2568,9 +2747,16 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    Escape y devuelve el foco a quien lo abrió. Dos usos:
      1. Contenido que hay que leer (aviso de privacidad): botones con
         data-abre-dialogo="id" y data-cierra-dialogo dentro del <dialog>.
-     2. Confirmación de una acción que no se deshace:
-        FormKit.confirma(ancla, {titulo, texto, si, no, peligro}) → Promise<boolean>
+     2. Confirmación de una acción con efecto:
+        FormKit.confirma(ancla, {titulo, texto, consecuencias, irreversible, si, no, peligro}) → Promise<boolean>
         Crea un <dialog role="alertdialog"> en el momento y lo retira al cerrar.
+        · titulo pregunta por la acción con su objeto («¿Rechazar la solicitud EJ-123?»);
+        · consecuencias: lista de lo que pasará («La persona recibe el motivo por correo»);
+        · irreversible: true agrega «No se puede deshacer.» con su icono;
+        · si repite el verbo de la acción («Rechazar solicitud»), nunca «Aceptar»;
+        · no es la salida segura («Volver sin cambios») y recibe el foco;
+        · peligro: true para lo destructivo (rechazar, cancelar, eliminar).
+        Guardar una nota no pide confirmación; cerrar un trámite sí, con sus consecuencias.
    CUÁNDO NO: para errores de campo (van en el campo), para avisos que no
    exigen decisión (van en línea) ni para confirmar acciones recuperables.
    En teléfono el diálogo baja como hoja inferior (modal.css).
@@ -2604,28 +2790,45 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   });
 
   FormKit.confirma = function (ancla, cfg = {}) {
+    const M = FormKit.config.mensajes;
+    const { idUnico } = FormKit.utilidades;
     return new Promise((resolve) => {
       const d = document.createElement('dialog');
       d.className = 'dialogo dialogo-confirma';
       d.setAttribute('role', 'alertdialog');
-      const idT = FormKit.utilidades.idUnico('conf-t'), idD = FormKit.utilidades.idUnico('conf-d');
+      const idT = idUnico('conf-t'), idD = idUnico('conf-d');
       d.setAttribute('aria-labelledby', idT);
-      if (cfg.texto) d.setAttribute('aria-describedby', idD);
-      const h = document.createElement('h2'); h.className = 'titulo-bloque dialogo-titulo'; h.id = idT; h.textContent = cfg.titulo || '¿Confirmas?';
-      const p = document.createElement('p'); p.className = 'texto-gris'; p.id = idD; p.textContent = cfg.texto || '';
+      const h = document.createElement('h2'); h.className = 'titulo-bloque dialogo-titulo'; h.id = idT; h.textContent = cfg.titulo || M.confirmaTitulo;
+      /* Texto, consecuencias e «irreversible» forman la descripción que oye el lector. */
+      const desc = document.createElement('div'); desc.id = idD; desc.className = 'dialogo-desc';
+      if (cfg.texto) { const p = document.createElement('p'); p.className = 'texto-gris'; p.textContent = cfg.texto; desc.appendChild(p); }
+      const consecuencias = (cfg.consecuencias || []).filter(Boolean);
+      if (consecuencias.length) {
+        const t = document.createElement('p'); t.className = 'dialogo-consecuencias-titulo'; t.textContent = M.confirmaConsecuencias;
+        const ul = document.createElement('ul'); ul.className = 'dialogo-consecuencias';
+        for (const c of consecuencias) { const li = document.createElement('li'); li.textContent = c; ul.appendChild(li); }
+        desc.append(t, ul);
+      }
+      if (cfg.irreversible) {
+        const p = document.createElement('p'); p.className = 'dialogo-irreversible';
+        p.append(FormKit.icono('alerta'), document.createTextNode(M.confirmaIrreversible));
+        desc.appendChild(p);
+      }
+      if (desc.childNodes.length) d.setAttribute('aria-describedby', idD);
       const acc = document.createElement('div'); acc.className = 'acciones dialogo-acciones';
-      const no = document.createElement('button'); no.type = 'button'; no.className = 'btn btn-secundario'; no.textContent = cfg.no || 'Cancelar'; no.dataset.r = 'no';
-      const si = document.createElement('button'); si.type = 'button'; si.className = cfg.peligro ? 'btn btn-peligro' : 'btn btn-primario'; si.textContent = cfg.si || 'Confirmar'; si.dataset.r = 'si';
+      const no = document.createElement('button'); no.type = 'button'; no.className = 'btn btn-secundario'; no.textContent = cfg.no || M.confirmaNo; no.dataset.r = 'no';
+      const si = document.createElement('button'); si.type = 'button'; si.className = cfg.peligro ? 'btn btn-peligro' : 'btn btn-primario'; si.textContent = cfg.si || M.confirmaSi; si.dataset.r = 'si';
+      if (!cfg.si) console.warn('FormKit.confirma: «si» debe repetir el verbo de la acción («Rechazar solicitud»), no «Confirmar».');
       acc.append(no, si);
-      d.append(h, p, acc);
+      d.append(h, desc, acc);
       document.body.appendChild(d);
       const termina = (ok) => { cierra(d); d.remove(); if (ancla && ancla.focus) ancla.focus(); resolve(ok); };
       d.addEventListener('click', (e) => { const b = e.target.closest('[data-r]'); if (b) termina(b.dataset.r === 'si'); });
       d.addEventListener('cancel', (e) => { e.preventDefault(); termina(false); });
       abre(d);
-      /* El foco inicial va a la opción segura (cancelar), no a la destructiva. */
+      /* El foco inicial va a la opción segura («Volver sin cambios»), no a la que actúa. */
       no.focus();
-      FormKit.anuncia(`${h.textContent} ${p.textContent}`, true);
+      FormKit.anuncia(`${h.textContent} ${desc.textContent}`, true);
     });
   };
 }());
@@ -2751,17 +2954,25 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (!b || b.getAttribute('aria-busy') === 'true') return;
         const gen = FormKit.descargas[b.dataset.generar];
         if (!gen) return;
+        const M = FormKit.config.mensajes;
         b.setAttribute('aria-busy', 'true'); b.setAttribute('aria-disabled', 'true');
         const texto = [...b.childNodes].find((x) => x.nodeType === 3);
         const original = texto ? texto.textContent : '';
         if (texto) texto.textContent = ' Preparando…';
-        anuncia('Preparando el archivo…');
+        anuncia(M.descargaPreparando);
+        /* Si falla, se dice en un aviso junto al botón, no sólo al lector (FRM-40). */
+        const previo = b.nextElementSibling && b.nextElementSibling.matches('[data-descarga-aviso]') ? b.nextElementSibling : null;
+        if (previo) previo.hidden = true;
         try {
           const r = await gen();
           const a = document.createElement('a'); a.href = r.url; a.download = r.nombre || 'archivo'; document.body.appendChild(a); a.click(); a.remove();
           if (r.peso) { b.dataset.peso = r.peso; pintaDetalle(b); }
-          anuncia('Descarga iniciada.');
-        } catch (err) { anuncia('No se pudo preparar el archivo. Intenta de nuevo.', true); }
+          anuncia(M.descargaLista);
+        } catch (err) {
+          let av = previo;
+          if (!av) { av = document.createElement('p'); av.className = 'aviso'; av.dataset.descargaAviso = ''; b.after(av); }
+          FormKit.aviso(av, { tono: 'advertencia', texto: M.descargaError });
+        }
         finally { b.removeAttribute('aria-busy'); b.removeAttribute('aria-disabled'); if (texto) texto.textContent = original; }
       });
     }
@@ -3144,6 +3355,62 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 }());
 
 
+/* ===== codigo/modulos/estado/estado.js ===== */
+/* =========================================================
+   estado.js · Módulo «estado» · nivel OPCIONAL
+
+   Etiquetas de estado de un trámite o un registro («En revisión»,
+   «Validada»). Cinco tonos con significado fijo, cada uno con su icono:
+     borrador  · gris  · lápiz   · lo que aún no se envía;
+     proceso   · azul  · reloj   · en revisión, en trámite;
+     atencion  · ámbar · alerta  · espera algo de la persona o del personal;
+     ok        · verde · palomita· validado, aprobado, concluido;
+     rechazo   · rojo  · error   · rechazado, cancelado, vencido.
+   La palabra dice el estado; el color y el icono sólo lo refuerzan. Un
+   sistema no inventa tonos: cada estado suyo cae en uno de estos cinco.
+
+   Se inicia solo al cargar la página: a la etiqueta que no trae su icono se
+   le pone el de su tono. FormKit.estado(el, { tono, texto, anuncia }) la
+   cambia después (anuncia: true cuando cambia por una acción de la persona).
+
+   Contrato HTML:
+     <span class="estado estado-proceso">En revisión</span>
+   ========================================================= */
+(function () {
+  'use strict';
+  const ICONOS = { borrador: 'editar', proceso: 'reloj', atencion: 'alerta', ok: 'ok', rechazo: 'error' };
+  const tonoDe = (el) => Object.keys(ICONOS).find((t) => el.classList.contains(`estado-${t}`)) || 'borrador';
+
+  function pinta(el) {
+    const tono = tonoDe(el);
+    if (!el.classList.contains(`estado-${tono}`)) el.classList.add(`estado-${tono}`);
+    const previo = el.querySelector(':scope > .icono');
+    const nuevo = FormKit.icono(ICONOS[tono], 'icono icono-sm');
+    if (previo) previo.replaceWith(nuevo); else el.prepend(nuevo);
+  }
+
+  function estado(el, { tono, texto, anuncia = false } = {}) {
+    if (tono && ICONOS[tono]) {
+      for (const t of Object.keys(ICONOS)) el.classList.remove(`estado-${t}`);
+      el.classList.add(`estado-${tono}`);
+    }
+    if (texto !== undefined) el.replaceChildren(document.createTextNode(texto));
+    el.classList.add('estado');
+    pinta(el);
+    if (anuncia) FormKit.anuncia(el.textContent.trim());
+    return el;
+  }
+
+  /* Las que aún no tienen icono; también sirve para etiquetas que la página pinta después. */
+  function inicia(cont = document) {
+    for (const el of cont.querySelectorAll('.estado')) if (!el.querySelector(':scope > .icono')) pinta(el);
+  }
+
+  FormKit.estado = Object.assign(estado, { inicia });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => inicia()); else inicia();
+}());
+
+
 /* ===== codigo/modulos/archivos/archivos.js ===== */
 /* =========================================================
    archivos.js · Módulo «archivos» · nivel RECOMENDADO
@@ -3403,8 +3670,12 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (cont && cont.hasAttribute('data-lleno') !== lleno) {
           const conFoco = cont.contains(document.activeElement) && document.activeElement.matches('.zona-carga,[data-camara]');
           cont.toggleAttribute('data-lleno', lleno);
+          /* Lo que se anuncia también se ve (FRM-40): la frase queda bajo la lista mientras siga lleno. */
+          let nota = $('.arch-lleno', el);
+          if (!nota && lleno) { nota = document.createElement('p'); nota.className = 'arch-lleno'; ul.after(nota); }
+          if (nota && !lleno) nota.hidden = true;
           if (lleno) {
-            anuncia(plantilla(c.max === 1 ? M.archLlenoUno : M.archLleno, { max: c.max }));
+            anuncia(plantilla(c.max === 1 ? M.archLlenoUno : M.archLleno, { max: c.max }), { visible: nota });
             if (conFoco) { const q = $$('.arch-quitar', ul).pop(); if (q) q.focus(); }
           }
         }

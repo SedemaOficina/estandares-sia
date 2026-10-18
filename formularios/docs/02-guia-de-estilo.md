@@ -97,6 +97,19 @@ Cada par de la tabla es un uso real del estándar: el texto sobre el fondo donde
 | N18 | `--borde` #878B8E | `--beige` #FFFEF8 | 3.40:1 | 3:1 | cumple | Borde de los enlaces a redes sociales en el pie |
 | C40 | `--dorado-txt` #8C6C3E | `--beige` #FFFEF8 | 4.80:1 | 4.5:1 | cumple | Distintivo de versión de un sitio de prueba |
 | C41 | `--texto` #2B2D2E | `--ok-bg` #F1F8F4 | 12.83:1 | 4.5:1 | cumple | Nombre de un archivo listo (su estado va en --ok-txt, C27) |
+| C42 | `--blanco` #FFFFFF | `--error` #B3261E | 6.54:1 | 4.5:1 | cumple | Botón de peligro (relleno), dentro de su confirmación |
+| C43 | `--blanco` #FFFFFF | `--error-txt` #8C1D18 | 9.11:1 | 4.5:1 | cumple | Botón de peligro al pasar el cursor |
+| C44 | `--error-txt` #8C1D18 | `--blanco` #FFFFFF | 9.11:1 | 4.5:1 | cumple | Botón de peligro de contorno y «No se puede deshacer» en la confirmación |
+| C45 | `--texto` #2B2D2E | `--aviso-bg` #F7F8F9 | 13.01:1 | 4.5:1 | cumple | Etiqueta de estado «borrador» |
+| C46 | `--azul` #1A56A8 | `--azul-cl` #EEF3FA | 6.41:1 | 4.5:1 | cumple | Etiqueta de estado «proceso» |
+| C47 | `--pend-txt` #6B4A00 | `--pend-bg` #FFF3CD | 7.28:1 | 4.5:1 | cumple | Etiqueta de estado «atención» |
+| C48 | `--ok-txt` #145032 | `--ok-bg` #F1F8F4 | 8.76:1 | 4.5:1 | cumple | Etiqueta de estado «ok» |
+| C49 | `--error-txt` #8C1D18 | `--error-bg` #FDF3F2 | 8.37:1 | 4.5:1 | cumple | Etiqueta de estado «rechazo» |
+| C50 | `--gris` #55585A | `--aviso-bg` #F7F8F9 | 6.74:1 | 4.5:1 | cumple | Rótulo «Motivo» del resultado |
+| N19 | `--pend` #8A5200 | `--blanco` #FFFFFF | 6.39:1 | 3:1 | cumple | Filete del resultado «atención» |
+| N20 | `--blanco` #FFFFFF | `--ok` #1B6B43 | 6.50:1 | 3:1 | cumple | Icono de la marca del resultado «ok» y del acuse |
+| N21 | `--blanco` #FFFFFF | `--pend` #8A5200 | 6.39:1 | 3:1 | cumple | Icono de la marca del resultado «atención» |
+| N22 | `--blanco` #FFFFFF | `--gris` #55585A | 7.17:1 | 3:1 | cumple | Icono de la marca del resultado neutro |
 <!-- contraste:fin -->
 
 ## 3. Tipografía
@@ -162,6 +175,8 @@ El CSS parte del teléfono y sólo crece. Hay tres puntos de corte, declarados e
 | Oculto | No existe para nadie | `hidden` (sin `!important`; nada lo pisa) |
 
 El estado vive siempre en un atributo; el auditor rechaza clases como `.activo` o `.invalido` (A10).
+
+El estado de un trámite o un registro (módulo `estado`) es otra cosa: una etiqueta con cinco tonos de significado fijo, cada uno con su icono y su palabra. Gris (lápiz), borrador: aún no se envía. Azul (reloj), proceso: en revisión, en trámite. Ámbar (alerta), atención: espera algo de la persona o del personal. Verde (palomita), ok: validado, aprobado, concluido. Rojo (error), rechazo: rechazado, cancelado, vencido. Cada estado de un sistema cae en uno de los cinco; el rojo no se usa para «En revisión» ni el verde para «Enviado». El desenlace de una decisión del personal (módulo `resultado`) usa los mismos significados: ok, atención, rechazo o neutro.
 
 ## 8. Iconografía
 

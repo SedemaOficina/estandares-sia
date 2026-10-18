@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.3.4
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -82,10 +82,17 @@
     document.body.prepend(cont);
   }
 
-  /* ---------- Anuncios para lector de pantalla ---------- */
+  /* ---------- Anuncios para lector de pantalla ----------
+     Todo anuncio también se ve (FRM-40): lo que sólo oye el lector no existe
+     para quien ve la pantalla. anuncia(texto, { visible: elemento }) escribe
+     el texto también en ese elemento y lo muestra; sin él, lo anunciado ya
+     debe estar en pantalla. El segundo argumento también puede ser true
+     (asertivo), como antes. */
   let regionAnuncios = null;
   let temporizadorAnuncio = 0;
-  function anuncia(texto, cortes = false) {
+  function anuncia(texto, opciones = false) {
+    const { cortes = false, visible = null } = opciones && typeof opciones === 'object' ? opciones : { cortes: opciones };
+    if (visible) { ($('.aviso-texto', visible) || visible).textContent = texto; visible.hidden = false; }
     if (!regionAnuncios) {
       regionAnuncios = $('[data-anuncios]') || document.createElement('div');
       regionAnuncios.className = 'solo-lector';
@@ -96,6 +103,37 @@
     clearTimeout(temporizadorAnuncio);
     regionAnuncios.textContent = '';
     temporizadorAnuncio = setTimeout(() => { regionAnuncios.textContent = texto; }, FormKit.config.anuncios.retardoMs);
+  }
+
+  /* ---------- Avisos (FRM-39) ----------
+     FormKit.aviso(lugar, { tono, titulo, texto, foco }) pinta un aviso con el
+     icono y el rol de su tono, su título y su texto. Si lugar ya es un .aviso,
+     se pinta ahí; si no, va al principio de lugar y sustituye al que haya
+     puesto antes. foco: true cuando responde a una acción de la persona. El
+     marcado es el del contrato (<span class="aviso-texto">), así que sirve
+     también dentro de un <p class="aviso">. */
+  const TONOS_AVISO = {
+    neutro: { clase: '', icono: 'info', rol: '' },
+    advertencia: { clase: 'aviso-advertencia', icono: 'alerta', rol: '' },
+    bloqueo: { clase: 'aviso-bloqueo', icono: 'error', rol: 'alert' },
+    ok: { clase: 'aviso-ok', icono: 'ok', rol: 'status' }
+  };
+  function aviso(lugar, { tono = 'neutro', titulo = '', texto = '', foco = false } = {}) {
+    const t = TONOS_AVISO[tono] || TONOS_AVISO.neutro;
+    let a = lugar.classList.contains('aviso') ? lugar : $(':scope > [data-aviso-formkit]', lugar);
+    if (!a) { a = document.createElement('div'); a.dataset.avisoFormkit = ''; lugar.prepend(a); }
+    a.className = ['aviso', t.clase, ...[...a.classList].filter((c) => !/^aviso(-|$)/.test(c))].filter(Boolean).join(' ');
+    if (t.rol) a.setAttribute('role', t.rol); else a.removeAttribute('role');
+    const cuerpo = document.createElement('span');
+    cuerpo.className = 'aviso-texto';
+    if (titulo) { const h = document.createElement('strong'); h.className = 'aviso-titulo'; h.textContent = titulo; cuerpo.appendChild(h); }
+    if (texto) cuerpo.appendChild(document.createTextNode(texto));
+    a.replaceChildren(icono(t.icono), cuerpo);
+    a.hidden = false;
+    if (foco) { a.tabIndex = -1; a.focus(); }
+    /* Sin rol ni foco nadie lo leería: se anuncia, y ya está a la vista. */
+    else if (!t.rol) anuncia([titulo, texto].filter(Boolean).join(' '));
+    return a;
   }
 
   /* ---------- Registro de módulos ----------
@@ -516,7 +554,17 @@
     /* ----- Resumen de errores (FRM-28) ----- */
     function quitaResumen(cont = form) { for (const r of $$('.resumen-errores', cont)) r.remove(); }
 
-    function muestraResumen(cont, fallos) {
+    /* El resumen dice de qué respuesta se trata: si varias tienen la misma
+       etiqueta («Decisión» en cada documento), data-contexto en el campo o en
+       un elemento que lo rodea («Identificación oficial») va antes del mensaje. */
+    function contextoDe(n) {
+      const e = envoltura(n);
+      const c = e && e.closest('[data-contexto]');
+      return c ? c.dataset.contexto.trim() : '';
+    }
+
+    /* origen 'servidor': el título dice que el envío no se completó. */
+    function muestraResumen(cont, fallos, origen = '') {
       quitaResumen(cont);
       if (!fallos.length) return null;
       const r = document.createElement('div');
@@ -525,7 +573,11 @@
       r.tabIndex = -1;
       const tit = document.createElement('p');
       tit.className = 'resumen-errores-titulo';
-      tit.append(icono('error'), document.createTextNode(fallos.length === 1 ? M.resumenUno : plantilla(M.resumenVarios, { n: fallos.length })));
+      const n = fallos.length;
+      const titulo = origen === 'servidor'
+        ? (n === 1 ? M.resumenServidorUno : plantilla(M.resumenServidorVarios, { n }))
+        : (n === 1 ? M.resumenUno : plantilla(M.resumenVarios, { n }));
+      tit.append(icono('error'), document.createTextNode(titulo));
       const ul = document.createElement('ul');
       ul.className = 'resumen-errores-lista';
       for (const f of fallos) {
@@ -536,7 +588,8 @@
         if (c && !c.id) c.id = idUnico(`c-${f.campo}`);
         a.href = `#${c ? c.id : ''}`;
         a.dataset.irCampo = f.campo;
-        a.textContent = f.mensaje;
+        const contexto = contextoDe(f.campo);
+        a.textContent = contexto ? plantilla(M.resumenContexto, { contexto, mensaje: f.mensaje }) : f.mensaje;
         li.appendChild(a);
         ul.appendChild(li);
       }
@@ -750,7 +803,7 @@
         const porCampo = e && Array.isArray(e.errores) ? e.errores.filter((x) => x && marcaError(x.campo, x.mensaje)) : [];
         if (porCampo.length) {
           const fallos = porCampo.map((x) => ({ campo: x.campo, mensaje: x.mensaje }));
-          if (!(FormKit.ganchos.erroresServidor && FormKit.ganchos.erroresServidor(form, fallos))) muestraResumen(form, fallos);
+          if (!(FormKit.ganchos.erroresServidor && FormKit.ganchos.erroresServidor(form, fallos))) muestraResumen(form, fallos, 'servidor');
           if (opciones.alFallar) opciones.alFallar(e, form);
           return false;
         }
@@ -907,7 +960,7 @@
   const FormKit = {
     version: BASE.version,
     config: fusiona(BASE, global.FORMKIT_CONFIG || {}),
-    registra, iniciar, anuncia, icono, almacen,
+    registra, iniciar, anuncia, aviso, icono, almacen,
     /* FormKit.marcaError(campo, mensaje): pinta el error junto al campo, en el formulario que lo tenga. */
     marcaError: marcaErrorGlobal,
     utilidades: { $, $$, plantilla, pesoTxt, normalizaBusqueda, idUnico, fusiona },

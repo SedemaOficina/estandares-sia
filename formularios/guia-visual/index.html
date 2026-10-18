@@ -19,6 +19,7 @@
 <link rel="stylesheet" href="../codigo/modulos/pasos/pasos.css">
 <link rel="stylesheet" href="../codigo/modulos/revision/revision.css">
 <link rel="stylesheet" href="../codigo/modulos/acuse/acuse.css">
+<link rel="stylesheet" href="../codigo/modulos/resultado/resultado.css">
 <link rel="stylesheet" href="../codigo/modulos/acordeon/acordeon.css">
 <link rel="stylesheet" href="../codigo/modulos/pestanas/pestanas.css">
 <link rel="stylesheet" href="../codigo/modulos/migas/migas.css">
@@ -27,6 +28,7 @@
 <link rel="stylesheet" href="../codigo/modulos/modal/modal.css">
 <link rel="stylesheet" href="../codigo/modulos/tooltip/tooltip.css">
 <link rel="stylesheet" href="../codigo/modulos/tabla/tabla.css">
+<link rel="stylesheet" href="../codigo/modulos/estado/estado.css">
 <link rel="stylesheet" href="../codigo/modulos/copiar/copiar.css">
 <link rel="stylesheet" href="../codigo/modulos/descarga/descarga.css">
 <link rel="stylesheet" href="../codigo/modulos/archivos/archivos.css">
@@ -385,8 +387,13 @@
 <div class="acciones guia-acciones-demo">
   <button type="button" class="btn-atras"><svg class="icono" aria-hidden="true"><use href="#i-flecha-izq"></use></svg>Atrás</button>
   <button type="button" class="btn btn-secundario">Guardar borrador</button>
-  <button type="button" class="btn btn-peligro"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg>Descartar</button>
+  <button type="button" class="btn btn-peligro-contorno"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg>Descartar</button>
   <button type="button" class="btn btn-primario">Continuar</button>
+</div>
+<p class="texto-gris">El botón que abre una acción destructiva va con contorno (<code>.btn-peligro-contorno</code>). El rojo relleno (<code>.btn-peligro</code>) es para el botón que hace el daño dentro de su confirmación, para que pese más que «Volver sin cambios»:</p>
+<div class="acciones guia-acciones-demo">
+  <button type="button" class="btn btn-secundario">Volver sin cambios</button>
+  <button type="button" class="btn btn-peligro">Rechazar solicitud</button>
 </div>
 <div class="guia-fila-demo">
   <button type="button" class="btn btn-primario" data-demo-foco>Con foco</button>
@@ -395,15 +402,18 @@
   <button type="button" class="btn-enlace"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-copiar"></use></svg>Enlace-botón</button>
   <button type="button" class="btn-icono" aria-label="Cerrar"><svg class="icono" aria-hidden="true"><use href="#i-cerrar"></use></svg></button>
 </div>
-<p class="aviso"><svg class="icono" aria-hidden="true"><use href="#i-info"></use></svg><span class="aviso-texto"><strong>Aviso.</strong> Algo que hay que leer, sin alarma. Cortés: no interrumpe al lector de pantalla.</span></p>
-<p class="aviso aviso-advertencia"><svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg><span class="aviso-texto"><strong>Advertencia.</strong> Atención sin bloqueo: puedes continuar, pero revisa.</span></p>
-<p class="aviso aviso-bloqueo" role="alert"><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"><strong>No puedes continuar.</strong> Lo único que impide seguir. Asertivo: el lector lo anuncia al momento.</span></p>
-<p class="aviso aviso-ok" role="status"><svg class="icono" aria-hidden="true"><use href="#i-ok"></use></svg><span class="aviso-texto"><strong>Recibido.</strong> El sistema confirma que recibió o guardó.</span></p>
+<p class="aviso"><svg class="icono" aria-hidden="true"><use href="#i-info"></use></svg><span class="aviso-texto"><strong class="aviso-titulo">Horario de revisión</strong> Algo que hay que leer, sin alarma. Cortés: no interrumpe al lector de pantalla.</span></p>
+<p class="aviso aviso-advertencia"><svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg><span class="aviso-texto"><strong class="aviso-titulo">Falta un documento</strong> Atención sin bloqueo: puedes continuar, pero la solicitud no se revisa hasta que lo subas.</span></p>
+<p class="aviso aviso-bloqueo" role="alert"><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"><strong class="aviso-titulo">No puedes continuar</strong> Lo único que impide seguir. Asertivo: el lector lo anuncia al momento.</span></p>
+<p class="aviso aviso-ok" role="status"><svg class="icono" aria-hidden="true"><use href="#i-ok"></use></svg><span class="aviso-texto"><strong class="aviso-titulo">Recibido</strong> El sistema confirma que recibió o guardó.</span></p>
+<p class="aviso"><svg class="icono" aria-hidden="true"><use href="#i-info"></use></svg><span class="aviso-texto">Un aviso de una sola frase puede ir sin título; el icono de su tono va siempre.</span></p>
+<div class="guia-fila-demo"><button type="button" class="btn btn-secundario" data-demo-aviso>Guardar una nota (aviso que responde a una acción)</button></div>
+<div data-demo-aviso-lugar></div>
 <p class="texto-gris">Lo que el proyecto no resuelve se dice: <span class="pendiente">Pendiente: horario de atención</span>. El rótulo va en el HTML, no en CSS, para que el lector lo lea.</p>
 </template>
 
 <template data-demo="resumen">
-<div class="campo" data-campo="n_r1" data-formato="cp" data-requerido data-uso="Muestra."><label class="etiqueta" for="n_r1">Código postal</label><input class="control" id="n_r1" name="n_r1" type="text" inputmode="numeric" autocomplete="postal-code"></div>
+<div class="campo" data-campo="n_r1" data-formato="cp" data-requerido data-uso="Muestra." data-contexto="Domicilio del predio"><label class="etiqueta" for="n_r1">Código postal</label><input class="control" id="n_r1" name="n_r1" type="text" inputmode="numeric" autocomplete="postal-code"></div>
 <div class="campo" data-campo="n_r2" data-formato="fecha" data-no-futura data-requerido data-uso="Muestra."><label class="etiqueta" for="n_r2">Fecha de los hechos</label><input class="control" id="n_r2" name="n_r2" type="date" autocomplete="off"></div>
 <p class="aviso aviso-bloqueo estado-envio" data-estado-envio role="alert" tabindex="-1" hidden><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"></span></p>
 <div class="acciones"><button type="submit" class="btn btn-primario btn-ancho" data-accion="enviar">Enviar (simulado; botón a lo ancho con .btn-ancho)</button></div>
@@ -555,7 +565,7 @@
 <template data-demo="modal">
 <div class="guia-fila-demo">
   <button type="button" class="btn btn-secundario" data-abre-dialogo="demo-dialogo">Abrir diálogo de contenido</button>
-  <button type="button" class="btn btn-peligro" data-demo-confirma>Descartar (pide confirmación)</button>
+  <button type="button" class="btn btn-peligro-contorno" data-demo-confirma>Cancelar el trámite (pide confirmación)</button>
 </div>
 <p class="texto-gris" data-demo-confirma-resultado aria-live="polite"></p>
 <dialog class="dialogo" id="demo-dialogo" aria-labelledby="demo-dialogo-t">
@@ -647,6 +657,28 @@
   <p class="version-sia version-sia--sia">Versión 1.4.0</p>
   <p class="version-sia version-sia--error">Versión sin leer</p>
 </footer>
+</template>
+
+<template data-demo="resultado">
+<p class="guia-fila-demo">Solicitud de acreditación EJ-2026-000123 (ficticia) <span class="estado estado-proceso" data-demo-estado-solicitud>En revisión</span></p>
+<div data-demo-decision>
+  <p class="texto-gris">Motivo que escribió quien revisa, por si rechaza: «La identificación oficial está vencida. Sube una vigente.»</p>
+  <div class="acciones"><button type="button" class="btn btn-peligro-contorno" data-demo-decide="rechazo">Rechazar solicitud</button><button type="button" class="btn btn-primario" data-demo-decide="ok">Validar solicitud</button></div>
+</div>
+<section class="resultado" data-demo-resultado hidden>
+  <div class="acciones" data-resultado-acciones><button type="button" class="btn btn-secundario" data-demo-reinicia>Volver a la muestra</button></div>
+</section>
+</template>
+
+<template data-demo="estado">
+<div class="guia-fila-demo">
+  <span class="estado estado-borrador">Borrador</span>
+  <span class="estado estado-proceso">En revisión</span>
+  <span class="estado estado-atencion">Requiere corrección</span>
+  <span class="estado estado-ok">Validada</span>
+  <span class="estado estado-rechazo">Rechazada</span>
+</div>
+<p class="texto-gris">Cinco tonos, cada uno con su significado y su icono: gris, aún no se envía; azul, en trámite; ámbar, espera algo; verde, concluido; rojo, rechazado, cancelado o vencido. Cada estado de un sistema cae en uno de ellos. El icono lo pone el módulo.</p>
 </template>
 
 <template data-demo="tooltip">
@@ -952,6 +984,7 @@
 <script src="../codigo/modulos/pasos/pasos.js"></script>
 <script src="../codigo/modulos/revision/revision.js"></script>
 <script src="../codigo/modulos/acuse/acuse.js"></script>
+<script src="../codigo/modulos/resultado/resultado.js"></script>
 <script src="../codigo/modulos/modal/modal.js"></script>
 <script src="../codigo/modulos/copiar/copiar.js"></script>
 <script src="../codigo/modulos/descarga/descarga.js"></script>
@@ -960,6 +993,7 @@
 <script src="../codigo/modulos/paginacion/paginacion.js"></script>
 <script src="../codigo/modulos/tooltip/tooltip.js"></script>
 <script src="../codigo/modulos/tabla/tabla.js"></script>
+<script src="../codigo/modulos/estado/estado.js"></script>
 <script src="../codigo/modulos/archivos/archivos.js"></script>
 <script src="../vendor/leaflet/leaflet.js"></script>
 <script src="../vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.js"></script>

@@ -2,7 +2,7 @@
 
 > Este documento se **genera** de `reglas/reglas.json` (`node herramientas/generar-reglas.mjs`). No se edita a mano: se corrige la regla en el JSON y se vuelve a generar.
 
-El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **54 BASE** (obligatorias en todo formulario), **19 RECOMENDADAS** (se cumplen salvo justificación escrita) y **8 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 0 son mejores prácticas adicionales.
+El estándar tiene **83 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **54 BASE** (obligatorias en todo formulario), **21 RECOMENDADAS** (se cumplen salvo justificación escrita) y **8 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 2 son mejores prácticas adicionales.
 
 **Cómo leer cada regla.** *Regla*: qué se hace. *Por qué*: el daño que evita. *Nivel*: BASE, RECOMENDADO u OPCIONAL (quien programa elige los módulos, no el nivel). *Origen*: `A FRM-xx` regla del paquete A; `B FRM-XXX-xx` regla del paquete B; `Cn` conflicto decidido en la fase 0 (ver `docs/09-trazabilidad.md`); `encargo n` sección del encargo; `norma n` norma de construcción de sistemas. *Verificación*: la prueba, herramienta o revisión que la comprueba.
 
@@ -12,7 +12,7 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 2. [Campos y etiquetas](#2-campos-y-etiquetas) · FRM-09 a FRM-15
 3. [Tipos de pregunta](#3-tipos-de-pregunta) · FRM-16 a FRM-25
 4. [Validación y errores](#4-validación-y-errores) · FRM-26 a FRM-33
-5. [Acciones y retroalimentación](#5-acciones-y-retroalimentación) · FRM-34 a FRM-41
+5. [Acciones y retroalimentación](#5-acciones-y-retroalimentación) · FRM-34 a FRM-83
 6. [Borrador y envío](#6-borrador-y-envío) · FRM-42 a FRM-45
 7. [Ubicación y domicilio](#7-ubicación-y-domicilio) · FRM-46 a FRM-50
 8. [Archivos y evidencia](#8-archivos-y-evidencia) · FRM-51 a FRM-54
@@ -25,7 +25,7 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 ## Resumen por nivel
 
 - **BASE**: FRM-07, FRM-08, FRM-09, FRM-10, FRM-11, FRM-12, FRM-13, FRM-14, FRM-15, FRM-16, FRM-17, FRM-26, FRM-27, FRM-28, FRM-29, FRM-30, FRM-32, FRM-33, FRM-34, FRM-35, FRM-36, FRM-37, FRM-39, FRM-40, FRM-44, FRM-45, FRM-48, FRM-51, FRM-54, FRM-55, FRM-56, FRM-59, FRM-60, FRM-61, FRM-62, FRM-63, FRM-64, FRM-65, FRM-66, FRM-67, FRM-68, FRM-69, FRM-70, FRM-71, FRM-72, FRM-73, FRM-74, FRM-75, FRM-76, FRM-77, FRM-78, FRM-79, FRM-80, FRM-81
-- **RECOMENDADO**: FRM-01, FRM-02, FRM-03, FRM-04, FRM-05, FRM-06, FRM-18, FRM-19, FRM-20, FRM-31, FRM-38, FRM-41, FRM-42, FRM-43, FRM-46, FRM-52, FRM-53, FRM-57, FRM-58
+- **RECOMENDADO**: FRM-01, FRM-02, FRM-03, FRM-04, FRM-05, FRM-06, FRM-18, FRM-19, FRM-20, FRM-31, FRM-38, FRM-41, FRM-42, FRM-43, FRM-46, FRM-52, FRM-53, FRM-57, FRM-58, FRM-82, FRM-83
 - **OPCIONAL**: FRM-21, FRM-22, FRM-23, FRM-24, FRM-25, FRM-47, FRM-49, FRM-50
 
 ## 1. Estructura y flujo
@@ -308,13 +308,13 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-28 · Resumen de errores al inicio, con rol de alerta, foco y enlaces
 
-**Regla.** Al continuar o enviar con errores aparece un resumen con role=alert que recibe el foco y enlaza a cada campo; cada enlace mide al menos 24 px. Al corregir el último error el resumen desaparece.
+**Regla.** Al continuar o enviar con errores aparece un resumen con role=alert que recibe el foco y enlaza a cada respuesta; cada enlace mide al menos 24 px. El resumen habla de respuestas, no de «campos» («Para continuar, revisa 2 respuestas.»). Si varias respuestas tienen la misma etiqueta, data-contexto en el campo o en un elemento que lo rodea pone antes del mensaje de cuál se trata («Identificación oficial: …»). Cuando el que rechaza es el servidor, el título lo dice («No se pudo enviar: revisa 1 respuesta.»). Al corregir el último error el resumen desaparece.
 
 **Por qué.** Sin resumen, quien usa lector de pantalla no sabe cuántos errores hay ni dónde; sin foco, no se entera.
 
-**Nivel.** BASE · **Origen.** A FRM-33; B FRM-VAL-02; B FRM-VAL-07 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-33; B FRM-VAL-02; B FRM-VAL-07; P116 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
-**Verificación.** 01-por-pasos; 02-una-pagina; 05-accesibilidad (target-size)
+**Verificación.** 01-por-pasos; 02-una-pagina; 05-accesibilidad (target-size); 07: contexto y título del servidor (P116)
 
 ### FRM-29 · El estado de error vive en aria-invalid y se comunica con icono, texto y borde
 
@@ -370,13 +370,13 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-34 · Una sola acción principal por pantalla
 
-**Regla.** Cada pantalla tiene un solo botón con relleno guinda. Lo demás es secundario (gris con borde), peligro (rojo, sólo destructivo y con confirmación), enlace-botón o botón de icono con nombre accesible y 44 px.
+**Regla.** Cada pantalla tiene un solo botón con relleno guinda. Lo demás es secundario (gris con borde), peligro, enlace-botón o botón de icono con nombre accesible y 44 px. El peligro es sólo para lo destructivo y siempre con confirmación: el botón que la abre va con contorno rojo (.btn-peligro-contorno) y el que hace el daño, dentro de la confirmación, en rojo relleno con texto blanco (.btn-peligro), para que pese más que «Volver sin cambios».
 
 **Por qué.** Dos botones guinda compiten y la persona no sabe cuál la lleva adelante.
 
-**Nivel.** BASE · **Origen.** A FRM-40; B FRM-ACC-01 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-40; B FRM-ACC-01; P114 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
-**Verificación.** guía: botones; sí y no
+**Verificación.** guía: botones; sí y no; 07: peligro relleno y de contorno (P114)
 
 ### FRM-35 · «Atrás» es un enlace azul con flecha, nunca un botón gris
 
@@ -408,35 +408,35 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Verificación.** 01-por-pasos: el botón se recupera; 02-una-pagina: agregar al máximo
 
-### FRM-38 · Toda acción que no se deshace pide confirmación dentro de la página
+### FRM-38 · Toda acción que no se deshace o que afecta a otra persona pide confirmación dentro de la página, con sus consecuencias
 
-**Regla.** Quitar, descartar o eliminar abren un diálogo nativo con role=alertdialog (FormKit.confirma), con el foco inicial en la opción segura, Escape para cancelar y retorno del foco al botón que lo abrió. Nunca window.confirm.
+**Regla.** Rechazar, cancelar, cerrar un trámite, quitar, descartar o eliminar abren un diálogo nativo con role=alertdialog (FormKit.confirma): la pregunta nombra la acción y su objeto («¿Rechazar la solicitud EJ-123?»), la lista dice qué pasará (consecuencias), «No se puede deshacer.» se escribe con su icono cuando aplica (irreversible), el botón que actúa repite el verbo («Rechazar solicitud», nunca «Aceptar») y va en rojo relleno si es destructivo, y el foco inicial va a «Volver sin cambios». Escape vuelve sin cambios y el foco regresa al botón que lo abrió. Guardar una nota u otra acción recuperable no pide confirmación. Nunca window.confirm.
 
-**Por qué.** window.confirm no se puede estilizar ni accesibilizar y en algunos visores no aparece; un diálogo que enfoca «Eliminar» borra con Enter por accidente.
+**Por qué.** window.confirm no se puede estilizar ni accesibilizar y en algunos visores no aparece; un diálogo que enfoca «Eliminar» borra con Enter por accidente; preguntar igual para guardar una nota que para cerrar un trámite enseña a confirmar sin leer.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-44; B FRM-ACC-04 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-44; B FRM-ACC-04; P113 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
-**Verificación.** 04-modulos: diálogo de confirmación; 02-una-pagina: quitar fila
+**Verificación.** 04-modulos: diálogo de confirmación; 02-una-pagina: quitar fila; 07: consecuencias y foco (P113)
 
-### FRM-39 · Cuatro avisos, cada uno con icono, texto y rol
+### FRM-39 · Cuatro avisos, cada uno con el icono de su tono, título, texto y rol
 
-**Regla.** Neutro (informa, sin rol), advertencia (ámbar, sin bloqueo), bloqueo (rojo, role=alert) y éxito (verde, role=status). Lo que impide continuar es asertivo; lo demás es cortés. Un aviso nunca sustituye al mensaje del campo.
+**Regla.** Neutro (informa, sin rol, icono info), advertencia (ámbar, sin bloqueo, icono alerta), bloqueo (rojo, role=alert, icono error) y éxito (verde, role=status, icono ok). El icono de su tono va siempre. Un aviso de más de una frase lleva título (.aviso-titulo) que dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. Lo que impide continuar es asertivo; lo demás es cortés. El aviso que responde a una acción de la persona recibe el foco; FormKit.aviso(lugar, {tono, titulo, texto, foco}) lo pinta así. Un aviso nunca sustituye al mensaje del campo.
 
-**Por qué.** Un aviso rojo para todo entrena a ignorarlo; un alert cortés no se oye.
+**Por qué.** Un aviso rojo para todo entrena a ignorarlo; un alert cortés no se oye; una frase larga sin título no deja ver si algo salió bien o mal.
 
-**Nivel.** BASE · **Origen.** encargo 5.4 · *decisión del encargo*
+**Nivel.** BASE · **Origen.** encargo 5.4; P115 (proyecto de acreditaciones, 17 oct 2026) · *decisión del encargo*
 
-**Verificación.** guía: botones y avisos; 05-accesibilidad
+**Verificación.** guía: botones y avisos; 05-accesibilidad; 07: FormKit.aviso (P115)
 
-### FRM-40 · Lo que cambia sin recargar se anuncia
+### FRM-40 · Lo que cambia sin recargar se anuncia, y todo anuncio también se ve
 
-**Regla.** Errores, avisos, resultados de paginación, pasos, copiar, archivos agregados o quitados y cambios de pestaña se anuncian en una región viva (FormKit.anuncia). El foco sólo se mueve al cambiar de paso, al resumen de errores y al título del acuse.
+**Regla.** Errores, avisos, resultados de paginación, pasos, copiar, archivos agregados o quitados, cambios de estado y cambios de pestaña se anuncian en una región viva (FormKit.anuncia). Todo anuncio tiene su texto en pantalla: nada se dice sólo al lector. FormKit.anuncia(texto, {visible: elemento}) escribe el texto también en ese elemento y lo muestra. El foco sólo se mueve al cambiar de paso, al resumen de errores, al título del acuse o del resultado y al aviso que responde a una acción.
 
-**Por qué.** Lo que aparece en silencio no existe para quien no ve la pantalla.
+**Por qué.** Lo que aparece en silencio no existe para quien no ve la pantalla; lo que sólo se oye no existe para quien la ve sin lector.
 
-**Nivel.** BASE · **Origen.** A FRM-49 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-49; P117 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
-**Verificación.** 05-accesibilidad; verificación manual con lector de pantalla (no automatizable)
+**Verificación.** 05-accesibilidad; 07: anuncio con su elemento, límite de filas, descarga fallida y archivos llenos (P117); verificación manual con lector de pantalla (no automatizable)
 
 ### FRM-41 · Copiar y compartir confirman con palabras
 
@@ -447,6 +447,26 @@ El estándar tiene **81 reglas** con numeración corrida FRM-NN (decisión C13).
 **Nivel.** RECOMENDADO · **Origen.** encargo 5.4 · *decisión del encargo*
 
 **Verificación.** 01-por-pasos: copiar folio; 04-modulos: copiar
+
+### FRM-82 · Una decisión del personal termina en un resultado que dice qué pasó, a qué hora y quién
+
+**Regla.** Al validar, rechazar, devolver para corregir o cerrar un trámite, la pantalla muestra el resultado (módulo «resultado», FormKit.resultado): título con el resultado y su objeto («Solicitud EJ-123 rechazada»), el tono en icono y palabras (ok, atención, rechazo o neutro), «Quedó guardado a las HH:MM · quien» con la hora de la Ciudad (y la fecha si no fue hoy), el motivo citado tal como se escribió y una acción para seguir. El panel de decisión que ya no aplica se oculta. El foco va al título y se anuncia.
+
+**Por qué.** Sin un resultado claro, quien decide no sabe si su decisión quedó registrada, y sin hora ni nombre no hay a quién preguntar.
+
+**Nivel.** RECOMENDADO · **Origen.** P113 (proyecto de acreditaciones, 17 oct 2026) · *mejor práctica adicional*
+
+**Verificación.** guía: resultado; 07: resultado con hora, quién y motivo (P113)
+
+### FRM-83 · Las etiquetas de estado usan cinco tonos con significado fijo, icono y palabra
+
+**Regla.** El estado de un trámite o un registro se muestra con el módulo «estado»: borrador (gris), proceso (azul), atención (ámbar), ok (verde) y rechazo (rojo), cada uno con su icono, y la palabra dice el estado. Cada estado de un sistema cae en uno de los cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia.
+
+**Por qué.** Nueve tonos sin regla obligan a aprender una leyenda por sistema, y una etiqueta sólo de color no dice nada a quien no distingue colores.
+
+**Nivel.** RECOMENDADO · **Origen.** P118 (proyecto de acreditaciones, 17 oct 2026) · *mejor práctica adicional*
+
+**Verificación.** guía: etiquetas de estado; contraste C45 a C49; 07: tonos e iconos (P118)
 
 ## 6. Borrador y envío
 

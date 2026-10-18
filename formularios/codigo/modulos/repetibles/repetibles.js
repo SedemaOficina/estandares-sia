@@ -40,6 +40,13 @@
         if (btnAgregar && !btnAgregar.textContent.trim()) btnAgregar.textContent = M.filaAgregar;
 
         function filas() { return $$(':scope > .repetible-fila', lista); }
+        /* El límite de filas se dice también en pantalla, junto a «Agregar» (FRM-40). */
+        let notaLimite = null;
+        function avisaLimite(texto) {
+          if (!notaLimite) { notaLimite = document.createElement('p'); notaLimite.className = 'repetible-limite'; if (btnAgregar) btnAgregar.before(notaLimite); else rep.appendChild(notaLimite); }
+          anuncia(texto, { visible: notaLimite });
+        }
+        const quitaLimite = () => { if (notaLimite) notaLimite.hidden = true; };
         function renumera() {
           filas().forEach((fila, i) => {
             const cab = $('.repetible-titulo', fila);
@@ -50,7 +57,8 @@
           if (btnAgregar) { const lleno = max && filas().length >= max; btnAgregar.setAttribute('aria-disabled', String(!!lleno)); }
         }
         function agrega(foco = true) {
-          if (max && filas().length >= max) { anuncia(plantilla(M.repetibleMax, { max, etiqueta: rep.dataset.etiqueta || '' })); return null; }
+          if (max && filas().length >= max) { avisaLimite(plantilla(M.repetibleMax, { max, etiqueta: rep.dataset.etiqueta || '' })); return null; }
+          quitaLimite();
           const i = filas().length;
           const html = tpl.innerHTML.replace(/#/g, String(i));
           const cont = document.createElement('div'); cont.innerHTML = html;
@@ -75,7 +83,8 @@
         function tieneDatos(fila) { return $$('[data-campo]', fila).some((c) => { const v = valorDe(c.dataset.campo); return Array.isArray(v) ? v.length : v; }); }
         function quita(fila) {
           const idx = filas().indexOf(fila);
-          if (min && filas().length <= min) { anuncia(plantilla(M.repetibleMin, { min, etiqueta: rep.dataset.etiqueta || '' })); return; }
+          if (min && filas().length <= min) { avisaLimite(plantilla(M.repetibleMin, { min, etiqueta: rep.dataset.etiqueta || '' })); return; }
+          quitaLimite();
           for (const c of $$('[data-campo]', fila)) limpia(c.dataset.campo);
           fila.remove();
           renumera();
@@ -87,7 +96,8 @@
 
         rep.addEventListener('click', (e) => {
           const ag = e.target.closest('[data-repetible-agregar]');
-          if (ag && ag.getAttribute('aria-disabled') !== 'true') { agrega(); return; }
+          /* Con el máximo, «Agregar» sigue enfocable (aria-disabled): al tocarlo se dice por qué no agrega. */
+          if (ag) { agrega(); return; }
           const q = e.target.closest('[data-repetible-quitar]');
           if (!q) return;
           const fila = q.closest('.repetible-fila');

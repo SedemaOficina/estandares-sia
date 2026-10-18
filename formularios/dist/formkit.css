@@ -1,7 +1,7 @@
 /* GENERADO: núcleo + todos los módulos. Para copiar sólo lo que se usa, toma los archivos de codigo/. */
 /* ===== codigo/css/tokens.css ===== */
 /* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.3.4
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.4.0
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -547,7 +547,11 @@ a{color:var(--azul)}
 }
 .btn-primario{background:var(--guinda);color:var(--blanco)}
 .btn-secundario{background:var(--blanco);border-color:var(--borde);color:var(--gris)}
-.btn-peligro{background:var(--blanco);border-color:var(--error);color:var(--error-txt)}
+/* Peligro: relleno rojo, para el botón que hace el daño dentro de su confirmación
+   («Rechazar solicitud»), que así pesa más que «Volver sin cambios». Fuera de la
+   confirmación, el botón que la abre va con contorno (.btn-peligro-contorno). */
+.btn-peligro{background:var(--error);border-color:var(--error);color:var(--blanco)}
+.btn-peligro-contorno{background:var(--blanco);border-color:var(--error);color:var(--error-txt)}
 /* «Atrás» y los enlaces-botón no tienen caja: se leen como texto que se toca. */
 .btn-atras{
   display:inline-flex;
@@ -593,7 +597,9 @@ a{color:var(--azul)}
 /* ---------- Avisos ----------
    Un aviso es algo que hay que leer, no una alarma: neutro con filete. El
    rojo es sólo para lo que impide continuar; el verde, para que el sistema
-   confirme; el ámbar, para atención sin bloqueo. Lleva icono y palabra. */
+   confirme; el ámbar, para atención sin bloqueo. Lleva siempre el icono de
+   su tono y palabras; el que pasa de una frase lleva título (.aviso-titulo),
+   que dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. */
 .aviso{
   display:flex;
   gap:var(--e-3);
@@ -609,6 +615,7 @@ a{color:var(--azul)}
 .aviso-bloqueo{background:var(--error-bg);border-left-color:var(--error);color:var(--error-txt)}
 .aviso-ok{background:var(--ok-bg);border-left-color:var(--ok);color:var(--ok-txt)}
 .aviso-texto{flex:1;min-width:0}
+.aviso-titulo{display:block;margin-bottom:var(--e-1);font-family:var(--fuente-titulo);font-size:var(--t-base);font-weight:var(--peso-fuerte)}
 
 /* Marcador de pendiente visible: lo que el proyecto aún no resuelve se dice
    con este rótulo, nunca se oculta ni se inventa (FRM-75). El texto va en el
@@ -701,7 +708,8 @@ a{color:var(--azul)}
 
 .btn-primario:hover{background:var(--guinda-osc)}
 .btn-secundario:hover{border-color:var(--gris);color:var(--texto)}
-.btn-peligro:hover{background:var(--error-bg)}
+.btn-peligro:hover{background:var(--error-txt);border-color:var(--error-txt)}
+.btn-peligro-contorno:hover{background:var(--error-bg)}
 .btn-atras:hover{text-decoration:underline}
 .btn-icono:hover{background:var(--azul-cl);color:var(--azul)}
 .redes-enlace:hover{background:var(--azul-cl);border-color:var(--azul);color:var(--azul)}
@@ -987,6 +995,8 @@ a{color:var(--azul)}
 }
 .repetible-cabecera{display:flex;align-items:center;justify-content:space-between;gap:var(--e-3);margin-bottom:var(--e-3)}
 .repetible-titulo{font-family:var(--fuente-titulo);font-weight:var(--peso-semi);color:var(--guinda)}
+/* «Como máximo se admiten…»: el límite se lee en pantalla, no sólo con lector. */
+.repetible-limite{margin-bottom:var(--e-2);font-size:var(--t-sm);color:var(--gris)}
 
 /* @bloque estados */
 
@@ -1368,6 +1378,59 @@ a{color:var(--azul)}
 }
 
 
+/* ===== codigo/modulos/resultado/resultado.css ===== */
+/* =========================================================
+   resultado.css · Módulo «resultado» · nivel RECOMENDADO
+   El desenlace de una decisión del personal. El tono va en el filete de
+   arriba y en la marca con su icono; el título dice el resultado con
+   palabras, así que nunca depende sólo del color.
+   Depende de: nucleo.css. Bloques: componentes → adaptaciones.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.resultado{
+  margin:var(--e-4) 0;
+  padding:var(--e-5) var(--e-pagina);
+  background:var(--blanco);
+  border:var(--b-1) solid var(--linea);
+  border-top:var(--b-4) solid var(--gris);
+  border-radius:var(--r-caja);
+}
+.resultado-ok{border-top-color:var(--ok)}
+.resultado-atencion{border-top-color:var(--pend)}
+.resultado-rechazo{border-top-color:var(--error)}
+.resultado-cabeza{display:flex;align-items:center;gap:var(--e-3)}
+.resultado-marca{
+  display:flex;
+  flex:none;
+  align-items:center;
+  justify-content:center;
+  width:var(--e-9);
+  height:var(--e-9);
+  background:var(--gris);
+  border-radius:var(--r-pill);
+  color:var(--blanco);
+}
+.resultado-ok .resultado-marca{background:var(--ok)}
+.resultado-atencion .resultado-marca{background:var(--pend)}
+.resultado-rechazo .resultado-marca{background:var(--error)}
+.resultado-titulo{margin:0;font-family:var(--fuente-titulo);font-size:var(--t-lg);font-weight:var(--peso-fuerte);color:var(--texto)}
+.resultado-meta{margin-top:var(--e-3);font-size:var(--t-sm);color:var(--gris)}
+.resultado-quien{font-weight:var(--peso-semi)}
+.resultado-texto{margin-top:var(--e-3);font-size:var(--t-md)}
+/* El motivo se cita tal como lo escribió quien decidió. */
+.resultado-motivo{margin:var(--e-4) 0 0;padding:var(--e-3) var(--e-4);background:var(--aviso-bg);border-left:var(--b-4) solid var(--borde);border-radius:0 var(--r-ctrl) var(--r-ctrl) 0}
+.resultado-motivo-rotulo{font-size:var(--t-xs);font-weight:var(--peso-fuerte);letter-spacing:var(--tracking-rotulo);text-transform:uppercase;color:var(--gris)}
+.resultado-motivo-texto{margin:var(--e-1) 0 0;font-size:var(--t-md);white-space:pre-line;overflow-wrap:anywhere}
+
+/* @bloque adaptaciones */
+
+@media (min-width:560px){
+  .resultado{padding:var(--e-6)}
+}
+
+
 /* ===== codigo/modulos/modal/modal.css ===== */
 /* =========================================================
    modal.css · Módulo «modal» · nivel RECOMENDADO
@@ -1398,6 +1461,11 @@ a{color:var(--azul)}
 .dialogo::backdrop{background:var(--velo)}
 .dialogo-titulo{margin-top:0;padding-top:0;border-top:0}
 .dialogo-acciones{margin-top:var(--e-5)}
+/* Confirmación: qué pasará, en lista, y si no se puede deshacer, con icono y palabras. */
+.dialogo-consecuencias-titulo{margin-top:var(--e-4);font-weight:var(--peso-semi)}
+.dialogo-consecuencias{margin:var(--e-2) 0 0 var(--e-5);font-size:var(--t-md);list-style:disc}
+.dialogo-consecuencias li{padding:var(--e-1) 0}
+.dialogo-irreversible{display:flex;align-items:center;gap:var(--e-2);margin-top:var(--e-4);font-weight:var(--peso-semi);color:var(--error-txt)}
 .dialogo-cierre{display:flex;justify-content:flex-end;margin-top:var(--e-5)}
 
 /* Aviso en línea antes del diálogo de privacidad. */
@@ -1850,6 +1918,36 @@ td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
 }
 
 
+/* ===== codigo/modulos/estado/estado.css ===== */
+/* =========================================================
+   estado.css · Módulo «estado» · nivel OPCIONAL
+   Etiquetas de estado: cinco tonos con significado fijo, cada uno con
+   icono y palabra. Texto de 4.5:1 o más sobre su fondo en los cinco.
+   Depende de: nucleo.css. Bloques: componentes.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.estado{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--e-1);
+  padding:var(--e-1) var(--e-2);
+  background:var(--aviso-bg);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-pill);
+  font-size:var(--t-sm);
+  font-weight:var(--peso-semi);
+  line-height:var(--interlineado-compacto);
+  white-space:nowrap;
+  color:var(--texto);
+}
+.estado-proceso{background:var(--azul-cl);border-color:var(--azul);color:var(--azul)}
+.estado-atencion{background:var(--pend-bg);border-color:var(--pend);color:var(--pend-txt)}
+.estado-ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok-txt)}
+.estado-rechazo{background:var(--error-bg);border-color:var(--error);color:var(--error-txt)}
+
+
 /* ===== codigo/modulos/archivos/archivos.css ===== */
 /* =========================================================
    archivos.css · Módulo «archivos» · nivel RECOMENDADO
@@ -1908,6 +2006,8 @@ td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
   font-size:var(--t-md);
   color:var(--error-txt);
 }
+/* «Ya adjuntaste el archivo…»: lo que se anuncia al llenarse también se lee en pantalla. */
+.arch-lleno{margin-top:var(--e-2);font-size:var(--t-sm);color:var(--gris)}
 
 /* @bloque estados */
 

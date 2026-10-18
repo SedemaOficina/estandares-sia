@@ -43,17 +43,25 @@
         if (!b || b.getAttribute('aria-busy') === 'true') return;
         const gen = FormKit.descargas[b.dataset.generar];
         if (!gen) return;
+        const M = FormKit.config.mensajes;
         b.setAttribute('aria-busy', 'true'); b.setAttribute('aria-disabled', 'true');
         const texto = [...b.childNodes].find((x) => x.nodeType === 3);
         const original = texto ? texto.textContent : '';
         if (texto) texto.textContent = ' Preparando…';
-        anuncia('Preparando el archivo…');
+        anuncia(M.descargaPreparando);
+        /* Si falla, se dice en un aviso junto al botón, no sólo al lector (FRM-40). */
+        const previo = b.nextElementSibling && b.nextElementSibling.matches('[data-descarga-aviso]') ? b.nextElementSibling : null;
+        if (previo) previo.hidden = true;
         try {
           const r = await gen();
           const a = document.createElement('a'); a.href = r.url; a.download = r.nombre || 'archivo'; document.body.appendChild(a); a.click(); a.remove();
           if (r.peso) { b.dataset.peso = r.peso; pintaDetalle(b); }
-          anuncia('Descarga iniciada.');
-        } catch (err) { anuncia('No se pudo preparar el archivo. Intenta de nuevo.', true); }
+          anuncia(M.descargaLista);
+        } catch (err) {
+          let av = previo;
+          if (!av) { av = document.createElement('p'); av.className = 'aviso'; av.dataset.descargaAviso = ''; b.after(av); }
+          FormKit.aviso(av, { tono: 'advertencia', texto: M.descargaError });
+        }
         finally { b.removeAttribute('aria-busy'); b.removeAttribute('aria-disabled'); if (texto) texto.textContent = original; }
       });
     }

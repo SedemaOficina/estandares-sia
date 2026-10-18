@@ -1,0 +1,27 @@
+/* =========================================================
+   estado.css · Módulo «estado» · nivel OPCIONAL
+   Etiquetas de estado: cinco tonos con significado fijo, cada uno con
+   icono y palabra. Texto de 4.5:1 o más sobre su fondo en los cinco.
+   Depende de: nucleo.css. Bloques: componentes.
+   ========================================================= */
+
+/* @bloque componentes */
+
+.estado{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--e-1);
+  padding:var(--e-1) var(--e-2);
+  background:var(--aviso-bg);
+  border:var(--b-1) solid var(--borde);
+  border-radius:var(--r-pill);
+  font-size:var(--t-sm);
+  font-weight:var(--peso-semi);
+  line-height:var(--interlineado-compacto);
+  white-space:nowrap;
+  color:var(--texto);
+}
+.estado-proceso{background:var(--azul-cl);border-color:var(--azul);color:var(--azul)}
+.estado-atencion{background:var(--pend-bg);border-color:var(--pend);color:var(--pend-txt)}
+.estado-ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok-txt)}
+.estado-rechazo{background:var(--error-bg);border-color:var(--error);color:var(--error-txt)}

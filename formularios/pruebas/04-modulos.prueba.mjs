@@ -160,12 +160,12 @@ test('diálogo de confirmación: foco en la opción segura, Escape cancela y dev
   await p.waitForTimeout(150);
   const d = p.locator('dialog[role="alertdialog"][open]');
   assert.equal(await d.count(), 1);
-  assert.match(await p.evaluate(() => document.activeElement.textContent), /Conservar|Cancelar/);
+  assert.match(await p.evaluate(() => document.activeElement.textContent), /^Volver sin cambios$/);
   await p.keyboard.press('Escape');
   await p.waitForTimeout(100);
   assert.equal(await p.locator('dialog[role="alertdialog"]').count(), 0, 'el diálogo se retira del documento');
   assert.ok(await p.evaluate(() => document.activeElement.hasAttribute('data-demo-confirma')));
-  assert.match(await p.locator('[data-demo-confirma-resultado]').textContent(), /Cancelaste/);
+  assert.match(await p.locator('[data-demo-confirma-resultado]').textContent(), /Volviste sin cambios/);
   await p.context().close();
 });
 
