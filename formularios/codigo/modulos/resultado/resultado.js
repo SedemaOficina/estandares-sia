@@ -4,16 +4,22 @@
    El desenlace de una decisión del personal: validar, rechazar, devolver
    para corregir o cerrar un trámite. El acuse es para quien envía; esto es
    para quien decide. Dice con claridad qué pasó, a qué hora y quién lo
-   hizo, y cita el motivo si lo hay. El foco va al título y se anuncia.
+   hizo, cita el motivo si lo hay y, si hay varias acciones en orden, las
+   pone como secuencia «qué sigue». El foco va al título y se anuncia.
 
-   FormKit.resultado(lugar, { tono, titulo, texto, hora, quien, motivo, nivel, oculta })
-     · tono: ok (validado, aprobado), atencion (devuelto, en espera),
-       rechazo (rechazado, cancelado) o neutro (cerrado, archivado);
+   FormKit.resultado(lugar, { tono, titulo, texto, hora, quien, motivo, pasos, nivel, oculta })
+     · tono: la misma familia que la etiqueta de estado (módulo «estado»):
+       ok (hecho: validado, aprobado), atencion (te toca actuar: devuelto
+       para corregir), proceso (en marcha: turnado a otra área), rechazo
+       (cerrado sin éxito: rechazado, cancelado) o terminado (concluido,
+       archivado);
      · titulo con el resultado y su objeto («Solicitud EJ-123 validada»);
      · hora: Date o fecha ISO del servidor (sin ella, ahora); si no es de
        hoy, también se dice la fecha;
      · quien: nombre de quien decidió, tal como lo da el servidor;
      · motivo: el texto que escribió quien decidió, citado tal cual;
+     · pasos: lista de lo que sigue, en orden («La persona recibe…»), que
+       va como secuencia numerada, no encadenada en un párrafo;
      · nivel del título (2 por omisión);
      · oculta: elemento o lista de elementos que ya no aplican (el panel de
        decisión), que se ocultan.
@@ -32,16 +38,17 @@
   const TONOS = {
     ok: { icono: 'ok', clase: 'resultado-ok' },
     atencion: { icono: 'alerta', clase: 'resultado-atencion' },
+    proceso: { icono: 'reloj', clase: 'resultado-proceso' },
     rechazo: { icono: 'error', clase: 'resultado-rechazo' },
-    neutro: { icono: 'info', clase: '' }
+    terminado: { icono: 'archivo', clase: '' }
   };
 
   function resultado(lugar, opciones = {}) {
     const cfg = FormKit.config;
     const M = cfg.mensajes;
     const { plantilla } = FormKit.utilidades;
-    const { tono = 'neutro', titulo = '', texto = '', hora, quien = '', motivo = '', nivel = 2, oculta } = opciones;
-    const t = TONOS[tono] ? tono : 'neutro';
+    const { tono = 'terminado', titulo = '', texto = '', hora, quien = '', motivo = '', pasos = [], nivel = 2, oculta } = opciones;
+    const t = TONOS[tono] ? tono : 'terminado';
     const acciones = [...lugar.querySelectorAll(':scope > [data-resultado-acciones]')];
 
     const cabeza = document.createElement('div');
@@ -82,6 +89,17 @@
       cita.textContent = motivo;
       fig.append(rot, cita);
       partes.push(fig);
+    }
+    /* «Qué sigue»: cada acción en su renglón numerado (FRM-84). */
+    const lista = [].concat(pasos).filter(Boolean);
+    if (lista.length) {
+      const rot = document.createElement('p');
+      rot.className = 'resultado-pasos-titulo';
+      rot.textContent = M.resultadoQueSigue;
+      const ol = document.createElement('ol');
+      ol.className = 'secuencia';
+      for (const paso of lista) { const li = document.createElement('li'); li.className = 'secuencia-item'; li.textContent = paso; ol.appendChild(li); }
+      partes.push(rot, ol);
     }
 
     lugar.classList.add('resultado');

@@ -100,16 +100,18 @@ Cada par de la tabla es un uso real del estándar: el texto sobre el fondo donde
 | C42 | `--blanco` #FFFFFF | `--error` #B3261E | 6.54:1 | 4.5:1 | cumple | Botón de peligro (relleno), dentro de su confirmación |
 | C43 | `--blanco` #FFFFFF | `--error-txt` #8C1D18 | 9.11:1 | 4.5:1 | cumple | Botón de peligro al pasar el cursor |
 | C44 | `--error-txt` #8C1D18 | `--blanco` #FFFFFF | 9.11:1 | 4.5:1 | cumple | Botón de peligro de contorno y «No se puede deshacer» en la confirmación |
-| C45 | `--texto` #2B2D2E | `--aviso-bg` #F7F8F9 | 13.01:1 | 4.5:1 | cumple | Etiqueta de estado «borrador» |
-| C46 | `--azul` #1A56A8 | `--azul-cl` #EEF3FA | 6.41:1 | 4.5:1 | cumple | Etiqueta de estado «proceso» |
-| C47 | `--pend-txt` #6B4A00 | `--pend-bg` #FFF3CD | 7.28:1 | 4.5:1 | cumple | Etiqueta de estado «atención» |
-| C48 | `--ok-txt` #145032 | `--ok-bg` #F1F8F4 | 8.76:1 | 4.5:1 | cumple | Etiqueta de estado «ok» |
-| C49 | `--error-txt` #8C1D18 | `--error-bg` #FDF3F2 | 8.37:1 | 4.5:1 | cumple | Etiqueta de estado «rechazo» |
+| C45 | `--texto` #2B2D2E | `--aviso-bg` #F7F8F9 | 13.01:1 | 4.5:1 | cumple | Etiqueta de estado «terminado» |
+| C46 | `--azul` #1A56A8 | `--azul-cl` #EEF3FA | 6.41:1 | 4.5:1 | cumple | Etiqueta de estado «en marcha» |
+| C47 | `--pend-txt` #6B4A00 | `--pend-bg` #FFF3CD | 7.28:1 | 4.5:1 | cumple | Etiqueta de estado «te toca actuar» |
+| C48 | `--ok-txt` #145032 | `--ok-bg` #F1F8F4 | 8.76:1 | 4.5:1 | cumple | Etiqueta de estado «hecho» |
+| C49 | `--error-txt` #8C1D18 | `--error-bg` #FDF3F2 | 8.37:1 | 4.5:1 | cumple | Etiqueta de estado «cerrado sin éxito» |
 | C50 | `--gris` #55585A | `--aviso-bg` #F7F8F9 | 6.74:1 | 4.5:1 | cumple | Rótulo «Motivo» del resultado |
 | N19 | `--pend` #8A5200 | `--blanco` #FFFFFF | 6.39:1 | 3:1 | cumple | Filete del resultado «atención» |
 | N20 | `--blanco` #FFFFFF | `--ok` #1B6B43 | 6.50:1 | 3:1 | cumple | Icono de la marca del resultado «ok» y del acuse |
 | N21 | `--blanco` #FFFFFF | `--pend` #8A5200 | 6.39:1 | 3:1 | cumple | Icono de la marca del resultado «atención» |
-| N22 | `--blanco` #FFFFFF | `--gris` #55585A | 7.17:1 | 3:1 | cumple | Icono de la marca del resultado neutro |
+| N22 | `--blanco` #FFFFFF | `--gris` #55585A | 7.17:1 | 3:1 | cumple | Icono de la marca del resultado «terminado» |
+| N23 | `--blanco` #FFFFFF | `--azul` #1A56A8 | 7.14:1 | 3:1 | cumple | Icono de la marca del resultado «en marcha» |
+| N24 | `--azul` #1A56A8 | `--blanco` #FFFFFF | 7.14:1 | 3:1 | cumple | Filete del resultado «en marcha» |
 <!-- contraste:fin -->
 
 ## 3. Tipografía
@@ -176,11 +178,11 @@ El CSS parte del teléfono y sólo crece. Hay tres puntos de corte, declarados e
 
 El estado vive siempre en un atributo; el auditor rechaza clases como `.activo` o `.invalido` (A10).
 
-El estado de un trámite o un registro (módulo `estado`) es otra cosa: una etiqueta con cinco tonos de significado fijo, cada uno con su icono y su palabra. Gris (lápiz), borrador: aún no se envía. Azul (reloj), proceso: en revisión, en trámite. Ámbar (alerta), atención: espera algo de la persona o del personal. Verde (palomita), ok: validado, aprobado, concluido. Rojo (error), rechazo: rechazado, cancelado, vencido. Cada estado de un sistema cae en uno de los cinco; el rojo no se usa para «En revisión» ni el verde para «Enviado». El desenlace de una decisión del personal (módulo `resultado`) usa los mismos significados: ok, atención, rechazo o neutro.
+El estado de un trámite o un registro (módulo `estado`) es otra cosa: una etiqueta con cinco familias según a quién le toca qué, cada una con su tono, su icono y su palabra. Verde (palomita), hecho: validado, aprobado. Ámbar (alerta), te toca actuar: corregir, completar, un borrador sin enviar. Azul (reloj), en marcha: en revisión, en trámite. Rojo (error), cerrado sin éxito: rechazado, cancelado, vencido. Gris (archivo), terminado: concluido, archivado. Cada estado de un sistema cae en una de las cinco; el rojo no se usa para «En revisión» ni el verde para «Enviado». El desenlace de una decisión del personal (módulo `resultado`) usa las mismas cinco familias.
 
 ## 8. Iconografía
 
-Un solo sprite SVG (`codigo/iconos/sprite.svg`, 29 símbolos) que `formkit.core.js` inyecta una vez por página. Los iconos heredan el color del texto (`currentColor`), miden `--icono` (20 px) o `--icono-sm` (16 px). El decorativo lleva `aria-hidden="true"`; el que comunica algo va siempre junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con `aria-label` y 44 px de objetivo. Catálogo: alerta, error, ok, info, ayuda, cerrar, palomita, flecha-izq, flecha-der, abajo, descarga, copiar, compartir, eliminar, editar, ubicacion, fecha, adjunto, camara, buscar, mas, cargando, reloj, externo. Marcas de redes sociales (rellenas, como las publica cada red; sólo en el bloque de redes del pie): facebook, x, instagram, tiktok, youtube.
+Un solo sprite SVG (`codigo/iconos/sprite.svg`, 30 símbolos) que `formkit.core.js` inyecta una vez por página. Los iconos heredan el color del texto (`currentColor`), miden `--icono` (20 px) o `--icono-sm` (16 px). El decorativo lleva `aria-hidden="true"`; el que comunica algo va siempre junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con `aria-label` y 44 px de objetivo. Catálogo: alerta, error, ok, info, ayuda, cerrar, palomita, flecha-izq, flecha-der, abajo, descarga, copiar, compartir, eliminar, editar, ubicacion, fecha, adjunto, camara, buscar, mas, cargando, reloj, externo. Marcas de redes sociales (rellenas, como las publica cada red; sólo en el bloque de redes del pie): facebook, x, instagram, tiktok, youtube.
 
 ## 9. Lo que la guía visual muestra y este documento no
 

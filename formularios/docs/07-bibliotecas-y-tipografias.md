@@ -33,7 +33,7 @@ Decisión C12: sólo estos cinco pesos, en subconjunto latino (cubre á é í ó
 | Bibliotecas de componentes (Bootstrap, Material) | Traen su propia paleta, su propia jerarquía y cientos de clases sin uso; el auditor las rechazaría. |
 | CDN de cualquier tipo | Petición a un tercero: filtra la IP de la persona, falla con política de red y rompe la página sin aviso. |
 | Google Fonts enlazado | Mismo motivo; las fuentes viajan en el paquete. |
-| Iconos de terceros (Font Awesome, Material Icons) | Un sprite propio de 29 símbolos (24 de la interfaz y 5 marcas de redes sociales) basta y pesa unos 5 KB. |
+| Iconos de terceros (Font Awesome, Material Icons) | Un sprite propio de 30 símbolos (25 de la interfaz y 5 marcas de redes sociales) basta y pesa unos 5 KB. |
 | Validadores externos (Yup, Zod) | La validación debe ser la misma en el navegador y en Node con un solo archivo sin dependencias. |
 | Captcha de terceros | Excluye a personas y envía datos a un tercero; el estándar usa señales (casilla, trampa, tiempo) y deja el punto de integración para un servicio autoalojado. |
 

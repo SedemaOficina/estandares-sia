@@ -20,6 +20,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | Validación individual, cruzada y resumen de errores con foco, contexto (data-contexto) y título propio del rechazo del servidor | BASE |
 | Botones (principal, secundario, peligro relleno y de contorno, atrás, enlace, icono) | BASE |
 | Avisos (neutro, advertencia, bloqueo, éxito) con título e icono por tono, FormKit.aviso() y pendiente visible | BASE |
+| Secuencia «qué sigue» (ol.secuencia) para varias acciones en orden, en cualquier pantalla | BASE |
 | Iconografía (sprite SVG) | BASE |
 | Anuncios que también se ven (FormKit.anuncia con el elemento visible) | BASE |
 | Estados de envío (enviando, error, plazo, límite) sin duplicados | BASE |
@@ -40,8 +41,8 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
 | `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.8 KB |
 | `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.3 KB | 3.2 KB |
-| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.9 KB | 3.5 KB |
-| `resultado` | Resultado de una decisión | RECOMENDADO | retroalimentacion | — | 2.2 KB | 4.6 KB |
+| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.2 KB | 3.5 KB |
+| `resultado` | Resultado de una decisión | RECOMENDADO | retroalimentacion | — | 2.5 KB | 5.7 KB |
 | `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 2.1 KB | 5.7 KB |
 | `copiar` | Copiar y compartir | RECOMENDADO | retroalimentacion | — | 542 B | 4.0 KB |
 | `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 3.7 KB |
@@ -53,7 +54,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
 | `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 3.8 KB | 6.6 KB |
-| `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.1 KB | 2.5 KB |
+| `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.2 KB | 2.9 KB |
 | `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 19.9 KB |
 | `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.7 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
@@ -276,7 +277,7 @@ Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el camp
 
 ### Acuse y «qué sigue» (`acuse`) · RECOMENDADO
 
-Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones).
+Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones).
 
 **Cuándo.** Todo envío que genere folio.
 
@@ -299,7 +300,7 @@ Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descar
 
 ### Resultado de una decisión (`resultado`) · RECOMENDADO
 
-El desenlace de lo que decide el personal (validar, rechazar, devolver, cerrar): título con el resultado, «Quedó guardado a las HH:MM · quien», el motivo citado tal cual y la acción para seguir. FormKit.resultado(lugar, {tono, titulo, hora, quien, motivo}).
+El desenlace de lo que decide el personal (validar, rechazar, devolver, turnar, cerrar): título con el resultado, «Quedó guardado a las HH:MM · quien», el motivo citado tal cual, lo que sigue como secuencia numerada y la acción para seguir. Usa las cinco familias de «estado». FormKit.resultado(lugar, {tono, titulo, hora, quien, motivo, pasos}).
 
 **Cuándo.** Pantallas del personal después de validar, rechazar, devolver para corregir o cerrar un trámite.
 
@@ -318,6 +319,7 @@ El desenlace de lo que decide el personal (validar, rechazar, devolver, cerrar):
 - Un resultado sin hora ni quién lo registró.
 - Reescribir el motivo en lugar de citarlo.
 - Dejar a la vista el panel de decisión que ya no aplica (opción oculta).
+- Encadenar lo que sigue en un párrafo («Abra el expediente… El siguiente paso es…»).
 
 ### Diálogo y confirmación (`modal`) · RECOMENDADO
 
@@ -551,7 +553,7 @@ Tabla con caption, orden por columna accesible, estados vacío/carga/error, acci
 
 ### Etiquetas de estado (`estado`) · OPCIONAL
 
-Cinco tonos con significado fijo para el estado de un trámite o registro: borrador (gris), proceso (azul), atención (ámbar), ok (verde) y rechazo (rojo), cada uno con su icono y su palabra. FormKit.estado(el, {tono, texto}) lo cambia.
+Cinco familias con significado fijo para el estado de un trámite o registro, según a quién le toca qué: hecho (ok, verde), te toca actuar (atencion, ámbar), en marcha (proceso, azul), cerrado sin éxito (rechazo, rojo) y terminado (gris), cada una con su icono y su palabra. FormKit.estado(el, {tono, texto}) lo cambia.
 
 **Cuándo.** Bandejas, tablas y fichas que muestran en qué va un trámite.
 
@@ -569,6 +571,7 @@ Cinco tonos con significado fijo para el estado de un trámite o registro: borra
 - Inventar tonos por sistema (nueve colores sin regla).
 - Etiqueta sólo de color, sin icono ni palabra.
 - Usar el rojo para «En revisión» o el verde para «Enviado».
+- Una etiqueta sin familia (la consola lo avisa y queda como terminado).
 
 ### Carga de archivos y fotografías (`archivos`) · RECOMENDADO
 

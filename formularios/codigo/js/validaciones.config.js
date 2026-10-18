@@ -514,7 +514,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.0',
+    version: '1.4.1',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -613,6 +613,7 @@
       resultadoHora: 'Quedó guardado a las {hora}',
       resultadoFechaHora: 'Quedó guardado el {fecha} a las {hora}',
       resultadoMotivo: 'Motivo',
+      resultadoQueSigue: 'Qué sigue',
       descargaPreparando: 'Preparando el archivo…',
       descargaLista: 'Descarga iniciada.',
       descargaError: 'No se pudo preparar el archivo. Intenta de nuevo.',

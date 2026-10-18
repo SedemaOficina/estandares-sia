@@ -130,7 +130,7 @@
    "id": "FRM-06",
    "seccion": 1,
    "titulo": "Un acuse con folio al terminar",
-   "regla": "Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue, si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia.",
+   "regla": "Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue como secuencia numerada (FRM-84), si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia.",
    "porque": "Sin acuse la persona no sabe si terminó; sin folio no puede dar seguimiento.",
    "nivel": "RECOMENDADO",
    "origen": [
@@ -1111,7 +1111,7 @@
    "id": "FRM-72",
    "seccion": 11,
    "titulo": "Iconografía: un solo sprite SVG, catálogo cerrado",
-   "regla": "Los iconos viven en codigo/iconos/sprite.svg (29 símbolos), se inyectan una vez por página y heredan el color del texto. El decorativo lleva aria-hidden; el que comunica va junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con nombre accesible. Las marcas de redes sociales van rellenas, como las publica cada red.",
+   "regla": "Los iconos viven en codigo/iconos/sprite.svg (30 símbolos), se inyectan una vez por página y heredan el color del texto. El decorativo lleva aria-hidden; el que comunica va junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con nombre accesible. Las marcas de redes sociales van rellenas, como las publica cada red.",
    "porque": "Iconos de tres fuentes distintas se ven distintos y pesan; un icono sin nombre es mudo.",
    "nivel": "BASE",
    "origen": [
@@ -1251,27 +1251,41 @@
    "id": "FRM-82",
    "seccion": 5,
    "titulo": "Una decisión del personal termina en un resultado que dice qué pasó, a qué hora y quién",
-   "regla": "Al validar, rechazar, devolver para corregir o cerrar un trámite, la pantalla muestra el resultado (módulo «resultado», FormKit.resultado): título con el resultado y su objeto («Solicitud EJ-123 rechazada»), el tono en icono y palabras (ok, atención, rechazo o neutro), «Quedó guardado a las HH:MM · quien» con la hora de la Ciudad (y la fecha si no fue hoy), el motivo citado tal como se escribió y una acción para seguir. El panel de decisión que ya no aplica se oculta. El foco va al título y se anuncia.",
+   "regla": "Al validar, rechazar, devolver para corregir, turnar o cerrar un trámite, la pantalla muestra el resultado (módulo «resultado», FormKit.resultado): título con el resultado y su objeto («Solicitud EJ-123 rechazada»), el tono de una de las cinco familias de FRM-83 en icono y palabras, «Quedó guardado a las HH:MM · quien» con la hora de la Ciudad (y la fecha si no fue hoy), el motivo citado tal como se escribió, lo que sigue como secuencia numerada (pasos, FRM-84) y una acción para seguir. El panel de decisión que ya no aplica se oculta. El foco va al título y se anuncia.",
    "porque": "Sin un resultado claro, quien decide no sabe si su decisión quedó registrada, y sin hora ni nombre no hay a quién preguntar.",
    "nivel": "RECOMENDADO",
    "origen": [
-    "P113 (proyecto de acreditaciones, 17 oct 2026)"
+    "P113 (proyecto de acreditaciones, 17 oct 2026)",
+    "P119 (proyecto de acreditaciones, 17 oct 2026)"
    ],
    "tipo": "mejor práctica adicional",
-   "verificacion": "guía: resultado; 07: resultado con hora, quién y motivo (P113)"
+   "verificacion": "guía: resultado; 07: resultado con hora, quién y motivo (P113) y con lo que sigue (P119)"
   },
   {
    "id": "FRM-83",
    "seccion": 5,
-   "titulo": "Las etiquetas de estado usan cinco tonos con significado fijo, icono y palabra",
-   "regla": "El estado de un trámite o un registro se muestra con el módulo «estado»: borrador (gris), proceso (azul), atención (ámbar), ok (verde) y rechazo (rojo), cada uno con su icono, y la palabra dice el estado. Cada estado de un sistema cae en uno de los cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia.",
+   "titulo": "Las etiquetas de estado usan cinco familias con significado fijo, icono y palabra",
+   "regla": "El estado de un trámite o un registro se muestra con el módulo «estado», en cinco familias según a quién le toca qué: hecho (estado-ok, verde: validado, aprobado), te toca actuar (estado-atencion, ámbar: corregir, completar, un borrador sin enviar), en marcha (estado-proceso, azul: en revisión, en trámite), cerrado sin éxito (estado-rechazo, rojo: rechazado, cancelado, vencido) y terminado (estado-terminado, gris: concluido, archivado). Cada una lleva su icono y la palabra dice el estado. Cada estado de un sistema cae en una de las cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia.",
    "porque": "Nueve tonos sin regla obligan a aprender una leyenda por sistema, y una etiqueta sólo de color no dice nada a quien no distingue colores.",
    "nivel": "RECOMENDADO",
    "origen": [
     "P118 (proyecto de acreditaciones, 17 oct 2026)"
    ],
    "tipo": "mejor práctica adicional",
-   "verificacion": "guía: etiquetas de estado; contraste C45 a C49; 07: tonos e iconos (P118)"
+   "verificacion": "guía: etiquetas de estado; contraste C45 a C49; 07: familias e iconos (P118)"
+  },
+  {
+   "id": "FRM-84",
+   "seccion": 5,
+   "titulo": "Varias acciones en orden van en una secuencia numerada, no en un párrafo",
+   "regla": "Cuando hay que decir dos o más acciones en orden (qué sigue después del acuse o de una decisión, qué hacer para corregir, los pasos de un trámite en su ficha), van en una lista numerada <ol class=\"secuencia\"> con un <li class=\"secuencia-item\"> por acción, cada una empezando con su verbo. Nunca encadenadas en un párrafo («Abra el expediente… El siguiente paso es… La persona ve…»). La secuencia es del núcleo: sirve en el acuse (centrada), en el resultado (pasos), en un aviso y en cualquier pantalla.",
+   "porque": "En un párrafo, quien lee pierde la cuenta de cuántas acciones son, en qué orden van y cuál le toca.",
+   "nivel": "BASE",
+   "origen": [
+    "P119 (proyecto de acreditaciones, 17 oct 2026)"
+   ],
+   "tipo": "mejor práctica adicional",
+   "verificacion": "guía: botones y avisos, resultado y sí y no; 07: secuencia fuera del acuse (P119)"
   }
  ]
 }

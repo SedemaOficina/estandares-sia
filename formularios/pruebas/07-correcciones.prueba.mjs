@@ -495,13 +495,36 @@ test('lo que se anuncia también se ve: anuncio con su elemento, límite de fila
   await p.context().close();
 });
 
-test('etiquetas de estado: cinco tonos, cada uno con su icono, y FormKit.estado las cambia (P118)', async () => {
+test('etiquetas de estado: cinco familias, cada una con su icono, y FormKit.estado las cambia (P118)', async () => {
   const p = await abreDesenlace();
   const leer = (id) => p.locator(`#${id}`).evaluate((x) => ({ clase: x.className, iconos: x.querySelectorAll('.icono').length, icono: x.querySelector('use').getAttribute('href'), texto: x.textContent, color: getComputedStyle(x).color }));
-  assert.deepEqual(await leer('estado-solicitud'), { clase: 'estado estado-proceso', iconos: 1, icono: '#i-reloj', texto: 'En revisión', color: 'rgb(26, 86, 168)' }, 'el módulo pone el icono de su tono');
-  assert.equal((await leer('estado-sin-tono')).clase, 'estado estado-borrador', 'sin tono, queda en borrador');
+  assert.deepEqual(await leer('estado-solicitud'), { clase: 'estado estado-proceso', iconos: 1, icono: '#i-reloj', texto: 'En revisión', color: 'rgb(26, 86, 168)' }, 'en marcha: el módulo pone el icono de su familia');
+  assert.deepEqual(await leer('estado-expediente'), { clase: 'estado estado-terminado', iconos: 1, icono: '#i-archivo', texto: 'Expediente concluido', color: 'rgb(43, 45, 46)' }, 'terminado: gris, con el archivo');
   await p.evaluate(() => FormKit.estado(document.getElementById('estado-solicitud'), { tono: 'ok', texto: 'Validada', anuncia: true }));
-  assert.deepEqual(await leer('estado-solicitud'), { clase: 'estado estado-ok', iconos: 1, icono: '#i-ok', texto: 'Validada', color: 'rgb(20, 80, 50)' }, 'cambia de tono, de icono y de palabra, sin acumular iconos');
+  assert.deepEqual(await leer('estado-solicitud'), { clase: 'estado estado-ok', iconos: 1, icono: '#i-ok', texto: 'Validada', color: 'rgb(20, 80, 50)' }, 'hecho: cambia de familia, de icono y de palabra, sin acumular iconos');
   await p.waitForFunction(() => document.querySelector('[data-anuncios]').textContent === 'Validada');
+  const familias = await p.evaluate(() => ['ok', 'atencion', 'proceso', 'rechazo', 'terminado'].map((t) => FormKit.estado(document.createElement('span'), { tono: t, texto: t }).querySelector('use').getAttribute('href')));
+  assert.deepEqual(familias, ['#i-ok', '#i-alerta', '#i-reloj', '#i-error', '#i-archivo'], 'cada familia con su icono');
+  assert.deepEqual(p.registro, [], 'consola limpia mientras cada etiqueta tiene su familia');
+  await p.evaluate(() => { const s = document.createElement('span'); s.className = 'estado'; s.textContent = 'Sin familia'; document.body.append(s); FormKit.estado.inicia(document.body); });
+  assert.match(p.registro.join(' '), /le falta su familia/, 'una etiqueta sin familia se avisa en la consola');
   await p.context().close();
+});
+
+test('la secuencia «qué sigue» sirve fuera del acuse: en el resultado y en un aviso, sin perder su forma en el acuse (P119)', async () => {
+  const p = await abreDesenlace();
+  await p.click('#rechazar');
+  await p.locator('dialog[open] [data-r="si"]').click();
+  const sec = p.locator('#resultado .secuencia');
+  await sec.waitFor();
+  assert.equal(await p.locator('#resultado .resultado-pasos-titulo').textContent(), 'Qué sigue');
+  assert.deepEqual(await sec.locator('li.secuencia-item').allTextContents(), ['La persona recibe el motivo por correo.', 'Si quiere seguir, abre una solicitud nueva.'], 'cada acción en su renglón');
+  const forma = await sec.evaluate((ol) => { const li = ol.querySelector('li'); const n = getComputedStyle(li, '::before'); return { numero: n.content, borde: n.borderTopStyle, acuse: getComputedStyle(ol).maxWidth }; });
+  assert.deepEqual(forma, { numero: 'counter(sec)', borde: 'solid', acuse: 'none' }, 'el número viene del núcleo, sin cargar el acuse, y fuera del acuse no se limita su ancho');
+  assert.deepEqual(p.registro, [], 'consola limpia');
+  await p.context().close();
+  const t = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  const enAcuse = await t.locator('.acuse .secuencia').evaluate((ol) => { const c = getComputedStyle(ol); return { ancho: c.maxWidth !== 'none', filete: c.borderTopStyle }; });
+  assert.deepEqual(enAcuse, { ancho: true, filete: 'solid' }, 'en el acuse conserva su ancho y su filete');
+  await t.context().close();
 });

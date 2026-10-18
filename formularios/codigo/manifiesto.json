@@ -1,6 +1,6 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -53,6 +53,10 @@
         "nivel": "BASE"
       },
       {
+        "pieza": "Secuencia «qué sigue» (ol.secuencia) para varias acciones en orden, en cualquier pantalla",
+        "nivel": "BASE"
+      },
+      {
         "pieza": "Iconografía (sprite SVG)",
         "nivel": "BASE"
       },
@@ -76,10 +80,10 @@
     "tamano": {
       "tokens.css": 8535,
       "base.css": 6062,
-      "nucleo.css": 18154,
-      "validaciones.config.js": 41973,
+      "nucleo.css": 19344,
+      "validaciones.config.js": 42012,
       "formkit.core.js": 52226,
-      "iconos.js": 5845
+      "iconos.js": 6047
     }
   },
   "modulos": [
@@ -371,7 +375,7 @@
       "titulo": "Acuse y «qué sigue»",
       "nivel": "RECOMENDADO",
       "tipo": "retroalimentacion",
-      "proposito": "Pantalla final con folio copiable, fecha, secuencia de pasos posteriores, descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones).",
+      "proposito": "Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones).",
       "cuando": "Todo envío que genere folio.",
       "cuandoNo": "Capturas internas sin acuse.",
       "dependencias": [
@@ -393,7 +397,7 @@
         "js": "codigo/modulos/acuse/acuse.js"
       },
       "tamano": {
-        "css": 2999,
+        "css": 2250,
         "js": 3619
       }
     },
@@ -402,7 +406,7 @@
       "titulo": "Resultado de una decisión",
       "nivel": "RECOMENDADO",
       "tipo": "retroalimentacion",
-      "proposito": "El desenlace de lo que decide el personal (validar, rechazar, devolver, cerrar): título con el resultado, «Quedó guardado a las HH:MM · quien», el motivo citado tal cual y la acción para seguir. FormKit.resultado(lugar, {tono, titulo, hora, quien, motivo}).",
+      "proposito": "El desenlace de lo que decide el personal (validar, rechazar, devolver, turnar, cerrar): título con el resultado, «Quedó guardado a las HH:MM · quien», el motivo citado tal cual, lo que sigue como secuencia numerada y la acción para seguir. Usa las cinco familias de «estado». FormKit.resultado(lugar, {tono, titulo, hora, quien, motivo, pasos}).",
       "cuando": "Pantallas del personal después de validar, rechazar, devolver para corregir o cerrar un trámite.",
       "cuandoNo": "Lo que envía la ciudadanía (usa el acuse); cambios menores que basta con anunciar, como guardar una nota.",
       "dependencias": [],
@@ -414,15 +418,16 @@
         "Dejar la pantalla igual tras decidir, sin decir qué pasó.",
         "Un resultado sin hora ni quién lo registró.",
         "Reescribir el motivo en lugar de citarlo.",
-        "Dejar a la vista el panel de decisión que ya no aplica (opción oculta)."
+        "Dejar a la vista el panel de decisión que ya no aplica (opción oculta).",
+        "Encadenar lo que sigue en un párrafo («Abra el expediente… El siguiente paso es…»)."
       ],
       "archivos": {
         "css": "codigo/modulos/resultado/resultado.css",
         "js": "codigo/modulos/resultado/resultado.js"
       },
       "tamano": {
-        "css": 2230,
-        "js": 4758
+        "css": 2546,
+        "js": 5807
       }
     },
     {
@@ -728,7 +733,7 @@
       "titulo": "Etiquetas de estado",
       "nivel": "OPCIONAL",
       "tipo": "retroalimentacion",
-      "proposito": "Cinco tonos con significado fijo para el estado de un trámite o registro: borrador (gris), proceso (azul), atención (ámbar), ok (verde) y rechazo (rojo), cada uno con su icono y su palabra. FormKit.estado(el, {tono, texto}) lo cambia.",
+      "proposito": "Cinco familias con significado fijo para el estado de un trámite o registro, según a quién le toca qué: hecho (ok, verde), te toca actuar (atencion, ámbar), en marcha (proceso, azul), cerrado sin éxito (rechazo, rojo) y terminado (gris), cada una con su icono y su palabra. FormKit.estado(el, {tono, texto}) lo cambia.",
       "cuando": "Bandejas, tablas y fichas que muestran en qué va un trámite.",
       "cuandoNo": "Avisos a la persona (usa los avisos del núcleo); botones o filtros (no se tocan).",
       "dependencias": [],
@@ -739,15 +744,16 @@
       "errores": [
         "Inventar tonos por sistema (nueve colores sin regla).",
         "Etiqueta sólo de color, sin icono ni palabra.",
-        "Usar el rojo para «En revisión» o el verde para «Enviado»."
+        "Usar el rojo para «En revisión» o el verde para «Enviado».",
+        "Una etiqueta sin familia (la consola lo avisa y queda como terminado)."
       ],
       "archivos": {
         "css": "codigo/modulos/estado/estado.css",
         "js": "codigo/modulos/estado/estado.js"
       },
       "tamano": {
-        "css": 1100,
-        "js": 2568
+        "css": 1208,
+        "js": 2923
       }
     },
     {
@@ -916,5 +922,5 @@
       }
     }
   ],
-  "generado": "2026-10-18T01:39:32.919Z"
+  "generado": "2026-10-18T02:40:07.347Z"
 }

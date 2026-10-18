@@ -1,5 +1,14 @@
 # Historial de cambios
 
+## 1.4.1 · 2026-10-17
+
+Dos hallazgos más del sistema de acreditaciones: P118 completo (con las familias que propuso el proyecto) y P119. 84 reglas (FRM-84 nueva) y 30 iconos (`archivo`, nuevo).
+
+- **P118 · Las etiquetas de estado, en las cinco familias del proyecto** (módulo `estado`, FRM-83): la 1.4.0 tenía un tono gris «borrador». Ahora son las familias que el proyecto ya probó, según a quién le toca qué: hecho (`estado-ok`, verde), te toca actuar (`estado-atencion`, ámbar, también un borrador sin enviar), en marcha (`estado-proceso`, azul), cerrado sin éxito (`estado-rechazo`, rojo) y terminado (`estado-terminado`, gris, con el icono nuevo `archivo`). `estado-borrador` deja de existir. Una etiqueta sin familia se avisa en la consola. El módulo `resultado` usa las mismas cinco: su tono `neutro` pasa a `terminado` y se suma `proceso` (pares N23 y N24).
+- **P119 · La secuencia «qué sigue» sirve en cualquier pantalla** (núcleo, FRM-84 nueva): sólo existía dentro del acuse (centrada, con su ancho y su filete). Un resultado del personal, un aviso o la ficha de un trámite con varias acciones en orden terminaban encadenándolas en un párrafo. `.secuencia` y `.secuencia-item` pasan al núcleo; el acuse sólo las centra y les pone su filete. `FormKit.resultado` recibe `pasos` y los pone como secuencia «Qué sigue» (mensaje `resultadoQueSigue`, 156 en total). La guía muestra un aviso con una secuencia y un par «sí y no». El proyecto puede convertir sus párrafos de pasos en `<ol class="secuencia">`.
+
+**Pruebas**: un caso nuevo en `07-correcciones` (31 en total) y el de las etiquetas, con las cinco familias.
+
 ## 1.4.0 · 2026-10-17
 
 Seis hallazgos del sistema de acreditaciones al revisar sus avisos y confirmaciones. Trae dos módulos nuevos, «resultado» y «estado», por eso es versión menor. 30 módulos y 83 reglas (FRM-82 y FRM-83 nuevas).

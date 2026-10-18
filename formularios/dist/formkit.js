@@ -516,7 +516,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.4.0',
+    version: '1.4.1',
     idioma: 'es-MX',
     fechas: { zonaHoraria: 'America/Mexico_City' },
     /* Ámbito territorial. `cp` restringe el rango; `coordenadas` el
@@ -615,6 +615,7 @@
       resultadoHora: 'Quedó guardado a las {hora}',
       resultadoFechaHora: 'Quedó guardado el {fecha} a las {hora}',
       resultadoMotivo: 'Motivo',
+      resultadoQueSigue: 'Qué sigue',
       descargaPreparando: 'Preparando el archivo…',
       descargaLista: 'Descarga iniciada.',
       descargaError: 'No se pudo preparar el archivo. Intenta de nuevo.',
@@ -705,14 +706,14 @@
 
 /* ===== codigo/js/iconos.js ===== */
 /* GENERADO por herramientas/construir.mjs desde codigo/iconos/sprite.svg. No se edita a mano.
-   Catálogo cerrado de 29 iconos: i-alerta, i-error, i-ok, i-info, i-ayuda, i-cerrar, i-palomita, i-flecha-izq, i-flecha-der, i-abajo, i-descarga, i-copiar, i-compartir, i-eliminar, i-editar, i-ubicacion, i-fecha, i-adjunto, i-camara, i-buscar, i-mas, i-cargando, i-reloj, i-externo, i-facebook, i-x, i-instagram, i-tiktok, i-youtube.
+   Catálogo cerrado de 30 iconos: i-alerta, i-error, i-ok, i-info, i-ayuda, i-cerrar, i-palomita, i-flecha-izq, i-flecha-der, i-abajo, i-descarga, i-copiar, i-compartir, i-eliminar, i-editar, i-ubicacion, i-fecha, i-adjunto, i-camara, i-buscar, i-mas, i-cargando, i-reloj, i-externo, i-archivo, i-facebook, i-x, i-instagram, i-tiktok, i-youtube.
    formkit.core.js lo inyecta una vez por página. */
-window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symbol id=\"i-alerta\" viewBox=\"0 0 24 24\"><path d=\"M12 3 2.5 20h19L12 3z\"/><path d=\"M12 9v5\"/><path d=\"M12 17.5h.01\"/></symbol> <symbol id=\"i-error\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v6\"/><path d=\"M12 16.5h.01\"/></symbol> <symbol id=\"i-ok\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"m8 12.5 2.5 2.5L16 9.5\"/></symbol> <symbol id=\"i-info\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v6\"/><path d=\"M12 7.5h.01\"/></symbol> <symbol id=\"i-ayuda\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7\"/><path d=\"M12 17h.01\"/></symbol> <symbol id=\"i-cerrar\" viewBox=\"0 0 24 24\"><path d=\"m6 6 12 12\"/><path d=\"M18 6 6 18\"/></symbol> <symbol id=\"i-palomita\" viewBox=\"0 0 24 24\"><path d=\"m5 12.5 4.5 4.5L19 7.5\"/></symbol> <symbol id=\"i-flecha-izq\" viewBox=\"0 0 24 24\"><path d=\"M19 12H5\"/><path d=\"m11 6-6 6 6 6\"/></symbol> <symbol id=\"i-flecha-der\" viewBox=\"0 0 24 24\"><path d=\"M5 12h14\"/><path d=\"m13 6 6 6-6 6\"/></symbol> <symbol id=\"i-abajo\" viewBox=\"0 0 24 24\"><path d=\"m6 9 6 6 6-6\"/></symbol> <symbol id=\"i-descarga\" viewBox=\"0 0 24 24\"><path d=\"M12 4v11\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M4 19h16\"/></symbol> <symbol id=\"i-copiar\" viewBox=\"0 0 24 24\"><rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2\"/><path d=\"M5 15V6a2 2 0 0 1 2-2h9\"/></symbol> <symbol id=\"i-compartir\" viewBox=\"0 0 24 24\"><circle cx=\"18\" cy=\"5\" r=\"2.5\"/><circle cx=\"6\" cy=\"12\" r=\"2.5\"/><circle cx=\"18\" cy=\"19\" r=\"2.5\"/><path d=\"m8.3 10.8 7.4-4.6\"/><path d=\"m8.3 13.2 7.4 4.6\"/></symbol> <symbol id=\"i-eliminar\" viewBox=\"0 0 24 24\"><path d=\"M4 7h16\"/><path d=\"M9 7V4h6v3\"/><path d=\"M6 7l1 13h10l1-13\"/></symbol> <symbol id=\"i-editar\" viewBox=\"0 0 24 24\"><path d=\"M4 20h4l11-11-4-4L4 16v4z\"/><path d=\"m13 7 4 4\"/></symbol> <symbol id=\"i-ubicacion\" viewBox=\"0 0 24 24\"><path d=\"M12 21s-6-6.3-6-11a6 6 0 0 1 12 0c0 4.7-6 11-6 11z\"/><circle cx=\"12\" cy=\"10\" r=\"2.2\"/></symbol> <symbol id=\"i-fecha\" viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"5\" width=\"16\" height=\"15\" rx=\"2\"/><path d=\"M4 10h16\"/><path d=\"M8 3v4\"/><path d=\"M16 3v4\"/></symbol> <symbol id=\"i-adjunto\" viewBox=\"0 0 24 24\"><path d=\"m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7L9.5 17a1.6 1.6 0 0 1-2.3-2.3L15 7\"/></symbol> <symbol id=\"i-camara\" viewBox=\"0 0 24 24\"><path d=\"M4 8h3l2-3h6l2 3h3v11H4z\"/><circle cx=\"12\" cy=\"13\" r=\"3.5\"/></symbol> <symbol id=\"i-buscar\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6\"/><path d=\"m20 20-4.5-4.5\"/></symbol> <symbol id=\"i-mas\" viewBox=\"0 0 24 24\"><path d=\"M12 5v14\"/><path d=\"M5 12h14\"/></symbol> <symbol id=\"i-cargando\" viewBox=\"0 0 24 24\"><path d=\"M12 3a9 9 0 1 0 9 9\"/></symbol> <symbol id=\"i-reloj\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/></symbol> <symbol id=\"i-externo\" viewBox=\"0 0 24 24\"><path d=\"M14 4h6v6\"/><path d=\"M20 4 10 14\"/><path d=\"M19 14v5H5V5h5\"/></symbol> <symbol id=\"i-facebook\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" stroke=\"none\" d=\"M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.93 8.44-9.94Z\"/></symbol> <symbol id=\"i-x\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" stroke=\"none\" d=\"M17.53 3h3.03l-6.62 7.57L21.75 21h-6.09l-4.77-6.24L5.42 21H2.38l7.08-8.09L2.25 3h6.24l4.31 5.7L17.53 3Zm-1.07 16.17h1.68L7.62 4.73H5.82l10.64 14.44Z\"/></symbol> <symbol id=\"i-instagram\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" stroke=\"none\" d=\"M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.29a6.55 6.55 0 1 0 0 13.1 6.55 6.55 0 0 0 0-13.1Zm0 10.8a4.25 4.25 0 1 1 0-8.5 4.25 4.25 0 0 1 0 8.5Zm8.34-11.06a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z\"/></symbol> <symbol id=\"i-tiktok\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" stroke=\"none\" d=\"M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.28a4.29 4.29 0 0 1-3.24-1.46Z\"/></symbol> <symbol id=\"i-youtube\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" stroke=\"none\" d=\"M23.5 6.5a3.02 3.02 0 0 0-2.12-2.14C19.5 3.85 12 3.85 12 3.85s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.5C0 8.39 0 12 0 12s0 3.61.5 5.5a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.61 24 12 24 12s0-3.61-.5-5.5ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z\"/></symbol> </svg>";
+window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symbol id=\"i-alerta\" viewBox=\"0 0 24 24\"><path d=\"M12 3 2.5 20h19L12 3z\"/><path d=\"M12 9v5\"/><path d=\"M12 17.5h.01\"/></symbol> <symbol id=\"i-error\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v6\"/><path d=\"M12 16.5h.01\"/></symbol> <symbol id=\"i-ok\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"m8 12.5 2.5 2.5L16 9.5\"/></symbol> <symbol id=\"i-info\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v6\"/><path d=\"M12 7.5h.01\"/></symbol> <symbol id=\"i-ayuda\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7\"/><path d=\"M12 17h.01\"/></symbol> <symbol id=\"i-cerrar\" viewBox=\"0 0 24 24\"><path d=\"m6 6 12 12\"/><path d=\"M18 6 6 18\"/></symbol> <symbol id=\"i-palomita\" viewBox=\"0 0 24 24\"><path d=\"m5 12.5 4.5 4.5L19 7.5\"/></symbol> <symbol id=\"i-flecha-izq\" viewBox=\"0 0 24 24\"><path d=\"M19 12H5\"/><path d=\"m11 6-6 6 6 6\"/></symbol> <symbol id=\"i-flecha-der\" viewBox=\"0 0 24 24\"><path d=\"M5 12h14\"/><path d=\"m13 6 6 6-6 6\"/></symbol> <symbol id=\"i-abajo\" viewBox=\"0 0 24 24\"><path d=\"m6 9 6 6 6-6\"/></symbol> <symbol id=\"i-descarga\" viewBox=\"0 0 24 24\"><path d=\"M12 4v11\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M4 19h16\"/></symbol> <symbol id=\"i-copiar\" viewBox=\"0 0 24 24\"><rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2\"/><path d=\"M5 15V6a2 2 0 0 1 2-2h9\"/></symbol> <symbol id=\"i-compartir\" viewBox=\"0 0 24 24\"><circle cx=\"18\" cy=\"5\" r=\"2.5\"/><circle cx=\"6\" cy=\"12\" r=\"2.5\"/><circle cx=\"18\" cy=\"19\" r=\"2.5\"/><path d=\"m8.3 10.8 7.4-4.6\"/><path d=\"m8.3 13.2 7.4 4.6\"/></symbol> <symbol id=\"i-eliminar\" viewBox=\"0 0 24 24\"><path d=\"M4 7h16\"/><path d=\"M9 7V4h6v3\"/><path d=\"M6 7l1 13h10l1-13\"/></symbol> <symbol id=\"i-editar\" viewBox=\"0 0 24 24\"><path d=\"M4 20h4l11-11-4-4L4 16v4z\"/><path d=\"m13 7 4 4\"/></symbol> <symbol id=\"i-ubicacion\" viewBox=\"0 0 24 24\"><path d=\"M12 21s-6-6.3-6-11a6 6 0 0 1 12 0c0 4.7-6 11-6 11z\"/><circle cx=\"12\" cy=\"10\" r=\"2.2\"/></symbol> <symbol id=\"i-fecha\" viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"5\" width=\"16\" height=\"15\" rx=\"2\"/><path d=\"M4 10h16\"/><path d=\"M8 3v4\"/><path d=\"M16 3v4\"/></symbol> <symbol id=\"i-adjunto\" viewBox=\"0 0 24 24\"><path d=\"m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7L9.5 17a1.6 1.6 0 0 1-2.3-2.3L15 7\"/></symbol> <symbol id=\"i-camara\" viewBox=\"0 0 24 24\"><path d=\"M4 8h3l2-3h6l2 3h3v11H4z\"/><circle cx=\"12\" cy=\"13\" r=\"3.5\"/></symbol> <symbol id=\"i-buscar\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6\"/><path d=\"m20 20-4.5-4.5\"/></symbol> <symbol id=\"i-mas\" viewBox=\"0 0 24 24\"><path d=\"M12 5v14\"/><path d=\"M5 12h14\"/></symbol> <symbol id=\"i-cargando\" viewBox=\"0 0 24 24\"><path d=\"M12 3a9 9 0 1 0 9 9\"/></symbol> <symbol id=\"i-reloj\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/></symbol> <symbol id=\"i-externo\" viewBox=\"0 0 24 24\"><path d=\"M14 4h6v6\"/><path d=\"M20 4 10 14\"/><path d=\"M19 14v5H5V5h5\"/></symbol> <symbol id=\"i-archivo\" viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"5\" rx=\"1\"/><path d=\"M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9\"/><path d=\"M10 13h4\"/></symbol> <symbol id=\"i-facebook\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" stroke=\"none\" d=\"M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.79 8.44-4.93 8.44-9.94Z\"/></symbol> <symbol id=\"i-x\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" stroke=\"none\" d=\"M17.53 3h3.03l-6.62 7.57L21.75 21h-6.09l-4.77-6.24L5.42 21H2.38l7.08-8.09L2.25 3h6.24l4.31 5.7L17.53 3Zm-1.07 16.17h1.68L7.62 4.73H5.82l10.64 14.44Z\"/></symbol> <symbol id=\"i-instagram\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" stroke=\"none\" d=\"M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 3.29a6.55 6.55 0 1 0 0 13.1 6.55 6.55 0 0 0 0-13.1Zm0 10.8a4.25 4.25 0 1 1 0-8.5 4.25 4.25 0 0 1 0 8.5Zm8.34-11.06a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z\"/></symbol> <symbol id=\"i-tiktok\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" stroke=\"none\" d=\"M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.84-2.48V9.75a5.72 5.72 0 1 0 4.94 5.66V9.01a7.35 7.35 0 0 0 4.3 1.38V7.28a4.29 4.29 0 0 1-3.24-1.46Z\"/></symbol> <symbol id=\"i-youtube\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" stroke=\"none\" d=\"M23.5 6.5a3.02 3.02 0 0 0-2.12-2.14C19.5 3.85 12 3.85 12 3.85s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.5C0 8.39 0 12 0 12s0 3.61.5 5.5a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.61 24 12 24 12s0-3.61-.5-5.5ZM9.6 15.57V8.43L15.82 12 9.6 15.57Z\"/></symbol> </svg>";
 
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.4.1
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -2644,16 +2645,22 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    El desenlace de una decisión del personal: validar, rechazar, devolver
    para corregir o cerrar un trámite. El acuse es para quien envía; esto es
    para quien decide. Dice con claridad qué pasó, a qué hora y quién lo
-   hizo, y cita el motivo si lo hay. El foco va al título y se anuncia.
+   hizo, cita el motivo si lo hay y, si hay varias acciones en orden, las
+   pone como secuencia «qué sigue». El foco va al título y se anuncia.
 
-   FormKit.resultado(lugar, { tono, titulo, texto, hora, quien, motivo, nivel, oculta })
-     · tono: ok (validado, aprobado), atencion (devuelto, en espera),
-       rechazo (rechazado, cancelado) o neutro (cerrado, archivado);
+   FormKit.resultado(lugar, { tono, titulo, texto, hora, quien, motivo, pasos, nivel, oculta })
+     · tono: la misma familia que la etiqueta de estado (módulo «estado»):
+       ok (hecho: validado, aprobado), atencion (te toca actuar: devuelto
+       para corregir), proceso (en marcha: turnado a otra área), rechazo
+       (cerrado sin éxito: rechazado, cancelado) o terminado (concluido,
+       archivado);
      · titulo con el resultado y su objeto («Solicitud EJ-123 validada»);
      · hora: Date o fecha ISO del servidor (sin ella, ahora); si no es de
        hoy, también se dice la fecha;
      · quien: nombre de quien decidió, tal como lo da el servidor;
      · motivo: el texto que escribió quien decidió, citado tal cual;
+     · pasos: lista de lo que sigue, en orden («La persona recibe…»), que
+       va como secuencia numerada, no encadenada en un párrafo;
      · nivel del título (2 por omisión);
      · oculta: elemento o lista de elementos que ya no aplican (el panel de
        decisión), que se ocultan.
@@ -2672,16 +2679,17 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   const TONOS = {
     ok: { icono: 'ok', clase: 'resultado-ok' },
     atencion: { icono: 'alerta', clase: 'resultado-atencion' },
+    proceso: { icono: 'reloj', clase: 'resultado-proceso' },
     rechazo: { icono: 'error', clase: 'resultado-rechazo' },
-    neutro: { icono: 'info', clase: '' }
+    terminado: { icono: 'archivo', clase: '' }
   };
 
   function resultado(lugar, opciones = {}) {
     const cfg = FormKit.config;
     const M = cfg.mensajes;
     const { plantilla } = FormKit.utilidades;
-    const { tono = 'neutro', titulo = '', texto = '', hora, quien = '', motivo = '', nivel = 2, oculta } = opciones;
-    const t = TONOS[tono] ? tono : 'neutro';
+    const { tono = 'terminado', titulo = '', texto = '', hora, quien = '', motivo = '', pasos = [], nivel = 2, oculta } = opciones;
+    const t = TONOS[tono] ? tono : 'terminado';
     const acciones = [...lugar.querySelectorAll(':scope > [data-resultado-acciones]')];
 
     const cabeza = document.createElement('div');
@@ -2722,6 +2730,17 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       cita.textContent = motivo;
       fig.append(rot, cita);
       partes.push(fig);
+    }
+    /* «Qué sigue»: cada acción en su renglón numerado (FRM-84). */
+    const lista = [].concat(pasos).filter(Boolean);
+    if (lista.length) {
+      const rot = document.createElement('p');
+      rot.className = 'resultado-pasos-titulo';
+      rot.textContent = M.resultadoQueSigue;
+      const ol = document.createElement('ol');
+      ol.className = 'secuencia';
+      for (const paso of lista) { const li = document.createElement('li'); li.className = 'secuencia-item'; li.textContent = paso; ol.appendChild(li); }
+      partes.push(rot, ol);
     }
 
     lugar.classList.add('resultado');
@@ -3360,17 +3379,20 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    estado.js · Módulo «estado» · nivel OPCIONAL
 
    Etiquetas de estado de un trámite o un registro («En revisión»,
-   «Validada»). Cinco tonos con significado fijo, cada uno con su icono:
-     borrador  · gris  · lápiz   · lo que aún no se envía;
-     proceso   · azul  · reloj   · en revisión, en trámite;
-     atencion  · ámbar · alerta  · espera algo de la persona o del personal;
-     ok        · verde · palomita· validado, aprobado, concluido;
-     rechazo   · rojo  · error   · rechazado, cancelado, vencido.
+   «Validada»). Cinco familias según a quién le toca qué, cada una con su
+   tono y su icono:
+     ok         · verde · palomita · hecho: validado, aprobado, pagado;
+     atencion   · ámbar · alerta   · te toca actuar: corregir, completar,
+                                     un borrador sin enviar;
+     proceso    · azul  · reloj    · en marcha: en revisión, en trámite;
+     rechazo    · rojo  · error    · cerrado sin éxito: rechazado,
+                                     cancelado, vencido;
+     terminado  · gris  · archivo  · terminado: concluido, archivado.
    La palabra dice el estado; el color y el icono sólo lo refuerzan. Un
-   sistema no inventa tonos: cada estado suyo cae en uno de estos cinco.
+   sistema no inventa tonos: cada estado suyo cae en una de las cinco.
 
    Se inicia solo al cargar la página: a la etiqueta que no trae su icono se
-   le pone el de su tono. FormKit.estado(el, { tono, texto, anuncia }) la
+   le pone el de su familia. FormKit.estado(el, { tono, texto, anuncia }) la
    cambia después (anuncia: true cuando cambia por una acción de la persona).
 
    Contrato HTML:
@@ -3378,12 +3400,16 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    ========================================================= */
 (function () {
   'use strict';
-  const ICONOS = { borrador: 'editar', proceso: 'reloj', atencion: 'alerta', ok: 'ok', rechazo: 'error' };
-  const tonoDe = (el) => Object.keys(ICONOS).find((t) => el.classList.contains(`estado-${t}`)) || 'borrador';
+  const ICONOS = { ok: 'ok', atencion: 'alerta', proceso: 'reloj', rechazo: 'error', terminado: 'archivo' };
+  const tonoDe = (el) => Object.keys(ICONOS).find((t) => el.classList.contains(`estado-${t}`));
 
   function pinta(el) {
-    const tono = tonoDe(el);
-    if (!el.classList.contains(`estado-${tono}`)) el.classList.add(`estado-${tono}`);
+    let tono = tonoDe(el);
+    if (!tono) {
+      console.warn(`FormKit.estado: a «${el.textContent.trim()}» le falta su familia (estado-ok, estado-atencion, estado-proceso, estado-rechazo o estado-terminado); queda como terminado.`);
+      tono = 'terminado';
+      el.classList.add('estado-terminado');
+    }
     const previo = el.querySelector(':scope > .icono');
     const nuevo = FormKit.icono(ICONOS[tono], 'icono icono-sm');
     if (previo) previo.replaceWith(nuevo); else el.prepend(nuevo);

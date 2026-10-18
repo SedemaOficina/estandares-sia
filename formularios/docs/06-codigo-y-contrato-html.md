@@ -9,7 +9,7 @@ codigo/
   css/        tokens.css · base.css · nucleo.css              (núcleo, siempre)
   js/         validaciones.config.js · iconos.js (generado) · formkit.core.js
   fuentes/    Cabin 600/700, Roboto 400/500/700 (woff2) + licencias OFL
-  iconos/     sprite.svg (29 símbolos; iconos.js se genera de aquí)
+  iconos/     sprite.svg (30 símbolos; iconos.js se genera de aquí)
   imagenes/   logotipo-sedema.png
   modulos/    <nombre>/<nombre>.css · <nombre>.js      (28 módulos, cada uno se copia solo)
   catalogos/  cdmx-ejemplo.js (ficticio) · LEEME.md
@@ -143,9 +143,11 @@ Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({
 
 **Confirmación con consecuencias.** `FormKit.confirma(ancla, { titulo, texto, consecuencias: ['…'], irreversible: true, si: 'Rechazar solicitud', peligro: true })` devuelve una promesa con `true` o `false`. `no` es «Volver sin cambios» por omisión y recibe el foco; si falta `si`, la consola lo avisa (debe repetir el verbo). El botón que abre la confirmación lleva `.btn btn-peligro-contorno`; el que hace el daño dentro de ella, `.btn btn-peligro` (rojo relleno).
 
-**Módulo `resultado`.** Para el personal, después de decidir: `<section class="resultado" data-resultado hidden>` con, si se quiere, `<div class="acciones" data-resultado-acciones>…</div>` (se conserva al final). `FormKit.resultado(lugar, { tono: 'ok'|'atencion'|'rechazo'|'neutro', titulo, texto, hora, quien, motivo, nivel, oculta })`: `hora` es la del servidor (sin ella, ahora) y se dice en la hora de la Ciudad, con la fecha si no fue hoy; `motivo` se cita tal cual; `oculta` esconde el panel de decisión. El foco va al título.
+**Módulo `resultado`.** Para el personal, después de decidir: `<section class="resultado" data-resultado hidden>` con, si se quiere, `<div class="acciones" data-resultado-acciones>…</div>` (se conserva al final). `FormKit.resultado(lugar, { tono: 'ok'|'atencion'|'proceso'|'rechazo'|'terminado', titulo, texto, hora, quien, motivo, pasos, nivel, oculta })`: el tono es una de las cinco familias de `estado`; `hora` es la del servidor (sin ella, ahora) y se dice en la hora de la Ciudad, con la fecha si no fue hoy; `motivo` se cita tal cual; `pasos` (lista) va como secuencia «Qué sigue»; `oculta` esconde el panel de decisión. El foco va al título.
 
-**Módulo `estado`.** `<span class="estado estado-proceso">En revisión</span>`; tonos `estado-borrador`, `estado-proceso`, `estado-atencion`, `estado-ok` y `estado-rechazo`. El módulo pone el icono de cada tono al cargar (también en una página sin formulario); `FormKit.estado(el, { tono, texto, anuncia })` lo cambia y `FormKit.estado.inicia(contenedor)` prepara las que la página pinte después.
+**Módulo `estado`.** `<span class="estado estado-proceso">En revisión</span>`; cinco familias según a quién le toca qué: `estado-ok` (hecho), `estado-atencion` (te toca actuar; también un borrador sin enviar), `estado-proceso` (en marcha), `estado-rechazo` (cerrado sin éxito) y `estado-terminado` (terminado). Una etiqueta sin familia se avisa en la consola y queda como terminada. El módulo pone el icono de cada familia al cargar (también en una página sin formulario); `FormKit.estado(el, { tono, texto, anuncia })` lo cambia y `FormKit.estado.inicia(contenedor)` prepara las que la página pinte después.
+
+**Secuencia «qué sigue».** Varias acciones en orden van en `<ol class="secuencia"><li class="secuencia-item">Abre «Mis documentos».</li>…</ol>`, cada una con su verbo, nunca en un párrafo. Es del núcleo: sirve en cualquier pantalla, dentro de un aviso (en un `<div class="aviso">` con `<div class="aviso-texto">`) y en el resultado (`pasos`); en el acuse va centrada, a su ancho y con su filete.
 
 **Código postal de todo el país.** `data-ambito="nacional"` en un campo `data-formato="cp"` acepta cualquier código de cinco dígitos; sin él, sólo los del ámbito configurado (la Ciudad).
 

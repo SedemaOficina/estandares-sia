@@ -453,35 +453,35 @@ window.GUIA_PARES = [
   "texto": "--texto",
   "fondo": "--aviso-bg",
   "minimo": 4.5,
-  "donde": "Etiqueta de estado «borrador»"
+  "donde": "Etiqueta de estado «terminado»"
  },
  {
   "id": "C46",
   "texto": "--azul",
   "fondo": "--azul-cl",
   "minimo": 4.5,
-  "donde": "Etiqueta de estado «proceso»"
+  "donde": "Etiqueta de estado «en marcha»"
  },
  {
   "id": "C47",
   "texto": "--pend-txt",
   "fondo": "--pend-bg",
   "minimo": 4.5,
-  "donde": "Etiqueta de estado «atención»"
+  "donde": "Etiqueta de estado «te toca actuar»"
  },
  {
   "id": "C48",
   "texto": "--ok-txt",
   "fondo": "--ok-bg",
   "minimo": 4.5,
-  "donde": "Etiqueta de estado «ok»"
+  "donde": "Etiqueta de estado «hecho»"
  },
  {
   "id": "C49",
   "texto": "--error-txt",
   "fondo": "--error-bg",
   "minimo": 4.5,
-  "donde": "Etiqueta de estado «rechazo»"
+  "donde": "Etiqueta de estado «cerrado sin éxito»"
  },
  {
   "id": "C50",
@@ -516,6 +516,20 @@ window.GUIA_PARES = [
   "texto": "--blanco",
   "fondo": "--gris",
   "minimo": 3,
-  "donde": "Icono de la marca del resultado neutro"
+  "donde": "Icono de la marca del resultado «terminado»"
+ },
+ {
+  "id": "N23",
+  "texto": "--blanco",
+  "fondo": "--azul",
+  "minimo": 3,
+  "donde": "Icono de la marca del resultado «en marcha»"
+ },
+ {
+  "id": "N24",
+  "texto": "--azul",
+  "fondo": "--blanco",
+  "minimo": 3,
+  "donde": "Filete del resultado «en marcha»"
  }
 ];

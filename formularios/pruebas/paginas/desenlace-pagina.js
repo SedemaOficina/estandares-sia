@@ -1,5 +1,6 @@
 /* Código propio de la página de prueba de desenlaces: rechazar pide
-   confirmación con sus consecuencias y luego muestra el resultado (P113). */
+   confirmación con sus consecuencias y luego muestra el resultado con lo
+   que sigue (P113, P119). */
 FormKit.descargas.falla = () => Promise.reject(new Error('sin servidor'));
 document.getElementById('rechazar').addEventListener('click', async (e) => {
   const ok = await FormKit.confirma(e.currentTarget, {
@@ -11,6 +12,7 @@ document.getElementById('rechazar').addEventListener('click', async (e) => {
   FormKit.estado(document.getElementById('estado-solicitud'), { tono: 'rechazo', texto: 'Rechazada', anuncia: true });
   FormKit.resultado(document.getElementById('resultado'), {
     tono: 'rechazo', titulo: 'Solicitud EJ-2026-000123 rechazada', quien: 'Ana Revisora',
-    motivo: 'La identificación oficial está vencida.', oculta: document.getElementById('decision')
+    motivo: 'La identificación oficial está vencida.', oculta: document.getElementById('decision'),
+    pasos: ['La persona recibe el motivo por correo.', 'Si quiere seguir, abre una solicitud nueva.']
   });
 });

@@ -299,6 +299,42 @@
 /* Anuncio de estado de envío (error de red, plazo vencido): recibe el foco. */
 .estado-envio{margin-top:var(--e-4)}
 
+/* Secuencia «qué sigue»: varias acciones en orden, numeradas por CSS (el orden
+   de la lista es el de los números), nunca encadenadas en un párrafo. Sirve en
+   el acuse, en el resultado de una decisión, en un aviso o en la ficha de un
+   trámite (FRM-84). */
+.secuencia{margin-top:var(--e-4);counter-reset:sec}
+.secuencia-item{position:relative;min-height:var(--e-7);padding:var(--e-1) 0 var(--e-6) var(--e-9);counter-increment:sec;font-size:var(--t-md)}
+.secuencia-item::before{
+  content:counter(sec);
+  position:absolute;
+  top:0;
+  left:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:var(--e-7);
+  height:var(--e-7);
+  background:var(--guinda-cl);
+  border:var(--b-2) solid var(--guinda);
+  border-radius:var(--r-pill);
+  font-family:var(--fuente-titulo);
+  font-size:var(--t-sm);
+  font-weight:var(--peso-fuerte);
+  color:var(--guinda);
+}
+.secuencia-item::after{
+  content:'';
+  position:absolute;
+  top:calc(var(--e-7) + var(--b-2));
+  bottom:var(--b-2);
+  left:calc(var(--e-4) - var(--b-1));
+  width:var(--b-2);
+  background:var(--dorado);
+}
+.secuencia-item:last-child{padding-bottom:var(--e-1)}
+.secuencia-item:last-child::after{display:none}
+
 /* «Mostrar» / «Ocultar»: dentro del campo, a la derecha; aria-pressed dice si se ve lo escrito. */
 .contrasena-caja{position:relative}
 .contrasena-caja > .control{padding-right:var(--e-11)}

@@ -407,6 +407,13 @@
 <p class="aviso aviso-bloqueo" role="alert"><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"><strong class="aviso-titulo">No puedes continuar</strong> Lo único que impide seguir. Asertivo: el lector lo anuncia al momento.</span></p>
 <p class="aviso aviso-ok" role="status"><svg class="icono" aria-hidden="true"><use href="#i-ok"></use></svg><span class="aviso-texto"><strong class="aviso-titulo">Recibido</strong> El sistema confirma que recibió o guardó.</span></p>
 <p class="aviso"><svg class="icono" aria-hidden="true"><use href="#i-info"></use></svg><span class="aviso-texto">Un aviso de una sola frase puede ir sin título; el icono de su tono va siempre.</span></p>
+<div class="aviso aviso-advertencia"><svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg><div class="aviso-texto"><strong class="aviso-titulo">Te toca corregir dos documentos</strong>Varias acciones en orden van en una secuencia numerada, no en un párrafo:
+  <ol class="secuencia">
+    <li class="secuencia-item">Abre «Mis documentos».</li>
+    <li class="secuencia-item">Sube de nuevo la identificación oficial y el comprobante de domicilio.</li>
+    <li class="secuencia-item">Envía la solicitud: la Secretaría la revisa otra vez.</li>
+  </ol>
+</div></div>
 <div class="guia-fila-demo"><button type="button" class="btn btn-secundario" data-demo-aviso>Guardar una nota (aviso que responde a una acción)</button></div>
 <div data-demo-aviso-lugar></div>
 <p class="texto-gris">Lo que el proyecto no resuelve se dice: <span class="pendiente">Pendiente: horario de atención</span>. El rótulo va en el HTML, no en CSS, para que el lector lo lea.</p>
@@ -672,13 +679,13 @@
 
 <template data-demo="estado">
 <div class="guia-fila-demo">
-  <span class="estado estado-borrador">Borrador</span>
-  <span class="estado estado-proceso">En revisión</span>
-  <span class="estado estado-atencion">Requiere corrección</span>
   <span class="estado estado-ok">Validada</span>
+  <span class="estado estado-atencion">Requiere corrección</span>
+  <span class="estado estado-proceso">En revisión</span>
   <span class="estado estado-rechazo">Rechazada</span>
+  <span class="estado estado-terminado">Concluida</span>
 </div>
-<p class="texto-gris">Cinco tonos, cada uno con su significado y su icono: gris, aún no se envía; azul, en trámite; ámbar, espera algo; verde, concluido; rojo, rechazado, cancelado o vencido. Cada estado de un sistema cae en uno de ellos. El icono lo pone el módulo.</p>
+<p class="texto-gris">Cinco familias, según a quién le toca qué, cada una con su tono y su icono: verde, hecho; ámbar, te toca actuar (también un borrador sin enviar); azul, en marcha; rojo, cerrado sin éxito (rechazado, cancelado o vencido); gris, terminado. Cada estado de un sistema cae en una de ellas. El icono lo pone el módulo.</p>
 </template>
 
 <template data-demo="tooltip">

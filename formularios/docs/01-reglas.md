@@ -2,7 +2,7 @@
 
 > Este documento se **genera** de `reglas/reglas.json` (`node herramientas/generar-reglas.mjs`). No se edita a mano: se corrige la regla en el JSON y se vuelve a generar.
 
-El estándar tiene **83 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **54 BASE** (obligatorias en todo formulario), **21 RECOMENDADAS** (se cumplen salvo justificación escrita) y **8 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 2 son mejores prácticas adicionales.
+El estándar tiene **84 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **55 BASE** (obligatorias en todo formulario), **21 RECOMENDADAS** (se cumplen salvo justificación escrita) y **8 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 3 son mejores prácticas adicionales.
 
 **Cómo leer cada regla.** *Regla*: qué se hace. *Por qué*: el daño que evita. *Nivel*: BASE, RECOMENDADO u OPCIONAL (quien programa elige los módulos, no el nivel). *Origen*: `A FRM-xx` regla del paquete A; `B FRM-XXX-xx` regla del paquete B; `Cn` conflicto decidido en la fase 0 (ver `docs/09-trazabilidad.md`); `encargo n` sección del encargo; `norma n` norma de construcción de sistemas. *Verificación*: la prueba, herramienta o revisión que la comprueba.
 
@@ -12,7 +12,7 @@ El estándar tiene **83 reglas** con numeración corrida FRM-NN (decisión C13).
 2. [Campos y etiquetas](#2-campos-y-etiquetas) · FRM-09 a FRM-15
 3. [Tipos de pregunta](#3-tipos-de-pregunta) · FRM-16 a FRM-25
 4. [Validación y errores](#4-validación-y-errores) · FRM-26 a FRM-33
-5. [Acciones y retroalimentación](#5-acciones-y-retroalimentación) · FRM-34 a FRM-83
+5. [Acciones y retroalimentación](#5-acciones-y-retroalimentación) · FRM-34 a FRM-84
 6. [Borrador y envío](#6-borrador-y-envío) · FRM-42 a FRM-45
 7. [Ubicación y domicilio](#7-ubicación-y-domicilio) · FRM-46 a FRM-50
 8. [Archivos y evidencia](#8-archivos-y-evidencia) · FRM-51 a FRM-54
@@ -24,7 +24,7 @@ El estándar tiene **83 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ## Resumen por nivel
 
-- **BASE**: FRM-07, FRM-08, FRM-09, FRM-10, FRM-11, FRM-12, FRM-13, FRM-14, FRM-15, FRM-16, FRM-17, FRM-26, FRM-27, FRM-28, FRM-29, FRM-30, FRM-32, FRM-33, FRM-34, FRM-35, FRM-36, FRM-37, FRM-39, FRM-40, FRM-44, FRM-45, FRM-48, FRM-51, FRM-54, FRM-55, FRM-56, FRM-59, FRM-60, FRM-61, FRM-62, FRM-63, FRM-64, FRM-65, FRM-66, FRM-67, FRM-68, FRM-69, FRM-70, FRM-71, FRM-72, FRM-73, FRM-74, FRM-75, FRM-76, FRM-77, FRM-78, FRM-79, FRM-80, FRM-81
+- **BASE**: FRM-07, FRM-08, FRM-09, FRM-10, FRM-11, FRM-12, FRM-13, FRM-14, FRM-15, FRM-16, FRM-17, FRM-26, FRM-27, FRM-28, FRM-29, FRM-30, FRM-32, FRM-33, FRM-34, FRM-35, FRM-36, FRM-37, FRM-39, FRM-40, FRM-44, FRM-45, FRM-48, FRM-51, FRM-54, FRM-55, FRM-56, FRM-59, FRM-60, FRM-61, FRM-62, FRM-63, FRM-64, FRM-65, FRM-66, FRM-67, FRM-68, FRM-69, FRM-70, FRM-71, FRM-72, FRM-73, FRM-74, FRM-75, FRM-76, FRM-77, FRM-78, FRM-79, FRM-80, FRM-81, FRM-84
 - **RECOMENDADO**: FRM-01, FRM-02, FRM-03, FRM-04, FRM-05, FRM-06, FRM-18, FRM-19, FRM-20, FRM-31, FRM-38, FRM-41, FRM-42, FRM-43, FRM-46, FRM-52, FRM-53, FRM-57, FRM-58, FRM-82, FRM-83
 - **OPCIONAL**: FRM-21, FRM-22, FRM-23, FRM-24, FRM-25, FRM-47, FRM-49, FRM-50
 
@@ -82,7 +82,7 @@ El estándar tiene **83 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-06 · Un acuse con folio al terminar
 
-**Regla.** Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue, si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia.
+**Regla.** Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue como secuencia numerada (FRM-84), si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia.
 
 **Por qué.** Sin acuse la persona no sabe si terminó; sin folio no puede dar seguimiento.
 
@@ -450,23 +450,33 @@ El estándar tiene **83 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-82 · Una decisión del personal termina en un resultado que dice qué pasó, a qué hora y quién
 
-**Regla.** Al validar, rechazar, devolver para corregir o cerrar un trámite, la pantalla muestra el resultado (módulo «resultado», FormKit.resultado): título con el resultado y su objeto («Solicitud EJ-123 rechazada»), el tono en icono y palabras (ok, atención, rechazo o neutro), «Quedó guardado a las HH:MM · quien» con la hora de la Ciudad (y la fecha si no fue hoy), el motivo citado tal como se escribió y una acción para seguir. El panel de decisión que ya no aplica se oculta. El foco va al título y se anuncia.
+**Regla.** Al validar, rechazar, devolver para corregir, turnar o cerrar un trámite, la pantalla muestra el resultado (módulo «resultado», FormKit.resultado): título con el resultado y su objeto («Solicitud EJ-123 rechazada»), el tono de una de las cinco familias de FRM-83 en icono y palabras, «Quedó guardado a las HH:MM · quien» con la hora de la Ciudad (y la fecha si no fue hoy), el motivo citado tal como se escribió, lo que sigue como secuencia numerada (pasos, FRM-84) y una acción para seguir. El panel de decisión que ya no aplica se oculta. El foco va al título y se anuncia.
 
 **Por qué.** Sin un resultado claro, quien decide no sabe si su decisión quedó registrada, y sin hora ni nombre no hay a quién preguntar.
 
-**Nivel.** RECOMENDADO · **Origen.** P113 (proyecto de acreditaciones, 17 oct 2026) · *mejor práctica adicional*
+**Nivel.** RECOMENDADO · **Origen.** P113 (proyecto de acreditaciones, 17 oct 2026); P119 (proyecto de acreditaciones, 17 oct 2026) · *mejor práctica adicional*
 
-**Verificación.** guía: resultado; 07: resultado con hora, quién y motivo (P113)
+**Verificación.** guía: resultado; 07: resultado con hora, quién y motivo (P113) y con lo que sigue (P119)
 
-### FRM-83 · Las etiquetas de estado usan cinco tonos con significado fijo, icono y palabra
+### FRM-83 · Las etiquetas de estado usan cinco familias con significado fijo, icono y palabra
 
-**Regla.** El estado de un trámite o un registro se muestra con el módulo «estado»: borrador (gris), proceso (azul), atención (ámbar), ok (verde) y rechazo (rojo), cada uno con su icono, y la palabra dice el estado. Cada estado de un sistema cae en uno de los cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia.
+**Regla.** El estado de un trámite o un registro se muestra con el módulo «estado», en cinco familias según a quién le toca qué: hecho (estado-ok, verde: validado, aprobado), te toca actuar (estado-atencion, ámbar: corregir, completar, un borrador sin enviar), en marcha (estado-proceso, azul: en revisión, en trámite), cerrado sin éxito (estado-rechazo, rojo: rechazado, cancelado, vencido) y terminado (estado-terminado, gris: concluido, archivado). Cada una lleva su icono y la palabra dice el estado. Cada estado de un sistema cae en una de las cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia.
 
 **Por qué.** Nueve tonos sin regla obligan a aprender una leyenda por sistema, y una etiqueta sólo de color no dice nada a quien no distingue colores.
 
 **Nivel.** RECOMENDADO · **Origen.** P118 (proyecto de acreditaciones, 17 oct 2026) · *mejor práctica adicional*
 
-**Verificación.** guía: etiquetas de estado; contraste C45 a C49; 07: tonos e iconos (P118)
+**Verificación.** guía: etiquetas de estado; contraste C45 a C49; 07: familias e iconos (P118)
+
+### FRM-84 · Varias acciones en orden van en una secuencia numerada, no en un párrafo
+
+**Regla.** Cuando hay que decir dos o más acciones en orden (qué sigue después del acuse o de una decisión, qué hacer para corregir, los pasos de un trámite en su ficha), van en una lista numerada <ol class="secuencia"> con un <li class="secuencia-item"> por acción, cada una empezando con su verbo. Nunca encadenadas en un párrafo («Abra el expediente… El siguiente paso es… La persona ve…»). La secuencia es del núcleo: sirve en el acuse (centrada), en el resultado (pasos), en un aviso y en cualquier pantalla.
+
+**Por qué.** En un párrafo, quien lee pierde la cuenta de cuántas acciones son, en qué orden van y cuál le toca.
+
+**Nivel.** BASE · **Origen.** P119 (proyecto de acreditaciones, 17 oct 2026) · *mejor práctica adicional*
+
+**Verificación.** guía: botones y avisos, resultado y sí y no; 07: secuencia fuera del acuse (P119)
 
 ## 6. Borrador y envío
 
@@ -782,7 +792,7 @@ El estándar tiene **83 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-72 · Iconografía: un solo sprite SVG, catálogo cerrado
 
-**Regla.** Los iconos viven en codigo/iconos/sprite.svg (29 símbolos), se inyectan una vez por página y heredan el color del texto. El decorativo lleva aria-hidden; el que comunica va junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con nombre accesible. Las marcas de redes sociales van rellenas, como las publica cada red.
+**Regla.** Los iconos viven en codigo/iconos/sprite.svg (30 símbolos), se inyectan una vez por página y heredan el color del texto. El decorativo lleva aria-hidden; el que comunica va junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con nombre accesible. Las marcas de redes sociales van rellenas, como las publica cada red.
 
 **Por qué.** Iconos de tres fuentes distintas se ven distintos y pesan; un icono sin nombre es mudo.
 
