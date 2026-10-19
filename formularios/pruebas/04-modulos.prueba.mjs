@@ -102,8 +102,8 @@ test('cascadas: el CP propone alcaldía y colonia; la colonia propone el CP; CP 
 
 test('chips: el historial se guarda sólo en el dispositivo y no viaja en el payload', async () => {
   const p = await abreGuia();
-  await p.fill('#m_cat', 'Poda'); await p.keyboard.press('Tab'); await p.waitForTimeout(100);
-  assert.deepEqual((await p.locator('#m-chips [data-chip]').allTextContents()).map((t) => t.trim()), ['Poda'], 'sólo el historial; los chips fijos van aparte');
+  await p.fill('#m_cat', 'Reciclaje'); await p.keyboard.press('Tab'); await p.waitForTimeout(100);
+  assert.deepEqual((await p.locator('#m-chips [data-chip]').allTextContents()).map((t) => t.trim()), ['Reciclaje'], 'sólo el historial; los chips fijos van aparte');
   const claves = await p.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('sia-chips')));
   assert.equal(claves.length, 1, 'una clave de chips por campo');
   const texto = await p.evaluate(() => document.documentElement.outerHTML);

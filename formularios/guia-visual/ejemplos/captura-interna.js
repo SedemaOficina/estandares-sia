@@ -44,10 +44,10 @@
     const b = e.target.closest('[data-accion-fila="eliminar"]');
     if (!b) return;
     const folio = b.closest('tr').dataset.folio;
-    FormKit.confirma(b, { titulo: `¿Eliminar el registro ${folio}?`, texto: 'Esta acción no se puede deshacer.', si: 'Eliminar', no: 'Conservar', peligro: true }).then((ok) => { if (ok) { const i = REGISTROS.findIndex((r) => r.folio === folio); if (i >= 0) REGISTROS.splice(i, 1); pinta(); FormKit.anuncia(`Registro ${folio} eliminado.`); } });
+    FormKit.confirma(b, { titulo: `¿Eliminar el registro ${folio}?`, irreversible: true, si: 'Eliminar registro', peligro: true }).then((ok) => { if (ok) { const i = REGISTROS.findIndex((r) => r.folio === folio); if (i >= 0) REGISTROS.splice(i, 1); pinta(); FormKit.anuncia(`Registro ${folio} eliminado.`); } });
   });
   const captura = document.getElementById('captura');
-  captura.addEventListener('click', (e) => { if (e.target.closest('[data-limpiar]')) FormKit.confirma(e.target, { titulo: '¿Descartar la captura?', texto: 'Se borra lo escrito en este formulario.', si: 'Descartar', no: 'Conservar', peligro: true }).then((ok) => { if (ok) { captura.reset(); FormKit.anuncia('Captura descartada.'); } }); });
+  captura.addEventListener('click', (e) => { if (e.target.closest('[data-limpiar]')) FormKit.confirma(e.target, { titulo: '¿Descartar la captura?', consecuencias: ['Se borra lo escrito en este formulario.'], irreversible: true, si: 'Descartar captura', peligro: true }).then((ok) => { if (ok) { captura.reset(); FormKit.anuncia('Captura descartada.'); } }); });
   captura.addEventListener('formkit:enviado', (e) => { FormKit.anuncia(`Registro guardado con folio ${e.detail.folio}.`, true); captura.reset(); });
   document.addEventListener('DOMContentLoaded', pinta);
 }());

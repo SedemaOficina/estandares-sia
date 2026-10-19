@@ -423,7 +423,7 @@ test('confirmar con consecuencias y foco en «Volver sin cambios»; el resultado
   assert.equal(await res.locator('.resultado-titulo').textContent(), 'Solicitud EJ-2026-000123 rechazada');
   assert.match(await res.locator('.resultado-meta').textContent(), /^Quedó guardado a las \d{2}:\d{2} · Ana Revisora$/, 'hora y quién');
   assert.equal(await res.locator('.resultado-motivo-texto').textContent(), 'La identificación oficial está vencida.', 'el motivo, citado tal cual');
-  assert.equal(await res.locator('[data-resultado-acciones] .btn-primario').textContent(), 'Volver a la bandeja', 'la acción para seguir se conserva');
+  assert.equal(await res.locator('[data-resultado-acciones] .btn-primario').textContent(), 'Volver a la lista de solicitudes', 'la acción para seguir se conserva');
   assert.ok(await res.evaluate((x) => x.classList.contains('resultado-rechazo')), 'con el tono del rechazo');
   assert.ok(await p.locator('#decision').isHidden(), 'el panel de decisión ya no se ofrece');
   const otroDia = await p.evaluate(() => { const el = document.createElement('section'); document.body.append(el); FormKit.resultado(el, { tono: 'ok', titulo: 'Validada', hora: '2026-01-05T17:30:00Z' }); return el.querySelector('.resultado-meta').textContent; });
@@ -599,6 +599,20 @@ test('el borrador no guarda la precarga de la página, empieza con la persona y 
   await p.context().close();
 });
 
+test('el proveedor del borrador recibe la foto sin su ubicación cuando el formulario no la pide (auditoría 1.5.1)', async () => {
+  const p = await abrePagina(navegador, servidor.url, 'pruebas/paginas/borrador.html', { contexto: PERFILES.escritorio.contexto });
+  const base = Buffer.from(await p.evaluate(() => { const c = document.createElement('canvas'); c.width = 400; c.height = 300; const x = c.getContext('2d'); x.fillStyle = '#2a6'; x.fillRect(0, 0, 400, 300); return c.toDataURL('image/jpeg', 0.5).split(',')[1]; }), 'base64');
+  await p.fill('#nombre', 'Con foto');
+  await p.setInputFiles('[data-campo="documento"] input[type="file"]', [{ name: 'foto.jpg', mimeType: 'image/jpeg', buffer: jpegConExif(base) }]);
+  await p.waitForSelector('[data-campo="documento"] .arch[data-estado="listo"]');
+  await p.waitForFunction(() => (JSON.parse(sessionStorage.getItem('arch-documento') || '[]')).some((x) => x.nombre === 'foto.jpg'));
+  const guardada = await p.evaluate(() => JSON.parse(sessionStorage.getItem('arch-documento')).find((x) => x.nombre === 'foto.jpg'));
+  const bytes = Buffer.from(guardada.datos.split(',')[1], 'base64');
+  assert.equal(bytes[0], 0xFF, 'sigue siendo un JPG');
+  assert.ok(!bytes.includes(Buffer.from('Exif\0')), 'sin el bloque EXIF con la ubicación');
+  await p.context().close();
+});
+
 /* ----- Versión 1.4.4: P134 y P135 (revisión de pantallas del 18 oct) ----- */
 
 test('la bajada y la ayuda de bloque ocupan su tarjeta; el límite de 70ch es del texto corrido; una línea de datos no parte sus datos (P134)', async () => {
@@ -627,7 +641,7 @@ test('la bajada y la ayuda de bloque ocupan su tarjeta; el límite de 70ch es de
 
 test('los motivos frecuentes no se parten ni se encogen, y al pasar el cursor no parecen elegidos (P135)', async () => {
   const p = await abreGuia();
-  const largo = p.locator('#m-chips [data-chip-fijo]', { hasText: 'No coincide con el nombre de la cuenta' });
+  const largo = p.locator('#m-chips [data-chip-fijo]', { hasText: 'No coincide con el nombre de quien solicita' });
   const m = await largo.evaluate((b) => { const c = getComputedStyle(b); return { encoge: c.flexShrink, ancho: c.maxWidth, alto: Math.round(b.getBoundingClientRect().height), min: parseFloat(c.minHeight) }; });
   assert.deepEqual([m.encoge, m.ancho], ['0', '100%']);
   assert.ok(m.alto <= m.min + 1, `el motivo largo va en un renglón: ${JSON.stringify(m)}`);

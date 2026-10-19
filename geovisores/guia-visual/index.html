@@ -27,7 +27,7 @@
 </header>
 
 <main class="pagina" id="contenido">
-  <p class="bajada">Esta página carga las hojas reales: las de formularios (<code>../formularios</code>) y las del mapa (<code>codigo/css</code>). Los colores, razones de contraste y distancias de color se calculan aquí, en el navegador, con los valores que la hoja tiene en este momento; no se copian. La hoja de esta guía (<code>guia.css</code>) solo ordena las muestras.</p>
+  <p class="bajada texto-corrido">Esta página carga las hojas reales: las de formularios (<code>../formularios</code>) y las del mapa (<code>codigo/css</code>). Los colores, razones de contraste y distancias de color se calculan aquí, en el navegador, con los valores que la hoja tiene en este momento; no se copian. La hoja de esta guía (<code>guia.css</code>) solo ordena las muestras.</p>
 
   <nav class="guia-indice" aria-label="Contenido de la guía">
     <ul class="guia-lista-indice">
@@ -49,7 +49,7 @@
   <!-- ===== Muestra del mapa ===== -->
   <section class="guia-seccion" id="muestra" aria-labelledby="t-muestra">
     <h2 class="titulo-bloque" id="t-muestra">Muestra del mapa</h2>
-    <p class="bajada">El fondo propio, los límites con su franja blanca, los nombres con contorno, lo elegido en azul, el lugar buscado en guinda, el punto de «mi ubicación», la escala y el norte, todo pintado con los tokens. Los nombres están a su tamaño real; en una pantalla angosta se ve solo una parte. El botón de capas (el cuarto de la columna de la derecha) abre el menú para cambiar el mapa base y la opacidad de la capa de datos.</p>
+    <p class="bajada texto-corrido">El fondo propio, los límites con su franja blanca, los nombres con contorno, lo elegido en azul, el lugar buscado en guinda, el punto de «mi ubicación», la escala y el norte, todo pintado con los tokens. Los nombres están a su tamaño real; en una pantalla angosta se ve solo una parte. El botón de capas (el cuarto de la columna de la derecha) abre el menú para cambiar el mapa base y la opacidad de la capa de datos.</p>
     <div class="guia-fila" role="group" aria-label="Capa de datos de la muestra">
       <button type="button" class="btn btn-secundario" data-vista="fondo" aria-pressed="true">Sin capa de datos</button>
       <button type="button" class="btn btn-secundario" data-vista="rampa" aria-pressed="false">Colonias con la rampa de prioridad</button>
@@ -156,7 +156,7 @@
   <!-- ===== Mapas base ===== -->
   <section class="guia-seccion" id="mapas-base" aria-labelledby="t-mapas-base">
     <h2 class="titulo-bloque" id="t-mapas-base">Mapas base: qué opciones hay y cómo se ven</h2>
-    <p class="bajada">El mapa base es lo que va debajo de los datos: calles, manzanas, parques, agua o la foto de satélite. Cada visor elige el suyo según el proyecto (D7, GEO-74). Las muestras de esta sección son dibujos hechos con los colores del estándar, no teselas reales: esta página no pide nada a ningún servidor de mapas. Lo que no se pudo comprobar en las fuentes del estándar queda marcado como pendiente.</p>
+    <p class="bajada texto-corrido">El mapa base es lo que va debajo de los datos: calles, manzanas, parques, agua o la foto de satélite. Cada visor elige el suyo según el proyecto (D7, GEO-74). Las muestras de esta sección son dibujos hechos con los colores del estándar, no teselas reales: esta página no pide nada a ningún servidor de mapas. Lo que no se pudo comprobar en las fuentes del estándar queda marcado como pendiente.</p>
     <p class="guia-recomendacion"><strong>Por omisión, el fondo propio.</strong> Es la única opción que no llama a otro servidor, no necesita llave y no tiene licencia por resolver (D7, GEO-74 y la guía de decisión). La satelital queda para la captura en campo, cuando la Secretaría resuelva la licencia de Esri. Si se contrata un proveedor de calles claras, y cuál, es una decisión pendiente de la Secretaría.</p>
 
     <h3 class="rotulo">Cómo se ve cada uno</h3>
@@ -238,14 +238,14 @@
   <!-- ===== Paleta ===== -->
   <section class="guia-seccion" id="paleta" aria-labelledby="t-paleta">
     <h2 class="titulo-bloque" id="t-paleta">Paleta del mapa: un color, un trabajo</h2>
-    <p class="bajada">Solo lo que formularios no tiene. Donde un papel del mapa puede usar un color de formularios, el token lo nombra en lugar de copiarlo: la columna «es» lo dice. Los valores se leen de <code>tokens-mapa.css</code> en este momento.</p>
+    <p class="bajada texto-corrido">Solo lo que formularios no tiene. Donde un papel del mapa puede usar un color de formularios, el token lo nombra en lugar de copiarlo: la columna «es» lo dice. Los valores se leen de <code>tokens-mapa.css</code> en este momento.</p>
     <div id="guia-paleta"></div>
   </section>
 
   <!-- ===== Contraste ===== -->
   <section class="guia-seccion" id="contraste" aria-labelledby="t-contraste">
     <h2 class="titulo-bloque" id="t-contraste">Contraste medido sobre cada fondo real</h2>
-    <p class="bajada">Cada par se mide sobre el fondo donde aparece en el mapa. Texto: 4.5:1; líneas, puntos, aros y foco: 3:1 (WCAG 2.2, criterios 1.4.3 y 1.4.11). La razón se calcula aquí, y <code>herramientas/contraste.mjs</code> la calcula por su lado. Si un par que se exige no cumple y espera una decisión de la Secretaría, se marca «Pendiente de decisión»; cuando la Secretaría decide, la decisión queda escrita en «Dónde» (por ejemplo, MC27 y D11).</p>
+    <p class="bajada texto-corrido">Cada par se mide sobre el fondo donde aparece en el mapa. Texto: 4.5:1; líneas, puntos, aros y foco: 3:1 (WCAG 2.2, criterios 1.4.3 y 1.4.11). La razón se calcula aquí, y <code>herramientas/contraste.mjs</code> la calcula por su lado. Si un par que se exige no cumple y espera una decisión de la Secretaría, se marca «Pendiente de decisión»; cuando la Secretaría decide, la decisión queda escrita en «Dónde» (por ejemplo, MC27 y D11).</p>
     <p class="guia-resumen" id="guia-resumen-contraste" role="status"></p>
     <div class="guia-envoltura-tabla">
       <table class="guia-tabla" id="guia-tabla-contraste">
@@ -259,7 +259,7 @@
   <!-- ===== Rampas ===== -->
   <section class="guia-seccion" id="rampas" aria-labelledby="t-rampas">
     <h2 class="titulo-bloque" id="t-rampas">Rampas de datos y daltonismo</h2>
-    <p class="bajada">Cada rampa vista tal cual y como la ven las personas con protanopia, deuteranopia y tritanopia (simulación de Machado, 2009). Debajo de cada fila, la distancia de color (ΔE) entre clases vecinas: debe ser 15 o más, y 50 o más entre los extremos. El cuadro punteado es «sin dato», y al final de cada fila va su distancia a la clase más parecida.</p>
+    <p class="bajada texto-corrido">Cada rampa vista tal cual y como la ven las personas con protanopia, deuteranopia y tritanopia (simulación de Machado, 2009). Debajo de cada fila, la distancia de color (ΔE) entre clases vecinas: debe ser 15 o más, y 50 o más entre los extremos. El cuadro punteado es «sin dato», y al final de cada fila va su distancia a la clase más parecida.</p>
     <p class="guia-recomendacion"><strong>Rampa de verdor, aprobada por la Secretaría (14 oct 2026).</strong> Es la rampa «verde continuo» que la Secretaría eligió para Guardianes (GA) el 14 oct 2026: va del verde pálido al verde bosque y cambia sobre todo de claridad, por eso conserva el orden con cualquier visión. Pasa la misma prueba que la de prioridad y lleva texto oscuro sobre las clases 1 a 3 y blanco sobre la 4 y la 5. Con ella, «sin dato» pasa al gris medio de GA (#9A9A96), que queda lejos de todas las clases de las dos rampas.</p>
     <div id="guia-rampas"></div>
   </section>
@@ -267,7 +267,7 @@
   <!-- ===== Foco ===== -->
   <section class="guia-seccion" id="foco" aria-labelledby="t-foco">
     <h2 class="titulo-bloque" id="t-foco">Foco de dos tonos</h2>
-    <p class="bajada">El anillo azul de formularios con su separación llena de blanco (D3). Sobre lo claro se ve el azul; sobre lo oscuro, el blanco. El foco se muestra con <code>data-demo-foco</code>, que aplica la misma regla que <code>:focus-visible</code>.</p>
+    <p class="bajada texto-corrido">El anillo azul de formularios con su separación llena de blanco (D3). Sobre lo claro se ve el azul; sobre lo oscuro, el blanco. El foco se muestra con <code>data-demo-foco</code>, que aplica la misma regla que <code>:focus-visible</code>.</p>
     <div class="guia-fondos">
       <div class="guia-fondo" data-fondo="blanco"><span>Tarjeta</span><button type="button" class="btn btn-secundario" data-demo-foco>Con foco</button></div>
       <div class="guia-fondo" data-fondo="suelo"><span>Suelo</span><button type="button" class="btn btn-secundario" data-demo-foco>Con foco</button></div>
@@ -281,7 +281,7 @@
   <!-- ===== Nombres ===== -->
   <section class="guia-seccion" id="nombres" aria-labelledby="t-nombres">
     <h2 class="titulo-bloque" id="t-nombres">Nombres del mapa</h2>
-    <p class="bajada">Cabin para alcaldías y Roboto para colonias y calles, en los pesos que trae formularios, siempre con contorno blanco. El contorno es lo que deja leer el nombre sobre la clase más oscura de la rampa o sobre la satelital.</p>
+    <p class="bajada texto-corrido">Cabin para alcaldías y Roboto para colonias y calles, en los pesos que trae formularios, siempre con contorno blanco. El contorno es lo que deja leer el nombre sobre la clase más oscura de la rampa o sobre la satelital.</p>
     <div class="guia-fondos" id="guia-nombres"></div>
     <div id="guia-escala-nombres"></div>
   </section>
@@ -296,7 +296,7 @@
   <!-- ===== Capas ===== -->
   <section class="guia-seccion" id="capas" aria-labelledby="t-capas">
     <h2 class="titulo-bloque" id="t-capas">Capas de apilamiento</h2>
-    <p class="bajada">El mapa va aislado (<code>isolation: isolate</code>): sus capas internas, de 200 a 1000 en Leaflet, no compiten con la página. Lo de encima usa estas capas con nombre, por debajo de las de formularios. Las ventanas son <code>&lt;dialog&gt;</code> nativo y no necesitan número.</p>
+    <p class="bajada texto-corrido">El mapa va aislado (<code>isolation: isolate</code>): sus capas internas, de 200 a 1000 en Leaflet, no compiten con la página. Lo de encima usa estas capas con nombre, por debajo de las de formularios. Las ventanas son <code>&lt;dialog&gt;</code> nativo y no necesitan número.</p>
     <div class="guia-envoltura-tabla">
       <table class="guia-tabla" id="guia-tabla-capas">
         <caption class="solo-lector">Capas de apilamiento, de abajo arriba</caption>
@@ -309,7 +309,7 @@
   <!-- ===== Temas ===== -->
   <section class="guia-seccion" id="temas" aria-labelledby="t-temas">
     <h2 class="titulo-bloque" id="t-temas">Tema por visor</h2>
-    <p class="bajada">Un tema cambia cuatro tokens: la marca, su fondo tenue, la superficie de la ficha y su texto (D4). El botón principal sigue en guinda, lo tocable en azul y el foco no cambia. Los tres temas son de visores reales.</p>
+    <p class="bajada texto-corrido">Un tema cambia cuatro tokens: la marca, su fondo tenue, la superficie de la ficha y su texto (D4). El botón principal sigue en guinda, lo tocable en azul y el foco no cambia. Los tres temas son de visores reales.</p>
     <p class="guia-recomendacion"><strong>Decisión de la Secretaría (D11, 14 oct 2026): las fichas de tema son siempre claras.</strong> Así lo tocable es azul en todos los visores. La marca va en el título de la ficha y en la franja de su borde izquierdo, donde su contraste está medido. La ficha oscura del tema hoja (GA), donde el enlace azul daba 1.73:1, pasa a ser clara.</p>
     <div class="guia-temas" id="guia-temas"></div>
   </section>
@@ -317,7 +317,7 @@
   <!-- ===== Componentes ===== -->
   <section class="guia-seccion" id="componentes" aria-labelledby="t-componentes">
     <h2 class="titulo-bloque" id="t-componentes">Componentes del mapa</h2>
-    <p class="bajada">Los componentes no se escriben de nuevo: se extraen de los proyectos que ya funcionan y se agregan aquí, con sus estados, conforme llegan. Botones, avisos, ventanas, listas y campos son los de formularios y ya están en su guía visual.</p>
+    <p class="bajada texto-corrido">Los componentes no se escriben de nuevo: se extraen de los proyectos que ya funcionan y se agregan aquí, con sus estados, conforme llegan. Botones, avisos, ventanas, listas y campos son los de formularios y ya están en su guía visual.</p>
     <div class="guia-envoltura-tabla">
       <table class="guia-tabla" id="guia-tabla-componentes">
         <caption class="solo-lector">Componentes del mapa, de dónde se extraen y en qué fase</caption>
@@ -330,7 +330,7 @@
   <!-- ===== Sí y no ===== -->
   <section class="guia-seccion" id="pares" aria-labelledby="t-pares">
     <h2 class="titulo-bloque" id="t-pares">Sí y no</h2>
-    <p class="bajada">Pares de la misma situación: el primero cumple el estándar; el segundo es el error que lo hizo necesario, en el proyecto donde pasó. Cada uno dice con palabras cuál es.</p>
+    <p class="bajada texto-corrido">Pares de la misma situación: el primero cumple el estándar; el segundo es el error que lo hizo necesario, en el proyecto donde pasó. Cada uno dice con palabras cuál es.</p>
 
     <div class="guia-par">
       <figure class="guia-si"><p class="guia-veredicto">Sí · Límite con franja blanca debajo</p>

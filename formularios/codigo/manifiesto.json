@@ -1,14 +1,14 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
       "codigo/css/base.css",
       "codigo/css/nucleo.css",
       "codigo/js/validaciones.config.js",
-      "codigo/js/formkit.core.js",
-      "codigo/js/iconos.js"
+      "codigo/js/iconos.js",
+      "codigo/js/formkit.core.js"
     ],
     "orden": "tokens.css → base.css → nucleo.css → (CSS de módulos) … validaciones.config.js → iconos.js → formkit.core.js → (JS de módulos)",
     "incluye": [
@@ -79,11 +79,11 @@
     ],
     "tamano": {
       "tokens.css": 8535,
-      "base.css": 6632,
+      "base.css": 6625,
       "nucleo.css": 19313,
-      "validaciones.config.js": 42365,
-      "formkit.core.js": 54804,
-      "iconos.js": 6047
+      "validaciones.config.js": 44996,
+      "iconos.js": 6047,
+      "formkit.core.js": 54780
     }
   },
   "modulos": [
@@ -171,7 +171,7 @@
       },
       "tamano": {
         "css": 1466,
-        "js": 8081
+        "js": 8075
       }
     },
     {
@@ -200,7 +200,7 @@
       },
       "tamano": {
         "css": 1003,
-        "js": 7213
+        "js": 7302
       }
     },
     {
@@ -228,7 +228,7 @@
       },
       "tamano": {
         "css": 0,
-        "js": 4129
+        "js": 4199
       }
     },
     {
@@ -257,7 +257,7 @@
       },
       "tamano": {
         "css": 1103,
-        "js": 7589
+        "js": 7898
       }
     },
     {
@@ -321,7 +321,7 @@
       "tipo": "navegacion",
       "proposito": "Pasos con barra fija navegable que valida igual que «Continuar»; estados completado, actual, pendiente y con error; «Paso X de N» en teléfono; recordatorio; barra de acciones fija opcional.",
       "cuando": "Más de una pantalla de preguntas.",
-      "cuandoNo": "Formularios de 5 campos o menos (una página).",
+      "cuandoNo": "Formularios cortos que caben en una pantalla del teléfono, hasta unas 8 preguntas (una página).",
       "dependencias": [],
       "js": true,
       "accesibilidad": "Botones con aria-current=step y nombre «Paso N de M: título, completado»; el foco va al título al cambiar; Enter avanza, no envía.",
@@ -338,7 +338,7 @@
       },
       "tamano": {
         "css": 4892,
-        "js": 8961
+        "js": 9043
       }
     },
     {
@@ -367,7 +367,7 @@
         "js": "codigo/modulos/revision/revision.js"
       },
       "tamano": {
-        "css": 2455,
+        "css": 2448,
         "js": 3292
       }
     },
@@ -399,7 +399,7 @@
       },
       "tamano": {
         "css": 2250,
-        "js": 3540
+        "js": 4043
       }
     },
     {
@@ -428,7 +428,7 @@
       },
       "tamano": {
         "css": 2546,
-        "js": 5836
+        "js": 5866
       }
     },
     {
@@ -484,7 +484,7 @@
       },
       "tamano": {
         "css": 542,
-        "js": 4052
+        "js": 4058
       }
     },
     {
@@ -510,7 +510,7 @@
       },
       "tamano": {
         "css": 434,
-        "js": 3805
+        "js": 4037
       }
     },
     {
@@ -562,7 +562,7 @@
       },
       "tamano": {
         "css": 1101,
-        "js": 2941
+        "js": 3009
       }
     },
     {
@@ -614,7 +614,7 @@
       },
       "tamano": {
         "css": 1126,
-        "js": 1810
+        "js": 1829
       }
     },
     {
@@ -641,7 +641,7 @@
       },
       "tamano": {
         "css": 2189,
-        "js": 6129
+        "js": 6168
       }
     },
     {
@@ -726,8 +726,8 @@
         "js": "codigo/modulos/tabla/tabla.js"
       },
       "tamano": {
-        "css": 4544,
-        "js": 6807
+        "css": 4509,
+        "js": 7409
       }
     },
     {
@@ -736,7 +736,7 @@
       "nivel": "OPCIONAL",
       "tipo": "retroalimentacion",
       "proposito": "Cinco familias con significado fijo para el estado de un trámite o registro, según a quién le toca qué: hecho (ok, verde), te toca actuar (atencion, ámbar), en marcha (proceso, azul), cerrado sin éxito (rechazo, rojo) y terminado (gris), cada una con su icono y su palabra. FormKit.estado(el, {tono, texto}) lo cambia.",
-      "cuando": "Bandejas, tablas y fichas que muestran en qué va un trámite.",
+      "cuando": "Listas de trámites, tablas y fichas que muestran en qué va un trámite.",
       "cuandoNo": "Avisos a la persona (usa los avisos del núcleo); botones o filtros (no se tocan).",
       "dependencias": [],
       "js": true,
@@ -756,7 +756,7 @@
       },
       "tamano": {
         "css": 1490,
-        "js": 2923
+        "js": 3004
       }
     },
     {
@@ -786,7 +786,7 @@
       },
       "tamano": {
         "css": 3211,
-        "js": 23231
+        "js": 24152
       }
     },
     {
@@ -815,7 +815,7 @@
       },
       "tamano": {
         "css": 3228,
-        "js": 11976
+        "js": 12063
       }
     },
     {
@@ -842,7 +842,7 @@
       },
       "tamano": {
         "css": 2754,
-        "js": 9846
+        "js": 9669
       }
     },
     {
@@ -871,7 +871,7 @@
       },
       "tamano": {
         "css": 0,
-        "js": 8196
+        "js": 7781
       }
     },
     {
@@ -898,7 +898,7 @@
       },
       "tamano": {
         "css": 539,
-        "js": 7583
+        "js": 7614
       }
     },
     {
@@ -923,10 +923,10 @@
         "js": "codigo/modulos/chips/chips.js"
       },
       "tamano": {
-        "css": 1920,
-        "js": 8490
+        "css": 2048,
+        "js": 8658
       }
     }
   ],
-  "generado": "2026-10-18T23:29:00.171Z"
+  "generado": "2026-10-19T01:20:06.093Z"
 }

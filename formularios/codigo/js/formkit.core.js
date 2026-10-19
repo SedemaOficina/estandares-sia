@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.1
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -7,11 +7,11 @@
    la superficie para quien programa es el HTML; la fuente de verdad de la
    validación es un solo archivo de configuración.
 
-   Qué hace el núcleo: anuncios para lector de pantalla, preparación de cada
-   campo (marca de obligatorio, ayuda, error, contador), visibilidad
-   condicional, validación individual y cruzada con el momento acordado
-   (decisión C5), resumen de errores con foco, borrador local, envío sin
-   duplicados y registro de módulos. Todo lo demás es un módulo opcional
+   Qué hace el núcleo: anuncios que también se ven, avisos (FormKit.aviso),
+   preparación de cada campo (marca de obligatorio, ayuda, error, contador),
+   visibilidad condicional, validación individual y cruzada con el momento
+   acordado (decisión C5), resumen de errores con foco, borrador local, envío
+   sin duplicados y registro de módulos. Todo lo demás es un módulo opcional
    (codigo/modulos/*) que se carga sólo si el formulario lo usa.
 
    Sin dependencias, sin manejadores en línea (eventos por delegación), sin
@@ -165,7 +165,7 @@
   function iniciar(formulario, opciones = {}) {
     const form = typeof formulario === 'string' ? $(formulario) : formulario;
     if (!form) throw new Error(`FormKit: no existe el formulario «${formulario}»`);
-    /* Un formulario se inicia una sola vez (P111): si ya arrancó solo al
+    /* Un formulario se inicia una sola vez: si ya arrancó solo al
        cargar, la llamada de la página le suma sus opciones (enviar, alEnviar…)
        y recibe la misma instancia, sin duplicar escuchas. */
     const previa = iniciados.get(form);
@@ -678,7 +678,7 @@
     /* Lo que la página escribe sola (al precargar una solicitud para continuarla) no es
        un borrador de la persona: el borrador empieza con su primer gesto en el formulario
        (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
-       después la página o los módulos entra en el mismo borrador (P148). */
+       después la página o los módulos entra en el mismo borrador. */
     let personaActuo = false;
     for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
     /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
@@ -741,7 +741,7 @@
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
       avisaBorrador('restaura', b);
-      anuncia(M.borradorGuardado.replace('guardado', 'recuperado'));
+      anuncia(M.borradorRecuperado);
     }
     function iniciaFranja(b) {
       franja.hidden = false;
@@ -752,7 +752,7 @@
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
         if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador="descartar-si"]', franja); if (si) si.focus(); } else { borraBorrador(); franja.hidden = true; } }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const seguro = $('[data-borrador="conservar"]', franja); if (seguro) seguro.focus(); } else { borraBorrador(); franja.hidden = true; } }
         else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador="recuperar"]', franja).focus(); }
       });
@@ -987,7 +987,7 @@
   /* Formularios iniciados en la página, para marcar un error desde fuera
      sin tener a mano la instancia. */
   const instancias = [];
-  /* Cada formulario iniciado, con sus opciones: para no iniciarlo dos veces (P111). */
+  /* Cada formulario iniciado, con sus opciones: para no iniciarlo dos veces. */
   const iniciados = new WeakMap();
   const marcaErrorGlobal = (campo, mensaje) => instancias.some((i) => i.marcaError(campo, mensaje));
 

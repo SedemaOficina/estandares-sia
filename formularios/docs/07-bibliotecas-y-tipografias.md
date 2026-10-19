@@ -8,6 +8,7 @@ Todo lo que el estándar usa y no escribió. Regla: **todo autoalojado** (FRM-77
 |---|---|---|---|---|
 | Leaflet | 1.9.4 | BSD-2-Clause | Mapa del módulo `mapa` (sólo si el formulario pide un punto). | Sólo con el módulo `mapa` |
 | leaflet-gesture-handling | 1.2.2 | MIT | Un dedo desplaza la página, dos el mapa; Ctrl + rueda acerca. | Sólo con el módulo `mapa` |
+| pdfjs-dist | 4.10.38 | Apache-2.0 | Visor de documentos (módulo `visor`); se carga al abrir el primer PDF, con `isEvalSupported: false`. | Sólo con el módulo `visor` |
 | axe-core | 4.13.0 | MPL-2.0 | Auditoría de accesibilidad en las pruebas. | **No** (sólo verificación) |
 
 `vendor/MANIFIESTO.json` registra cada archivo con su SHA-256; `node herramientas/vendor.mjs --verificar` comprueba que lo que hay en disco es lo registrado, y `node herramientas/vendor.mjs` lo vuelve a descargar del registro de npm. Las licencias completas están junto a cada biblioteca (`vendor/<paquete>/LICENSE`). Al actualizar una versión: se actualiza `herramientas/vendor.json`, se corre `vendor.mjs`, se revisa el CHANGELOG del paquete y se vuelven a correr las pruebas.
@@ -39,4 +40,4 @@ Decisión C12: sólo estos cinco pesos, en subconjunto latino (cubre á é í ó
 
 ## 4. Entorno de verificación (no viaja al sitio)
 
-`package.json` declara sólo `devDependencies`: `@playwright/test` 1.63.0 (abre Chromium para las pruebas) y `axe-core` 4.13.0 (también copiado a `vendor/` para servirlo en las pruebas sin red). Node 22 o superior (`node:test`). En este entorno el navegador se tomó de `/opt/pw-browsers`; `pruebas/ayudas.mjs` acepta la variable `NAVEGADOR_EJECUTABLE` para otro.
+`package.json` declara sólo `devDependencies`: `@playwright/test` 1.63.0 (abre Chromium para las pruebas) y `axe-core` 4.13.0 (también copiado a `vendor/` para servirlo en las pruebas sin red). Node 22 o superior (`node:test`). El navegador se toma de `NAVEGADOR_EJECUTABLE`, de `PLAYWRIGHT_BROWSERS_PATH` o del que instala Playwright; `pruebas/ayudas.mjs` acepta la variable `NAVEGADOR_EJECUTABLE` para otro.

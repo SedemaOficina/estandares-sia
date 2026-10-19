@@ -14,16 +14,16 @@ window.FORMKIT_CONFIG = {
 
 window.FORMKIT_CATALOGOS = window.FORMKIT_CATALOGOS || {};
 /* Catálogo corto para el combo que acepta valor libre (data-libre). */
-window.FORMKIT_CATALOGOS.especies = [
-  { nombre: 'Ahuehuete', detalle: 'Taxodium mucronatum' },
-  { nombre: 'Fresno', detalle: 'Fraxinus uhdei' },
-  { nombre: 'Jacaranda', detalle: 'Jacaranda mimosifolia' },
-  { nombre: 'Liquidámbar', detalle: 'Liquidambar styraciflua' },
-  { nombre: 'Encino', detalle: 'Quercus spp.' },
-  { nombre: 'Pirul', detalle: 'Schinus molle' },
-  { nombre: 'Trueno', detalle: 'Ligustrum lucidum' },
-  { nombre: 'Colorín', detalle: 'Erythrina americana' },
-  { nombre: 'Tepozán', detalle: 'Buddleja cordata' }
+window.FORMKIT_CATALOGOS.ocupaciones = [
+  { nombre: 'Estudiante' },
+  { nombre: 'Docente' },
+  { nombre: 'Comerciante' },
+  { nombre: 'Persona servidora pública' },
+  { nombre: 'Agricultura', detalle: 'Campo, huerto o vivero' },
+  { nombre: 'Construcción' },
+  { nombre: 'Trabajo del hogar' },
+  { nombre: 'Jubilada o pensionada' },
+  { nombre: 'Profesional independiente' }
 ];
 
 /* Envío simulado para las muestras que envían: responde con un folio

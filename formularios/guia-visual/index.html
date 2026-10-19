@@ -86,7 +86,7 @@
     <!-- ========== 0. Inicio y árbol de decisión ========== -->
     <section class="guia-seccion" id="inicio" aria-labelledby="t-inicio">
       <h2 class="titulo-bloque" id="t-inicio">¿Qué necesito para mi formulario?</h2>
-      <p class="bajada">El paquete es un catálogo de piezas. El <strong>núcleo</strong> va siempre; cada módulo se copia sólo si el formulario lo necesita. Marca lo que tu formulario pide y la guía te dice qué archivos incluir, en qué orden y con qué nivel de exigencia.</p>
+      <p class="bajada texto-corrido">El paquete es un catálogo de piezas. El <strong>núcleo</strong> va siempre; cada módulo se copia sólo si el formulario lo necesita. Marca lo que tu formulario pide y la guía te dice qué archivos incluir, en qué orden y con qué nivel de exigencia.</p>
       <div class="guia-dos">
         <form class="guia-arbol" data-arbol aria-labelledby="t-arbol">
           <h3 class="rotulo" id="t-arbol">Mi formulario…</h3>
@@ -105,7 +105,7 @@
           <label class="casilla"><input class="casilla-input" type="checkbox" name="mapa" value="mapa"><span class="casilla-texto">necesita un punto en el mapa (además de la dirección)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="repetibles" value="repetibles,modal"><span class="casilla-texto">tiene elementos repetibles («agregar otro»)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="escala" value="escala,opciones"><span class="casilla-texto">es una encuesta con escalas</span></label>
-          <label class="casilla"><input class="casilla-input" type="checkbox" name="interna" value="tabla,paginacion,pestanas,migas,chips,descarga,modal"><span class="casilla-texto">es una consulta o captura interna (tablas, paginación, pestañas, sugerencias)</span></label>
+          <label class="casilla"><input class="casilla-input" type="checkbox" name="interna" value="tabla,paginacion,pestanas,migas,chips,descarga,modal,estado,resultado"><span class="casilla-texto">es una consulta o captura interna (tablas, paginación, pestañas, sugerencias)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="visor" value="visor"><span class="casilla-texto">sirve para revisar documentos cargados (visor de PDF e imágenes junto a la revisión)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="version" value="version"><span class="casilla-texto">muestra en pantalla qué versión del sitio es (distintivo de versión en el pie)</span></label>
           <label class="casilla"><input class="casilla-input" type="checkbox" name="terceros" value=""><span class="casilla-texto">captura datos de terceros (se desactiva el autocompletado en esos campos)</span></label>
@@ -176,21 +176,21 @@
     <!-- ========== 3. Módulos ========== -->
     <section class="guia-seccion" id="modulos" aria-labelledby="t-modulos">
       <h2 class="titulo-bloque" id="t-modulos">Módulos: se copian sólo los que el formulario usa</h2>
-      <p class="bajada">Cada ficha dice para qué sirve la pieza, cuándo elegirla, cuándo no, de qué depende, cómo se comporta en teléfono y en escritorio, y trae el HTML mínimo para copiar. Niveles: <span class="guia-nivel-badge" data-nivel="BASE">BASE</span> obligatorio · <span class="guia-nivel-badge" data-nivel="RECOMENDADO">RECOMENDADO</span> salvo justificación escrita · <span class="guia-nivel-badge" data-nivel="OPCIONAL">OPCIONAL</span> si el formulario lo necesita.</p>
+      <p class="bajada texto-corrido">Cada ficha dice para qué sirve la pieza, cuándo elegirla, cuándo no, de qué depende, cómo se comporta en teléfono y en escritorio, y trae el HTML mínimo para copiar. Niveles: <span class="guia-nivel-badge" data-nivel="BASE">BASE</span> obligatorio · <span class="guia-nivel-badge" data-nivel="RECOMENDADO">RECOMENDADO</span> salvo justificación escrita · <span class="guia-nivel-badge" data-nivel="OPCIONAL">OPCIONAL</span> si el formulario lo necesita.</p>
       <div data-fichas-modulos></div>
     </section>
 
     <!-- ========== 3 bis. Bloques listos ========== -->
     <section class="guia-seccion" id="bloques" aria-labelledby="t-bloques">
       <h2 class="titulo-bloque" id="t-bloques">Bloques listos: secciones completas para copiar</h2>
-      <p class="bajada">Secciones que se repiten en muchos formularios, armadas sólo con piezas del núcleo y de los módulos, tal como funcionan en proyectos de la Secretaría. Se copian completas; luego se cambian los textos de <code>data-uso</code> y <code>data-finalidad</code> por el uso real y, si hace falta, el prefijo <code>b_</code> de los nombres.</p>
+      <p class="bajada texto-corrido">Secciones que se repiten en muchos formularios, armadas sólo con piezas del núcleo y de los módulos, tal como funcionan en proyectos de la Secretaría. Se copian completas; luego se cambian los textos de <code>data-uso</code> y <code>data-finalidad</code> por el uso real y, si hace falta, el prefijo <code>b_</code> de los nombres.</p>
       <div data-fichas-bloques></div>
     </section>
 
     <!-- ========== 4. Probador de validaciones ========== -->
     <section class="guia-seccion" id="validaciones" aria-labelledby="t-validaciones">
       <h2 class="titulo-bloque" id="t-validaciones">Probador de validaciones</h2>
-      <p class="bajada">Escribe y mira al instante el resultado, el mensaje y el dato <em>normalizado</em> que se conserva. Los casos precargados son válidos, inválidos y límite. Todo viene de <code>validaciones.config.js</code>, el mismo archivo que usa el servidor.</p>
+      <p class="bajada texto-corrido">Escribe y mira al instante el resultado, el mensaje y el dato <em>normalizado</em> que se conserva. Los casos precargados son válidos, inválidos y límite. Todo viene de <code>validaciones.config.js</code>, el mismo archivo que usa el servidor.</p>
       <div data-probador></div>
       <h3 class="rotulo">CURP y fecha de nacimiento, juntas</h3>
       <p class="texto-gris">Datos exclusivamente ficticios. La fecha se deriva de la CURP; si además se escribe, debe coincidir (validación cruzada, bloqueante por omisión).</p>
@@ -210,14 +210,14 @@
     <!-- ========== 5. Sí y no ========== -->
     <section class="guia-seccion" id="pares" aria-labelledby="t-pares">
       <h2 class="titulo-bloque" id="t-pares">Sí y no</h2>
-      <p class="bajada">Pares de la misma situación: el primero cumple el estándar, el segundo es el error que el estándar evita. Cada uno dice con palabras cuál es, no sólo con color.</p>
+      <p class="bajada texto-corrido">Pares de la misma situación: el primero cumple el estándar, el segundo es el error que el estándar evita. Cada uno dice con palabras cuál es, no sólo con color.</p>
       <div data-pares-sino></div>
     </section>
 
     <!-- ========== 6. Ejemplos ========== -->
     <section class="guia-seccion" id="ejemplos" aria-labelledby="t-ejemplos">
       <h2 class="titulo-bloque" id="t-ejemplos">Formularios de ejemplo, armados con distintas piezas</h2>
-      <p class="bajada">Cuatro formularios completos con datos ficticios que se pueden llenar y enviar de manera simulada hasta el acuse. Elige el ancho o míralos lado a lado en teléfono y escritorio. Las plantillas de <code>codigo/plantillas/</code> son el punto de partida para copiar.</p>
+      <p class="bajada texto-corrido">Cuatro formularios completos con datos ficticios que se pueden llenar y enviar de manera simulada hasta el acuse. Elige el ancho o míralos lado a lado en teléfono y escritorio. Las plantillas de <code>codigo/plantillas/</code> son el punto de partida para copiar.</p>
       <div class="guia-ejemplos-barra" role="group" aria-label="Ancho de la vista">
         <span class="texto-gris">Ancho:</span>
         <button type="button" class="btn btn-secundario guia-ancho" data-ancho="320" aria-pressed="false">320</button>
@@ -274,7 +274,7 @@
     <!-- ========== 8. Pendientes ========== -->
     <section class="guia-seccion" id="pendientes" aria-labelledby="t-pendientes">
       <h2 class="titulo-bloque" id="t-pendientes">Pendientes del estándar</h2>
-      <p class="bajada">Lo que falta decidir o terminar en formularios y en lo común a los dos estándares, y quién lo resuelve. Lo resuelto se quita de la lista y queda en el registro de cambios (CHANGELOG). Los pendientes de mapas están en <a href="../../guia-visual/index.html#pendiente">la portada</a>, en la misma lista.</p>
+      <p class="bajada texto-corrido">Lo que falta decidir o terminar en formularios y en lo común a los dos estándares, y quién lo resuelve. Lo resuelto se quita de la lista y queda en el registro de cambios (CHANGELOG). Los pendientes de mapas están en <a href="../../guia-visual/index.html#pendiente">la portada</a>, en la misma lista.</p>
       <div data-pendientes><p class="texto-gris">La lista de pendientes vive en la carpeta común (<code>guia-visual/pendientes.js</code>); ábrela desde <a href="../../guia-visual/index.html#pendiente">la portada</a>.</p></div>
     </section>
   </main>
@@ -329,9 +329,9 @@
   <div class="campo" data-campo="n_num" data-uso="Localizar el sitio."><label class="etiqueta" for="n_num">Número</label><input class="control" id="n_num" name="n_num" type="text" maxlength="10" autocomplete="off"></div>
 </div>
 <div class="fila-3">
-  <div class="campo" data-campo="n_a" data-formato="numero" data-uso="Muestra de fila a tercios."><label class="etiqueta" for="n_a">Altura</label><div class="control-grupo"><input class="control" id="n_a" name="n_a" type="text" inputmode="decimal" min="0" max="60" step="any" autocomplete="off"><span class="control-unidad" aria-hidden="true">m</span></div></div>
-  <div class="campo" data-campo="n_b" data-formato="numero" data-uso="Muestra."><label class="etiqueta" for="n_b">Diámetro</label><div class="control-grupo"><input class="control" id="n_b" name="n_b" type="text" inputmode="decimal" min="0" max="500" step="any" autocomplete="off"><span class="control-unidad" aria-hidden="true">cm</span></div></div>
-  <div class="campo" data-campo="n_c" data-formato="numero" data-uso="Muestra."><label class="etiqueta" for="n_c">Ejemplares</label><input class="control control-corto" id="n_c" name="n_c" type="text" inputmode="numeric" min="1" max="999" step="1" autocomplete="off"></div>
+  <div class="campo" data-campo="n_a" data-formato="numero" data-uso="Muestra de fila a tercios."><label class="etiqueta" for="n_a">Largo</label><div class="control-grupo"><input class="control" id="n_a" name="n_a" type="text" inputmode="decimal" min="0" max="60" step="any" autocomplete="off"><span class="control-unidad" aria-hidden="true">m</span></div></div>
+  <div class="campo" data-campo="n_b" data-formato="numero" data-uso="Muestra."><label class="etiqueta" for="n_b">Ancho</label><div class="control-grupo"><input class="control" id="n_b" name="n_b" type="text" inputmode="decimal" min="0" max="500" step="any" autocomplete="off"><span class="control-unidad" aria-hidden="true">cm</span></div></div>
+  <div class="campo" data-campo="n_c" data-formato="numero" data-uso="Muestra."><label class="etiqueta" for="n_c">Piezas</label><input class="control control-corto" id="n_c" name="n_c" type="text" inputmode="numeric" min="1" max="999" step="1" autocomplete="off"></div>
 </div>
 <div class="campo" data-campo="n_desc" data-requerido data-uso="Valorar el caso.">
   <label class="etiqueta" for="n_desc">Describe la situación</label>
@@ -431,9 +431,9 @@
 <fieldset class="grupo" data-campo="m_unica" data-requerido data-uso="Muestra.">
   <legend class="etiqueta">Lista de opción única (la forma por omisión)</legend>
   <div class="opciones-lista">
-    <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="m_unica" value="poda"><span><span class="opcion-nombre">Poda</span><span class="opcion-desc">Curso de acreditación para podadores.</span></span></label>
-    <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="m_unica" value="dictamen"><span><span class="opcion-nombre">Dictamen</span><span class="opcion-desc">Curso para dictaminadores.</span></span></label>
-    <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="m_unica" value="cerrado" disabled><span><span class="opcion-nombre">Revalidación</span><span class="opcion-desc">Deshabilitada: sin fechas por ahora.</span></span></label>
+    <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="m_unica" value="presencial"><span><span class="opcion-nombre">Presencial</span><span class="opcion-desc">Acudes a una oficina de la Secretaría.</span></span></label>
+    <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="m_unica" value="en-linea"><span><span class="opcion-nombre">En línea</span><span class="opcion-desc">Lo haces desde este sitio.</span></span></label>
+    <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="m_unica" value="cerrado" disabled><span><span class="opcion-nombre">Por teléfono</span><span class="opcion-desc">Deshabilitada: sin horario por ahora.</span></span></label>
   </div>
 </fieldset>
 <fieldset class="grupo" data-campo="m_tipo" data-requerido data-uso="Muestra.">
@@ -483,7 +483,7 @@
 </div>
 <div class="campo" data-campo="m_sel" data-requerido data-uso="Muestra.">
   <label class="etiqueta" for="m_sel">«Otro» en una lista desplegable</label>
-  <div class="select"><select class="control control-select" id="m_sel" name="m_sel"><option value="">Elige una opción</option><option value="a">Árbol</option><option value="b">Arbusto</option><option value="otro">Otro</option></select></div>
+  <div class="select"><select class="control control-select" id="m_sel" name="m_sel"><option value="">Elige una opción</option><option value="a">Correo</option><option value="b">Teléfono</option><option value="otro">Otro</option></select></div>
 </div>
 <div class="campo" data-campo="m_sel_otro" data-si="m_sel=otro" data-otro-de="m_sel" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_sel_otro">Especifica cuál</label><input class="control" id="m_sel_otro" name="m_sel_otro" type="text" maxlength="80" autocomplete="off"></div>
 </template>
@@ -496,9 +496,9 @@
     <div class="combo" data-combo data-catalogo="alcaldias"><input class="control" id="m_alc" name="m_alc" type="text" autocomplete="off"><ul class="combo-lista" hidden></ul></div>
   </div>
   <div class="campo" data-campo="m_esp" data-uso="Muestra.">
-    <label class="etiqueta" for="m_esp">Especie (acepta valor libre)</label>
+    <label class="etiqueta" for="m_esp">Ocupación (acepta valor libre)</label>
     <p class="ayuda">Si no está en la lista, se guarda como lo escribas.</p>
-    <div class="combo" data-combo data-catalogo="especies" data-libre><input class="control" id="m_esp" name="m_esp" type="text" autocomplete="off"><ul class="combo-lista" hidden></ul></div>
+    <div class="combo" data-combo data-catalogo="ocupaciones" data-libre><input class="control" id="m_esp" name="m_esp" type="text" autocomplete="off"><ul class="combo-lista" hidden></ul></div>
   </div>
 </div>
 </template>
@@ -650,7 +650,7 @@
       <a class="btn-enlace visor-abrir" data-visor-abrir href="#" target="_blank" rel="noopener">Abrir en otra pestaña<svg class="icono icono-sm" aria-hidden="true"><use href="#i-externo"></use></svg><span class="solo-lector"> (se abre en otra pestaña)</span></a>
     </div>
     <p class="visor-pagina" data-visor-pagina aria-live="polite"></p>
-    <p class="aviso visor-aviso" data-visor-aviso hidden></p>
+    <div class="aviso visor-aviso" data-visor-aviso hidden></div>
     <div class="visor-hojas" data-visor-hojas tabindex="0" aria-label="Hojas del documento"></div>
     <p class="visor-nota" data-visor-nota hidden></p>
   </dialog>
@@ -667,8 +667,8 @@
 </template>
 
 <template data-demo="resultado">
-<p class="guia-fila-demo">Solicitud de acreditación EJ-2026-000123 (ficticia) <span class="estado estado-proceso" data-demo-estado-solicitud>En revisión</span></p>
-<p class="linea-datos"><span class="linea-datos-item">Folio EJ-2026-000123</span> · <span class="linea-datos-item">Recibida el 17 de octubre de 2026</span> · <span class="linea-datos-item">Revisión 2 de 3</span></p>
+<p class="guia-fila-demo">Solicitud EJ-2026-000123 (ficticia) <span class="estado estado-proceso" data-demo-estado-solicitud>En revisión</span></p>
+<p class="linea-datos"><span class="linea-datos-item">Folio EJ-2026-000123</span> · <span class="linea-datos-item">Recibida el 17 de octubre de 2026</span> · <span class="linea-datos-item">Paso 2 de 3</span></p>
 <div data-demo-decision>
   <p class="texto-gris">Motivo que escribió quien revisa, por si rechaza: «La identificación oficial está vencida. Sube una vigente.»</p>
   <div class="acciones"><button type="button" class="btn btn-peligro-contorno" data-demo-decide="rechazo">Rechazar solicitud</button><button type="button" class="btn btn-primario" data-demo-decide="ok">Validar solicitud</button></div>
@@ -699,7 +699,7 @@
   <table class="tabla"><caption class="tabla-titulo">Solicitudes (muestra)</caption>
     <thead><tr><th scope="col" data-ordenable>Folio</th><th scope="col" data-ordenable>Título</th><th scope="col" data-ordenable>Fecha</th><th scope="col"><span class="solo-lector">Acciones</span></th></tr></thead>
     <tbody>
-      <tr data-folio="EJ-001"><td>EJ-001</td><td>Árbol de prueba inclinado</td><td>2026-03-01</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
+      <tr data-folio="EJ-001"><td>EJ-001</td><td>Fuga de agua de prueba</td><td>2026-03-01</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
       <!-- Fila oculta por un filtro: el rayado alterno cuenta sólo las filas visibles. -->
       <tr data-folio="EJ-004" hidden><td>EJ-004</td><td>Fila filtrada de prueba</td><td>2026-02-01</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
       <tr data-folio="EJ-002"><td>EJ-002</td><td>Residuos de prueba</td><td>2026-02-10</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
@@ -969,7 +969,7 @@
 <template data-demo="chips">
 <div class="campo" data-campo="m_cat" data-requerido data-uso="Muestra." data-chips><label class="etiqueta" for="m_cat">Categoría (con sugerencias de uso frecuente)</label><p class="ayuda">Escribe un valor y sal del campo: aparece como sugerencia. El historial vive sólo en este dispositivo.</p><input class="control" id="m_cat" name="m_cat" type="text" maxlength="60" autocomplete="off"></div>
 <!-- Respuestas frecuentes fijas (data-chips-fijos): la misma lista siempre, sin guardar nada en el dispositivo. En un texto largo, cada chip agrega su texto al final para completarlo. -->
-<div class="campo" data-campo="m_observacion" data-uso="Muestra." data-chips-fijos="No se lee completo|Está vencido|No corresponde al requisito|No coincide con el nombre de la cuenta|Falta una página">
+<div class="campo" data-campo="m_observacion" data-uso="Muestra." data-chips-fijos="No se lee completo|Está vencido|No corresponde al requisito|No coincide con el nombre de quien solicita|Falta una página">
   <label class="etiqueta" for="m_observacion">¿Qué debe corregir la persona? (con respuestas frecuentes fijas)</label>
   <p class="ayuda">Elige un motivo frecuente y complétalo con tus palabras.</p>
   <textarea class="control control-texto" id="m_observacion" name="m_observacion" rows="3" maxlength="400" autocomplete="off"></textarea>

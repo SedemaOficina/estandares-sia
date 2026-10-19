@@ -5,8 +5,10 @@
    varias filas de una tabla de captura. Cada fila es una copia de una
    plantilla <template>; los campos de la fila son [data-campo] cuyo nombre
    se completa con el índice (personas.0.nombre). Mínimo y máximo de filas
-   configurables; quitar una fila con datos pide confirmación en línea; el
-   foco vuelve a un lugar sensato tras agregar o quitar.
+   configurables; quitar una fila con datos pide confirmación con el módulo
+   «modal» («Quitar fila N»); con el máximo, «Agregar» dice el límite junto
+   a él (.repetible-limite); el foco vuelve a un lugar sensato tras agregar
+   o quitar.
 
    Contrato HTML:
      <div class="repetible" data-repetible="personas" data-min="1" data-max="5"
@@ -76,7 +78,7 @@
           for (const c of $$('[data-campo]', fila)) preparaCampo(c.dataset.campo);
           renumera();
           if (foco) { const primero = $('input,select,textarea', fila); if (primero) primero.focus(); }
-          anuncia(`${rep.dataset.etiqueta || rep.dataset.repetible} ${i + 1} agregado.`);
+          anuncia(plantilla(M.repetibleAgregado, { etiqueta: rep.dataset.etiqueta || rep.dataset.repetible, n: i + 1 }));
           programaBorrador();
           return fila;
         }
@@ -90,7 +92,7 @@
           renumera();
           const siguiente = filas()[Math.min(idx, filas().length - 1)];
           (siguiente ? $('[data-repetible-quitar]', siguiente) : btnAgregar).focus();
-          anuncia(`Fila ${idx + 1} quitada.`);
+          anuncia(plantilla(M.repetibleQuitado, { n: idx + 1 }));
           programaBorrador();
         }
 
@@ -101,9 +103,10 @@
           const q = e.target.closest('[data-repetible-quitar]');
           if (!q) return;
           const fila = q.closest('.repetible-fila');
-          if (tieneDatos(fila) && FormKit.confirma) FormKit.confirma(q, { titulo: M.filaConfirma, si: 'Quitar', no: 'Conservar', peligro: true }).then((ok) => { if (ok) quita(fila); });
-          else if (tieneDatos(fila)) { if (window.confirm(M.filaConfirma)) quita(fila); } /* sin módulo modal: confirmación nativa como último recurso */
-          else quita(fila);
+          /* Con datos, se confirma con el módulo modal (dependencia), nunca con window.confirm (FRM-38). */
+          if (!tieneDatos(fila)) { quita(fila); return; }
+          if (!FormKit.confirma) { console.warn('FormKit: «repetibles» necesita el módulo «modal» para confirmar antes de quitar una fila con datos.'); return; }
+          FormKit.confirma(q, { titulo: M.filaConfirma, si: plantilla(M.filaQuitar, { n: filas().indexOf(fila) + 1 }), peligro: true }).then((ok) => { if (ok) quita(fila); });
         });
 
         /* Filas iniciales: las que exija el mínimo (al menos una si el grupo es obligatorio). */

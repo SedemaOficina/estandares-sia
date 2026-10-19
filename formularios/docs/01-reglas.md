@@ -2,7 +2,7 @@
 
 > Este documento se **genera** de `reglas/reglas.json` (`node herramientas/generar-reglas.mjs`). No se edita a mano: se corrige la regla en el JSON y se vuelve a generar.
 
-El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **55 BASE** (obligatorias en todo formulario), **23 RECOMENDADAS** (se cumplen salvo justificación escrita) y **8 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 5 son mejores prácticas adicionales.
+El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **55 BASE** (obligatorias en todo formulario), **21 RECOMENDADAS** (se cumplen salvo justificación escrita) y **10 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 5 son mejores prácticas adicionales.
 
 **Cómo leer cada regla.** *Regla*: qué se hace. *Por qué*: el daño que evita. *Nivel*: BASE, RECOMENDADO u OPCIONAL (quien programa elige los módulos, no el nivel). *Origen*: `A FRM-xx` regla del paquete A; `B FRM-XXX-xx` regla del paquete B; `Cn` conflicto decidido en la fase 0 (ver `docs/09-trazabilidad.md`); `encargo n` sección del encargo; `norma n` norma de construcción de sistemas. *Verificación*: la prueba, herramienta o revisión que la comprueba.
 
@@ -12,21 +12,21 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 2. [Campos y etiquetas](#2-campos-y-etiquetas) · FRM-09 a FRM-15
 3. [Tipos de pregunta](#3-tipos-de-pregunta) · FRM-16 a FRM-25
 4. [Validación y errores](#4-validación-y-errores) · FRM-26 a FRM-33
-5. [Acciones y retroalimentación](#5-acciones-y-retroalimentación) · FRM-34 a FRM-84
+5. [Acciones y retroalimentación](#5-acciones-y-retroalimentación) · FRM-34 a FRM-41, FRM-82 a FRM-84
 6. [Borrador y envío](#6-borrador-y-envío) · FRM-42 a FRM-45
 7. [Ubicación y domicilio](#7-ubicación-y-domicilio) · FRM-46 a FRM-50
 8. [Archivos y evidencia](#8-archivos-y-evidencia) · FRM-51 a FRM-54
 9. [Datos personales y protección contra el abuso](#9-datos-personales-y-protección-contra-el-abuso) · FRM-55 a FRM-59
-10. [Móvil y escritorio](#10-móvil-y-escritorio) · FRM-60 a FRM-85
+10. [Móvil y escritorio](#10-móvil-y-escritorio) · FRM-60 a FRM-65, FRM-85
 11. [Hojas de estilo y código](#11-hojas-de-estilo-y-código) · FRM-66 a FRM-72
-12. [Textos y pendientes visibles](#12-textos-y-pendientes-visibles) · FRM-73 a FRM-86
+12. [Textos y pendientes visibles](#12-textos-y-pendientes-visibles) · FRM-73 a FRM-76, FRM-86
 13. [Bibliotecas, tipografías y verificación](#13-bibliotecas-tipografías-y-verificación) · FRM-77 a FRM-81
 
 ## Resumen por nivel
 
 - **BASE**: FRM-07, FRM-08, FRM-09, FRM-10, FRM-11, FRM-12, FRM-13, FRM-14, FRM-15, FRM-16, FRM-17, FRM-26, FRM-27, FRM-28, FRM-29, FRM-30, FRM-32, FRM-33, FRM-34, FRM-35, FRM-36, FRM-37, FRM-39, FRM-40, FRM-44, FRM-45, FRM-48, FRM-51, FRM-54, FRM-55, FRM-56, FRM-59, FRM-60, FRM-61, FRM-62, FRM-63, FRM-64, FRM-65, FRM-66, FRM-67, FRM-68, FRM-69, FRM-70, FRM-71, FRM-72, FRM-73, FRM-74, FRM-75, FRM-76, FRM-77, FRM-78, FRM-79, FRM-80, FRM-81, FRM-84
-- **RECOMENDADO**: FRM-01, FRM-02, FRM-03, FRM-04, FRM-05, FRM-06, FRM-18, FRM-19, FRM-20, FRM-31, FRM-38, FRM-41, FRM-42, FRM-43, FRM-46, FRM-52, FRM-53, FRM-57, FRM-58, FRM-82, FRM-83, FRM-85, FRM-86
-- **OPCIONAL**: FRM-21, FRM-22, FRM-23, FRM-24, FRM-25, FRM-47, FRM-49, FRM-50
+- **RECOMENDADO**: FRM-01, FRM-02, FRM-03, FRM-04, FRM-05, FRM-06, FRM-18, FRM-19, FRM-20, FRM-31, FRM-38, FRM-41, FRM-42, FRM-43, FRM-46, FRM-52, FRM-53, FRM-58, FRM-82, FRM-85, FRM-86
+- **OPCIONAL**: FRM-21, FRM-22, FRM-23, FRM-24, FRM-25, FRM-47, FRM-49, FRM-50, FRM-57, FRM-83
 
 ## 1. Estructura y flujo
 
@@ -52,11 +52,11 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-03 · Al abrir un paso, el foco va a su título y se anuncia
 
-**Regla.** Al cambiar de paso el foco se coloca en el título (h2.titulo-paso con tabindex -1) y la región viva anuncia «Paso X de N · Título». En ningún otro momento el formulario mueve el foco por la persona, salvo al resumen de errores.
+**Regla.** Al cambiar de paso el foco se coloca en el título (h2.titulo-paso con tabindex -1) y la región viva anuncia «Paso X de N · Título». Los demás momentos en que se mueve el foco están en FRM-40.
 
 **Por qué.** Sin foco, quien usa lector de pantalla queda donde estaba y no sabe que la página cambió.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-05; B FRM-EST-01 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-05; B FRM-EST-01; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 01-por-pasos.prueba.mjs: «el foco va al título del paso»
 
@@ -72,11 +72,11 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-05 · Una pantalla de revisión antes de enviar, con «Editar» que aterriza en el campo
 
-**Regla.** Los formularios por pasos muestran todo lo capturado agrupado por paso antes de enviar (módulo «revision»). Cada bloque lleva «Editar», que abre el paso y enfoca el campo correspondiente. «Editar» se queda junto al valor, arriba y a la derecha, aunque el valor ocupe varios renglones. En cada dato, el rótulo va en gris y peso normal, sin fondo, y el dato destaca, como en la ficha y en la tabla del teléfono.
+**Regla.** Los formularios por pasos muestran todo lo capturado agrupado por paso antes de enviar (módulo «revision»). Cada bloque lleva «Editar», que abre el paso y enfoca el campo correspondiente. «Editar» se queda junto al valor, arriba y a la derecha, aunque el valor ocupe varios renglones. En cada dato, el rótulo va en gris y peso normal, sin fondo, y el dato destaca, como en toda lista de rótulo y dato (la tabla del teléfono, el acuse).
 
 **Por qué.** Revisar antes de enviar evita envíos equivocados y repeticiones; «Editar» que sólo cambia de paso obliga a buscar el campo.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-08; P72 (proyecto de acreditaciones, 17 oct 2026); P147 (proyecto de acreditaciones, 18 oct 2026) · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-08; P72 (proyecto de acreditaciones, 17 oct 2026); P147 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 01-por-pasos.prueba.mjs: «Editar» aterriza en el campo; 07: «Editar» junto al valor largo; 07: rótulo de la revisión (P147)
 
@@ -98,7 +98,7 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Nivel.** BASE · **Origen.** A FRM-11; B FRM-EST-05; P38 (proyecto de acreditaciones, 15 oct 2026); P81 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
 
-**Verificación.** 04-modulos.prueba.mjs: condicional; 06-servidor: condición incumplida; 06: condiciones en section y article
+**Verificación.** 01-por-pasos: contacto condicional; 06-servidor: condiciones anidadas y en cualquier elemento; 07: condiciones encadenadas
 
 ### FRM-08 · Enlace de salto al contenido y una sola jerarquía de encabezados
 
@@ -126,11 +126,11 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Regla.** Los campos obligatorios llevan un asterisco guinda (--guinda) con aria-hidden y la palabra «(obligatorio)» sólo para lectores de pantalla; la leyenda «Los campos con * son obligatorios» aparece una vez por pantalla. Los opcionales no se marcan.
 
-**Por qué.** La Secretaría decidió el 14 oct 2026 que el asterisco va en guinda, el color de la identidad (C2 revisada; antes era gris porque el rojo se confundía con error). El guinda se distingue de un error porque el error lleva icono, la palabra «Error» y borde rojo grueso, y el asterisco nunca va solo: va con la leyenda y con «(obligatorio)» para el lector de pantalla, que sin la palabra no lo sabe.
+**Por qué.** El asterisco va en guinda, el color de la identidad, y no en rojo, que se confundiría con un error. El guinda se distingue de un error porque el error lleva icono, la palabra «Error» y borde rojo grueso, y el asterisco nunca va solo: va con la leyenda y con «(obligatorio)» para el lector de pantalla, que sin la palabra no lo sabe.
 
-**Nivel.** BASE · **Origen.** A FRM-30; B FRM-CMP-02; C2 (revisada por la Secretaría, 14 oct 2026) · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-30; B FRM-CMP-02; C2 (revisada por la Secretaría, 14 oct 2026); decisión de la Secretaría, 14 oct 2026: asterisco guinda (C2 revisada; antes gris) · *decisión heredada*
 
-**Verificación.** nucleo.css .marca-oblig; 04-modulos: resumen de obligatorios
+**Verificación.** nucleo.css .marca-oblig; guía: el campo (ninguna prueba automática revisa todavía el asterisco ni la leyenda)
 
 ### FRM-11 · Cada campo se declara con atributos y la validación vive en un solo archivo
 
@@ -142,13 +142,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Verificación.** 04-modulos.prueba.mjs: esquema derivado del HTML coincide con el navegador
 
-### FRM-12 · Cada campo declara autocompletado, inputmode y enterkeyhint cuando aplican
+### FRM-12 · Cada campo declara autocompletado y el teclado que corresponde
 
-**Regla.** Los datos de identidad, contacto y domicilio de quien llena llevan el autocomplete que corresponde (given-name, email, tel-national, postal-code, street-address…); los datos de terceros llevan autocomplete="off" con el motivo en un comentario. El teclado del teléfono se elige con inputmode y type.
+**Regla.** Los datos de identidad, contacto y domicilio de quien llena llevan el autocomplete que corresponde (given-name, email, tel-national, postal-code, street-address…); los datos de terceros llevan autocomplete="off" con el motivo en un comentario. El teclado del teléfono se elige con inputmode y type; el núcleo pone enterkeyhint («siguiente») en cada campo.
 
 **Por qué.** El autocompletado del dispositivo ahorra tecleo y errores; en datos de terceros rellenaría con los datos de quien captura.
 
-**Nivel.** BASE · **Origen.** A FRM-23; B FRM-CMP-04 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-23; B FRM-CMP-04; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** herramientas/auditar-campos.mjs D2 y D4
 
@@ -192,7 +192,7 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Nivel.** BASE · **Origen.** A FRM-26; B FRM-CMP-05; B FRM-CMP-06; C3; P56 (proyecto de acreditaciones, 15 oct 2026); S2-2 (proyecto de acreditaciones, 16 oct 2026) · *decisión heredada*
 
-**Verificación.** 04-modulos; 05-accesibilidad; manifiesto «opciones»
+**Verificación.** 07: Sí/No en línea; guía: opciones; 05-accesibilidad; manifiesto «opciones»
 
 ### FRM-17 · Sí/No ocupa el alto táctil según el puntero, no según el ancho
 
@@ -266,21 +266,21 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-24 · Pestañas, acordeón, migas, progreso, paginación, ayuda desplegable, tabla y visor de documentos son módulos con teclado completo
 
-**Regla.** Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que se inicia sola también sin formulario, vuelve a leer sus encabezados cuando la página avisa con formkit:tabla, en teléfono se vuelve tarjetas con rótulo y valor en dos columnas fijas (el rótulo gris de peso normal y el dato que destaca, como en la ficha y en la revisión) y en computadora lleva la línea de cada fila bajo todas sus columnas, con el contenido centrado en vertical, sin partir botones, folios (.mono) ni etiquetas, y con la columna de acciones al ancho de sus botones; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con un solo contador «Hoja n de total», en su barra, acercar y girar, fijo junto a la revisión en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor, que se busca junto a la copia del estándar o en la ruta que diga la configuración.
+**Regla.** Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que se inicia sola también sin formulario, vuelve a leer sus encabezados cuando la página avisa con formkit:tabla, en teléfono se vuelve tarjetas con rótulo y valor en dos columnas fijas (el rótulo gris de peso normal y el dato que destaca, como en toda lista de rótulo y dato) y en computadora lleva la línea de cada fila bajo todas sus columnas, con el contenido centrado en vertical, sin partir botones, folios (.mono) ni etiquetas, y con la columna de acciones al ancho de sus botones; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con un solo contador «Hoja n de total», en su barra, acercar y girar, fijo junto a lo que se revisa en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor, que se busca junto a la copia del estándar o en la ruta que diga la configuración.
 
 **Por qué.** Un componente a medias (sólo ratón, sólo escritorio) excluye a una parte de las personas y obliga a rehacerlo después. Un ícono que repite lo que ya se lee obliga a abrirlo para nada.
 
-**Nivel.** OPCIONAL · **Origen.** encargo 5.1; encargo 5.4; S2-4 (proyecto de acreditaciones, 16 oct 2026); P66 (proyecto de acreditaciones, 16 oct 2026); P67 (proyecto de acreditaciones, 16 oct 2026); P96 (proyecto de acreditaciones, 17 oct 2026); P103 (proyecto de acreditaciones, 17 oct 2026); P104 (proyecto de acreditaciones, 17 oct 2026); P110 (proyecto de acreditaciones, 17 oct 2026); P145 (proyecto de acreditaciones, 18 oct 2026); P146 (proyecto de acreditaciones, 18 oct 2026); P147 (proyecto de acreditaciones, 18 oct 2026) · *decisión del encargo*
+**Nivel.** OPCIONAL · **Origen.** encargo 5.1; encargo 5.4; S2-4 (proyecto de acreditaciones, 16 oct 2026); P66 (proyecto de acreditaciones, 16 oct 2026); P67 (proyecto de acreditaciones, 16 oct 2026); P96 (proyecto de acreditaciones, 17 oct 2026); P103 (proyecto de acreditaciones, 17 oct 2026); P104 (proyecto de acreditaciones, 17 oct 2026); P110 (proyecto de acreditaciones, 17 oct 2026); P145 (proyecto de acreditaciones, 18 oct 2026); P146 (proyecto de acreditaciones, 18 oct 2026); P147 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión del encargo*
 
 **Verificación.** 04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos; auditar-campos D5; 07: tabla filtrada y visor; 07: tabla sin partir datos, contador del visor, rótulos (P145 a P147)
 
 ### FRM-25 · Chips de uso frecuente con historial del propio dispositivo o con una lista fija
 
-**Regla.** Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo los motivos para observar un documento) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete. Cada grupo de chips tiene un nombre distinto para el lector de pantalla, aunque los campos compartan etiqueta. Cada respuesta fija se ve completa: no se encoge en la fila (si no cabe, pasa completa al renglón siguiente) y al pasar el cursor sólo cambia su borde; el fondo azul es de la respuesta elegida.
+**Regla.** Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo, los motivos para pedir que se corrija algo) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete. Cada grupo de chips tiene un nombre distinto para el lector de pantalla, aunque los campos compartan etiqueta. Cada respuesta fija se ve completa: no se encoge en la fila (si no cabe, pasa completa al renglón siguiente) y al pasar el cursor sólo cambia su borde; el fondo azul es de la respuesta elegida.
 
 **Por qué.** Un historial compartido o enviado es una fuga de datos; sugerir datos personales los expone en pantallas ajenas.
 
-**Nivel.** OPCIONAL · **Origen.** encargo 5.2; P65 (proyecto de acreditaciones, 16 oct 2026); P97 (proyecto de acreditaciones, 17 oct 2026); P135 (proyecto de acreditaciones, 18 oct 2026) · *decisión del encargo*
+**Nivel.** OPCIONAL · **Origen.** encargo 5.2; P65 (proyecto de acreditaciones, 16 oct 2026); P97 (proyecto de acreditaciones, 17 oct 2026); P135 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión del encargo*
 
 **Verificación.** 04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad; 07: chips fijos; 07: motivos completos y cursor (P135)
 
@@ -328,11 +328,11 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-30 · Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, folio fiscal, contraseña
 
-**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el RFC conserva la Ñ (se quitan los acentos, no la tilde de la Ñ); el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir, escrita AAAA-MM-DD o, en «fecha-dma», día/mes/año, y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos.
+**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el RFC conserva la Ñ (se quitan los acentos, no la tilde de la Ñ); el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir (AAAA-MM-DD es el formato interno; toda fecha que el formulario escribe o anuncia a la persona va en día/mes/año), y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos.
 
 **Por qué.** Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.
 
-**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026); P42 (proyecto de acreditaciones, 15 oct 2026); P73 (proyecto de acreditaciones, 17 oct 2026); P82 (proyecto de acreditaciones, 17 oct 2026); P98 (proyecto de acreditaciones, 17 oct 2026); P112 (proyecto de acreditaciones, 17 oct 2026); P129 (proyecto de acreditaciones, 18 oct 2026) · *decisión del encargo*
+**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026); P42 (proyecto de acreditaciones, 15 oct 2026); P73 (proyecto de acreditaciones, 17 oct 2026); P82 (proyecto de acreditaciones, 17 oct 2026); P98 (proyecto de acreditaciones, 17 oct 2026); P112 (proyecto de acreditaciones, 17 oct 2026); P129 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión del encargo*
 
 **Verificación.** guía: probador; 06-servidor; validaciones.config.js; 06: RFC con Ñ (P129)
 
@@ -358,11 +358,11 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-33 · El navegador ayuda; el servidor defiende con las mismas reglas
 
-**Regla.** Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor además revisa la firma de los archivos, el límite por origen y la idempotencia. El esquema del servidor se toma sólo de lo que está dentro del <form>: un control de la página fuera de él no es parte de ningún campo.
+**Regla.** Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor del sistema además revisa la firma de los archivos, el límite por origen y la idempotencia (fuera de validar.mjs, que valida los datos). El esquema del servidor se toma sólo de lo que está dentro del <form>: un control de la página fuera de él no es parte de ningún campo.
 
 **Por qué.** La validación del navegador se salta con una petición directa; una segunda lista de reglas se desactualiza.
 
-**Nivel.** BASE · **Origen.** A FRM-70; B FRM-VAL-08; P90 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-70; B FRM-VAL-08; P90 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 06-servidor-y-herramientas.prueba.mjs; 04-modulos: esquema vs navegador
 
@@ -370,11 +370,11 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-34 · Una sola acción principal por pantalla
 
-**Regla.** Cada pantalla tiene un solo botón con relleno guinda. Lo demás es secundario (gris con borde), peligro, enlace-botón o botón de icono con nombre accesible y 44 px. El peligro es sólo para lo destructivo y siempre con confirmación: el botón que la abre va con contorno rojo (.btn-peligro-contorno) y el que hace el daño, dentro de la confirmación, en rojo relleno con texto blanco (.btn-peligro), para que pese más que «Volver sin cambios».
+**Regla.** Cada pantalla, y cada diálogo, que cuenta como pantalla propia, tiene un solo botón relleno: guinda para avanzar o, dentro de una confirmación destructiva, rojo. Lo demás es secundario (gris con borde), peligro, enlace-botón o botón de icono con nombre accesible y 44 px. El peligro es sólo para lo destructivo y siempre con confirmación: el botón que la abre va con contorno rojo (.btn-peligro-contorno) y el que hace el daño, dentro de la confirmación, en rojo relleno con texto blanco (.btn-peligro), para que pese más que «Volver sin cambios».
 
 **Por qué.** Dos botones guinda compiten y la persona no sabe cuál la lleva adelante.
 
-**Nivel.** BASE · **Origen.** A FRM-40; B FRM-ACC-01; P114 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-40; B FRM-ACC-01; P114 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** guía: botones; sí y no; 07: peligro relleno y de contorno (P114)
 
@@ -388,33 +388,33 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Verificación.** guía: botones; nucleo.css .btn-atras
 
-### FRM-36 · Los botones dicen qué hacen; nunca «Aceptar» ni «OK»
+### FRM-36 · Los botones dicen qué hacen; nunca «Aceptar», «OK» ni «Confirmar»
 
-**Regla.** La etiqueta es un verbo concreto con su objeto («Enviar solicitud», «Guardar borrador», «Descartar»). Los botones de icono llevan aria-label; los de descarga dicen formato y peso.
+**Regla.** La etiqueta es un verbo concreto con su objeto («Enviar solicitud», «Guardar borrador», «Descartar borrador»), nunca «Aceptar», «OK», «Confirmar» ni «Sí». Los botones de icono llevan aria-label; los de descarga dicen formato y peso.
 
 **Por qué.** «Aceptar» no dice qué se acepta; un icono sin nombre es un botón mudo para el lector de pantalla.
 
-**Nivel.** BASE · **Origen.** B FRM-ACC-02 · *decisión heredada*
+**Nivel.** BASE · **Origen.** B FRM-ACC-02; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 03-anchos: ningún botón sin nombre; guía: botones
 
 ### FRM-37 · Un botón no se deshabilita en silencio: aria-disabled y aria-busy
 
-**Regla.** Mientras se envía, el botón lleva aria-disabled y aria-busy con texto «Enviando…» y conserva el foco; al terminar se recupera. Si una acción no está disponible, se deja pulsar y se explica, o se marca con aria-disabled, nunca con disabled.
+**Regla.** Mientras se envía, el botón lleva aria-disabled y aria-busy con texto «Enviando…» y conserva el foco; al terminar se recupera. Si un botón no está disponible, se deja pulsar y se explica, o se marca con aria-disabled, nunca con disabled (disabled queda para los campos que no aplican, FRM-14).
 
 **Por qué.** disabled saca el botón del orden de tabulación y el lector de pantalla no sabe por qué desapareció.
 
-**Nivel.** BASE · **Origen.** A FRM-42; B FRM-ACC-03 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-42; B FRM-ACC-03; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 01-por-pasos: el botón se recupera; 02-una-pagina: agregar al máximo
 
 ### FRM-38 · Toda acción que no se deshace o que afecta a otra persona pide confirmación dentro de la página, con sus consecuencias
 
-**Regla.** Rechazar, cancelar, cerrar un trámite, quitar, descartar o eliminar abren un diálogo nativo con role=alertdialog (FormKit.confirma): la pregunta nombra la acción y su objeto («¿Rechazar la solicitud EJ-123?»), la lista dice qué pasará (consecuencias), «No se puede deshacer.» se escribe con su icono cuando aplica (irreversible), el botón que actúa repite el verbo («Rechazar solicitud», nunca «Aceptar») y va en rojo relleno si es destructivo, y el foco inicial va a «Volver sin cambios». Escape vuelve sin cambios y el foco regresa al botón que lo abrió. Guardar una nota u otra acción recuperable no pide confirmación. Nunca window.confirm.
+**Regla.** Rechazar, cancelar, cerrar un trámite, descartar, eliminar o quitar algo con datos que no se recuperan (una fila con lo capturado, FRM-22) abren un diálogo nativo con role=alertdialog (FormKit.confirma): la pregunta nombra la acción y su objeto («¿Rechazar la solicitud EJ-123?»), la lista dice qué pasará (consecuencias), «No se puede deshacer.» se escribe con su icono cuando aplica (irreversible), el botón que actúa repite el verbo («Rechazar solicitud», nunca «Aceptar») y va en rojo relleno si es destructivo, y el foco inicial va a «Volver sin cambios». Escape vuelve sin cambios y el foco regresa al botón que lo abrió. Guardar una nota, quitar un archivo que se puede volver a elegir u otra acción recuperable no pide confirmación. Una confirmación en línea, dentro de la misma pantalla (descartar el borrador), sigue las mismas reglas: el foco va a la opción segura y el botón repite el verbo. Nunca window.confirm.
 
 **Por qué.** window.confirm no se puede estilizar ni accesibilizar y en algunos visores no aparece; un diálogo que enfoca «Eliminar» borra con Enter por accidente; preguntar igual para guardar una nota que para cerrar un trámite enseña a confirmar sin leer.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-44; B FRM-ACC-04; P113 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-44; B FRM-ACC-04; P113 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 04-modulos: diálogo de confirmación; 02-una-pagina: quitar fila; 07: consecuencias y foco (P113)
 
@@ -430,13 +430,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-40 · Lo que cambia sin recargar se anuncia, y todo anuncio también se ve
 
-**Regla.** Errores, avisos, resultados de paginación, pasos, copiar, archivos agregados o quitados, cambios de estado y cambios de pestaña se anuncian en una región viva (FormKit.anuncia). Todo anuncio tiene su texto en pantalla: nada se dice sólo al lector. FormKit.anuncia(texto, {visible: elemento}) escribe el texto también en ese elemento y lo muestra. El foco sólo se mueve al cambiar de paso, al resumen de errores, al título del acuse o del resultado y al aviso que responde a una acción.
+**Regla.** Errores, avisos, resultados de paginación, pasos, copiar, archivos agregados o quitados, cambios de estado y cambios de pestaña se anuncian en una región viva (FormKit.anuncia). Todo anuncio se ve en pantalla, con su texto o con el cambio que describe (la fila que se va, el dato que se llena): nada se dice sólo al lector. FormKit.anuncia(texto, {visible: elemento}) escribe el texto también en ese elemento y lo muestra. El foco se mueve sólo en tres casos: (a) a lo nuevo que la persona pidió: el título del paso, del acuse, del resultado o de la pantalla de límite; el resumen de errores; el aviso que responde a su acción; el campo que abre «Editar»; el primer campo de una fila agregada; el inicio de la lista al cambiar de página; (b) de vuelta al control que abrió un diálogo, un visor o una ayuda, y a la opción segura dentro de una confirmación; (c) al control más cercano cuando el que tenía el foco desaparece (un archivo o una fila que se quita).
 
 **Por qué.** Lo que aparece en silencio no existe para quien no ve la pantalla; lo que sólo se oye no existe para quien la ve sin lector.
 
-**Nivel.** BASE · **Origen.** A FRM-49; P117 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-49; P117 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
-**Verificación.** 05-accesibilidad; 07: anuncio con su elemento, límite de filas, descarga fallida y archivos llenos (P117); verificación manual con lector de pantalla (no automatizable)
+**Verificación.** 05-accesibilidad; 07: anuncio con su elemento, límite de filas, descarga fallida y archivos llenos (P71 y P117); verificación manual con lector de pantalla (no automatizable)
 
 ### FRM-41 · Copiar y compartir confirman con palabras
 
@@ -460,21 +460,21 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-83 · Las etiquetas de estado usan cinco familias con significado fijo, icono y palabra
 
-**Regla.** El estado de un trámite o un registro se muestra con el módulo «estado», en cinco familias según a quién le toca qué: hecho (estado-ok, verde: validado, aprobado), te toca actuar (estado-atencion, ámbar: corregir, completar, un borrador sin enviar), en marcha (estado-proceso, azul: en revisión, en trámite), cerrado sin éxito (estado-rechazo, rojo: rechazado, cancelado, vencido) y terminado (estado-terminado, gris: concluido, archivado). Cada una lleva su icono y la palabra dice el estado. Cada estado de un sistema cae en una de las cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia. Una etiqueta larga se parte en renglones y nunca ensancha su tarjeta ni su tabla en teléfono; sólo en una tabla de computadora va en una línea.
+**Regla.** Si el formulario o la pantalla muestran el estado de un trámite o un registro, lo hacen con el módulo «estado», en cinco familias según a quién le toca qué: hecho (estado-ok, verde: validado, aprobado), te toca actuar (estado-atencion, ámbar: corregir, completar, un borrador sin enviar), en marcha (estado-proceso, azul: en revisión, en trámite), cerrado sin éxito (estado-rechazo, rojo: rechazado, cancelado, vencido) y terminado (estado-terminado, gris: concluido, archivado). Cada una lleva su icono y la palabra dice el estado. Cada estado de un sistema cae en una de las cinco; no se inventan tonos ni se usa el color solo. FormKit.estado(el, {tono, texto}) lo cambia y, si cambia por una acción de la persona, lo anuncia. Una etiqueta larga se parte en renglones y nunca ensancha su tarjeta ni su tabla en teléfono; sólo en una tabla de computadora va en una línea.
 
-**Por qué.** Nueve tonos sin regla obligan a aprender una leyenda por sistema, y una etiqueta sólo de color no dice nada a quien no distingue colores.
+**Por qué.** Muchos tonos sin regla obligan a aprender una leyenda por sistema, y una etiqueta sólo de color no dice nada a quien no distingue colores.
 
-**Nivel.** RECOMENDADO · **Origen.** P118 (proyecto de acreditaciones, 17 oct 2026); P126 (proyecto de acreditaciones, 18 oct 2026) · *mejor práctica adicional*
+**Nivel.** OPCIONAL · **Origen.** P118 (proyecto de acreditaciones, 17 oct 2026); P126 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *mejor práctica adicional*
 
 **Verificación.** guía: etiquetas de estado; contraste C45 a C49; 07: familias e iconos (P118); 07: etiqueta larga en teléfono (P126)
 
 ### FRM-84 · Varias acciones en orden van en una secuencia numerada, no en un párrafo
 
-**Regla.** Cuando hay que decir dos o más acciones en orden (qué sigue después del acuse o de una decisión, qué hacer para corregir, los pasos de un trámite en su ficha), van en una lista numerada <ol class="secuencia"> con un <li class="secuencia-item"> por acción, cada una empezando con su verbo. Nunca encadenadas en un párrafo («Abra el expediente… El siguiente paso es… La persona ve…»). La secuencia es del núcleo: sirve en el acuse (centrada), en el resultado y en FormKit.aviso (pasos), en un aviso escrito en el HTML y en cualquier pantalla.
+**Regla.** Cuando hay que decir dos o más acciones en orden (qué sigue después del acuse o de una decisión, qué hacer para corregir, los pasos de un trámite en su ficha), van en una lista numerada <ol class="secuencia"> con un <li class="secuencia-item"> por acción: cada una es una sola acción con su verbo y, si no la hace la persona, dice quién la hace («La Secretaría revisa…»). Nunca encadenadas en un párrafo («Abra el expediente… El siguiente paso es… La persona ve…»). La secuencia es del núcleo: sirve en el acuse (centrada), en el resultado y en FormKit.aviso (pasos), en un aviso escrito en el HTML y en cualquier pantalla.
 
 **Por qué.** En un párrafo, quien lee pierde la cuenta de cuántas acciones son, en qué orden van y cuál le toca.
 
-**Nivel.** BASE · **Origen.** P119 (proyecto de acreditaciones, 17 oct 2026); P131 (proyecto de acreditaciones, 18 oct 2026) · *mejor práctica adicional*
+**Nivel.** BASE · **Origen.** P119 (proyecto de acreditaciones, 17 oct 2026); P131 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *mejor práctica adicional*
 
 **Verificación.** guía: botones y avisos, resultado y sí y no; 07: secuencia fuera del acuse (P119)
 
@@ -482,31 +482,31 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-42 · Todo formulario largo guarda borrador en el dispositivo y lo ofrece al volver
 
-**Regla.** Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja «Tienes un borrador» con Recuperar y Descartar (con confirmación). El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas. El borrador empieza con el primer gesto de la persona en el formulario (escribir, elegir, tocar, soltar un archivo): lo que la página escribe sola, como al precargar una solicitud para continuarla, no crea un borrador.
+**Regla.** Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja («Hay un borrador guardado el …») con «Recuperar borrador» y «Empezar de nuevo»; «Empezar de nuevo» pide confirmación en la franja, con el foco en «Conservar» y el botón «Descartar borrador» (FRM-38). Sin franja en la página, el borrador se recupera solo al volver. El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas. El borrador empieza con el primer gesto de la persona en el formulario (escribir, elegir, tocar, soltar un archivo): lo que la página escribe sola, como al precargar una solicitud para continuarla, no crea un borrador.
 
 **Por qué.** Perder diez minutos de captura por cerrar la pestaña es la causa principal de abandono.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-14; A FRM-17; B FRM-EST-04; P128 (proyecto de acreditaciones, 18 oct 2026); P148 (proyecto de acreditaciones, 18 oct 2026) · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-14; A FRM-17; B FRM-EST-04; P128 (proyecto de acreditaciones, 18 oct 2026); P148 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 01-por-pasos: borrador se guarda, se ofrece y se restaura; 07: la precarga no crea borrador (P148)
 
-### FRM-43 · El borrador nunca incluye campos sensibles ni archivos, y se invalida con la estructura
+### FRM-43 · El borrador del dispositivo nunca guarda campos sensibles ni archivos, y se invalida con la estructura
 
-**Regla.** Los campos con data-sensible y los archivos no se guardan en el borrador del dispositivo: los sensibles se piden de nuevo. Los archivos vuelven sólo si la página da un proveedor (FormKit.iniciar(form, { borradorArchivos: { guarda, lee, borra } })), que decide dónde guardarlos, por ejemplo en su servidor; el estándar nunca los guarda en el dispositivo por su cuenta. Un borrador de otra versión del formulario o caducado no se ofrece. El borrador se escribe también al salir de la página (pagehide) y se borra al enviar.
+**Regla.** Los campos con data-sensible y los archivos no se guardan en el borrador del dispositivo: los sensibles se piden de nuevo. Los archivos vuelven sólo si la página da un proveedor (FormKit.iniciar(form, { borradorArchivos: { guarda, lee, borra } })), que decide dónde guardarlos, por ejemplo en su servidor; el estándar nunca los guarda en el dispositivo por su cuenta. El proveedor recibe cada archivo como lo eligió la persona; una foto JPG, sin sus metadatos (EXIF, ubicación) si el formulario no pide conservarExif. Un borrador de otra versión del formulario o caducado no se ofrece. El borrador se escribe también al salir de la página (pagehide) y se borra al enviar.
 
 **Por qué.** Un nombre y un correo en el almacén local de una computadora compartida son una fuga; un borrador viejo contra un formulario nuevo produce datos inconsistentes.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-15; A FRM-16; B FRM-DP-03; P148 (proyecto de acreditaciones, 18 oct 2026) · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-15; A FRM-16; B FRM-DP-03; P148 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 01-por-pasos: lo sensible se pide de nuevo; el borrador se borra al enviar; 07: archivos con el proveedor de la página (P148)
 
 ### FRM-44 · Todo envío tiene límite de espera, clave de idempotencia y dice qué pasó
 
-**Regla.** El envío lleva AbortController con plazo configurable y una clave de idempotencia por intento. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver». El aviso de un envío fallido se queda hasta que la persona cambia un dato o vuelve a enviar: no se oculta al mover el foco, porque el botón de abajo subiría a media pulsación y el clic se perdería.
+**Regla.** El envío lleva AbortController con plazo configurable y una clave de idempotencia por envío, la misma en cada reintento hasta que el servidor lo reciba. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver». El aviso de un envío fallido se queda hasta que la persona cambia un dato o vuelve a enviar: no se oculta al mover el foco, porque el botón de abajo subiría a media pulsación y el clic se perdería.
 
 **Por qué.** Un giro eterno y una pantalla en blanco son el peor error posible; un reenvío sin idempotencia duplica registros.
 
-**Nivel.** BASE · **Origen.** A FRM-42; A FRM-43; B FRM-SEG-02; P87 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-42; A FRM-43; B FRM-SEG-02; P87 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 01-por-pasos: error simulado, límite y éxito; 07: aviso de envío fallido
 
@@ -554,21 +554,21 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-49 · El punto en el mapa se coloca con toque, arrastre o teclado, se confirma y no se pide geolocalización por omisión
 
-**Regla.** El mapa (Leaflet autoalojado con gestos: un dedo desplaza la página, dos el mapa) coloca el punto al tocar, permite arrastrarlo y, con el mapa enfocado, Enter lo coloca en el centro. Con data-confirmar el punto debe confirmarse. Las coordenadas se enuncian en texto (lon, lat en EPSG:4326, seis decimales). La geolocalización del dispositivo sólo se ofrece con data-geolocalizacion. El ámbito se acota y un punto fuera se dice al momento.
+**Regla.** El mapa (Leaflet autoalojado con gestos: un dedo desplaza la página, dos el mapa) coloca el punto al tocar, permite arrastrarlo y, con el mapa enfocado, Enter lo coloca en el centro. Con data-confirmar el punto debe confirmarse. Las coordenadas se dicen en texto como latitud, longitud; viajan como punto GeoJSON [lon, lat] en EPSG:4326 con seis decimales. La geolocalización del dispositivo sólo se ofrece con data-geolocalizacion. El ámbito se acota y un punto fuera se dice al momento.
 
 **Por qué.** Un mapa que atrapa el desplazamiento del teléfono bloquea la página; un punto sin confirmar se envía por un roce; pedir permiso de ubicación sin motivo ahuyenta.
 
-**Nivel.** OPCIONAL · **Origen.** A FRM-53; A FRM-54; B FRM-UBI-01; B FRM-UBI-03 · *decisión heredada*
+**Nivel.** OPCIONAL · **Origen.** A FRM-53; A FRM-54; B FRM-UBI-01; B FRM-UBI-03; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 01-por-pasos: mapa toca, confirma; mapa.js
 
 ### FRM-50 · El mapa base, el marcador y el cruce son del proyecto, no de un tercero
 
-**Regla.** Las teselas se declaran en FORMKIT_CONFIG.mapa (proveedor, atribución, clave), vacías por omisión: sin teselas el punto sigue pudiendo colocarse. El marcador es propio e incrustado. El cruce con capas (alcaldía, suelo, competencia) se resuelve en el servidor contra la capa completa.
+**Regla.** Las teselas se declaran en FORMKIT_CONFIG.mapa (teselas, atribucion, centro, zoom), vacías por omisión: sin teselas el punto sigue pudiendo colocarse. El marcador es propio e incrustado. El cruce con capas (alcaldía, suelo, competencia) se resuelve en el servidor contra la capa completa.
 
 **Por qué.** Una tesela o un icono que no carga por política de red deja el mapa en blanco; un cruce en el navegador es manipulable.
 
-**Nivel.** OPCIONAL · **Origen.** A FRM-55; A FRM-56; A FRM-57; B FRM-UBI-04; B FRM-LIB-03 · *decisión heredada*
+**Nivel.** OPCIONAL · **Origen.** A FRM-55; A FRM-56; A FRM-57; B FRM-UBI-04; B FRM-LIB-03; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 03-anchos: nada se pide a un tercero; mapa.css marcador
 
@@ -596,23 +596,23 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-53 · Las fotografías se optimizan en el navegador y se conserva la huella del original
 
-**Regla.** Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6). Sin conservarExif, la foto viaja siempre recodificada, sin EXIF ni ubicación, aunque así pese más que la original; si no se puede recodificar, al JPG se le quitan los metadatos (EXIF, XMP e IPTC). Si tampoco se pueden quitar, la foto se agrega como está: la Secretaría decidió no rechazar una foto por sus metadatos (18 oct 2026).
+**Regla.** Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6). Sin conservarExif, la foto viaja siempre recodificada, sin EXIF ni ubicación, aunque así pese más que la original; si no se puede recodificar, al JPG se le quitan los metadatos (EXIF, XMP e IPTC). Si tampoco se pueden quitar, la foto se agrega como está: una foto no se rechaza por sus metadatos.
 
-**Por qué.** Una foto de 12 MB desde la calle no sube; sin huella no se prueba que la imagen es la que se tomó; el EXIF revela la ubicación de quien denuncia.
+**Por qué.** Una foto de 12 MB no sube con red limitada; sin huella no se prueba que la imagen es la que se tomó; el EXIF revela la ubicación de quien toma la foto.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-62; A FRM-63; B FRM-ARC-02; C6; P127 (proyecto de acreditaciones, 18 oct 2026) · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-62; A FRM-63; B FRM-ARC-02; C6; P127 (proyecto de acreditaciones, 18 oct 2026); decisión de la Secretaría, 18 oct 2026: no rechazar una foto por sus metadatos · *decisión heredada*
 
 **Verificación.** 01-por-pasos: sha256 en payload; validaciones.config.js ARCHIVOS; 07: foto sin EXIF aunque la recodificada pese más o no se pueda recodificar; la que no se puede limpiar se agrega (P127)
 
 ### FRM-54 · El servidor revalida los archivos
 
-**Regla.** El servidor comprueba de nuevo tipo real, peso, número y total, y conserva el original antes de cualquier transformación. Los archivos no entran al borrador local.
+**Regla.** El servidor comprueba de nuevo tipo real, peso, número y total, y conserva el archivo tal como lo recibió, antes de cualquier transformación propia. La firma real y el límite de peticiones se comprueban en el servidor del sistema, fuera de validar.mjs.
 
 **Por qué.** La validación del navegador se salta; un archivo que entró sin revisar es un riesgo permanente.
 
-**Nivel.** BASE · **Origen.** A FRM-65; A FRM-66; B FRM-ARC-03 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-65; A FRM-66; B FRM-ARC-03; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
-**Verificación.** codigo/servidor/validar.mjs; 06-servidor
+**Verificación.** codigo/servidor/validar.mjs; 06-servidor: número, obligatorios y total (el tipo real y la firma, en el servidor del sistema)
 
 ## 9. Datos personales y protección contra el abuso
 
@@ -636,23 +636,23 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Verificación.** 01-por-pasos: diálogo de privacidad; revisión jurídica (no automatizable)
 
-### FRM-57 · El anonimato es posible: el contacto se pide sólo si la persona lo elige
+### FRM-57 · Cuando el trámite admite anonimato, el contacto se pide sólo si la persona lo elige
 
 **Regla.** Los datos de contacto van detrás de una pregunta condicional «¿Quieres que te contactemos?»; si la respuesta es no, no se piden ni viajan.
 
-**Por qué.** Exigir identificarse para denunciar desalienta y expone.
+**Por qué.** Exigir identificarse cuando el trámite no lo necesita desalienta y expone.
 
-**Nivel.** RECOMENDADO · **Origen.** B FRM-DP-01 · *decisión heredada*
+**Nivel.** OPCIONAL · **Origen.** B FRM-DP-01; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 01-por-pasos: contacto condicional; 06-servidor: contacto no
 
 ### FRM-58 · Prueba de humanidad accesible, campo trampa y tiempo mínimo como señales; límite por origen en el servidor
 
-**Regla.** La casilla de declaración, el campo trampa fuera de pantalla y el tiempo de llenado viajan en meta como señales que el servidor pondera; nunca acertijos visuales ni reconocimiento de imágenes. El límite por origen endurece antes de cortar y sus cifras no se publican.
+**Regla.** La casilla «No soy un programa automático» (en los datos), el campo trampa fuera de pantalla y el tiempo de llenado (en meta) viajan como señales que el servidor pondera; nunca acertijos visuales ni reconocimiento de imágenes. El límite de peticiones (FRM-33) se endurece poco a poco antes de cortar y sus cifras no se publican.
 
 **Por qué.** Un captcha visual excluye; un límite publicado se calibra desde fuera.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-71; A FRM-72; A FRM-74; B FRM-SEG-01; B FRM-SEG-03; B FRM-SEG-04 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-71; A FRM-72; A FRM-74; B FRM-SEG-01; B FRM-SEG-03; B FRM-SEG-04; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 01-por-pasos: límite; validar.mjs señales
 
@@ -690,11 +690,11 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-62 · Todo lo que se toca mide al menos 44 px con puntero táctil
 
-**Regla.** Botones, enlaces de acción, opciones, pestañas y controles miden al menos 44 px en teléfono; los enlaces dentro de texto corrido cumplen 24 px con espacio alrededor.
+**Regla.** Botones, enlaces de acción, opciones, pestañas y controles miden al menos 44 px con puntero táctil, sea cual sea el ancho de la pantalla; los enlaces dentro de texto corrido cumplen 24 px con espacio alrededor.
 
 **Por qué.** El dedo no acierta a 32 px; errar un botón en la calle es abandonar.
 
-**Nivel.** BASE · **Origen.** A FRM-46; B FRM-A11Y-02 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-46; B FRM-A11Y-02; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 03-anchos.prueba.mjs: objetivos táctiles (320–768)
 
@@ -730,11 +730,11 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-85 · Cada imagen pesa lo que se muestra
 
-**Regla.** Una imagen del paquete se guarda a lo más al doble del tamaño en que se muestra (para pantallas de alta densidad) y su <img> lleva width y height con su tamaño real, para que la página no salte al cargar. El logotipo se muestra a 48 px de alto y se guarda a 96 (477 × 96 px, 27 KB). Una imagen de miles de píxeles que se ve a 200 se descarga entera en cada pantalla, también en el teléfono con red limitada.
+**Regla.** Una imagen del paquete se guarda a lo más al doble del tamaño en que se muestra (para pantallas de alta densidad) y su <img> lleva width y height con su tamaño real, para que la página no salte al cargar. El logotipo, por ejemplo, se muestra a 48 px de alto y se guarda a 96.
 
-**Por qué.** El logotipo a 3829 px pesaba 110 KB en cada pantalla para verse a unos 200 px.
+**Por qué.** Una imagen de miles de píxeles que se ve a 200 se descarga entera en cada pantalla, también en el teléfono con red limitada.
 
-**Nivel.** RECOMENDADO · **Origen.** P130 (proyecto de acreditaciones, 18 oct 2026) · *mejor práctica adicional*
+**Nivel.** RECOMENDADO · **Origen.** P130 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *mejor práctica adicional*
 
 **Verificación.** 06: tamaño del logotipo y de su <img> (P130)
 
@@ -786,27 +786,27 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Por qué.** Un onclick en el HTML no se puede probar ni auditar; una clase sin uso es una promesa que nadie cumple.
 
-**Nivel.** BASE · **Origen.** A FRM-89; A FRM-90; B FRM-STY-07 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-89; A FRM-90; B FRM-STY-07; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
-**Verificación.** auditor-css A09, A16; revisión
+**Verificación.** auditor-css A09, A14, A16; revisión
 
 ### FRM-71 · Núcleo obligatorio y módulos independientes con manifiesto
 
-**Regla.** El núcleo (tokens, base, nucleo, validaciones.config, iconos, formkit.core) va siempre; cada módulo vive en su carpeta con su CSS y su JS, declara en codigo/manifiesto.json nivel, propósito, cuándo, cuándo no, dependencias, accesibilidad y comportamiento en teléfono y escritorio, y se activa solo si el formulario contiene su selector. Los módulos de ámbito documento se inician una sola vez aunque la página tenga varios formularios. Cada formulario se inicia una sola vez: una segunda llamada a FormKit.iniciar le suma sus opciones y devuelve la misma instancia. Un módulo que también sirve sin formulario (tabla, visor) se inicia solo al cargar la página.
+**Regla.** El núcleo (tokens, base, nucleo, validaciones.config, iconos, formkit.core) va siempre; cada módulo vive en su carpeta con su CSS y su JS, declara en codigo/manifiesto.json nivel, propósito, cuándo, cuándo no, dependencias, accesibilidad y comportamiento en teléfono y escritorio, y se activa solo si el formulario contiene su selector. Los módulos de ámbito documento se inician una sola vez aunque la página tenga varios formularios. Cada formulario se inicia una sola vez: una segunda llamada a FormKit.iniciar le suma sus opciones y devuelve la misma instancia. Un módulo que también sirve sin formulario (tabla, visor, estado) se inicia solo al cargar la página.
 
 **Por qué.** Un paquete monolítico se copia entero o no se copia; un módulo sin ficha se usa mal.
 
-**Nivel.** BASE · **Origen.** C1; encargo 7; P110 (proyecto de acreditaciones, 17 oct 2026); P111 (proyecto de acreditaciones, 17 oct 2026) · *decisión del encargo*
+**Nivel.** BASE · **Origen.** C1; encargo 7; P110 (proyecto de acreditaciones, 17 oct 2026); P111 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión del encargo*
 
 **Verificación.** 06-servidor: manifiesto; 04-modulos: varios formularios en una página
 
 ### FRM-72 · Iconografía: un solo sprite SVG, catálogo cerrado
 
-**Regla.** Los iconos viven en codigo/iconos/sprite.svg (30 símbolos), se inyectan una vez por página y heredan el color del texto. El decorativo lleva aria-hidden; el que comunica va junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con nombre accesible. Las marcas de redes sociales van rellenas, como las publica cada red.
+**Regla.** Los iconos viven en codigo/iconos/sprite.svg (30 símbolos), se inyectan una vez por página y heredan el color del texto. El decorativo lleva aria-hidden; el que comunica va junto a texto; sólo «cerrar», «buscar», «ayuda», «quitar» o «eliminar» en una fila y los enlaces a redes sociales pueden ir solos, siempre con nombre accesible. Un icono significa siempre lo mismo. Las marcas de redes sociales van rellenas, como las publica cada red.
 
 **Por qué.** Iconos de tres fuentes distintas se ven distintos y pesan; un icono sin nombre es mudo.
 
-**Nivel.** BASE · **Origen.** encargo 5.4; redes sociales (la Secretaría, 14 oct 2026) · *decisión del encargo*
+**Nivel.** BASE · **Origen.** encargo 5.4; redes sociales (la Secretaría, 14 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión del encargo*
 
 **Verificación.** guía: catálogo de iconos; 03-anchos: nombres
 
@@ -814,11 +814,11 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-73 · Registro institucional claro: frases cortas, voz activa, sin siglas sin explicar
 
-**Regla.** Los textos del formulario hablan a la persona de tú con oraciones cortas; el nombre de la institución se escribe completo la primera vez. Las acciones se atribuyen a «la Secretaría».
+**Regla.** Los textos del formulario hablan a la persona de tú por omisión, con oraciones cortas; un formulario que habla de usted lo hace en todos sus textos, sin mezclar (los mensajes se cambian en la configuración, FRM-11). El nombre de la institución se escribe completo la primera vez y las acciones se le atribuyen («la Secretaría»).
 
 **Por qué.** Un formulario que no se entiende se llena mal o no se llena.
 
-**Nivel.** BASE · **Origen.** A FRM-92; B FRM-TXT-04 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-92; B FRM-TXT-04; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** revisión editorial (no automatizable)
 
@@ -854,7 +854,7 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-86 · El límite de 70 caracteres es del texto corrido; la bajada y las líneas de datos ocupan su tarjeta
 
-**Regla.** Sólo el texto corrido (varios párrafos que se leen de seguido) se limita a 70 caracteres por renglón, con .texto-corrido. La bajada del título y la ayuda de bloque ocupan el ancho de su tarjeta: una oración no pasa al segundo renglón si sobra espacio. Una línea de datos (folio · fechas · revisión) va en .linea-datos con cada dato en .linea-datos-item, que no se parte: si no cabe, pasa completo al renglón siguiente.
+**Regla.** Sólo el texto corrido (varios párrafos que se leen de seguido) se limita a 70 caracteres por renglón, con .texto-corrido. La bajada del título y la ayuda de bloque ocupan el ancho de su tarjeta: una oración no pasa al segundo renglón si sobra espacio. Una línea de datos (folio · fechas · estado) va en .linea-datos con cada dato en .linea-datos-item, que no se parte: si no cabe, pasa completo al renglón siguiente.
 
 **Por qué.** Una bajada de una oración partida en dos, o un dato cortado a la mitad («Recibida el 17 / de octubre»), se leen como dos cosas distintas.
 
@@ -866,41 +866,41 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-77 · Todo se sirve desde el propio servidor
 
-**Regla.** Tipografías, CSS, JS, iconos, Leaflet y axe-core viajan en el paquete; ninguna página pide nada a un tercero salvo el mapa base declarado en configuración.
+**Regla.** Tipografías, CSS, JS, iconos, Leaflet, leaflet-gesture-handling y pdf.js se sirven desde el propio servidor; ninguna página pide nada a un tercero salvo el mapa base declarado en configuración.
 
 **Por qué.** Un recurso externo bloqueado por política de red deja la página rota; además filtra la IP de la persona.
 
-**Nivel.** BASE · **Origen.** A FRM-96; B FRM-LIB-01 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-96; B FRM-LIB-01; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 03-anchos: nada se pide a un tercero
 
 ### FRM-78 · Cabin 600/700 para títulos y Roboto 400/500/700 para el cuerpo, autoalojadas con licencia
 
-**Regla.** Las tipografías se incluyen en codigo/fuentes con su licencia (OFL / Apache) y sólo los pesos declarados en tokens.css (decisión C12).
+**Regla.** Las tipografías se incluyen en codigo/fuentes con su licencia (OFL) y sólo los pesos declarados en tokens.css (decisión C12).
 
 **Por qué.** Una tipografía desde Google Fonts es una petición a un tercero; pesos de más son kilobytes de más.
 
-**Nivel.** BASE · **Origen.** A FRM-97; C12 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-97; C12; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 06-servidor: tipografías; 03-anchos: las tipografías cargan
 
 ### FRM-79 · Cada biblioteca con versión exacta, licencia y suma de verificación
 
-**Regla.** vendor/MANIFIESTO.json registra Leaflet, leaflet-gesture-handling y axe-core con versión, licencia y SHA-256; herramientas/vendor.mjs --verificar lo comprueba.
+**Regla.** vendor/MANIFIESTO.json registra Leaflet, leaflet-gesture-handling, pdf.js y axe-core con versión, licencia y SHA-256; herramientas/vendor.mjs --verificar lo comprueba.
 
 **Por qué.** Una biblioteca sin suma puede cambiar sin que nadie lo note.
 
-**Nivel.** BASE · **Origen.** A FRM-98; B FRM-LIB-02 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-98; B FRM-LIB-02; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** 06-servidor: bibliotecas coinciden con el manifiesto
 
 ### FRM-80 · Lo que sólo sirve para verificar no viaja al sitio
 
-**Regla.** Playwright y axe-core son devDependencies; el código del estándar no tiene dependencias. La carpeta pruebas/_humo y node_modules no entran en el ZIP.
+**Regla.** Playwright y axe-core son devDependencies; el código del estándar no tiene dependencias. axe-core, Playwright, pruebas/, herramientas/ y node_modules no se copian al sitio.
 
 **Por qué.** Una herramienta de pruebas en producción es superficie de ataque y peso.
 
-**Nivel.** BASE · **Origen.** A FRM-99 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-99; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
 **Verificación.** package.json; construir.mjs --zip
 

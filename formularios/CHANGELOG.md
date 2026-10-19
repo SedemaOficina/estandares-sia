@@ -1,5 +1,48 @@
 # Historial de cambios
 
+## 1.5.1 · 2026-10-18
+
+Auditoría completa del estándar, sin hallazgos nuevos de un proyecto. Busca dos cosas: que el estándar sea general para cualquier formulario sin importar su tema, y que código, reglas y documentación digan lo mismo.
+
+**Que sea general.** Se quitaron de las muestras de la guía, de los ejemplos de contrato y de la documentación los textos de un solo tema que venían del proyecto de acreditaciones:
+- cursos de poda y dictamen;
+- medidas de árboles;
+- un catálogo de especies de árboles, que pasa a ser de ocupaciones;
+- examen, dictamen y «bandeja».
+
+El mensaje de edad mínima ya no impone que llene el formulario la madre, el padre o el tutor; el formulario que tenga esa ruta lo dice en sus mensajes. Los comentarios del código ya no citan números de hallazgos de un proyecto.
+
+**Privacidad.** El proveedor del borrador (1.5.0) recibía la foto original, con su ubicación, aunque el formulario no pidiera `conservarExif`. Ahora recibe el archivo como lo eligió la persona: un JPG, sin metadatos. Prueba nueva en `07`.
+
+**Textos configurables.** Cuarenta y cuatro textos seguían escritos en el código de los módulos, así que un formulario que habla de usted no podía cambiarlos. Pasan a `mensajes` (198 en total). Son de los módulos `archivos`, `copiar`, `descarga`, `enlace-mapa`, `fecha`, `identificadores`, `cascadas`, `chips`, `mapa`, `progreso`, `repetibles`, `pestanas` y `paginacion`, y la frase de borrador recuperado. El servidor usa los mismos mensajes de longitud mínima y de coordenadas fuera de rango. Se retiran tres textos sin uso: `mapaSinPunto`, `sesionExpira` (no hay pieza de sesión, así que prometía algo que no existe) y `curp.sexos`.
+
+**Comportamiento.**
+- `repetibles` confirma con el módulo `modal` («Quitar fila N», foco en «Volver sin cambios»), nunca con `window.confirm`.
+- En la franja del borrador, «Recuperar borrador» pasa a secundario (un solo botón guinda por pantalla). «Empezar de nuevo» lleva el foco a «Conservar», no al botón que borra, y ese botón dice «Descartar borrador».
+- El aviso del visor lleva el icono de su tono.
+- El periodo de fechas se anuncia en día/mes/año.
+- La falla de la ubicación del dispositivo en el mapa se ve en pantalla.
+- El ejemplo de captura interna confirma con consecuencias y el verbo completo.
+
+**Reglas.**
+- Se resolvieron contradicciones: cuándo se mueve el foco (FRM-03 y FRM-40), un botón relleno por pantalla y por diálogo (FRM-34), qué se confirma y qué no (FRM-38), la franja del borrador tal como es (FRM-42), y lo que puede llevar el borrador del dispositivo y el proveedor (FRM-43 y FRM-54).
+- Se corrigió lo que no coincidía con el código (FRM-12, 33, 36, 44, 49, 50, 58, 71, 77 a 80) y la redacción de un solo tema (FRM-05, 10, 24, 25, 53, 57, 73, 83, 84, 85).
+- FRM-57 (anonimato) y FRM-83 (etiquetas de estado) pasan a OPCIONAL, porque aplican sólo cuando el trámite admite anonimato o la pantalla muestra estados.
+- El índice de `docs/01` lista los tramos de cada sección.
+
+**Documentación.**
+- Conteos al día: 30 módulos, 86 reglas, 76 pares, 30 iconos, A01 a A11 y A13 a A16.
+- pdf.js en las listas de bibliotecas.
+- La guía de decisión ya incluye resultado, estado, secuencia, avisos, `data-contexto`, texto corrido y el proveedor de archivos.
+- La guía de estilo se corrigió: pesos de los títulos, rótulo, `--guinda-cl` y `--gris`, puntos de corte, el icono `archivo` y una sección de botones y avisos.
+- La trazabilidad tiene los módulos nuevos. Los encabezados de los módulos describen su contrato actual.
+- Las bajadas largas de las tres guías usan `.texto-corrido`.
+- Se regeneraron las 41 capturas de evidencia.
+
+**Pruebas**: una nueva en `07-correcciones` (42 en total); las de confirmación esperan «Volver sin cambios».
+
+**Queda para después** (en `guia-visual/pendientes.js` no hay cambios): dividir las reglas muy cargadas (FRM-24, FRM-30, FRM-39, FRM-43, FRM-44) en reglas más simples; poner título a los avisos de envío fallido; capturas de las piezas nuevas (resultado, estado, visor).
+
 ## 1.5.0 · 2026-10-18
 
 Cuatro hallazgos de la auditoría completa del sistema de acreditaciones del 18 oct. El borrador gana un proveedor de archivos, por eso es versión menor.

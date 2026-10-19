@@ -4,7 +4,7 @@ Qué se valida, cuándo, con qué mensaje y dónde vive la regla. Fuente única:
 
 ## 1. Principios
 
-1. **Un solo archivo de reglas.** Patrones, límites, mensajes y cruzadas viven en `validaciones.config.js`. El HTML sólo declara qué campo usa qué formato (`data-formato`) y sus límites (`min`, `max`, `minlength`, `maxlength`, `step`). Ni el HTML ni los módulos escriben mensajes.
+1. **Un solo archivo de reglas.** Patrones, límites, mensajes y cruzadas viven en `validaciones.config.js`. El HTML sólo declara qué campo usa qué formato (`data-formato`) y sus límites (`min`, `max`, `minlength`, `maxlength`, `step`). Ni el HTML ni los módulos escriben mensajes (salvo los avisos para quien programa, en la consola, y los rechazos técnicos de un envío mal formado en el servidor, que el navegador nunca produce).
 2. **Se rechaza sólo lo inválido con certeza.** Un nombre con apóstrofe, un teléfono con espacios, un correo con mayúsculas se **normalizan**, no se rechazan. La regla distingue «esto no puede ser un dato válido» de «esto no es como yo lo escribiría».
 3. **El momento (decisión C5).** El error aparece al salir del campo sólo si la persona escribió algo; una vez marcado, se recalcula en cada tecla y desaparece en cuanto el valor es válido; salir de un campo intacto no produce error; «Continuar» y «Enviar» validan todo lo visible y activo, muestran el resumen con foco y enlaces, y no avanzan con pendientes.
 4. **El mensaje dice qué hacer, con ejemplo.** Nunca «Campo inválido».
@@ -20,7 +20,7 @@ Qué se valida, cuándo, con qué mensaje y dónde vive la regla. Fuente única:
 | `telefono` | Exactamente 10 dígitos | Quita espacios, guiones, paréntesis y el prefijo +52 / 52 | Escribe 10 dígitos, sin lada internacional. Ejemplo: 5512345678. *Regla de México; confirmar con el plan de numeración vigente [Fuente: __]* | tel |
 | `cp` | 5 dígitos; si hay ámbito configurado, dentro del rango | Sólo dígitos; **se conserva como texto** | El código postal lleva 5 dígitos. Ejemplo: 01000 · Ese código postal no es de la Ciudad de México: van del 01000 al 16999 | numeric |
 | `curp` | 18 caracteres; estructura `AAAA######HAAAAA##`; fecha real en posiciones 5–10 y no futura; entidad válida en 12–13; dígito verificador (activable) *[estructura y algoritmo a confirmar con RENAPO: Fuente: __]* | Mayúsculas, sin acentos ni espacios | La CURP tiene 18 caracteres; escribiste 17 · La fecha dentro de la CURP no es una fecha real · El último carácter no coincide con el resto | text |
-| `rfc` | 12 (moral) o 13 (física) caracteres; fecha real *[estructura a confirmar con el SAT: Fuente: __]* | Mayúsculas, sin guiones | El RFC lleva 3 o 4 letras, 6 dígitos de fecha y 3 caracteres finales. Ejemplo: XAXX010101000 | text |
+| `rfc` | 12 (moral) o 13 (física) caracteres; fecha real *[estructura a confirmar con el SAT: Fuente: __]* | Mayúsculas, sin acentos (la Ñ se conserva), sin espacios ni guiones | El RFC lleva 3 o 4 letras, 6 dígitos de fecha y 3 caracteres finales. Ejemplo: XAXX010101000 | text |
 | `numero` | Número entero o decimal; `min`, `max`, `step` del campo (el paso cuenta desde el mínimo y admite decimales: `step="0.5"`); `data-min-segun`/`data-max-segun` para un límite que depende de otra respuesta | Coma → punto | Escribe sólo números; para decimales usa punto · El valor máximo es 20 · Usa múltiplos de 0.5 · Escribe un número entero, sin decimales | decimal |
 | `fecha` | AAAA-MM-DD existente; `min`/`max`; `data-no-futura` = máximo hoy | Recorta | Escribe una fecha real… Ejemplo: 2026-03-15 · La fecha no puede ser posterior a hoy | numeric |
 | `fecha-dma` | Fecha real escrita día/mes/año (23/07/1985, también con guiones, puntos, espacios, los ocho dígitos juntos o AAAA-MM-DD del autocompletado); año desde 1900; `data-no-futura` = máximo hoy. Para la fecha de nacimiento, sin calendario; la escritura se acomoda sola (módulo `fecha`) | Queda como DD/MM/AAAA | Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985 · La fecha no puede ser posterior a hoy | numeric |
@@ -77,7 +77,7 @@ Lo que se sabe sin leer el archivo se rechaza en el acto (`.arch-rechazo`); lo q
 
 ## 5. Mensajes
 
-Los 156 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc., también los de cada formato (`fmt…`) y de cada cruzada (`cz…`). Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo, y el servidor recibe los mismos en `validaPayload(…, { mensajes })`. Registro: tuteo, frase corta, qué hacer primero. Un sistema que habla de usted cambia ahí los que se vean; por ejemplo, `FORMKIT_CONFIG.mensajes = { fmtTelefono: 'Escriba 10 dígitos, sin lada internacional.' }`. Formatos y cruzadas leen también de la configuración del formulario el ámbito (`ambito.cp`, `ambito.coordenadas`) y la CURP (`curp.verificarDigito`). También van ahí los títulos del resumen de errores (`resumenUno`, `resumenServidorVarios`…), los de la confirmación (`confirmaNo`, `confirmaIrreversible`…) y los del resultado (`resultadoHora`, `resultadoMotivo`, `resultadoQueSigue`).
+Los 198 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc., también los de cada formato (`fmt…`) y de cada cruzada (`cz…`). Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo, y el servidor recibe los mismos en `validaPayload(…, { mensajes })`. Registro: tuteo, frase corta, qué hacer primero. Un sistema que habla de usted cambia ahí los que se vean; por ejemplo, `FORMKIT_CONFIG.mensajes = { fmtTelefono: 'Escriba 10 dígitos, sin lada internacional.' }`. Formatos y cruzadas leen también de la configuración del formulario el ámbito (`ambito.cp`, `ambito.coordenadas`) y la CURP (`curp.verificarDigito`). También van ahí los títulos del resumen de errores (`resumenUno`, `resumenServidorVarios`…), los de la confirmación (`confirmaNo`, `confirmaIrreversible`…) y los del resultado (`resultadoHora`, `resultadoMotivo`, `resultadoQueSigue`).
 
 ## 6. Configuración por formulario (`FORMKIT_CONFIG`)
 
@@ -97,7 +97,7 @@ Los 156 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.
 | `chips` | 5, `sia-chips` | Máximo de chips del historial y clave del almacén local (la lista fija no guarda nada). |
 | `visor` | pdf.js junto al paquete; fijo desde 1024 px | Dónde está pdf.js (`pdfjs`), desde qué ancho el visor queda fijo junto a la revisión (`fijoDesde`) y la espera para repintar (`retardoMs`). |
 | `mapa` | sin teselas | Proveedor, atribución, centro, zoom. |
-| `mensajes` | 156 textos | Cualquier mensaje, también los de formatos y cruzadas. |
+| `mensajes` | 198 textos | Cualquier mensaje, también los de formatos y cruzadas. |
 
 ## 7. En el servidor
 

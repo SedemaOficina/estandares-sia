@@ -19,7 +19,7 @@
     const barra = el.querySelector('progress');
     const txt = el.querySelector('[data-progreso-texto]');
     if (!barra) return;
-    if (valor === null || valor === undefined) { barra.removeAttribute('value'); if (txt) txt.textContent = 'Cargando…'; return; }
+    if (valor === null || valor === undefined) { barra.removeAttribute('value'); if (txt) txt.textContent = FormKit.config.mensajes.cargando; return; }
     const max = Number(barra.max || 100);
     const v = Math.max(0, Math.min(max, Number(valor)));
     barra.value = v;

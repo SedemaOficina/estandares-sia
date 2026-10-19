@@ -35,12 +35,12 @@
       const b = document.createElement('button'); b.type = 'button'; b.className = `paginacion-btn${cfg.clase ? ` ${cfg.clase}` : ''}`;
       if (cfg.icono) b.append(icono(cfg.icono, 'icono icono-sm'));
       b.append(document.createTextNode(texto));
-      if (cfg.actual) { b.setAttribute('aria-current', 'page'); b.setAttribute('aria-label', `Página ${texto}, actual`); }
+      if (cfg.actual) { b.setAttribute('aria-current', 'page'); b.setAttribute('aria-label', plantilla(M.paginacionActual, { n: texto })); }
       if (cfg.deshabilitado) { b.setAttribute('aria-disabled', 'true'); } else b.dataset.ir = String(ir);
       if (cfg.etiqueta) b.setAttribute('aria-label', cfg.etiqueta);
       li.appendChild(b); return li;
     };
-    lista.appendChild(boton('Anterior', pagina - 1, { deshabilitado: pagina === 1, icono: 'flecha-izq', clase: 'paginacion-prev' }));
+    lista.appendChild(boton(M.paginacionAnterior, pagina - 1, { deshabilitado: pagina === 1, icono: 'flecha-izq', clase: 'paginacion-prev' }));
     if (nav.dataset.modo !== 'mas') {
       /* Primera, última, la actual y una a cada lado; puntos suspensivos entre huecos. */
       const visibles = new Set([1, paginas, pagina - 1, pagina, pagina + 1].filter((n) => n >= 1 && n <= paginas));
@@ -51,7 +51,7 @@
         previo = n;
       }
     }
-    lista.appendChild(boton(nav.dataset.modo === 'mas' ? 'Cargar más' : 'Siguiente', pagina + 1, { deshabilitado: pagina >= paginas, icono: nav.dataset.modo === 'mas' ? 'mas' : 'flecha-der', clase: 'paginacion-next' }));
+    lista.appendChild(boton(nav.dataset.modo === 'mas' ? M.paginacionMas : M.paginacionSiguiente, pagina + 1, { deshabilitado: pagina >= paginas, icono: nav.dataset.modo === 'mas' ? 'mas' : 'flecha-der', clase: 'paginacion-next' }));
     const compacto = document.createElement('p'); compacto.className = 'paginacion-compacto'; compacto.textContent = plantilla(M.paginacionPagina, { n: pagina, total: paginas });
 
     const sel = document.createElement('label'); sel.className = 'paginacion-tamano';

@@ -81,7 +81,7 @@
   FormKit.registra('enlace-mapa', {
     selector: '[data-enlace-mapa]',
     iniciar(form, ctx) {
-      const { $$, anuncia, controlPrincipal } = ctx;
+      const { $$, M, plantilla, anuncia, controlPrincipal } = ctx;
       for (const caja of $$('[data-enlace-mapa]', form)) {
         const destino = controlPrincipal(caja.dataset.enlaceMapa);
         const entrada = caja.querySelector('input');
@@ -118,11 +118,11 @@
           const t = entrada.value.trim();
           if (!t) { dice(null, ''); return; }
           const r = lee(t);
-          if (!r) return dice('advertencia', 'No encontramos coordenadas en ese texto. Pega el enlace completo de Google Maps (el que empieza con google.com/maps) o escribe las coordenadas.');
-          if (r.corto) return dice('advertencia', 'Los enlaces cortos de Google Maps no traen las coordenadas. Ábrelo en Google Maps: en el celular, mantén presionado el punto y copia los números que aparecen; en la computadora, haz clic derecho sobre el punto. Pégalos en «Coordenadas».');
+          if (!r) return dice('advertencia', M.enlaceMapaSin);
+          if (r.corto) return dice('advertencia', M.enlaceMapaCorto);
           escribe(r);
-          if (r.origen === 'centro') dice('advertencia', `Ese enlace marca el centro de la pantalla, no un punto: tomamos ${fmt(r)}. Revisa que sea el lugar.`);
-          else dice('ok', `Coordenadas tomadas del enlace: ${fmt(r)}.`);
+          if (r.origen === 'centro') dice('advertencia', plantilla(M.enlaceMapaCentro, { coordenadas: fmt(r) }));
+          else dice('ok', plantilla(M.enlaceMapaTomadas, { coordenadas: fmt(r) }));
         };
         entrada.addEventListener('change', desdeEnlace);
         /* Al pegar se lee de inmediato, sin esperar a salir del campo. */
@@ -137,10 +137,10 @@
           destino.value = nuevo;
           destino.dispatchEvent(new Event('input', { bubbles: true }));
           const que = [
-            r.notas.includes('orden') ? 'se acomodaron latitud y longitud' : '',
-            r.notas.includes('menos') ? 'se agregó el signo menos a la longitud, que en la Ciudad siempre es negativa' : ''
-          ].filter(Boolean).join(' y ');
-          anuncia(`Coordenadas: ${nuevo}${que ? `; ${que}` : ''}.`);
+            r.notas.includes('orden') ? M.enlaceMapaOrden : '',
+            r.notas.includes('menos') ? M.enlaceMapaSigno : ''
+          ].filter(Boolean).join(M.conjuncion);
+          anuncia(plantilla(M.enlaceMapaAnuncio, { coordenadas: nuevo, notas: que ? `; ${que}` : '' }));
         });
       }
     }

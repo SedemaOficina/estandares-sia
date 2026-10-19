@@ -148,7 +148,7 @@ a{color:var(--azul)}
 }
 /* Cabecera y pie ponen su margen lateral por fuera y .pagina por dentro: los
    tres miden lo mismo por dentro (--ancho-contenido), así logotipo, título,
-   contenido y pie empiezan en la misma línea (P102). */
+   contenido y pie empiezan en la misma línea. */
 .pie-int{max-width:var(--ancho-contenido);margin-inline:auto}
 
 /* Enlace de salto al contenido: primer elemento enfocable de la página. */

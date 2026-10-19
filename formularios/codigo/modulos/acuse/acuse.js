@@ -17,10 +17,18 @@
          <div class="acuse-dato"><span class="acuse-etq">Recibido el</span><span data-acuse-fecha></span></div>
        </div>
        <ol class="secuencia">…</ol>
-       <a class="btn btn-secundario" data-acuse-descarga hidden download>Descargar acuse (PDF)</a>
+       <div class="acuse-acciones">
+         <a class="btn btn-secundario" data-acuse-descarga hidden download>Descargar acuse (PDF, <span data-acuse-peso></span>)</a>
+         <a class="btn btn-primario" href="/">Volver al inicio</a>
+       </div>
+     </section>
+     <section class="tarjeta" data-limite hidden>
+       <h2 class="titulo-paso" tabindex="-1">Por ahora no podemos recibir más envíos</h2>
+       <button type="button" class="btn btn-primario" data-accion="reintentar">Volver</button>
      </section>
    La respuesta del servidor debe traer {folio, fecha} y opcionalmente
-   {acuseUrl, acusePeso}.
+   {acuseUrl, acusePeso, acuseNombre}. La fecha se escribe con
+   FormKit.utilidades.fechaHora (zona de la Ciudad, 24 horas).
    ========================================================= */
 (function () {
   'use strict';

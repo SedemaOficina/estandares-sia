@@ -39,7 +39,7 @@
             if (panel) panel.hidden = !es;
           }
           if (foco) tab.focus();
-          anuncia(`Pestaña ${tab.textContent.trim()}`);
+          anuncia(FormKit.utilidades.plantilla(FormKit.config.mensajes.pestanaAnuncio, { nombre: tab.textContent.trim() }));
         };
         cont.addEventListener('click', (e) => { const t = e.target.closest('[role="tab"]'); if (t && tabs.includes(t)) activa(t, false); });
         cont.addEventListener('keydown', (e) => {

@@ -88,7 +88,7 @@ for (const perfil of Object.values(PERFILES)) {
     await p.waitForTimeout(200);
     const dlg = p.locator('dialog[role="alertdialog"][open]');
     assert.equal(await dlg.count(), 1, 'quitar pide confirmación');
-    assert.ok(await p.evaluate(() => /Cancelar|Conservar/.test(document.activeElement.textContent)), 'el foco inicial va a la opción segura');
+    assert.ok(await p.evaluate(() => /^Volver sin cambios$/.test(document.activeElement.textContent)), 'el foco inicial va a la opción segura');
     await dlg.locator('[data-r="si"]').click();
     await p.waitForTimeout(100);
     assert.equal(await p.locator('.repetible-fila').count(), 2);

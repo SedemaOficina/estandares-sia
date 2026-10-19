@@ -6,10 +6,10 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 
 | Si el formulario… | Entonces |
 |---|---|
-| Cabe en una pantalla sin desplazarse mucho en el teléfono (hasta ~8 preguntas) | **Una página**: copia `codigo/plantillas/una-pagina.html`. |
+| Cabe en una pantalla sin desplazarse mucho en el teléfono (hasta unas 8 preguntas) | **Una página**: copia `codigo/plantillas/una-pagina.html`. |
 | Tiene más de una pantalla de preguntas, o pide datos de distinta naturaleza (qué pasa, dónde, quién) | **Por pasos**: copia `codigo/plantillas/por-pasos.html` (módulos pasos, revisión, acuse). |
 | Es una encuesta anónima corta | Una página + escala + progreso (ejemplo `guia-visual/ejemplos/encuesta.html`). |
-| Es una consulta o captura interna del personal | Pestañas, tabla, paginación, chips, descarga (ejemplo `guia-visual/ejemplos/captura-interna.html`). Mismo estándar, otro catálogo. |
+| Es una consulta o captura interna del personal | Pestañas, tabla, paginación, chips, descarga, etiquetas de estado, resultado de una decisión, visor y confirmaciones (ejemplo `guia-visual/ejemplos/captura-interna.html`). Mismo estándar, otro catálogo. |
 
 ## 2. Por tipo de respuesta
 
@@ -37,8 +37,8 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Declarar o consentir | Casilla destacada (`.destacado`), nunca premarcada | BASE | — |
 | Activar un ajuste de efecto inmediato | `toggle` (role=switch) | OPCIONAL | Es una pregunta del formulario: Sí/No. |
 | Valorar en una escala | `escala` (radios 1–5 con extremos) | OPCIONAL | — |
-| Agregar varios elementos iguales (personas, ejemplares) | `repetibles` con `data-min`/`data-max` | OPCIONAL | Siempre son exactamente dos: dos bloques fijos. |
-| Adjuntar fotos o documentos | `archivos`: formatos, peso, cámara, firma, duplicados | BASE (zona) / RECOMENDADO (optimización) | — |
+| Agregar varios elementos iguales (personas, domicilios, vehículos) | `repetibles` con `data-min`/`data-max` | OPCIONAL | Siempre son exactamente dos: dos bloques fijos. |
+| Adjuntar fotos o documentos | `archivos`: formatos, peso, cámara, firma, duplicados | RECOMENDADO (decir formatos, peso y número antes de elegir es BASE, FRM-51) | — |
 | Revisar los documentos que alguien cargó | `visor`: todas las hojas del PDF (o la imagen) junto a la decisión, con contador, acercar y girar; en teléfono, a pantalla completa | OPCIONAL | La persona sólo revisa lo que ella misma adjuntó: basta la vista previa de `archivos`. |
 | Marcar un punto en el mapa | `mapa` (Leaflet autoalojado) **además** de la dirección | OPCIONAL | La dirección basta; no hay mapa base acordado. |
 | Dar coordenadas a mano | `data-formato="coordenadas"` con ámbito | OPCIONAL | — |
@@ -57,13 +57,20 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Revisar antes de enviar | `revision` con «Editar» que aterriza en el campo | RECOMENDADO |
 | Cerrar con folio y «qué sigue» | `acuse` (+ `copiar`, `descarga`) | RECOMENDADO |
 | Avisar que hay un borrador | Franja del núcleo (`data-borrador`) | RECOMENDADO |
-| Pedir confirmación | `modal` (`FormKit.confirma`) · diálogo de contenido (`data-abre-dialogo`) | RECOMENDADO |
+| Pedir confirmación | `modal` (`FormKit.confirma` con `consecuencias` e `irreversible`; el botón repite el verbo, el foco va a «Volver sin cambios»; el botón que la abre lleva `.btn-peligro-contorno` y el que actúa `.btn-peligro`) · diálogo de contenido (`data-abre-dialogo`). No para lo que se puede rehacer, como guardar una nota | RECOMENDADO |
+| Decir al personal qué pasó después de decidir (validar, rechazar, devolver, turnar, cerrar) | `resultado` (`FormKit.resultado`: tono, hora, quién, motivo y pasos). No para lo que envía la ciudadanía: eso es el acuse | RECOMENDADO |
+| Mostrar en qué va un trámite o un registro | `estado` (cinco familias: hecho, te toca actuar, en marcha, cerrado sin éxito, terminado). No para avisos ni botones | OPCIONAL |
+| Decir varias acciones en orden | `ol.secuencia` del núcleo, en cualquier pantalla o dentro de un aviso | BASE |
+| Avisar el resultado de una acción | `FormKit.aviso` (título, icono por tono, pasos, foco) | BASE |
+| Varias respuestas con la misma etiqueta (una por documento) | `data-contexto` para el resumen de errores | BASE |
+| Texto de varios párrafos / línea de datos (folio · fecha · estado) | `.texto-corrido` / `.linea-datos` con `.linea-datos-item` | BASE |
+| Que los archivos vuelvan con el borrador | proveedor de la página: `borradorArchivos` | RECOMENDADO |
 | Explicar un campo con un texto corto que no todos necesitan | `tooltip` (botón «?»); nunca repite la ayuda visible: si la ayuda visible basta, no hay ícono (`auditar-campos` D5) | OPCIONAL |
 | Plegar lo opcional de uso raro | `acordeon` (`details`) | OPCIONAL |
 | Ubicar a la persona en un sitio interno | `migas` | OPCIONAL |
 | Mostrar en pantalla qué versión del sitio es (de prueba, instalada en el SIA o sin leer) | `version`: distintivo fijo abajo a la izquierda, dentro del pie | OPCIONAL |
 | Mostrar avance de una tarea | `progreso` | OPCIONAL |
-| Listas largas de resultados | `tabla` + `paginacion`; para filtrar, las filas se ocultan con `hidden` (el rayado cuenta sólo las visibles) | OPCIONAL |
+| Listas largas de resultados | `tabla` + `paginacion`; para filtrar, las filas se ocultan con `hidden` (el rayado cuenta sólo las visibles); el folio va en `<span class="mono">` y el estado de cada registro con `estado` | OPCIONAL |
 | Sugerir lo que la persona ya escribió antes | `chips` (sólo campos sin datos personales) | OPCIONAL |
 | Ofrecer respuestas frecuentes conocidas (motivos para observar un documento) | `chips` con `data-chips-fijos`: lista fija, no guarda nada; en un texto largo, el chip agrega su texto para completarlo | OPCIONAL |
 | Ofrecer un archivo | `descarga` (formato y peso visibles) | OPCIONAL |
@@ -72,7 +79,7 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 
 ## 4. Lo que no es una pregunta
 
-- **Datos de terceros** (la persona denunciada, un vecino): mismos campos, `autocomplete="off"` con el motivo en comentario, y revisar si de verdad hacen falta (`data-uso`).
+- **Datos de terceros** (otra persona involucrada, un vecino): mismos campos, `autocomplete="off"` con el motivo en comentario, y revisar si de verdad hacen falta (`data-uso`).
 - **Datos personales**: siempre `data-finalidad`; los de identidad y contacto, `data-sensible` (no entran al borrador). `herramientas/auditar-campos.mjs` lo comprueba.
 - **Aviso de privacidad**: diálogo desde la pantalla de envío, antes de la casilla; fundamentos sin verificar como `[Art. __, fracc. __]`.
 - **Lo pendiente**: `.pendiente` con la palabra «Pendiente:» en el HTML.

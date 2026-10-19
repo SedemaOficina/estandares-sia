@@ -6,10 +6,10 @@ Cómo se comprueba que un formulario cumple el estándar, qué comprueba la máq
 
 | Paso | Herramienta | Qué comprueba | Reglas |
 |---|---|---|---|
-| 1 | `herramientas/auditor-css.mjs` | A01 un selector una declaración · A02 una propiedad por regla · A03 sin `!important` salvo movimiento reducido · A04 sin colores fuera de `:root` · A05 sin longitudes literales · A06 duraciones e interlineados desde tokens · A07 sin id · A08 máximo dos niveles · A09 sin clases sin uso · A10 sin clases de estado · A11 sólo `min-width` en los tres puntos de corte y sólo lo que cambia · A13 orden de bloques · A15 variables sólo en tokens (o `--guia-*` en la guía) · A16 sin variables sin uso | FRM-66 a FRM-70 |
-| 2 | `herramientas/contraste.mjs` | Los 59 pares de color sobre su fondo real cumplen 4.5:1 (texto) o 3:1 (bordes, foco, iconos) | FRM-29, docs/02 |
+| 1 | `herramientas/auditor-css.mjs` | A01 un selector una declaración · A02 una propiedad por regla · A03 sin `!important` salvo movimiento reducido · A04 sin colores fuera de `:root` · A05 sin longitudes literales · A06 duraciones e interlineados desde tokens · A07 sin id · A08 máximo dos niveles · A09 sin clases sin uso · A10 sin clases de estado · A11 sólo `min-width` en los tres puntos de corte y sólo lo que cambia · A13 orden de bloques · A14 sin manejadores ni estilos en línea repetidos · A15 variables sólo en tokens (o `--guia-*` en la guía) · A16 sin variables sin uso | FRM-66 a FRM-70 |
+| 2 | `herramientas/contraste.mjs` | Los 76 pares de color sobre su fondo real cumplen 4.5:1 (texto) o 3:1 (bordes, foco, iconos) | FRM-29, docs/02 |
 | 3 | `herramientas/auditar-campos.mjs` | Todo `data-campo` declara `data-uso`; los personales, `autocomplete` (u `off` con motivo) y `data-sensible` en identidad y contacto; los formatos, su `inputmode`; el «?» no repite la ayuda visible y dos campos seguidos no repiten la misma ayuda | FRM-09, FRM-12, FRM-24, FRM-55 |
-| 4 | `herramientas/vendor.mjs --verificar` | Leaflet, gestos y axe-core coinciden byte a byte con `vendor/MANIFIESTO.json` | FRM-79 |
+| 4 | `herramientas/vendor.mjs --verificar` | Leaflet, gestos, pdf.js y axe-core coinciden byte a byte con `vendor/MANIFIESTO.json` | FRM-79 |
 | 5 | `herramientas/generar-reglas.mjs --comprobar` | `docs/01-reglas.md` y la tabla de contraste de `docs/02` están al día con sus fuentes | — |
 | 6 | `herramientas/construir.mjs` | Iconos, manifiesto (archivos existentes, dependencias reales), `dist/`, esquemas de las plantillas y `docs/04` se regeneran sin error | FRM-71 |
 | 7 | `pruebas/ejecutar.mjs` | Las pruebas siguientes | — |
@@ -23,7 +23,8 @@ Cómo se comprueba que un formulario cumple el estándar, qué comprueba la máq
 | `03-anchos` | Las cinco páginas a 320, 360, 390, 768, 1024, 1280 y 1920 px: sin desplazamiento horizontal, consola y red limpias, `[hidden]` oculto, botones con nombre, objetivos ≥ 44 px con puntero táctil, tipografías cargadas; movimiento reducido; nada a terceros | 35 combinaciones |
 | `04-modulos` | Cada módulo aislado sobre las muestras de la guía; varios formularios en una página sin escuchas duplicadas; esquema del servidor igual a lo que expone el navegador | escritorio |
 | `05-accesibilidad` | axe-core (WCAG 2.0/2.1/2.2 AA + buenas prácticas) en la plantilla por pasos en siete estados, una página, ejemplos, guía y artefacto | ambos |
-| `06-servidor-y-herramientas` | `validar.mjs` acepta lo bueno y rechaza lo malo; herramientas en verde; manifiesto; tipografías con licencia; toda regla FRM citada existe | Node |
+| `06-servidor-y-herramientas` | `validar.mjs` acepta lo bueno y rechaza lo malo; herramientas en verde; manifiesto; tipografías con licencia; tamaño del logotipo; toda regla FRM citada existe | Node |
+| `07-correcciones` | Cada corrección que pidió un proyecto real, una por prueba, sobre `pruebas/paginas/` (correcciones, desenlace, consulta, borrador), las plantillas y la guía | ambos |
 
 Las pruebas miran lo que la persona ve y pulsa (etiquetas, botones, mensajes), no la estructura interna, para que un cambio de implementación no las rompa sin motivo.
 
@@ -57,7 +58,7 @@ Marcar cada punto con fecha, quién y resultado antes de liberar un formulario c
 4. `node herramientas/construir.mjs --todo` para regenerar derivados, artefacto y ZIP.
 5. `CHANGELOG.md` actualizado: qué cambió, qué decisión lo motivó, qué queda pendiente.
 6. Casilla «Verificado en móvil y en escritorio» marcada por quien probó.
-7. Entrega: carpeta `estandar-formularios/`, ZIP, artefacto publicado, resumen de no más de diez líneas que diga qué se comprobó por emulación y qué exige dispositivos reales.
+7. Entrega: carpeta `estandares-sia/formularios/`, ZIP (`../estandar-formularios-vX.Y.Z.zip`), artefacto publicado, resumen de no más de diez líneas que diga qué se comprobó por emulación y qué exige dispositivos reales.
 
 ## 5. Lo que esta versión no pudo comprobar
 

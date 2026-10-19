@@ -17,6 +17,17 @@ const { secciones, reglas } = JSON.parse(readFileSync(resolve(RAIZ, 'reglas/regl
 const CAMPOS = ['id', 'seccion', 'titulo', 'regla', 'porque', 'nivel', 'origen', 'tipo', 'verificacion'];
 const TIPOS = ['decisión heredada', 'decisión del encargo', 'mejor práctica adicional'];
 const NIVELES = ['BASE', 'RECOMENDADO', 'OPCIONAL'];
+/* «FRM-34 a FRM-41, FRM-82 a FRM-84»: los tramos seguidos de una sección. */
+const rangos = (rs) => {
+  const tramos = [];
+  for (const r of rs) {
+    const n = Number(r.id.slice(4));
+    const ultimo = tramos.at(-1);
+    if (ultimo && n === ultimo.hasta + 1) ultimo.hasta = n; else tramos.push({ desde: n, hasta: n });
+  }
+  const id = (n) => `FRM-${String(n).padStart(2, '0')}`;
+  return tramos.map((t) => (t.desde === t.hasta ? id(t.desde) : `${id(t.desde)} a ${id(t.hasta)}`)).join(', ');
+};
 const errores = [];
 const ids = new Set();
 for (const r of reglas) {
@@ -45,10 +56,11 @@ const lineas = [
   '',
   '## Índice',
   '',
+  /* Las reglas nuevas se suman al final de la numeración, así que una sección puede tener tramos sueltos. */
   ...secciones.map((s) => {
     const rs = reglas.filter((r) => r.seccion === s.id);
     /* Ancla como la arma GitHub: minúsculas, sin puntuación, con acentos, cada espacio un guion. */
-    return `${s.id}. [${s.titulo}](#${s.id}-${s.titulo.toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s/g, '-')}) · ${rs[0].id} a ${rs.at(-1).id}`;
+    return `${s.id}. [${s.titulo}](#${s.id}-${s.titulo.toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s/g, '-')}) · ${rangos(rs)}`;
   }),
   '',
   '## Resumen por nivel',

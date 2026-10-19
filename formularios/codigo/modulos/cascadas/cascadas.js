@@ -77,7 +77,7 @@
           if (cp && origen !== 'cp') {
             const base = filas.filter((f) => (!a || !a.value || f.alcaldia === a.value) && (!co || !co.value || f.colonia === co.value));
             const cps = unicos(base, 'cp');
-            if (co && co.value && cps.length === 1 && cp.value !== cps[0]) { cp.value = cps[0]; limpia(campoDe(cp).dataset.campo); anuncia(`${etiquetaDe(campoDe(cp).dataset.campo)}: ${cps[0]}, tomado del catálogo. Puedes corregirlo.`); }
+            if (co && co.value && cps.length === 1 && cp.value !== cps[0]) { cp.value = cps[0]; limpia(campoDe(cp).dataset.campo); anuncia(plantilla(M.cascadaCpTomado, { etiqueta: etiquetaDe(campoDe(cp).dataset.campo), valor: cps[0] })); }
           }
         }
 
@@ -89,10 +89,10 @@
           if (!coinciden.length) return;
           const a = por.alcaldia, co = por.colonia;
           const alcs = unicos(coinciden, 'alcaldia');
-          if (a && alcs.length === 1 && a.value !== alcs[0]) { a.value = alcs[0]; a.toggleAttribute('data-vacio', false); limpia(campoDe(a).dataset.campo); anuncia(`${etiquetaDe(campoDe(a).dataset.campo)}: ${alcs[0]}, tomada del código postal.`); }
+          if (a && alcs.length === 1 && a.value !== alcs[0]) { a.value = alcs[0]; a.toggleAttribute('data-vacio', false); limpia(campoDe(a).dataset.campo); anuncia(plantilla(M.cascadaTomadaCp, { etiqueta: etiquetaDe(campoDe(a).dataset.campo), valor: alcs[0] })); }
           pinta('cp');
           const cols = unicos(coinciden, 'colonia');
-          if (co && cols.length === 1 && co.value !== cols[0]) { co.value = cols[0]; co.toggleAttribute('data-vacio', false); limpia(campoDe(co).dataset.campo); anuncia(`${etiquetaDe(campoDe(co).dataset.campo)}: ${cols[0]}, tomada del código postal.`); }
+          if (co && cols.length === 1 && co.value !== cols[0]) { co.value = cols[0]; co.toggleAttribute('data-vacio', false); limpia(campoDe(co).dataset.campo); anuncia(plantilla(M.cascadaTomadaCp, { etiqueta: etiquetaDe(campoDe(co).dataset.campo), valor: cols[0] })); }
         }
 
         cont.addEventListener('change', (e) => {

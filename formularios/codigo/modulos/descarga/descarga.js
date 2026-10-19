@@ -4,7 +4,10 @@
    Botones de descarga y enlaces a archivos. El texto dice la acción, el
    formato y el peso («Descargar acuse (PDF, 120 KB)»); icono más texto,
    nunca icono solo. Si el archivo se genera al momento, el botón muestra
-   estado de carga; si abre en otra pestaña, lo dice.
+   estado de carga; si abre en otra pestaña, lo dice. Si no se pudo
+   preparar, un aviso junto al botón lo dice ([data-descarga-aviso]). Sus
+   textos están en mensajes (descargaBoton, descargaPreparando,
+   descargaLista, descargaError, enlaceNuevaPestana).
 
    Contrato HTML:
      <a class="btn btn-secundario descarga" href="…" download="acuse-2026.pdf"
@@ -25,7 +28,7 @@
       for (const b of $$('[data-descarga]')) {
         if (!b.querySelector('.icono')) b.prepend(icono('descarga'));
         pintaDetalle(b);
-        if (b.target === '_blank') { const s = document.createElement('span'); s.className = 'solo-lector'; s.textContent = ' (se abre en otra pestaña)'; b.appendChild(s); }
+        if (b.target === '_blank') { const s = document.createElement('span'); s.className = 'solo-lector'; s.textContent = ` ${FormKit.config.mensajes.enlaceNuevaPestana}`; b.appendChild(s); }
       }
       function pintaDetalle(b) {
         const partes = [b.dataset.formato, b.dataset.peso].filter(Boolean);
@@ -47,7 +50,7 @@
         b.setAttribute('aria-busy', 'true'); b.setAttribute('aria-disabled', 'true');
         const texto = [...b.childNodes].find((x) => x.nodeType === 3);
         const original = texto ? texto.textContent : '';
-        if (texto) texto.textContent = ' Preparando…';
+        if (texto) texto.textContent = ` ${M.descargaBoton}`;
         anuncia(M.descargaPreparando);
         /* Si falla, se dice en un aviso junto al botón, no sólo al lector (FRM-40). */
         const previo = b.nextElementSibling && b.nextElementSibling.matches('[data-descarga-aviso]') ? b.nextElementSibling : null;

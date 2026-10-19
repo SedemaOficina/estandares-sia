@@ -6,7 +6,7 @@ Los dos estándares viven juntos porque comparten lo mismo: colores, letra, boto
 
 | Estándar | Versión | Estado |
 |---|---|---|
-| [Formularios](formularios/README.md) | 1.5.0 | En uso |
+| [Formularios](formularios/README.md) | 1.5.1 | En uso |
 | [Geovisores (mapas)](geovisores/README.md) | 0.1.2 | Fase 1: reglas, estilo y tokens, en revisión |
 
 ## Ver la guía visual
@@ -114,6 +114,7 @@ Lo que falta decidir o terminar está en la portada de la guía, sección «Pend
   |---|---|---|---|
   | Leaflet | 1.9.4 | BSD-2-Clause | Mapa de ubicación de formularios |
   | leaflet-gesture-handling | 1.2.2 | MIT | Que el mapa no atrape el desplazamiento en el teléfono |
+  | pdf.js (pdfjs-dist) | 4.10.38 | Apache-2.0 | Visor de documentos de formularios |
   | axe-core | 4.13.0 | MPL-2.0 | Sólo para las pruebas de accesibilidad |
   | Roboto y Cabin | — | SIL Open Font License 1.1 | Tipografías |
 

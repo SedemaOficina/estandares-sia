@@ -6,7 +6,7 @@ El paquete tiene un **núcleo** obligatorio y **30 módulos** que se copian sól
 
 ## Núcleo (BASE)
 
-Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo/css/nucleo.css`, `codigo/js/validaciones.config.js`, `codigo/js/formkit.core.js`, `codigo/js/iconos.js`. Orden de carga: tokens.css → base.css → nucleo.css → (CSS de módulos) … validaciones.config.js → iconos.js → formkit.core.js → (JS de módulos).
+Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo/css/nucleo.css`, `codigo/js/validaciones.config.js`, `codigo/js/iconos.js`, `codigo/js/formkit.core.js`. Orden de carga: tokens.css → base.css → nucleo.css → (CSS de módulos) … validaciones.config.js → iconos.js → formkit.core.js → (JS de módulos).
 
 | Pieza | Nivel |
 |---|---|
@@ -34,18 +34,18 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `opciones` | Opciones elegibles | BASE | pregunta | — | 5.1 KB | — |
 | `otro` | Opción «Otro» con especificación | RECOMENDADO | pregunta | opciones | — | 4.2 KB |
 | `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 7.9 KB |
-| `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.0 KB |
-| `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 4.0 KB |
-| `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 1.1 KB | 7.4 KB |
+| `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.1 KB |
+| `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 4.1 KB |
+| `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 1.1 KB | 7.7 KB |
 | `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.6 KB |
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
 | `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.8 KB |
 | `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.4 KB | 3.2 KB |
-| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.2 KB | 3.5 KB |
+| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.2 KB | 3.9 KB |
 | `resultado` | Resultado de una decisión | RECOMENDADO | retroalimentacion | — | 2.5 KB | 5.7 KB |
 | `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 2.1 KB | 5.7 KB |
 | `copiar` | Copiar y compartir | RECOMENDADO | retroalimentacion | — | 542 B | 4.0 KB |
-| `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 3.7 KB |
+| `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 3.9 KB |
 | `acordeon` | Acordeón y secciones plegables | OPCIONAL | navegacion | — | 2.0 KB | — |
 | `pestanas` | Pestañas | OPCIONAL | navegacion | — | 1.1 KB | 2.9 KB |
 | `migas` | Migas de pan | OPCIONAL | navegacion | — | 2.5 KB | — |
@@ -53,14 +53,14 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `paginacion` | Paginación de resultados | OPCIONAL | navegacion | — | 2.1 KB | 6.0 KB |
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
-| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 4.4 KB | 6.6 KB |
+| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 4.4 KB | 7.2 KB |
 | `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.9 KB |
-| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 22.7 KB |
-| `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.7 KB |
-| `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.6 KB |
-| `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
+| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 23.6 KB |
+| `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.8 KB |
+| `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.4 KB |
+| `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 7.6 KB |
 | `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 7.4 KB |
-| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 1.9 KB | 8.3 KB |
+| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 2.0 KB | 8.5 KB |
 
 ### Opciones elegibles (`opciones`) · BASE
 
@@ -239,7 +239,7 @@ Pasos con barra fija navegable que valida igual que «Continuar»; estados compl
 
 **Cuándo.** Más de una pantalla de preguntas.
 
-**Cuándo no.** Formularios de 5 campos o menos (una página).
+**Cuándo no.** Formularios cortos que caben en una pantalla del teléfono, hasta unas 8 preguntas (una página).
 
 **Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/pasos/pasos.css`, `codigo/modulos/pasos/pasos.js`
 
@@ -557,7 +557,7 @@ Tabla con caption, orden por columna accesible, estados vacío/carga/error, acci
 
 Cinco familias con significado fijo para el estado de un trámite o registro, según a quién le toca qué: hecho (ok, verde), te toca actuar (atencion, ámbar), en marcha (proceso, azul), cerrado sin éxito (rechazo, rojo) y terminado (gris), cada una con su icono y su palabra. FormKit.estado(el, {tono, texto}) lo cambia.
 
-**Cuándo.** Bandejas, tablas y fichas que muestran en qué va un trámite.
+**Cuándo.** Listas de trámites, tablas y fichas que muestran en qué va un trámite.
 
 **Cuándo no.** Avisos a la persona (usa los avisos del núcleo); botones o filtros (no se tocan).
 

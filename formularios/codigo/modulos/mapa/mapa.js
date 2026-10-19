@@ -75,25 +75,25 @@
         /* El plugin de gestos (leaflet-gesture-handling) se registra como
            manejador «gestureHandling»; si está cargado se activa: un dedo
            desplaza la página, dos el mapa. Sin él, Leaflet ignora la opción. */
-        const mapa = L.map(cont, { center: conf.centro, zoom: conf.zoom, gestureHandling: true, gestureHandlingOptions: { text: { touch: 'Usa dos dedos para mover el mapa', scroll: 'Usa Ctrl + rueda para acercar', scrollMac: 'Usa ⌘ + rueda para acercar' } }, zoomControl: true, attributionControl: !!conf.atribucion, tap: true });
+        const mapa = L.map(cont, { center: conf.centro, zoom: conf.zoom, gestureHandling: true, gestureHandlingOptions: { text: { touch: M.mapaGestoTactil, scroll: M.mapaGestoRueda, scrollMac: M.mapaGestoRuedaMac } }, zoomControl: true, attributionControl: !!conf.atribucion, tap: true });
         if (mapa.gestureHandling && !mapa.gestureHandling.enabled()) mapa.gestureHandling.enable();
         const limites = bbox ? L.latLngBounds([bbox.latMin, bbox.lonMin], [bbox.latMax, bbox.lonMax]) : null;
         const encuadra = () => { mapa.invalidateSize(); if (s.punto) mapa.setView([s.punto.lat, s.punto.lon], Math.max(mapa.getZoom(), 14)); else if (limites) mapa.fitBounds(limites); };
         if (limites) { mapa.setMaxBounds(limites.pad(0.1)); mapa.fitBounds(limites); }
         if (conf.teselas) L.tileLayer(conf.teselas, { attribution: conf.atribucion, maxZoom: 19 }).on('tileerror', () => { if (sin) sin.hidden = false; }).addTo(mapa);
-        else if (sin) { sin.hidden = false; sin.textContent = 'Sin mapa base configurado: puedes colocar y mover el punto igual, o escribir la dirección.'; }
+        else if (sin) { sin.hidden = false; sin.textContent = M.mapaSinBase; }
         /* Marcador propio en guinda (SVG en línea): no depende de imágenes externas. */
         const icono = L.divIcon({ className: 'mapa-marcador', html: '<svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true" focusable="false"><path d="M12 22s-7-7.3-7-12.5a7 7 0 0 1 14 0C19 14.7 12 22 12 22z" fill="currentColor"/><circle cx="12" cy="9.5" r="2.6" fill="#fff"/></svg>', iconSize: [32, 32], iconAnchor: [16, 32] });
         let marcador = null;
 
         s.coloca = (p, silencioso = false) => {
           s.punto = p; s.confirmado = false;
-          if (marcador) marcador.setLatLng([p.lat, p.lon]); else { marcador = L.marker([p.lat, p.lon], { icon: icono, draggable: true, keyboard: true, title: 'Punto marcado; arrástralo para moverlo' }).addTo(mapa); marcador.on('dragend', () => { const ll = marcador.getLatLng(); s.coloca({ lat: ll.lat, lon: ll.lng }); }); }
+          if (marcador) marcador.setLatLng([p.lat, p.lon]); else { marcador = L.marker([p.lat, p.lon], { icon: icono, draggable: true, keyboard: true, title: M.mapaMarcador }).addTo(mapa); marcador.on('dragend', () => { const ll = marcador.getLatLng(); s.coloca({ lat: ll.lat, lon: ll.lng }); }); }
           s.fuera = !!bbox && (p.lat < bbox.latMin || p.lat > bbox.latMax || p.lon < bbox.lonMin || p.lon > bbox.lonMax);
           if (inLat) inLat.value = p.lat.toFixed(6); if (inLon) inLon.value = p.lon.toFixed(6);
           const texto = plantilla(M.mapaPunto, { lat: p.lat.toFixed(5), lon: p.lon.toFixed(5) });
           if (salida) salida.textContent = s.fuera ? `${texto} ${M.mapaFuera}` : texto;
-          if (btnConfirmar) { btnConfirmar.hidden = !s.exigeConfirmar || s.fuera; btnConfirmar.textContent = 'Confirmar punto'; btnConfirmar.removeAttribute('aria-pressed'); }
+          if (btnConfirmar) { btnConfirmar.hidden = !s.exigeConfirmar || s.fuera; btnConfirmar.textContent = M.mapaConfirmar; btnConfirmar.removeAttribute('aria-pressed'); }
           if (s.fuera) marca(el.dataset.campo, bbox.mensaje); else limpia(el.dataset.campo);
           if (!silencioso) anuncia(salida ? salida.textContent : texto);
           programaBorrador();
@@ -102,10 +102,10 @@
         mapa.on('click', (e) => s.coloca({ lat: e.latlng.lat, lon: e.latlng.lng }));
         /* Teclado: con el mapa enfocado, Enter coloca el punto en el centro; las flechas lo desplazan (Leaflet). */
         cont.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const c = mapa.getCenter(); s.coloca({ lat: c.lat, lon: c.lng }); } });
-        if (btnConfirmar) btnConfirmar.addEventListener('click', () => { if (!s.punto) return; s.confirmado = true; btnConfirmar.textContent = 'Punto confirmado'; btnConfirmar.setAttribute('aria-pressed', 'true'); limpia(el.dataset.campo); anuncia('Punto confirmado.'); programaBorrador(); });
+        if (btnConfirmar) btnConfirmar.addEventListener('click', () => { if (!s.punto) return; s.confirmado = true; btnConfirmar.textContent = M.mapaConfirmado; btnConfirmar.setAttribute('aria-pressed', 'true'); limpia(el.dataset.campo); anuncia(`${M.mapaConfirmado}.`); programaBorrador(); });
         if (btnGeo && cont.hasAttribute('data-geolocalizacion') && navigator.geolocation) {
           btnGeo.hidden = false;
-          btnGeo.addEventListener('click', () => { btnGeo.setAttribute('aria-busy', 'true'); navigator.geolocation.getCurrentPosition((pos) => { btnGeo.removeAttribute('aria-busy'); s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude }); mapa.setView([pos.coords.latitude, pos.coords.longitude], 16); }, () => { btnGeo.removeAttribute('aria-busy'); anuncia('No se pudo obtener tu ubicación. Toca el mapa o escribe la dirección.', true); }, { timeout: 10000 }); });
+          btnGeo.addEventListener('click', () => { btnGeo.setAttribute('aria-busy', 'true'); navigator.geolocation.getCurrentPosition((pos) => { btnGeo.removeAttribute('aria-busy'); s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude }); mapa.setView([pos.coords.latitude, pos.coords.longitude], 16); }, () => { btnGeo.removeAttribute('aria-busy'); anuncia(M.mapaSinUbicacion, { cortes: true, visible: salida }); }, { timeout: 10000 }); });
         }
         /* La alternativa manual (campo data-formato="coordenadas") también mueve el punto. */
         const manual = $$('[data-formato="coordenadas"] input', form)[0];

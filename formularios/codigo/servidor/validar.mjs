@@ -185,7 +185,7 @@ export function validaPayload(payload, esquema, opciones = {}) {
     } else {
       v = cfg.recorta(v); datos[n] = v;
       if (c.atributos?.maxlength && v.length > Number(c.atributos.maxlength)) errores.push({ campo: n, mensaje: plantilla(M.maximoCaracteres, { max: c.atributos.maxlength, etiqueta: c.etiqueta }) });
-      if (c.atributos?.minlength && v.length < Number(c.atributos.minlength)) errores.push({ campo: n, mensaje: `Escribe al menos ${c.atributos.minlength} caracteres en «${c.etiqueta}».` });
+      if (c.atributos?.minlength && v.length < Number(c.atributos.minlength)) errores.push({ campo: n, mensaje: plantilla(M.minimoCaracteres, { min: c.atributos.minlength, n: v.length, etiqueta: c.etiqueta }) });
     }
   }
 
@@ -195,7 +195,7 @@ export function validaPayload(payload, esquema, opciones = {}) {
     const forma = esObjetoPlano(v) && Object.keys(v).length === 2 && v.type === 'Point' && Array.isArray(v.coordinates) && v.coordinates.length === 2 && v.coordinates.every((x) => typeof x === 'number' && Number.isFinite(x));
     if (!forma) { errores.push({ campo: n, mensaje: 'Punto mal formado: se espera {type:"Point", coordinates:[lon, lat]}.' }); return; }
     const [lon, lat] = v.coordinates;
-    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) { errores.push({ campo: n, mensaje: 'Las coordenadas están fuera de rango: la latitud va de -90 a 90 y la longitud de -180 a 180.' }); return; }
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) { errores.push({ campo: n, mensaje: M.fmtCoordenadasRango }); return; }
     const b = cfg.ambito?.coordenadas;
     if (b && (lat < b.latMin || lat > b.latMax || lon < b.lonMin || lon > b.lonMax)) errores.push({ campo: n, mensaje: b.mensaje });
   }

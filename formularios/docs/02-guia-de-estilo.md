@@ -6,13 +6,13 @@ Qué se ve y por qué. Todo valor de este documento vive en `codigo/css/tokens.c
 
 | Token | Valor | Trabajo |
 |---|---|---|
-| `--guinda` | #9D2148 | Identidad: títulos de página y de paso, encabezados de tabla, acción principal, filete de la cabecera. |
+| `--guinda` | #9D2148 | Identidad: títulos de página y de paso, encabezados de tabla, acción principal. |
 | `--guinda-osc` | #7A1A38 | Acción principal al pasar el cursor. |
-| `--guinda-cl` | #F7F1F3 | Fondo suave: filas alternas de tabla, panel de resultado. |
+| `--guinda-cl` | #F7F1F3 | Fondo suave: filas alternas de tabla, leyenda de obligatorios, número de la secuencia «qué sigue». |
 | `--dorado` | #B28E5C | Filete institucional y detalles de trazo. **Nunca como texto sobre blanco** (3.1:1). |
 | `--dorado-txt` | #8C6C3E | Dorado como texto: variante oscurecida que cumple 4.5:1. |
 | `--texto` | #2B2D2E | Cuerpo y respuesta de la persona. |
-| `--gris` | #55585A | Texto secundario: rótulos, pies, notas, marca de obligatorio. |
+| `--gris` | #55585A | Texto secundario: rótulos, pies, notas. |
 | `--gris-cl` | #6B6E70 | Ayuda de campo, contador, texto del select vacío. |
 | `--linea` | #DCDEE0 | Separadores y bordes de tarjeta. |
 | `--borde` | #878B8E | Borde de control y de botón secundario (3:1 sobre blanco). |
@@ -118,25 +118,25 @@ Cada par de la tabla es un uso real del estándar: el texto sobre el fondo donde
 
 | Rol | Familia y peso | Tamaño |
 |---|---|---|
-| Título de página (`.titulo-pagina`) | Cabin 700 | `--t-2xl` = clamp(24px, 3vw + 12px, 30px) |
-| Título de paso (`.titulo-paso`) | Cabin 600 | `--t-xl` = clamp(21px, 2vw + 12px, 24px) |
+| Título de página (`.titulo-pagina`) | Cabin 600 | `--t-2xl` = clamp(24px, 3vw + 12px, 30px) |
+| Título de paso (`.titulo-paso`) | Cabin 700 | `--t-xl` = clamp(21px, 2vw + 12px, 24px) |
 | Título de bloque (`.titulo-bloque`) | Cabin 600, filete dorado superior | `--t-lg` = clamp(18px, 1.5vw + 12px, 20px) |
 | Pregunta (`.etiqueta`) | Roboto 500 | `--t-base` = 16px |
-| Respuesta y cuerpo | Roboto 400 | `--t-base` = 16px, interlineado 1.55, ancho máximo 70 caracteres |
+| Respuesta y cuerpo | Roboto 400 | `--t-base` = 16px, interlineado 1.55; ancho máximo de 70 caracteres sólo en el texto corrido (`.texto-corrido`) |
 | Botones secundarios, celdas | Roboto 500 | `--t-md` = 14px |
 | Ayuda, contador, pies (`.ayuda`) | Roboto 400 | `--t-sm` = 13px |
-| Rótulo (`.rotulo`) | Cabin 600, mayúsculas, tracking .06em | `--t-xs` = 12px |
+| Rótulo (`.rotulo`) | Roboto 400, mayúsculas, tracking .06em | `--t-sm` = 13px |
 
 Los tamaños grandes son fluidos: crecen con el ancho de la pantalla entre un mínimo legible en teléfono y un máximo en escritorio. El cuerpo y los controles **nunca bajan de 16 px**: por debajo, iOS hace zoom al enfocar un campo. Las dos familias viajan en `codigo/fuentes/` con su licencia (OFL) y sólo en los pesos declarados (C12): Cabin 600 y 700; Roboto 400, 500 y 700.
 
 ## 4. Los seis niveles de jerarquía
 
-1. **Título de página**: uno por formulario, en la cabecera, junto al logotipo.
+1. **Título de página**: uno por formulario, en la cabecera, debajo del logotipo.
 2. **Título de paso**: uno por paso o por formulario de una página; recibe el foco al cambiar de paso.
 3. **Título de bloque**: agrupa preguntas afines dentro de un paso; lleva el filete dorado.
 4. **Pregunta**: la etiqueta del campo (`label` o `legend`); con asterisco guinda si es obligatoria.
 5. **Texto y ayuda**: el cuerpo, la ayuda del campo (antes del control) y el mensaje de error (después).
-6. **Rótulo**: etiquetas de datos en la revisión y el acuse, pies de tabla y de figura.
+6. **Rótulo**: etiquetas de datos del acuse, pies de tabla y de figura. En la revisión y en la tabla del teléfono, el rótulo de cada dato va en gris y peso normal, y el dato destaca.
 
 Entre niveles cambia el tamaño o el peso, nunca sólo el color. No se inventan niveles intermedios: si un contenido no cabe en estos seis, el problema es de estructura.
 
@@ -161,7 +161,7 @@ Entre niveles cambia el tamaño o el peso, nunca sólo el color. No se inventan 
 
 ## 6. Puntos de quiebre: móvil primero
 
-El CSS parte del teléfono y sólo crece. Hay tres puntos de corte, declarados en `tokens.css` y repetidos en la configuración del auditor (CSS no admite variables en `@media`): `--bp-sm` 560 px (hoja inferior → diálogo centrado; chips en fila), `--bp-md` 760 px (campos a dos columnas con subcuadrícula; tabla real; botones en fila con la acción principal a la derecha), `--bp-lg` 1024 px (navegación lateral en la guía; tres columnas donde las hay). Sólo `min-width`: el auditor rechaza `max-width`.
+El CSS parte del teléfono y sólo crece. Hay tres puntos de corte, declarados en `tokens.css` y repetidos en la configuración del auditor (CSS no admite variables en `@media`): `--bp-sm` 560 px (hoja inferior → diálogo centrado; acciones del acuse en fila), `--bp-md` 760 px (campos a dos columnas con subcuadrícula; tabla real; botones en fila con la acción principal a la derecha), `--bp-lg` 1024 px (navegación lateral en la guía; visor fijo junto a lo que se revisa). Sólo `min-width`: el auditor rechaza `max-width`.
 
 ## 7. Estados
 
@@ -180,9 +180,13 @@ El estado vive siempre en un atributo; el auditor rechaza clases como `.activo` 
 
 El estado de un trámite o un registro (módulo `estado`) es otra cosa: una etiqueta con cinco familias según a quién le toca qué, cada una con su tono, su icono y su palabra. Verde (palomita), hecho: validado, aprobado. Ámbar (alerta), te toca actuar: corregir, completar, un borrador sin enviar. Azul (reloj), en marcha: en revisión, en trámite. Rojo (error), cerrado sin éxito: rechazado, cancelado, vencido. Gris (archivo), terminado: concluido, archivado. Cada estado de un sistema cae en una de las cinco; el rojo no se usa para «En revisión» ni el verde para «Enviado». El desenlace de una decisión del personal (módulo `resultado`) usa las mismas cinco familias.
 
+### Botones y avisos
+
+El botón principal es guinda relleno, uno por pantalla (y uno por diálogo). El de peligro tiene dos formas: con contorno rojo para el botón que abre una acción destructiva y rojo relleno con texto blanco para el que la hace dentro de su confirmación (pares C42 a C44). Cada aviso lleva el icono de su tono (información, alerta, error, palomita) y, si pasa de una frase, un título en negritas. La secuencia «qué sigue» numera cada acción en un círculo guinda claro unido por una línea dorada.
+
 ## 8. Iconografía
 
-Un solo sprite SVG (`codigo/iconos/sprite.svg`, 30 símbolos) que `formkit.core.js` inyecta una vez por página. Los iconos heredan el color del texto (`currentColor`), miden `--icono` (20 px) o `--icono-sm` (16 px). El decorativo lleva `aria-hidden="true"`; el que comunica algo va siempre junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con `aria-label` y 44 px de objetivo. Catálogo: alerta, error, ok, info, ayuda, cerrar, palomita, flecha-izq, flecha-der, abajo, descarga, copiar, compartir, eliminar, editar, ubicacion, fecha, adjunto, camara, buscar, mas, cargando, reloj, externo. Marcas de redes sociales (rellenas, como las publica cada red; sólo en el bloque de redes del pie): facebook, x, instagram, tiktok, youtube.
+Un solo sprite SVG (`codigo/iconos/sprite.svg`, 30 símbolos) que `formkit.core.js` inyecta una vez por página. Los iconos heredan el color del texto (`currentColor`), miden `--icono` (20 px) o `--icono-sm` (16 px). El decorativo lleva `aria-hidden="true"`; el que comunica algo va siempre junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con `aria-label` y 44 px de objetivo. Catálogo: alerta, error, ok, info, ayuda, cerrar, palomita, flecha-izq, flecha-der, abajo, descarga, copiar, compartir, eliminar, editar, ubicacion, fecha, adjunto, camara, buscar, mas, cargando, reloj, externo, archivo. Marcas de redes sociales (rellenas, como las publica cada red; sólo en el bloque de redes del pie): facebook, x, instagram, tiktok, youtube.
 
 ## 9. Lo que la guía visual muestra y este documento no
 

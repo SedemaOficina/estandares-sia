@@ -122,7 +122,6 @@
   const CURP = {
     largo: 18,
     re: /^[A-Z][AEIOUX][A-Z]{2}\d{6}[HMX][A-Z]{2}[B-DF-HJ-NP-TV-Z]{3}[0-9A-Z]\d$/,
-    sexos: ['H', 'M', 'X'],
     entidades: ['AS', 'BC', 'BS', 'CC', 'CL', 'CM', 'CS', 'CH', 'DF', 'DG', 'GT', 'GR', 'HG', 'JC', 'MC', 'MN', 'MS', 'NT', 'NL', 'OC', 'PL', 'QT', 'QR', 'SP', 'SL', 'SR', 'TC', 'TS', 'TL', 'VZ', 'YN', 'ZS', 'NE'],
     verificarDigito: true,
     alfabeto: '0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'
@@ -490,7 +489,7 @@
     }
   };
 
-  /* «curp-fecha-dma»: el mismo cruce, con el nombre que usan los proyectos con fecha día/mes/año. */
+  /* «curp-fecha-dma»: el mismo cruce, para los formularios que piden la fecha como día/mes/año. */
   CRUZADAS['curp-fecha-dma'] = { ...CRUZADAS['curp-fecha'], descripcion: 'La fecha de nacimiento (día/mes/año) coincide con la contenida en la CURP' };
 
   /* ---------- Archivos ---------- */
@@ -518,7 +517,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.5.0',
+    version: '1.5.1',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -553,7 +552,7 @@
       maximoOpciones: 'Elige como máximo {max} opciones en «{etiqueta}».',
       soloLista: 'Elige una opción de la lista en «{etiqueta}».',
       repiteOpcion: '«{texto}» ya está en la lista: elige esa opción.',
-      edadMinima: 'Se requiere una edad mínima de {edad} años. Si la persona tiene menos, su madre, padre o tutor debe llenar el formulario.',
+      edadMinima: 'Se requiere una edad mínima de {edad} años.',
       edadMaxima: 'La edad máxima es de {edad} años.',
       curpNombre: 'La CURP no corresponde con el nombre y los apellidos que escribiste. Escríbelos tal como aparecen en tu CURP.',
       curpSinSegundo: 'Tu CURP indica que tienes segundo apellido. Escríbelo tal como aparece en tu CURP.',
@@ -686,7 +685,6 @@
       filaConfirma: '¿Quitar esta fila? Tiene datos capturados.',
       repetibleMin: 'Agrega al menos {min} elementos en «{etiqueta}».',
       repetibleMax: 'Como máximo se admiten {max} elementos en «{etiqueta}».',
-      mapaSinPunto: 'Sin punto marcado.',
       mapaPunto: 'Punto marcado: {lat}, {lon}.',
       mapaFuera: 'El punto queda fuera del ámbito. Muévelo o escribe la dirección.',
       chipsBorrar: 'Borrar historial',
@@ -699,7 +697,51 @@
       visorError: 'No se pudo mostrar el documento aquí. Ábrelo en otra pestaña con el enlace de arriba.',
       visorNavegador: 'Se muestra con el visor del navegador. Si no lo ves completo, ábrelo en otra pestaña con el enlace de arriba.',
       visorHoja: 'Hoja {n} de {total}',
-      sesionExpira: 'Tu sesión terminará en {min} minutos. Guarda o continúa para mantenerla.'
+      /* Textos de los módulos que antes estaban escritos en su código: así también se cambian aquí. */
+      archRechazoProceso: 'no se pudo procesar el archivo. Intenta de nuevo.',
+      copiarBoton: 'Copiado',
+      copiarBotonFallo: 'No se pudo copiar',
+      enlaceNuevaPestana: '(se abre en otra pestaña)',
+      descargaBoton: 'Preparando…',
+      enlaceMapaSin: 'No encontramos coordenadas en ese texto. Pega el enlace completo de Google Maps (el que empieza con google.com/maps) o escribe las coordenadas.',
+      enlaceMapaCorto: 'Los enlaces cortos de Google Maps no traen las coordenadas. Ábrelo en Google Maps: en el celular, mantén presionado el punto y copia los números que aparecen; en la computadora, haz clic derecho sobre el punto. Pégalos en «Coordenadas».',
+      enlaceMapaCentro: 'Ese enlace marca el centro de la pantalla, no un punto: tomamos {coordenadas}. Revisa que sea el lugar.',
+      enlaceMapaTomadas: 'Coordenadas tomadas del enlace: {coordenadas}.',
+      enlaceMapaOrden: 'se acomodaron latitud y longitud',
+      enlaceMapaSigno: 'se agregó el signo menos a la longitud, que en la Ciudad siempre es negativa',
+      enlaceMapaAnuncio: 'Coordenadas: {coordenadas}{notas}.',
+      conjuncion: ' y ',
+      fechaEdadCalculada: '{etiqueta}: {edad} años, calculada con la fecha de nacimiento.',
+      fechaAtajos: 'Atajos de periodo',
+      fechaUltimos: 'Últimos {n} días',
+      fechaPeriodo: 'Periodo: del {desde} al {hasta}',
+      curpDerivado: '{etiqueta}: {valor}, tomado de la CURP.',
+      sexoH: 'Hombre',
+      sexoM: 'Mujer',
+      sexoX: 'No binario',
+      cascadaCpTomado: '{etiqueta}: {valor}, tomado del catálogo. Puedes corregirlo.',
+      cascadaTomadaCp: '{etiqueta}: {valor}, tomada del código postal.',
+      chipsHistorial: 'Usados antes en {etiqueta}',
+      chipsQuitada: 'Sugerencia quitada.',
+      chipsBorrado: 'Historial borrado.',
+      mapaGestoTactil: 'Usa dos dedos para mover el mapa',
+      mapaGestoRueda: 'Usa Ctrl + rueda para acercar',
+      mapaGestoRuedaMac: 'Usa ⌘ + rueda para acercar',
+      mapaSinBase: 'Sin mapa base configurado: puedes colocar y mover el punto igual, o escribir la dirección.',
+      mapaMarcador: 'Punto marcado; arrástralo para moverlo',
+      mapaConfirmar: 'Confirmar punto',
+      mapaConfirmado: 'Punto confirmado',
+      mapaSinUbicacion: 'No se pudo obtener tu ubicación. Toca el mapa o escribe la dirección.',
+      cargando: 'Cargando…',
+      repetibleAgregado: '{etiqueta} {n} agregado.',
+      repetibleQuitado: 'Fila {n} quitada.',
+      pestanaAnuncio: 'Pestaña {nombre}',
+      paginacionAnterior: 'Anterior',
+      paginacionSiguiente: 'Siguiente',
+      paginacionMas: 'Cargar más',
+      paginacionActual: 'Página {n}, actual',
+      compartido: 'Compartido.',
+      borradorRecuperado: 'Borrador recuperado en este dispositivo.'
     }
   };
 
@@ -716,7 +758,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.1
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -724,11 +766,11 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    la superficie para quien programa es el HTML; la fuente de verdad de la
    validación es un solo archivo de configuración.
 
-   Qué hace el núcleo: anuncios para lector de pantalla, preparación de cada
-   campo (marca de obligatorio, ayuda, error, contador), visibilidad
-   condicional, validación individual y cruzada con el momento acordado
-   (decisión C5), resumen de errores con foco, borrador local, envío sin
-   duplicados y registro de módulos. Todo lo demás es un módulo opcional
+   Qué hace el núcleo: anuncios que también se ven, avisos (FormKit.aviso),
+   preparación de cada campo (marca de obligatorio, ayuda, error, contador),
+   visibilidad condicional, validación individual y cruzada con el momento
+   acordado (decisión C5), resumen de errores con foco, borrador local, envío
+   sin duplicados y registro de módulos. Todo lo demás es un módulo opcional
    (codigo/modulos/*) que se carga sólo si el formulario lo usa.
 
    Sin dependencias, sin manejadores en línea (eventos por delegación), sin
@@ -882,7 +924,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   function iniciar(formulario, opciones = {}) {
     const form = typeof formulario === 'string' ? $(formulario) : formulario;
     if (!form) throw new Error(`FormKit: no existe el formulario «${formulario}»`);
-    /* Un formulario se inicia una sola vez (P111): si ya arrancó solo al
+    /* Un formulario se inicia una sola vez: si ya arrancó solo al
        cargar, la llamada de la página le suma sus opciones (enviar, alEnviar…)
        y recibe la misma instancia, sin duplicar escuchas. */
     const previa = iniciados.get(form);
@@ -1395,7 +1437,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     /* Lo que la página escribe sola (al precargar una solicitud para continuarla) no es
        un borrador de la persona: el borrador empieza con su primer gesto en el formulario
        (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
-       después la página o los módulos entra en el mismo borrador (P148). */
+       después la página o los módulos entra en el mismo borrador. */
     let personaActuo = false;
     for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
     /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
@@ -1458,7 +1500,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
       avisaBorrador('restaura', b);
-      anuncia(M.borradorGuardado.replace('guardado', 'recuperado'));
+      anuncia(M.borradorRecuperado);
     }
     function iniciaFranja(b) {
       franja.hidden = false;
@@ -1469,7 +1511,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
         if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const si = $('[data-borrador="descartar-si"]', franja); if (si) si.focus(); } else { borraBorrador(); franja.hidden = true; } }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const seguro = $('[data-borrador="conservar"]', franja); if (seguro) seguro.focus(); } else { borraBorrador(); franja.hidden = true; } }
         else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador="recuperar"]', franja).focus(); }
       });
@@ -1704,7 +1746,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   /* Formularios iniciados en la página, para marcar un error desde fuera
      sin tener a mano la instancia. */
   const instancias = [];
-  /* Cada formulario iniciado, con sus opciones: para no iniciarlo dos veces (P111). */
+  /* Cada formulario iniciado, con sus opciones: para no iniciarlo dos veces. */
   const iniciados = new WeakMap();
   const marcaErrorGlobal = (campo, mensaje) => instancias.some((i) => i.marcaError(campo, mensaje));
 
@@ -1924,7 +1966,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           anuncia(visibles.length === 0 ? plantilla(M.comboNinguno, { texto: entrada.value }) : visibles.length === 1 ? M.comboUno : plantilla(M.comboVarios, { n: visibles.length }));
         }
 
-        /* Sólo cuando la persona escribe en el campo (P99): si la página lo llena
+        /* Sólo cuando la persona escribe en el campo: si la página lo llena
            (al retomar un borrador), la lista no se abre ni anuncia ni tapa la
            pregunta siguiente. */
         entrada.addEventListener('input', () => { if (document.activeElement === entrada) pinta(); });
@@ -1986,7 +2028,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   FormKit.registra('fecha', {
     selector: '[data-hoy],[data-ahora],[data-rango],[data-formato="fecha"][data-deriva],[data-formato="fecha-dma"]',
     iniciar(form, ctx) {
-      const { $, $$, cfg, M, anuncia, envoltura, controlPrincipal, validaYPinta, programaBorrador } = ctx;
+      const { $, $$, cfg, M, plantilla, anuncia, envoltura, controlPrincipal, validaYPinta, programaBorrador } = ctx;
 
       form.addEventListener('click', (e) => {
         const b = e.target.closest('[data-hoy],[data-ahora],[data-atajo]');
@@ -2040,7 +2082,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
             if (!c || c.value === edad) continue;
             c.value = edad;
             c.dispatchEvent(new Event('change', { bubbles: true }));
-            if (edad) anuncia(`${ctx.etiquetaDe(d)}: ${edad} años, calculada con la fecha de nacimiento.`);
+            if (edad) anuncia(plantilla(M.fechaEdadCalculada, { etiqueta: ctx.etiquetaDe(d), edad }));
           }
         };
         ctl.addEventListener('input', calcula);
@@ -2058,14 +2100,14 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const caja = document.createElement('div');
         caja.className = 'fecha-atajos';
         caja.setAttribute('role', 'group');
-        caja.setAttribute('aria-label', 'Atajos de periodo');
+        caja.setAttribute('aria-label', M.fechaAtajos);
         for (const d of dias) {
           const b = document.createElement('button');
           b.type = 'button';
           b.className = 'btn btn-secundario fecha-atajo';
           b.dataset.atajo = String(d);
           b.dataset.rangoIni = ini; b.dataset.rangoFin = fin;
-          b.textContent = `Últimos ${d} días`;
+          b.textContent = plantilla(M.fechaUltimos, { n: d });
           caja.appendChild(b);
         }
         r.prepend(caja);
@@ -2080,7 +2122,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         ini.value = desde.toISOString().slice(0, 10); fin.value = hoy;
         for (const c of [ini, fin]) { c.dispatchEvent(new Event('input', { bubbles: true })); c.dispatchEvent(new Event('change', { bubbles: true })); }
         validaYPinta(b.dataset.rangoIni); validaYPinta(b.dataset.rangoFin);
-        anuncia(`Periodo: del ${ini.value} al ${fin.value}`);
+        anuncia(plantilla(M.fechaPeriodo, { desde: cfg.dmaDeIso(ini.value) || ini.value, hasta: cfg.dmaDeIso(fin.value) || fin.value }));
         $$('[data-atajo]', b.parentNode).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
       }
     }
@@ -2142,7 +2184,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (!campo.dataset.deriva) return;
         const valida = !validaCampo(campo.dataset.campo) && ctl.value.length === cfg.curp.largo;
         const datos = valida ? cfg.formatos.curp.deriva(ctl.value) : {};
-        const textos = { H: 'Hombre', M: 'Mujer', X: 'No binario' };
+        const textos = { H: cfg.mensajes.sexoH, M: cfg.mensajes.sexoM, X: cfg.mensajes.sexoX };
         for (const par of campo.dataset.deriva.split(/\s+/).filter(Boolean)) {
           const [clave, destino] = par.split('=');
           const envDestino = envoltura(destino);
@@ -2155,7 +2197,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           if (ctlDestino.value !== valor) {
             ctlDestino.value = valor;
             ctlDestino.dispatchEvent(new Event('change', { bubbles: true }));
-            if (valor) anuncia(`${etiquetaDe(destino)}: ${valor}, tomado de la CURP.`);
+            if (valor) anuncia(FormKit.utilidades.plantilla(cfg.mensajes.curpDerivado, { etiqueta: etiquetaDe(destino), valor }));
           }
         }
       }
@@ -2176,8 +2218,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    varias filas de una tabla de captura. Cada fila es una copia de una
    plantilla <template>; los campos de la fila son [data-campo] cuyo nombre
    se completa con el índice (personas.0.nombre). Mínimo y máximo de filas
-   configurables; quitar una fila con datos pide confirmación en línea; el
-   foco vuelve a un lugar sensato tras agregar o quitar.
+   configurables; quitar una fila con datos pide confirmación con el módulo
+   «modal» («Quitar fila N»); con el máximo, «Agregar» dice el límite junto
+   a él (.repetible-limite); el foco vuelve a un lugar sensato tras agregar
+   o quitar.
 
    Contrato HTML:
      <div class="repetible" data-repetible="personas" data-min="1" data-max="5"
@@ -2247,7 +2291,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           for (const c of $$('[data-campo]', fila)) preparaCampo(c.dataset.campo);
           renumera();
           if (foco) { const primero = $('input,select,textarea', fila); if (primero) primero.focus(); }
-          anuncia(`${rep.dataset.etiqueta || rep.dataset.repetible} ${i + 1} agregado.`);
+          anuncia(plantilla(M.repetibleAgregado, { etiqueta: rep.dataset.etiqueta || rep.dataset.repetible, n: i + 1 }));
           programaBorrador();
           return fila;
         }
@@ -2261,7 +2305,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           renumera();
           const siguiente = filas()[Math.min(idx, filas().length - 1)];
           (siguiente ? $('[data-repetible-quitar]', siguiente) : btnAgregar).focus();
-          anuncia(`Fila ${idx + 1} quitada.`);
+          anuncia(plantilla(M.repetibleQuitado, { n: idx + 1 }));
           programaBorrador();
         }
 
@@ -2272,9 +2316,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           const q = e.target.closest('[data-repetible-quitar]');
           if (!q) return;
           const fila = q.closest('.repetible-fila');
-          if (tieneDatos(fila) && FormKit.confirma) FormKit.confirma(q, { titulo: M.filaConfirma, si: 'Quitar', no: 'Conservar', peligro: true }).then((ok) => { if (ok) quita(fila); });
-          else if (tieneDatos(fila)) { if (window.confirm(M.filaConfirma)) quita(fila); } /* sin módulo modal: confirmación nativa como último recurso */
-          else quita(fila);
+          /* Con datos, se confirma con el módulo modal (dependencia), nunca con window.confirm (FRM-38). */
+          if (!tieneDatos(fila)) { quita(fila); return; }
+          if (!FormKit.confirma) { console.warn('FormKit: «repetibles» necesita el módulo «modal» para confirmar antes de quitar una fila con datos.'); return; }
+          FormKit.confirma(q, { titulo: M.filaConfirma, si: plantilla(M.filaQuitar, { n: filas().indexOf(fila) + 1 }), peligro: true }).then((ok) => { if (ok) quita(fila); });
         });
 
         /* Filas iniciales: las que exija el mínimo (al menos una si el grupo es obligatorio). */
@@ -2387,7 +2432,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
      </form>
    Ganchos que ocupa: validaTodo (revalida todos los pasos al enviar),
    submit (Enter avanza en lugar de enviar), estadoBorrador/restauraBorrador
-   (paso actual y pasos hechos).
+   (paso actual y pasos hechos) y erroresServidor (abre el primer paso con un
+   error que devolvió el servidor).
    ========================================================= */
 (function () {
   'use strict';
@@ -2624,10 +2670,18 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
          <div class="acuse-dato"><span class="acuse-etq">Recibido el</span><span data-acuse-fecha></span></div>
        </div>
        <ol class="secuencia">…</ol>
-       <a class="btn btn-secundario" data-acuse-descarga hidden download>Descargar acuse (PDF)</a>
+       <div class="acuse-acciones">
+         <a class="btn btn-secundario" data-acuse-descarga hidden download>Descargar acuse (PDF, <span data-acuse-peso></span>)</a>
+         <a class="btn btn-primario" href="/">Volver al inicio</a>
+       </div>
+     </section>
+     <section class="tarjeta" data-limite hidden>
+       <h2 class="titulo-paso" tabindex="-1">Por ahora no podemos recibir más envíos</h2>
+       <button type="button" class="btn btn-primario" data-accion="reintentar">Volver</button>
      </section>
    La respuesta del servidor debe traer {folio, fecha} y opcionalmente
-   {acuseUrl, acusePeso}.
+   {acuseUrl, acusePeso, acuseNombre}. La fecha se escribe con
+   FormKit.utilidades.fechaHora (zona de la Ciudad, 24 horas).
    ========================================================= */
 (function () {
   'use strict';
@@ -2702,12 +2756,12 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
      · oculta: elemento o lista de elementos que ya no aplican (el panel de
        decisión), que se ocultan.
    Lo que la página ponga en lugar con data-resultado-acciones (por ejemplo,
-   «Volver a la bandeja») se conserva al final.
+   «Volver a la lista de solicitudes») se conserva al final.
 
    Contrato HTML:
      <section class="resultado" data-resultado hidden>
        <div class="acciones" data-resultado-acciones>
-         <a class="btn btn-primario" href="bandeja.html">Volver a la bandeja</a>
+         <a class="btn btn-primario" href="solicitudes.html">Volver a la lista de solicitudes</a>
        </div>
      </section>
    ========================================================= */
@@ -2936,7 +2990,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const sh = e.target.closest('[data-compartir]');
         if (sh) {
           const datos = { title: sh.dataset.compartirTitulo || document.title, text: sh.dataset.compartirTexto || '', url: sh.dataset.compartirUrl || location.href };
-          if (navigator.share) { try { await navigator.share(datos); confirma(sh, 'Compartido.', true); } catch (err) { /* la persona canceló */ } }
+          if (navigator.share) { try { await navigator.share(datos); confirma(sh, M.compartido, true); } catch (err) { /* la persona canceló */ } }
           else { const ok = await copia(datos.url); confirma(sh, ok ? `${M.compartirFallo} ${M.copiado}` : M.compartirFallo, ok); }
         }
       });
@@ -2955,7 +3009,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         anuncia(texto, !ok);
         const nodo = [...b.childNodes].reverse().find((x) => x.nodeType === 3 && x.textContent.trim()) || b.appendChild(document.createTextNode(''));
         if (b.dataset.textoOriginal === undefined) b.dataset.textoOriginal = nodo.textContent;
-        nodo.textContent = ok ? ' Copiado' : ' No se pudo copiar';
+        nodo.textContent = ` ${ok ? M.copiarBoton : M.copiarBotonFallo}`;
         clearTimeout(Number(b.dataset.temporizador));
         b.dataset.temporizador = String(setTimeout(() => { nodo.textContent = b.dataset.textoOriginal; }, FormKit.config.borrador.visibleMs));
       }
@@ -2971,7 +3025,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    Botones de descarga y enlaces a archivos. El texto dice la acción, el
    formato y el peso («Descargar acuse (PDF, 120 KB)»); icono más texto,
    nunca icono solo. Si el archivo se genera al momento, el botón muestra
-   estado de carga; si abre en otra pestaña, lo dice.
+   estado de carga; si abre en otra pestaña, lo dice. Si no se pudo
+   preparar, un aviso junto al botón lo dice ([data-descarga-aviso]). Sus
+   textos están en mensajes (descargaBoton, descargaPreparando,
+   descargaLista, descargaError, enlaceNuevaPestana).
 
    Contrato HTML:
      <a class="btn btn-secundario descarga" href="…" download="acuse-2026.pdf"
@@ -2992,7 +3049,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       for (const b of $$('[data-descarga]')) {
         if (!b.querySelector('.icono')) b.prepend(icono('descarga'));
         pintaDetalle(b);
-        if (b.target === '_blank') { const s = document.createElement('span'); s.className = 'solo-lector'; s.textContent = ' (se abre en otra pestaña)'; b.appendChild(s); }
+        if (b.target === '_blank') { const s = document.createElement('span'); s.className = 'solo-lector'; s.textContent = ` ${FormKit.config.mensajes.enlaceNuevaPestana}`; b.appendChild(s); }
       }
       function pintaDetalle(b) {
         const partes = [b.dataset.formato, b.dataset.peso].filter(Boolean);
@@ -3014,7 +3071,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         b.setAttribute('aria-busy', 'true'); b.setAttribute('aria-disabled', 'true');
         const texto = [...b.childNodes].find((x) => x.nodeType === 3);
         const original = texto ? texto.textContent : '';
-        if (texto) texto.textContent = ' Preparando…';
+        if (texto) texto.textContent = ` ${M.descargaBoton}`;
         anuncia(M.descargaPreparando);
         /* Si falla, se dice en un aviso junto al botón, no sólo al lector (FRM-40). */
         const previo = b.nextElementSibling && b.nextElementSibling.matches('[data-descarga-aviso]') ? b.nextElementSibling : null;
@@ -3078,7 +3135,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
             if (panel) panel.hidden = !es;
           }
           if (foco) tab.focus();
-          anuncia(`Pestaña ${tab.textContent.trim()}`);
+          anuncia(FormKit.utilidades.plantilla(FormKit.config.mensajes.pestanaAnuncio, { nombre: tab.textContent.trim() }));
         };
         cont.addEventListener('click', (e) => { const t = e.target.closest('[role="tab"]'); if (t && tabs.includes(t)) activa(t, false); });
         cont.addEventListener('keydown', (e) => {
@@ -3120,7 +3177,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     const barra = el.querySelector('progress');
     const txt = el.querySelector('[data-progreso-texto]');
     if (!barra) return;
-    if (valor === null || valor === undefined) { barra.removeAttribute('value'); if (txt) txt.textContent = 'Cargando…'; return; }
+    if (valor === null || valor === undefined) { barra.removeAttribute('value'); if (txt) txt.textContent = FormKit.config.mensajes.cargando; return; }
     const max = Number(barra.max || 100);
     const v = Math.max(0, Math.min(max, Number(valor)));
     barra.value = v;
@@ -3174,12 +3231,12 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       const b = document.createElement('button'); b.type = 'button'; b.className = `paginacion-btn${cfg.clase ? ` ${cfg.clase}` : ''}`;
       if (cfg.icono) b.append(icono(cfg.icono, 'icono icono-sm'));
       b.append(document.createTextNode(texto));
-      if (cfg.actual) { b.setAttribute('aria-current', 'page'); b.setAttribute('aria-label', `Página ${texto}, actual`); }
+      if (cfg.actual) { b.setAttribute('aria-current', 'page'); b.setAttribute('aria-label', plantilla(M.paginacionActual, { n: texto })); }
       if (cfg.deshabilitado) { b.setAttribute('aria-disabled', 'true'); } else b.dataset.ir = String(ir);
       if (cfg.etiqueta) b.setAttribute('aria-label', cfg.etiqueta);
       li.appendChild(b); return li;
     };
-    lista.appendChild(boton('Anterior', pagina - 1, { deshabilitado: pagina === 1, icono: 'flecha-izq', clase: 'paginacion-prev' }));
+    lista.appendChild(boton(M.paginacionAnterior, pagina - 1, { deshabilitado: pagina === 1, icono: 'flecha-izq', clase: 'paginacion-prev' }));
     if (nav.dataset.modo !== 'mas') {
       /* Primera, última, la actual y una a cada lado; puntos suspensivos entre huecos. */
       const visibles = new Set([1, paginas, pagina - 1, pagina, pagina + 1].filter((n) => n >= 1 && n <= paginas));
@@ -3190,7 +3247,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         previo = n;
       }
     }
-    lista.appendChild(boton(nav.dataset.modo === 'mas' ? 'Cargar más' : 'Siguiente', pagina + 1, { deshabilitado: pagina >= paginas, icono: nav.dataset.modo === 'mas' ? 'mas' : 'flecha-der', clase: 'paginacion-next' }));
+    lista.appendChild(boton(nav.dataset.modo === 'mas' ? M.paginacionMas : M.paginacionSiguiente, pagina + 1, { deshabilitado: pagina >= paginas, icono: nav.dataset.modo === 'mas' ? 'mas' : 'flecha-der', clase: 'paginacion-next' }));
     const compacto = document.createElement('p'); compacto.className = 'paginacion-compacto'; compacto.textContent = plantilla(M.paginacionPagina, { n: pagina, total: paginas });
 
     const sel = document.createElement('label'); sel.className = 'paginacion-tamano';
@@ -3308,11 +3365,18 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
      <div class="tabla-marco" data-tabla data-clave="folio">
        <table class="tabla"><caption class="tabla-titulo">Solicitudes</caption>
          <thead><tr><th scope="col" data-ordenable>Folio</th>…<th scope="col">Acciones</th></tr></thead>
-         <tbody>…<td><button type="button" class="btn-icono" data-accion-fila="ver">…</button></td></tr></tbody>
+         <tbody><tr data-folio="EJ-123"><td><span class="mono">EJ-123</span></td>…<td><button type="button" class="btn-icono" data-accion-fila="ver">…</button></td></tr></tbody>
        </table>
        <p class="tabla-vacia" data-tabla-vacia hidden>No hay resultados con esos filtros.</p>
+       <p data-tabla-cargando hidden>Cargando…</p>
+       <div class="aviso aviso-bloqueo" data-tabla-error tabindex="-1" hidden>…<div class="aviso-texto"></div></div>
      </div>
-   Una celda con data-etiqueta escrito en el HTML conserva ese rótulo.
+   Una celda con data-etiqueta escrito en el HTML conserva ese rótulo. El
+   contenido de cada celda va en .tabla-valor (lo pone el módulo). En
+   computadora no se parten botones, folios (.mono) ni etiquetas, y la
+   columna de acciones (encabezado sólo para el lector) toma el ancho de sus
+   botones. Desde código: FormKit.tabla.inicia() para tablas agregadas
+   después y FormKit.tabla.estado(marco, 'cargando' | 'error' | '', texto).
    ========================================================= */
 (function () {
   'use strict';
@@ -3334,7 +3398,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     function etiquetaCeldas() {
       const encabezados = ths();
       for (const tr of $$('tbody tr', tabla)) $$('td', tr).forEach((td, i) => {
-        /* El contenido de la celda va junto en .tabla-valor: en teléfono es la columna del valor (P104). */
+        /* El contenido de la celda va junto en .tabla-valor: en teléfono es la columna del valor. */
         if (!(td.children.length === 1 && td.firstElementChild.classList.contains('tabla-valor') && td.childNodes.length === 1)) {
           const valor = document.createElement('div');
           valor.className = 'tabla-valor';
@@ -3430,7 +3494,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
    Se inicia solo al cargar la página: a la etiqueta que no trae su icono se
    le pone el de su familia. FormKit.estado(el, { tono, texto, anuncia }) la
-   cambia después (anuncia: true cuando cambia por una acción de la persona).
+   cambia después (anuncia: true cuando cambia por una acción de la persona)
+   y FormKit.estado.inicia(contenedor) prepara las que la página pinte después.
 
    Contrato HTML:
      <span class="estado estado-proceso">En revisión</span>
@@ -3519,6 +3584,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    capture="user" en lugar de capture="environment" (campo «Fotografía de frente»).
    Configuración por campo (opcional): data-extensiones="jpg,png", data-mb,
    data-max, data-total-mb. Lo demás viene de validaciones.config.js.
+   Con el máximo cargado, [data-archivos] lleva data-lleno: se ocultan
+   «Elegir archivo» y la cámara, y la frase .arch-lleno lo dice bajo la lista.
+   Borrador: el estándar no guarda archivos en el dispositivo; la página
+   puede dar un proveedor, FormKit.iniciar(form, { borradorArchivos:
+   { guarda(campo, archivos), lee(campo), borra(campo) } }).
+   Desde código: FormKit.archivos.de(el) (la lista de un campo) y
+   FormKit.archivos.agrega(archivos, el).
    ========================================================= */
 (function () {
   'use strict';
@@ -3662,6 +3734,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           a.sha256_original = await huellaDe(buf);
           if (a.sha256_original && lista.some((x) => x !== a && x.sha256_original === a.sha256_original)) throw Object.assign(new Error('duplicado'), { motivo: M.archRechazoDuplicado });
           const esFoto = A.optimiza.tipos.includes(e);
+          /* Lo que recibe el proveedor del borrador tampoco lleva la ubicación sin conservarExif:
+             de un JPG se le da la copia sin metadatos, con el mismo nombre y formato. */
+          if (esFoto && !c.conservarExif && ['jpg', 'jpeg'].includes(e)) { const limpio = sinExif(buf); if (limpio) a.fuente = new File([limpio], f.name, { type: f.type || 'image/jpeg' }); }
           if (esFoto) {
             const meta = ['jpg', 'jpeg'].includes(e) ? leeExif(buf) : {};
             if (c.conservarExif) { if (meta.fecha) a.fecha_captura = meta.fecha; if (meta.lat !== undefined) { a.lat_captura = meta.lat; a.lon_captura = meta.lon; } }
@@ -3687,9 +3762,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         }).catch((err) => {
           a.estado = 'error';
           a.codigo = err.message;
-          a.motivo = err.motivo || 'no se pudo procesar el archivo. Intenta de nuevo.';
+          a.motivo = err.motivo || M.archRechazoProceso;
           a.archivoOriginal = f;
-        }).then(() => { delete a.promesa; pinta(el); if (a.estado === 'listo') limpia(el.dataset.campo); });
+        }).then(() => { delete a.promesa; pinta(el); if (a.estado === 'listo') { limpia(el.dataset.campo); programaBorrador(); } });
       }
 
       function agrega(archivos, el) {
@@ -3818,15 +3893,16 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       window.addEventListener('dragover', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
       window.addEventListener('drop', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
 
-      /* Archivos en el borrador (P148). El estándar no los guarda en el dispositivo (FRM-43); si la
+      /* Archivos en el borrador. El estándar no los guarda en el dispositivo (FRM-43); si la
          página da un proveedor, FormKit.iniciar(form, { borradorArchivos: { guarda(campo, archivos),
-         lee(campo), borra(campo) } }), al escribir el borrador se le pasan los archivos originales
-         de cada campo, al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
+         lee(campo), borra(campo) } }), al escribir el borrador se le pasan los archivos listos de
+         cada campo, como los eligió la persona (un JPG, sin metadatos si no se pide conservarExif);
+         al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
          El proveedor decide dónde guardarlos (en el servidor, en el almacén del sistema). */
       const camposArchivo = () => $$('[data-archivos]', form).map((c) => c.closest('[data-campo]'));
       const conProveedor = (fn) => { const p = ctx.opciones.borradorArchivos; if (!p) return; for (const el of camposArchivo()) Promise.resolve().then(() => fn(p, el)).catch(() => { /* un proveedor que falla no detiene el formulario */ }); };
       ctx.alBorrador({
-        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado !== 'error' && a.fuente).map((a) => a.fuente))),
+        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo' && a.fuente).map((a) => a.fuente))),
         restaura: () => conProveedor((p, el) => p.lee && Promise.resolve(p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); })),
         borra: () => conProveedor((p, el) => p.borra && p.borra(el.dataset.campo))
       });
@@ -3873,14 +3949,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
            <a class="btn-enlace visor-abrir" data-visor-abrir href="#" target="_blank" rel="noopener">Abrir en otra pestaña …</a>
          </div>
          <p class="visor-pagina" data-visor-pagina aria-live="polite"></p>
-         <p class="aviso visor-aviso" data-visor-aviso hidden></p>
+         <div class="aviso visor-aviso" data-visor-aviso hidden></div>
          <div class="visor-hojas" data-visor-hojas tabindex="0" aria-label="Hojas del documento"></div>
          <p class="visor-nota" data-visor-nota hidden></p>
        </dialog>
      </div>
    Desde código: FormKit.visor.abre({ url, titulo, archivo, tipo, nota }, boton).
    Para una imagen sin extensión en la dirección (blob:), data-visor-tipo="image/png".
-   Tomado del sistema de acreditaciones (P67).
    ========================================================= */
 (function (global) {
   'use strict';
@@ -3888,8 +3963,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   const ZOOMS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
   const AJUSTAR = 2; /* 100 %: la hoja al ancho del visor */
   /* pdf.js se busca en vendor/pdfjs-dist/, junto a la carpeta que contiene
-     modulos/: codigo/ en el estándar (formularios/vendor/) o la copia de un
-     proyecto (sitio/formkit/ → sitio/vendor/); con dist/formkit.js, junto a
+     modulos/: codigo/ en el estándar (formularios/vendor/) o una copia del
+     estándar (<carpeta>/formkit/ → <carpeta>/vendor/); con dist/formkit.js, junto a
      dist/. Si está en otro lugar, FORMKIT_CONFIG.visor.pdfjs. */
   const src = document.currentScript && document.currentScript.src;
   const raiz = src && src.match(/^(.*\/)(?:modulos\/visor\/visor|formkit)\.js(?:\?.*)?$/);
@@ -3903,7 +3978,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   let observador = null;
 
   const base = () => { const r = cfg.visor.pdfjs || PDFJS_JUNTO || 'vendor/pdfjs-dist/'; return new URL(r.endsWith('/') ? r : `${r}/`, document.baseURI).href; };
-  const di = (texto) => { aviso.textContent = texto; aviso.hidden = !texto; };
+  /* Aviso con el icono de su tono (FRM-39), pintado por el núcleo. */
+  const di = (texto) => { if (!texto) { aviso.hidden = true; return; } aviso = FormKit.aviso(aviso, { tono: 'advertencia', texto }); };
   const hoja = (n, total) => FormKit.utilidades.plantilla(M.visorHoja, { n, total });
   const esImagen = (tipo, nombre) => /^image\//.test(tipo || '') || /\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(nombre || '');
 
@@ -3948,7 +4024,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       fig.className = 'visor-hoja-pdf';
       fig.dataset.hoja = String(n);
       /* Sin pie «Hoja n de total»: ya lo dice el contador de la barra, y repetido debajo
-         de la hoja confundía (P146). Al lector se lo dice el nombre del lienzo. */
+         de la hoja confundía. Al lector se lo dice el nombre del lienzo. */
       fig.append(lienzo);
       figuras.push(fig);
       await pagina.render({ canvasContext: lienzo.getContext('2d'), viewport: vista }).promise;
@@ -4156,25 +4232,25 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         /* El plugin de gestos (leaflet-gesture-handling) se registra como
            manejador «gestureHandling»; si está cargado se activa: un dedo
            desplaza la página, dos el mapa. Sin él, Leaflet ignora la opción. */
-        const mapa = L.map(cont, { center: conf.centro, zoom: conf.zoom, gestureHandling: true, gestureHandlingOptions: { text: { touch: 'Usa dos dedos para mover el mapa', scroll: 'Usa Ctrl + rueda para acercar', scrollMac: 'Usa ⌘ + rueda para acercar' } }, zoomControl: true, attributionControl: !!conf.atribucion, tap: true });
+        const mapa = L.map(cont, { center: conf.centro, zoom: conf.zoom, gestureHandling: true, gestureHandlingOptions: { text: { touch: M.mapaGestoTactil, scroll: M.mapaGestoRueda, scrollMac: M.mapaGestoRuedaMac } }, zoomControl: true, attributionControl: !!conf.atribucion, tap: true });
         if (mapa.gestureHandling && !mapa.gestureHandling.enabled()) mapa.gestureHandling.enable();
         const limites = bbox ? L.latLngBounds([bbox.latMin, bbox.lonMin], [bbox.latMax, bbox.lonMax]) : null;
         const encuadra = () => { mapa.invalidateSize(); if (s.punto) mapa.setView([s.punto.lat, s.punto.lon], Math.max(mapa.getZoom(), 14)); else if (limites) mapa.fitBounds(limites); };
         if (limites) { mapa.setMaxBounds(limites.pad(0.1)); mapa.fitBounds(limites); }
         if (conf.teselas) L.tileLayer(conf.teselas, { attribution: conf.atribucion, maxZoom: 19 }).on('tileerror', () => { if (sin) sin.hidden = false; }).addTo(mapa);
-        else if (sin) { sin.hidden = false; sin.textContent = 'Sin mapa base configurado: puedes colocar y mover el punto igual, o escribir la dirección.'; }
+        else if (sin) { sin.hidden = false; sin.textContent = M.mapaSinBase; }
         /* Marcador propio en guinda (SVG en línea): no depende de imágenes externas. */
         const icono = L.divIcon({ className: 'mapa-marcador', html: '<svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true" focusable="false"><path d="M12 22s-7-7.3-7-12.5a7 7 0 0 1 14 0C19 14.7 12 22 12 22z" fill="currentColor"/><circle cx="12" cy="9.5" r="2.6" fill="#fff"/></svg>', iconSize: [32, 32], iconAnchor: [16, 32] });
         let marcador = null;
 
         s.coloca = (p, silencioso = false) => {
           s.punto = p; s.confirmado = false;
-          if (marcador) marcador.setLatLng([p.lat, p.lon]); else { marcador = L.marker([p.lat, p.lon], { icon: icono, draggable: true, keyboard: true, title: 'Punto marcado; arrástralo para moverlo' }).addTo(mapa); marcador.on('dragend', () => { const ll = marcador.getLatLng(); s.coloca({ lat: ll.lat, lon: ll.lng }); }); }
+          if (marcador) marcador.setLatLng([p.lat, p.lon]); else { marcador = L.marker([p.lat, p.lon], { icon: icono, draggable: true, keyboard: true, title: M.mapaMarcador }).addTo(mapa); marcador.on('dragend', () => { const ll = marcador.getLatLng(); s.coloca({ lat: ll.lat, lon: ll.lng }); }); }
           s.fuera = !!bbox && (p.lat < bbox.latMin || p.lat > bbox.latMax || p.lon < bbox.lonMin || p.lon > bbox.lonMax);
           if (inLat) inLat.value = p.lat.toFixed(6); if (inLon) inLon.value = p.lon.toFixed(6);
           const texto = plantilla(M.mapaPunto, { lat: p.lat.toFixed(5), lon: p.lon.toFixed(5) });
           if (salida) salida.textContent = s.fuera ? `${texto} ${M.mapaFuera}` : texto;
-          if (btnConfirmar) { btnConfirmar.hidden = !s.exigeConfirmar || s.fuera; btnConfirmar.textContent = 'Confirmar punto'; btnConfirmar.removeAttribute('aria-pressed'); }
+          if (btnConfirmar) { btnConfirmar.hidden = !s.exigeConfirmar || s.fuera; btnConfirmar.textContent = M.mapaConfirmar; btnConfirmar.removeAttribute('aria-pressed'); }
           if (s.fuera) marca(el.dataset.campo, bbox.mensaje); else limpia(el.dataset.campo);
           if (!silencioso) anuncia(salida ? salida.textContent : texto);
           programaBorrador();
@@ -4183,10 +4259,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         mapa.on('click', (e) => s.coloca({ lat: e.latlng.lat, lon: e.latlng.lng }));
         /* Teclado: con el mapa enfocado, Enter coloca el punto en el centro; las flechas lo desplazan (Leaflet). */
         cont.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const c = mapa.getCenter(); s.coloca({ lat: c.lat, lon: c.lng }); } });
-        if (btnConfirmar) btnConfirmar.addEventListener('click', () => { if (!s.punto) return; s.confirmado = true; btnConfirmar.textContent = 'Punto confirmado'; btnConfirmar.setAttribute('aria-pressed', 'true'); limpia(el.dataset.campo); anuncia('Punto confirmado.'); programaBorrador(); });
+        if (btnConfirmar) btnConfirmar.addEventListener('click', () => { if (!s.punto) return; s.confirmado = true; btnConfirmar.textContent = M.mapaConfirmado; btnConfirmar.setAttribute('aria-pressed', 'true'); limpia(el.dataset.campo); anuncia(`${M.mapaConfirmado}.`); programaBorrador(); });
         if (btnGeo && cont.hasAttribute('data-geolocalizacion') && navigator.geolocation) {
           btnGeo.hidden = false;
-          btnGeo.addEventListener('click', () => { btnGeo.setAttribute('aria-busy', 'true'); navigator.geolocation.getCurrentPosition((pos) => { btnGeo.removeAttribute('aria-busy'); s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude }); mapa.setView([pos.coords.latitude, pos.coords.longitude], 16); }, () => { btnGeo.removeAttribute('aria-busy'); anuncia('No se pudo obtener tu ubicación. Toca el mapa o escribe la dirección.', true); }, { timeout: 10000 }); });
+          btnGeo.addEventListener('click', () => { btnGeo.setAttribute('aria-busy', 'true'); navigator.geolocation.getCurrentPosition((pos) => { btnGeo.removeAttribute('aria-busy'); s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude }); mapa.setView([pos.coords.latitude, pos.coords.longitude], 16); }, () => { btnGeo.removeAttribute('aria-busy'); anuncia(M.mapaSinUbicacion, { cortes: true, visible: salida }); }, { timeout: 10000 }); });
         }
         /* La alternativa manual (campo data-formato="coordenadas") también mueve el punto. */
         const manual = $$('[data-formato="coordenadas"] input', form)[0];
@@ -4287,7 +4363,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   FormKit.registra('enlace-mapa', {
     selector: '[data-enlace-mapa]',
     iniciar(form, ctx) {
-      const { $$, anuncia, controlPrincipal } = ctx;
+      const { $$, M, plantilla, anuncia, controlPrincipal } = ctx;
       for (const caja of $$('[data-enlace-mapa]', form)) {
         const destino = controlPrincipal(caja.dataset.enlaceMapa);
         const entrada = caja.querySelector('input');
@@ -4324,11 +4400,11 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           const t = entrada.value.trim();
           if (!t) { dice(null, ''); return; }
           const r = lee(t);
-          if (!r) return dice('advertencia', 'No encontramos coordenadas en ese texto. Pega el enlace completo de Google Maps (el que empieza con google.com/maps) o escribe las coordenadas.');
-          if (r.corto) return dice('advertencia', 'Los enlaces cortos de Google Maps no traen las coordenadas. Ábrelo en Google Maps: en el celular, mantén presionado el punto y copia los números que aparecen; en la computadora, haz clic derecho sobre el punto. Pégalos en «Coordenadas».');
+          if (!r) return dice('advertencia', M.enlaceMapaSin);
+          if (r.corto) return dice('advertencia', M.enlaceMapaCorto);
           escribe(r);
-          if (r.origen === 'centro') dice('advertencia', `Ese enlace marca el centro de la pantalla, no un punto: tomamos ${fmt(r)}. Revisa que sea el lugar.`);
-          else dice('ok', `Coordenadas tomadas del enlace: ${fmt(r)}.`);
+          if (r.origen === 'centro') dice('advertencia', plantilla(M.enlaceMapaCentro, { coordenadas: fmt(r) }));
+          else dice('ok', plantilla(M.enlaceMapaTomadas, { coordenadas: fmt(r) }));
         };
         entrada.addEventListener('change', desdeEnlace);
         /* Al pegar se lee de inmediato, sin esperar a salir del campo. */
@@ -4343,10 +4419,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           destino.value = nuevo;
           destino.dispatchEvent(new Event('input', { bubbles: true }));
           const que = [
-            r.notas.includes('orden') ? 'se acomodaron latitud y longitud' : '',
-            r.notas.includes('menos') ? 'se agregó el signo menos a la longitud, que en la Ciudad siempre es negativa' : ''
-          ].filter(Boolean).join(' y ');
-          anuncia(`Coordenadas: ${nuevo}${que ? `; ${que}` : ''}.`);
+            r.notas.includes('orden') ? M.enlaceMapaOrden : '',
+            r.notas.includes('menos') ? M.enlaceMapaSigno : ''
+          ].filter(Boolean).join(M.conjuncion);
+          anuncia(plantilla(M.enlaceMapaAnuncio, { coordenadas: nuevo, notas: que ? `; ${que}` : '' }));
         });
       }
     }
@@ -4434,7 +4510,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           if (cp && origen !== 'cp') {
             const base = filas.filter((f) => (!a || !a.value || f.alcaldia === a.value) && (!co || !co.value || f.colonia === co.value));
             const cps = unicos(base, 'cp');
-            if (co && co.value && cps.length === 1 && cp.value !== cps[0]) { cp.value = cps[0]; limpia(campoDe(cp).dataset.campo); anuncia(`${etiquetaDe(campoDe(cp).dataset.campo)}: ${cps[0]}, tomado del catálogo. Puedes corregirlo.`); }
+            if (co && co.value && cps.length === 1 && cp.value !== cps[0]) { cp.value = cps[0]; limpia(campoDe(cp).dataset.campo); anuncia(plantilla(M.cascadaCpTomado, { etiqueta: etiquetaDe(campoDe(cp).dataset.campo), valor: cps[0] })); }
           }
         }
 
@@ -4446,10 +4522,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           if (!coinciden.length) return;
           const a = por.alcaldia, co = por.colonia;
           const alcs = unicos(coinciden, 'alcaldia');
-          if (a && alcs.length === 1 && a.value !== alcs[0]) { a.value = alcs[0]; a.toggleAttribute('data-vacio', false); limpia(campoDe(a).dataset.campo); anuncia(`${etiquetaDe(campoDe(a).dataset.campo)}: ${alcs[0]}, tomada del código postal.`); }
+          if (a && alcs.length === 1 && a.value !== alcs[0]) { a.value = alcs[0]; a.toggleAttribute('data-vacio', false); limpia(campoDe(a).dataset.campo); anuncia(plantilla(M.cascadaTomadaCp, { etiqueta: etiquetaDe(campoDe(a).dataset.campo), valor: alcs[0] })); }
           pinta('cp');
           const cols = unicos(coinciden, 'colonia');
-          if (co && cols.length === 1 && co.value !== cols[0]) { co.value = cols[0]; co.toggleAttribute('data-vacio', false); limpia(campoDe(co).dataset.campo); anuncia(`${etiquetaDe(campoDe(co).dataset.campo)}: ${cols[0]}, tomada del código postal.`); }
+          if (co && cols.length === 1 && co.value !== cols[0]) { co.value = cols[0]; co.toggleAttribute('data-vacio', false); limpia(campoDe(co).dataset.campo); anuncia(plantilla(M.cascadaTomadaCp, { etiqueta: etiquetaDe(campoDe(co).dataset.campo), valor: cols[0] })); }
         }
 
         cont.addEventListener('change', (e) => {
@@ -4499,7 +4575,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
    Respuestas frecuentes fijas: data-chips-fijos="Texto uno|Texto dos" en el
    [data-campo] muestra siempre esa lista (por ejemplo, los motivos para
-   observar un documento). No guarda nada en el dispositivo, así que sirve
+   pedir que se corrija algo). Si varios campos comparten etiqueta,
+   data-chips-etiqueta cambia la etiqueta en el nombre del grupo y
+   data-chips-fijos-nombre le da un nombre propio. No guarda nada en el dispositivo, así que sirve
    también en datos personales. En un texto largo, el chip agrega su texto
    al final («… Falta una página.») para que la persona lo complete; en un
    campo corto, lo pone como respuesta.
@@ -4574,7 +4652,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const caja = document.createElement('div');
         caja.className = 'chips';
         caja.setAttribute('role', 'group');
-        caja.setAttribute('aria-label', `Usados antes en ${ctx.etiquetaDe(n).toLowerCase()}`);
+        caja.setAttribute('aria-label', plantilla(M.chipsHistorial, { etiqueta: ctx.etiquetaDe(n).toLowerCase() }));
         antesDelControl(ctl, caja);
 
         const lee = () => { try { return JSON.parse(almacen.lee(clave(n)) || '[]'); } catch (e) { return []; } };
@@ -4598,8 +4676,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
         caja.addEventListener('click', (e) => {
           const q = e.target.closest('[data-chip-quitar]');
-          if (q) { escribe(lee().filter((v) => v !== q.dataset.chipQuitar)); pinta(); anuncia(`Sugerencia quitada.`); return; }
-          if (e.target.closest('[data-chips-borrar]')) { almacen.borra(clave(n)); pinta(); anuncia('Historial borrado.'); ctl.focus(); return; }
+          if (q) { escribe(lee().filter((v) => v !== q.dataset.chipQuitar)); pinta(); anuncia(M.chipsQuitada); return; }
+          if (e.target.closest('[data-chips-borrar]')) { almacen.borra(clave(n)); pinta(); anuncia(M.chipsBorrado); ctl.focus(); return; }
           const b = e.target.closest('[data-chip]');
           if (!b) return;
           ctl.value = b.dataset.chip;

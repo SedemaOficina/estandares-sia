@@ -53,10 +53,10 @@ Leyenda: **A** tomado del paquete A · **B** tomado del paquete B · **A+B** fus
 | Pregunta condicional `data-si` | B (sintaxis) + A (semántica) | |
 | Validación individual, resumen con foco y retiro automático | A+B | |
 | Validaciones cruzadas | Nuevo | |
-| Borrador local versionado, franja recuperar/descartar, sensibles fuera | A | `pagehide` nuevo |
+| Borrador local versionado, franja recuperar/descartar, sensibles fuera | A | `pagehide` nuevo; desde 1.5.0 empieza con el primer gesto de la persona y guarda archivos con un proveedor de la página |
 | Envío con plazo, `aria-busy`, error, límite, idempotencia | A | `aria-disabled` sin perder foco (encargo); idempotencia nueva |
-| Botones primario, secundario, atrás, enlace, icono | A+B (C7) | Variante peligro nueva |
-| Avisos neutro, bloqueo, ok | A+B | Advertencia nueva |
+| Botones primario, secundario, atrás, enlace, icono | A+B (C7) | Variante peligro nueva; desde 1.4.0, rojo relleno dentro de la confirmación y de contorno fuera |
+| Avisos neutro, bloqueo, ok | A+B | Advertencia nueva; desde 1.4.0, título e icono por tono y `FormKit.aviso`; desde 1.4.2, con pasos y enlaces |
 | Pendiente visible | A (C11) | |
 | Iconografía SVG (sprite) | Nuevo | |
 | Autocompletado, `inputmode` | A+B | `enterkeyhint` y auditoría nuevos |
@@ -94,13 +94,15 @@ Leyenda: **A** tomado del paquete A · **B** tomado del paquete B · **A+B** fus
 | chips | Nuevo | Lista fija de respuestas frecuentes agregada en 1.2.0 (P65) |
 | enlace-mapa | PR, CP, PL y Denuncias Ambientales | Agregado el 14 oct 2026 |
 | visor (visor de documentos con pdf.js) | Sistema de acreditaciones (P67) | Agregado en 1.2.0 |
+| resultado (desenlace de una decisión del personal) | Sistema de acreditaciones (P113) | Agregado en 1.4.0; tono «en marcha» y pasos en 1.4.1 |
+| estado (etiquetas de estado) | Sistema de acreditaciones (P118) | Agregado en 1.4.0; las cinco familias del proyecto en 1.4.1 |
 | version (distintivo de versión) | Plantilla de versión del SIA, rehecha con tokens en el proyecto de acreditaciones (P45) | Agregado en 1.1.0 |
 
 ### Herramientas y verificación
 
 | Pieza | Origen |
 |---|---|
-| Auditor de CSS (A01–A16) | A, ampliado (A11 sólo `min-width`, A15 variables propias) |
+| Auditor de CSS (A01 a A11 y A13 a A16) | A, ampliado (A11 sólo `min-width`, A15 variables propias) |
 | Contraste medido y tabla generada | A, con pares nuevos |
 | Generador de reglas → `docs/01` | A, adaptado a niveles y a la numeración corrida |
 | `vendor.mjs` con sumas | A |
@@ -112,15 +114,15 @@ Leyenda: **A** tomado del paquete A · **B** tomado del paquete B · **A+B** fus
 
 ## 3. Qué quedó fuera de la versión 1.0
 
-Confirmado por la persona responsable: los huecos adicionales de la sección 8 de la fase 0 se difieren. La 1.1.0 fue de correcciones de un proyecto real y no los incluye; cada pieza se agrega cuando un proyecto la necesite.
+Confirmado por la persona responsable: los huecos adicionales de la sección 8 de la fase 0 se difieren. Las versiones 1.1 a 1.5 atendieron lo que pidió un proyecto real (visor, resultado, estado, secuencia, entre otras); lo demás se agrega cuando un proyecto lo necesite.
 
 | Pieza | Nivel propuesto | Nota |
 |---|---|---|
-| Consulta de folio y seguimiento | OPCIONAL | Campo de folio + estado |
+| Consulta de folio y seguimiento | OPCIONAL | Campo de folio + estado (el módulo `estado` ya existe, 1.4.0) |
 | Aviso de privacidad completo (integral/simplificado, versión y fecha aceptada en el envío) | BASE con datos personales | El diálogo simplificado ya está; falta registrar versión aceptada |
 | Prueba de humanidad como módulo con punto de integración autoalojado | RECOMENDADO en públicos | Las señales (casilla, trampa, tiempo) ya viajan |
 | Aviso de sesión por expirar | OPCIONAL | |
-| Vista previa de PDF | OPCIONAL | La de imagen ya está |
+| Vista previa de PDF | OPCIONAL | El visor (1.2.0) cubre la revisión del personal; falta la vista previa en la zona de carga de la persona |
 | Calendario de citas | OPCIONAL | |
 | Firma o conformidad | OPCIONAL | |
 | Representante o tutor (bloque por edad) | OPCIONAL | La cruzada `edad` ya existe |

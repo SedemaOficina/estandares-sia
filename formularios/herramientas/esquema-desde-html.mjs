@@ -22,7 +22,7 @@ const [, , entrada, salida] = process.argv;
 if (!entrada) { console.error('Uso: node herramientas/esquema-desde-html.mjs <formulario.html> [salida.json]'); process.exit(2); }
 /* Lo comentado no es parte del formulario: un campo dentro de <!-- --> no se declara. */
 const pagina = readFileSync(entrada, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
-/* Sólo cuenta lo que está dentro de los <form> (P90): un control fuera del
+/* Sólo cuenta lo que está dentro de los <form>: un control fuera del
    formulario (una casilla de la página) no es parte del último campo. Sin
    <form> se lee todo, para fragmentos y bloques sueltos. */
 const formularios = [...pagina.matchAll(/<form\b[^>]*>[\s\S]*?<\/form>/gi)].map((m) => m[0]);

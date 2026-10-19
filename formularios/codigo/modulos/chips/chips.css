@@ -1,6 +1,8 @@
 /* =========================================================
    chips.css · Módulo «chips» · nivel OPCIONAL
    Sugerencias de un toque: botón con estado aria-pressed y su «quitar».
+   Las respuestas frecuentes fijas (.chip-fijo) se ven completas: no se
+   encogen y al pasar el cursor sólo cambian el borde.
    Depende de: nucleo.css. Bloques: componentes → estados.
    ========================================================= */
 

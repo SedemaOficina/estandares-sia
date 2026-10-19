@@ -42,6 +42,13 @@
    capture="user" en lugar de capture="environment" (campo «Fotografía de frente»).
    Configuración por campo (opcional): data-extensiones="jpg,png", data-mb,
    data-max, data-total-mb. Lo demás viene de validaciones.config.js.
+   Con el máximo cargado, [data-archivos] lleva data-lleno: se ocultan
+   «Elegir archivo» y la cámara, y la frase .arch-lleno lo dice bajo la lista.
+   Borrador: el estándar no guarda archivos en el dispositivo; la página
+   puede dar un proveedor, FormKit.iniciar(form, { borradorArchivos:
+   { guarda(campo, archivos), lee(campo), borra(campo) } }).
+   Desde código: FormKit.archivos.de(el) (la lista de un campo) y
+   FormKit.archivos.agrega(archivos, el).
    ========================================================= */
 (function () {
   'use strict';
@@ -185,6 +192,9 @@
           a.sha256_original = await huellaDe(buf);
           if (a.sha256_original && lista.some((x) => x !== a && x.sha256_original === a.sha256_original)) throw Object.assign(new Error('duplicado'), { motivo: M.archRechazoDuplicado });
           const esFoto = A.optimiza.tipos.includes(e);
+          /* Lo que recibe el proveedor del borrador tampoco lleva la ubicación sin conservarExif:
+             de un JPG se le da la copia sin metadatos, con el mismo nombre y formato. */
+          if (esFoto && !c.conservarExif && ['jpg', 'jpeg'].includes(e)) { const limpio = sinExif(buf); if (limpio) a.fuente = new File([limpio], f.name, { type: f.type || 'image/jpeg' }); }
           if (esFoto) {
             const meta = ['jpg', 'jpeg'].includes(e) ? leeExif(buf) : {};
             if (c.conservarExif) { if (meta.fecha) a.fecha_captura = meta.fecha; if (meta.lat !== undefined) { a.lat_captura = meta.lat; a.lon_captura = meta.lon; } }
@@ -210,9 +220,9 @@
         }).catch((err) => {
           a.estado = 'error';
           a.codigo = err.message;
-          a.motivo = err.motivo || 'no se pudo procesar el archivo. Intenta de nuevo.';
+          a.motivo = err.motivo || M.archRechazoProceso;
           a.archivoOriginal = f;
-        }).then(() => { delete a.promesa; pinta(el); if (a.estado === 'listo') limpia(el.dataset.campo); });
+        }).then(() => { delete a.promesa; pinta(el); if (a.estado === 'listo') { limpia(el.dataset.campo); programaBorrador(); } });
       }
 
       function agrega(archivos, el) {
@@ -341,15 +351,16 @@
       window.addEventListener('dragover', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
       window.addEventListener('drop', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
 
-      /* Archivos en el borrador (P148). El estándar no los guarda en el dispositivo (FRM-43); si la
+      /* Archivos en el borrador. El estándar no los guarda en el dispositivo (FRM-43); si la
          página da un proveedor, FormKit.iniciar(form, { borradorArchivos: { guarda(campo, archivos),
-         lee(campo), borra(campo) } }), al escribir el borrador se le pasan los archivos originales
-         de cada campo, al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
+         lee(campo), borra(campo) } }), al escribir el borrador se le pasan los archivos listos de
+         cada campo, como los eligió la persona (un JPG, sin metadatos si no se pide conservarExif);
+         al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
          El proveedor decide dónde guardarlos (en el servidor, en el almacén del sistema). */
       const camposArchivo = () => $$('[data-archivos]', form).map((c) => c.closest('[data-campo]'));
       const conProveedor = (fn) => { const p = ctx.opciones.borradorArchivos; if (!p) return; for (const el of camposArchivo()) Promise.resolve().then(() => fn(p, el)).catch(() => { /* un proveedor que falla no detiene el formulario */ }); };
       ctx.alBorrador({
-        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado !== 'error' && a.fuente).map((a) => a.fuente))),
+        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo' && a.fuente).map((a) => a.fuente))),
         restaura: () => conProveedor((p, el) => p.lee && Promise.resolve(p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); })),
         borra: () => conProveedor((p, el) => p.borra && p.borra(el.dataset.campo))
       });
