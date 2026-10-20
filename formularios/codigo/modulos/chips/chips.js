@@ -97,7 +97,8 @@
         caja.setAttribute('aria-label', plantilla(M.chipsHistorial, { etiqueta: ctx.etiquetaDe(n).toLowerCase() }));
         antesDelControl(ctl, caja);
 
-        const lee = () => { try { return JSON.parse(almacen.lee(clave(n)) || '[]'); } catch (e) { return []; } };
+        /* Sólo una lista de textos: un historial alterado o de otra versión no detiene el formulario. */
+        const lee = () => { try { const v = JSON.parse(almacen.lee(clave(n)) || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string' && x) : []; } catch (e) { return []; } };
         const escribe = (lista) => almacen.escribe(clave(n), JSON.stringify(lista.slice(0, cfg.chips.max)));
 
         function pinta() {

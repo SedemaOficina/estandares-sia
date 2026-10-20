@@ -1,6 +1,6 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -81,9 +81,9 @@
       "tokens.css": 8535,
       "base.css": 6625,
       "nucleo.css": 19504,
-      "validaciones.config.js": 47133,
+      "validaciones.config.js": 48803,
       "iconos.js": 6047,
-      "formkit.core.js": 61109
+      "formkit.core.js": 66783
     }
   },
   "modulos": [
@@ -152,7 +152,7 @@
       "titulo": "Lista desplegable con búsqueda",
       "nivel": "RECOMENDADO",
       "tipo": "pregunta",
-      "proposito": "Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, anuncia resultados; cerrado por omisión, libre con data-libre.",
+      "proposito": "Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, anuncia resultados; cerrado por omisión, libre con data-libre. Si el catálogo de una lista cerrada no carga, acepta lo escrito con un aviso a la vista y lo señala en meta.sin_catalogo.",
       "cuando": "Catálogos de 8 o más valores (alcaldías, giros, especies).",
       "cuandoNo": "Listas cortas (usa select u opciones).",
       "dependencias": [],
@@ -163,7 +163,8 @@
       "errores": [
         "Mezclar select nativo y combo en el mismo formulario.",
         "Escribir el catálogo a mano en el código.",
-        "Aceptar valor libre sin decirlo."
+        "Aceptar valor libre sin decirlo.",
+        "Dejar una lista cerrada sin salida cuando su catálogo no carga."
       ],
       "archivos": {
         "css": "codigo/modulos/combo/combo.css",
@@ -171,7 +172,7 @@
       },
       "tamano": {
         "css": 1466,
-        "js": 9674
+        "js": 11451
       }
     },
     {
@@ -200,7 +201,7 @@
       },
       "tamano": {
         "css": 1003,
-        "js": 7843
+        "js": 7872
       }
     },
     {
@@ -228,7 +229,7 @@
       },
       "tamano": {
         "css": 0,
-        "js": 4199
+        "js": 4538
       }
     },
     {
@@ -236,7 +237,7 @@
       "titulo": "Grupos repetibles («Agregar otro»)",
       "nivel": "OPCIONAL",
       "tipo": "pregunta",
-      "proposito": "Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos. El número de una fila no se reutiliza, y el borrador rehace las filas que había.",
+      "proposito": "Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos. El número de una fila no se reutiliza, y el borrador rehace las filas que había. Cada fila nueva lanza formkit:fila, y los módulos (mayúsculas de la CURP, ayuda «?», listas) preparan sus campos.",
       "cuando": "La cantidad de elementos la decide la persona.",
       "cuandoNo": "Siempre son exactamente N (ponlos fijos).",
       "dependencias": [
@@ -258,7 +259,7 @@
       },
       "tamano": {
         "css": 1103,
-        "js": 9298
+        "js": 9630
       }
     },
     {
@@ -339,7 +340,7 @@
       },
       "tamano": {
         "css": 4892,
-        "js": 9043
+        "js": 9252
       }
     },
     {
@@ -430,7 +431,7 @@
       },
       "tamano": {
         "css": 2546,
-        "js": 5866
+        "js": 6458
       }
     },
     {
@@ -512,7 +513,7 @@
       },
       "tamano": {
         "css": 434,
-        "js": 4037
+        "js": 4179
       }
     },
     {
@@ -616,7 +617,7 @@
       },
       "tamano": {
         "css": 1126,
-        "js": 1829
+        "js": 1997
       }
     },
     {
@@ -697,7 +698,7 @@
       },
       "tamano": {
         "css": 1511,
-        "js": 2737
+        "js": 2946
       }
     },
     {
@@ -729,7 +730,7 @@
       },
       "tamano": {
         "css": 4509,
-        "js": 7409
+        "js": 7517
       }
     },
     {
@@ -788,7 +789,7 @@
       },
       "tamano": {
         "css": 3211,
-        "js": 25507
+        "js": 27874
       }
     },
     {
@@ -817,7 +818,7 @@
       },
       "tamano": {
         "css": 3228,
-        "js": 12063
+        "js": 12515
       }
     },
     {
@@ -844,7 +845,7 @@
       },
       "tamano": {
         "css": 2754,
-        "js": 10212
+        "js": 10806
       }
     },
     {
@@ -873,7 +874,7 @@
       },
       "tamano": {
         "css": 0,
-        "js": 7975
+        "js": 8173
       }
     },
     {
@@ -900,7 +901,7 @@
       },
       "tamano": {
         "css": 539,
-        "js": 8834
+        "js": 8776
       }
     },
     {
@@ -926,9 +927,9 @@
       },
       "tamano": {
         "css": 2048,
-        "js": 8658
+        "js": 8845
       }
     }
   ],
-  "generado": "2026-10-20T21:49:06.707Z"
+  "generado": "2026-10-20T22:46:01.711Z"
 }

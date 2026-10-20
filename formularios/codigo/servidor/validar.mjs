@@ -59,7 +59,7 @@ const CLAVES_PROHIBIDAS = new Set(['__proto__', 'constructor', 'prototype']);
 const esObjetoPlano = (x) => x !== null && typeof x === 'object' && !Array.isArray(x) && [Object.prototype, null].includes(Object.getPrototypeOf(x));
 const esTexto = (v) => typeof v === 'string' || (typeof v === 'number' && Number.isFinite(v));
 /* Caracteres que no se ven o que invierten el texto: un nombre de archivo no los lleva. */
-const INVISIBLES = /[\u0000-\u001F\u007F-\u009F​-‏‪-‮⁠-⁤⁦-⁩﻿]/;
+const INVISIBLES = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF]/;
 /* Filas de un catálogo: un arreglo o el objeto documentado {filas, fuente, corte}. */
 const filasDe = (cat) => (Array.isArray(cat) ? cat : cat && Array.isArray(cat.filas) ? cat.filas : null);
 /* Una configuración parcial (sólo lo que cambia, como FORMKIT_CONFIG en el navegador) se fusiona con la base. */
@@ -135,9 +135,13 @@ export function validaPayload(payload, esquema, opciones = {}) {
   }
 
   /* 1. Campos desconocidos: no se aceptan (un campo «por si acaso» es un dato personal sin uso). */
+  /* Se dicen los primeros 20 por nombre y el resto en un solo error: un envío con miles de claves no produce miles de errores. */
+  let desconocidos = 0;
   for (const n of Object.keys(datos)) {
-    if (declarado(n) ? esPatron(n) : !filaDe(n)) errores.push({ campo: n, mensaje: 'Campo no declarado en el formulario.' });
+    if (!(declarado(n) ? esPatron(n) : !filaDe(n))) continue;
+    if (++desconocidos <= 20) errores.push({ campo: n, mensaje: 'Campo no declarado en el formulario.' });
   }
+  if (desconocidos > 20) errores.push({ campo: '', mensaje: `Y ${desconocidos - 20} campos más no declarados en el formulario.` });
 
   /* 2. Campo por campo; las filas de los grupos repetibles, con su patrón.
      Los archivos se validan en el paso 6, con payload.archivos; los datos
@@ -196,7 +200,11 @@ export function validaPayload(payload, esquema, opciones = {}) {
       if (!lista) senales.push(`«${n}» es una lista cerrada del catálogo «${c.catalogo}», que el servidor no recibió en opciones.catalogos: no se pudo comprobar.`);
       else {
         const hallada = lista.map((o) => (typeof o === 'string' ? { nombre: o } : o && { nombre: o.nombre ?? o.alcaldia, valor: o.valor })).find((o) => o && o.nombre && normaliza(o.nombre) === normaliza(v));
-        if (!hallada) errores.push({ campo: n, mensaje: plantilla(M.soloLista, { etiqueta: c.etiqueta }) });
+        /* Si a la página no le cargó la lista, la persona lo escribió a mano (meta.sin_catalogo): se
+           acepta y queda una señal para revisarlo, en lugar de impedir el trámite. */
+        const sinLista = Array.isArray((payload.meta || {}).sin_catalogo) && payload.meta.sin_catalogo.includes(n);
+        if (!hallada && sinLista) senales.push(`«${n}» se escribió a mano porque a la página no le cargó la lista: «${v}» no está en el catálogo; revisarlo.`);
+        else if (!hallada) errores.push({ campo: n, mensaje: plantilla(M.soloLista, { etiqueta: c.etiqueta }) });
         else { v = hallada.nombre; datos[n] = v; if (hallada.valor !== undefined) claves[n] = hallada.valor; }
       }
     }
@@ -307,7 +315,9 @@ export function validaPayload(payload, esquema, opciones = {}) {
     if (!admite) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoTipo, { formatos: cfg.formatosArchivo(extensiones) })}` });
     if (!(a.size > 0)) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${M.archRechazoVacio}` });
     const mb = Number(campos[a.campo].atributos?.mb || A.mb);
-    if (a.size > mb * 1048576) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoPeso, { peso: `${(a.size / 1048576).toFixed(1)} MB`, mb })}` });
+    /* Apenas sobre el límite, el peso redondeado se vería igual al máximo: «más de 8 MB». */
+    const peso = (a.size / 1048576).toFixed(1) === Number(mb).toFixed(1) ? plantilla(M.archMasDe, { mb }) : `${(a.size / 1048576).toFixed(1)} MB`;
+    if (a.size > mb * 1048576) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoPeso, { peso, mb })}` });
     if (/[\\/]/.test(a.nombre) || INVISIBLES.test(a.nombre) || a.nombre.length > (A.nombreMax || 120)) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre.slice(0, 60)}»: nombre no saneado.` });
   }
   for (const [campo, lista] of Object.entries(porCampo)) {

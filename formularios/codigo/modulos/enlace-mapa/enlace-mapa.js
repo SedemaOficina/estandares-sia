@@ -139,6 +139,8 @@
           if (destino.value.replace(/\s/g, '') === nuevo.replace(/\s/g, '')) return;
           destino.value = nuevo;
           destino.dispatchEvent(new Event('input', { bubbles: true }));
+          /* El mapa escucha «change»: también se entera de lo corregido (con el signo menos, ya dentro de la Ciudad). */
+          destino.dispatchEvent(new Event('change', { bubbles: true }));
           const que = [
             r.notas.includes('orden') ? M.enlaceMapaOrden : '',
             r.notas.includes('menos') ? M.enlaceMapaSigno : ''

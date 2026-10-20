@@ -27,8 +27,11 @@
   'use strict';
 
   /* ---------- Utilidades compartidas ---------- */
-  const recorta = (v) => String(v ?? '').replace(/\s+/g, ' ').trim();
-  const soloDigitos = (v) => String(v ?? '').replace(/\D/g, '');
+  /* Caracteres de control y que no se ven (espacio de ancho cero, marca de orden): no son parte de un dato. */
+  const INVISIBLES = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200B-\u200D\u2060\uFEFF]/g;
+  const recorta = (v) => String(v ?? '').replace(INVISIBLES, '').replace(/\s+/g, ' ').trim();
+  /* Los dígitos de ancho completo (５５) cuentan como dígitos: no se borran en silencio. */
+  const soloDigitos = (v) => String(v ?? '').normalize('NFKC').replace(/\D/g, '');
   /* Formatos de archivo para leerlos: en mayúsculas y sin repetir JPEG (jpg y jpeg son el mismo). */
   const formatosArchivo = (exts) => [...new Set((exts || []).map((e) => String(e).trim().toUpperCase()).map((e) => (e === 'JPG' ? 'JPEG' : e)))].join(', ');
   const sinAcentos = (v) => String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -53,7 +56,7 @@
   /* Número con comas de miles: 1,500 · 12,345 · 1,234.50. */
   const CON_MILES = /^-?\d{1,3}(,\d{3})+(\.\d+)?$/;
   /* «23/07/1985» → «1985-07-23»; '' si no es una fecha real. */
-  const isoDeDma = (v) => { const p = partesDma(v); return p && esFechaReal(p.a, p.m, p.d) ? `${p.a}-${dosCifras(p.m)}-${dosCifras(p.d)}` : ''; };
+  const isoDeDma = (v) => { const p = partesDma(v); return p && esFechaReal(p.a, p.m, p.d) ? `${String(p.a).padStart(4, '0')}-${dosCifras(p.m)}-${dosCifras(p.d)}` : ''; };
   /* «1985-07-23» → «23/07/1985». */
   const dmaDeIso = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
   /* Escritura guiada, sin calendario: al completar el día pasa al mes y al
@@ -318,6 +321,8 @@
         if (!m || !esFechaReal(Number(m[1]), Number(m[2]), Number(m[3]))) return M.fmtFecha;
         if (a.max && v > a.max) return a.max === hoyISO() ? M.fmtFechaFutura : plantilla(M.fmtFechaMax, { fecha: dmaDeIso(a.max) || a.max });
         if (a.min && v < a.min) return plantilla(M.fmtFechaMin, { fecha: dmaDeIso(a.min) || a.min });
+        /* Sin otro límite que lo diga, un año de 1900 a 2100: «0100» o «9999» son errores de dedo, no fechas. */
+        if (Number(m[1]) < 1900 || Number(m[1]) > 2100) return M.fmtFechaAnio;
         return '';
       }
     },
@@ -334,6 +339,8 @@
         const max = a.max || (a.noFutura !== undefined ? hoyISO() : '');
         if (max && iso > max) return max === hoyISO() ? M.fmtFechaFutura : plantilla(M.fmtFechaMax, { fecha: dmaDeIso(max) });
         if (a.min && iso < a.min) return plantilla(M.fmtFechaMin, { fecha: dmaDeIso(a.min) });
+        /* Sin otro límite que lo diga, el año llega hasta 2100: «9999» es un error de dedo. */
+        if (Number(iso.slice(0, 4)) > 2100) return M.fmtFechaDmaAnio;
         return '';
       }
     },
@@ -536,7 +543,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.6.0',
+    version: '1.6.1',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -602,8 +609,9 @@
       fmtNumeroMin: 'El valor mínimo es {min}.',
       fmtNumeroMax: 'El valor máximo es {max}.',
       fmtFecha: 'Escribe una fecha real con el formato AAAA-MM-DD. Ejemplo: 2026-03-15',
+      fmtFechaAnio: 'Revisa el año: escribe una fecha entre 1900 y 2100.',
       fmtFechaDma: 'Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985',
-      fmtFechaDmaAnio: 'Revisa el año: escribe los cuatro dígitos, de 1900 en adelante. Ejemplo: 1985',
+      fmtFechaDmaAnio: 'Revisa el año: escribe los cuatro dígitos, entre 1900 y 2100. Ejemplo: 1985',
       fmtFechaFutura: 'La fecha no puede ser posterior a hoy.',
       fmtFechaMax: 'La fecha no puede ser posterior al {fecha}.',
       fmtFechaMin: 'La fecha no puede ser anterior al {fecha}.',
@@ -668,6 +676,11 @@
       envioTimeout: 'El envío tardó demasiado y se detuvo. Lo que capturaste sigue aquí; intenta de nuevo.',
       envioLimite: 'Por ahora no podemos recibir más envíos desde este dispositivo. Lo que capturaste no se perdió; intenta más tarde.',
       envioRecibido: 'Tu envío se recibió. No lo envíes de nuevo.',
+      envioRecibidoFolio: 'Tu envío se recibió con el folio {folio}. Guárdalo; no lo envíes de nuevo.',
+      borradorSinAlmacen: 'Este equipo no permite guardar el borrador: si cierras la página antes de enviar, lo que capturaste se pierde.',
+      borradorDescartarTitulo: '¿Descartar el borrador?',
+      borradorDescartarTexto: 'Se borra lo que capturaste en este dispositivo y no se puede deshacer.',
+      borradorDescartarSi: 'Descartar borrador',
       acuseSinFolio: 'No llegó el folio. Guarda esta pantalla como constancia de tu envío.',
       archOptimizando: 'Optimizando…',
       archOptimizada: '{peso} · optimizada',
@@ -679,6 +692,9 @@
       archRechazoTipo: 'ese tipo de archivo no se admite. Los formatos son {formatos}.',
       archRechazoFirma: 'el contenido del archivo no corresponde a su extensión. Elige el archivo original.',
       archRechazoPeso: 'pesa {peso} y el máximo es {mb} MB. Reduce su tamaño o elige otro.',
+      archMasDe: 'más de {mb} MB',
+      archFalloAlEnviar: 'No se agregó «{nombre}»: {motivo} Revísalo antes de enviar.',
+      archProveedorFallo: 'No se pudieron recuperar los archivos que habías agregado. Agrégalos de nuevo.',
       archRechazoTotal: 'con él se superan los {mb} MB en total.',
       archRechazoVacio: 'el archivo está vacío.',
       archRechazoDuplicado: 'ya adjuntaste ese mismo archivo.',
@@ -697,6 +713,7 @@
       comboVarios: '{n} resultados disponibles.',
       comboNinguno: 'Sin resultados para «{texto}».',
       comboLibre: 'No está en la lista: se guarda como lo escribiste.',
+      comboSinLista: 'La lista no cargó: escribe el nombre como lo conoces. Se revisará al recibir tu envío.',
       tablaOrdenada: 'Ordenado por {columna}, {sentido}.',
       tablaAscendente: 'ascendente',
       tablaDescendente: 'descendente',
@@ -769,6 +786,7 @@
       paginacionActual: 'Página {n}, actual',
       compartido: 'Compartido.',
       borradorRecuperado: 'Borrador recuperado en este dispositivo.',
+      fechaHora: '{fecha} a las {hora}',
       borradorNoGuardar: 'Nada se guarda en este equipo mientras esta pestaña siga abierta. Si la cierras antes de enviar, lo que capturaste se pierde.'
     }
   };

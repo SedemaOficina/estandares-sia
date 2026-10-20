@@ -155,14 +155,18 @@
         form.addEventListener('change', pinta);
       }
 
-      /* Borrador: paso actual y pasos hechos. */
-      const estadoAnterior = FormKit.ganchos.estadoBorrador;
-      FormKit.ganchos.estadoBorrador = (f) => ({ ...(estadoAnterior ? estadoAnterior(f) : {}), paso: actual, hechos: [...hechos] });
-      const restauraAnterior = FormKit.ganchos.restauraBorrador;
-      FormKit.ganchos.restauraBorrador = (f, b) => { if (restauraAnterior) restauraAnterior(f, b); (b.hechos || []).forEach((i) => hechos.add(i)); ir(Math.min(b.paso || 0, pasos.length - 1), { foco: false }); };
+      /* Borrador: paso actual y pasos hechos, de este formulario. Un paso que no existe (un
+         borrador de otra versión o alterado) lleva al primero. */
+      const pasoValido = (x) => (Number.isInteger(x) && x >= 0 && x < pasos.length ? x : 0);
+      ctx.alBorrador({
+        estado: () => ({ paso: actual, hechos: [...hechos] }),
+        restaura: (b) => { if (Array.isArray(b.hechos)) b.hechos.filter((i) => Number.isInteger(i) && i >= 0 && i < pasos.length).forEach((i) => hechos.add(i)); ir(pasoValido(b.paso), { foco: false }); }
+      });
 
       construyeBarra();
       ir(0, { foco: false });
+      /* Con el primer paso a la vista, el aviso «la página no terminó de cargar» ya no hace falta. */
+      for (const a of $$('[data-carga-pendiente]')) a.hidden = true;
 
       FormKit.pasos = { ir: intentaIr, actual: () => actual, total: pasos.length, elementos: pasos };
     }

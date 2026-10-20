@@ -71,7 +71,8 @@
         for (const b of $$('[data-accion-fila]', tr)) if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', `${b.textContent.trim() || b.dataset.accionFila} ${id || ''}`.trim());
       }
       const vacio = $('[data-tabla-vacia]', marco);
-      if (vacio) vacio.hidden = $$('tbody tr', tabla).length > 0;
+      /* «No hay resultados» también cuando hay filas pero un filtro las ocultó todas. */
+      if (vacio) vacio.hidden = $$('tbody tr', tabla).some((tr) => !tr.hidden);
     }
 
     /* Orden por columna: botón dentro del th, aria-sort en el th. Un

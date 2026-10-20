@@ -38,6 +38,12 @@
 
 <main class="pagina" id="contenido">
 
+  <!-- Se ve sólo si la página no terminó de cargar (falta un archivo del estándar): el módulo de pasos lo oculta al mostrar el primero. -->
+  <div class="aviso aviso-advertencia" data-carga-pendiente>
+    <svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg>
+    <div class="aviso-texto"><p><strong class="aviso-titulo">La página no terminó de cargar.</strong> Recárgala; si sigue igual, inténtalo más tarde o con otro navegador.</p></div>
+  </div>
+
   <!-- Borrador recuperado: sólo aparece si hay uno vigente en este dispositivo. -->
   <div class="franja" data-franja-borrador hidden>
     <p class="franja-texto">Hay un borrador guardado el <span data-borrador-fecha></span>. Guardar el avance no es presentar la solicitud.</p>

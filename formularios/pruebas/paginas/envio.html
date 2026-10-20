@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de carga y envío</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../codigo/css/tokens.css">
+<link rel="stylesheet" href="../../codigo/css/base.css">
+<link rel="stylesheet" href="../../codigo/css/nucleo.css">
+<link rel="stylesheet" href="../../codigo/modulos/archivos/archivos.css">
+<link rel="stylesheet" href="../../codigo/modulos/combo/combo.css">
+<link rel="stylesheet" href="../../codigo/modulos/repetibles/repetibles.css">
+<link rel="stylesheet" href="../../codigo/modulos/tooltip/tooltip.css">
+</head>
+<body>
+<main class="pagina" id="contenido">
+  <h1 class="titulo-pagina">Prueba de carga y envío</h1>
+  <!-- Página sólo para pruebas automáticas: envío por omisión con archivos, lista sin catálogo y filas que se agregan con CURP, ayuda y lista. Datos ficticios. -->
+  <form id="formulario" class="tarjeta" data-formkit data-borrador="prueba-envio" data-borrador-version="1" action="/recibe" method="post">
+    <div class="campo" data-campo="nombre" data-uso="Prueba."><label class="etiqueta" for="nombre">Nombre del grupo</label><input class="control" id="nombre" name="nombre" type="text" maxlength="80" autocomplete="off"></div>
+
+    <div class="campo" data-campo="fotos" data-max="3" data-mb="8" data-extensiones="jpg,png,pdf" data-uso="Prueba.">
+      <span class="etiqueta" id="et-fotos">Fotografías o documentos</span>
+      <div data-archivos>
+        <button type="button" class="zona-carga" aria-labelledby="et-fotos"><span class="zona-carga-texto">Elegir archivos</span><span class="zona-carga-limite" data-limite-texto></span></button>
+        <input type="file" multiple hidden>
+        <div data-rechazos></div>
+        <ul class="lista-arch"></ul>
+      </div>
+    </div>
+
+    <!-- Lista cerrada cuyo catálogo no existe en la página (como si no hubiera cargado). -->
+    <div class="campo" data-campo="alcaldia" data-uso="Prueba.">
+      <label class="etiqueta" for="alcaldia">Alcaldía</label>
+      <div class="combo" data-combo data-catalogo="no-cargo"><input class="control" id="alcaldia" name="alcaldia" type="text" autocomplete="off"><ul class="combo-lista" hidden></ul></div>
+    </div>
+
+    <!-- Filas con CURP, ayuda «?» y lista: los módulos las preparan al agregarse. -->
+    <div class="repetible" data-repetible="personas" data-max="2" data-etiqueta="Persona">
+      <p class="etiqueta">Personas (hasta 2)</p>
+      <ol class="repetible-lista" data-repetible-lista></ol>
+      <template data-repetible-plantilla>
+        <li>
+          <div class="campo" data-campo="personas.#.curp" data-formato="curp" data-uso="Prueba." data-finalidad="Prueba.">
+            <label class="etiqueta" for="pe-#-curp">CURP
+              <span class="tooltip" data-tooltip>
+                <button type="button" class="btn-icono tooltip-btn" aria-expanded="false" aria-label="Ayuda sobre la CURP"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-ayuda"></use></svg></button>
+                <span class="tooltip-texto" role="tooltip" hidden>Está en tu acta de nacimiento.</span>
+              </span>
+            </label>
+            <input class="control" id="pe-#-curp" name="personas[#][curp]" type="text" maxlength="18" autocomplete="off">
+          </div>
+          <div class="campo" data-campo="personas.#.alcaldia" data-uso="Prueba.">
+            <label class="etiqueta" for="pe-#-alc">Alcaldía de la persona</label>
+            <div class="combo" data-combo data-catalogo="alcaldias-prueba"><input class="control" id="pe-#-alc" name="personas[#][alcaldia]" type="text" autocomplete="off"><ul class="combo-lista" hidden></ul></div>
+          </div>
+        </li>
+      </template>
+      <button type="button" class="btn btn-secundario" data-repetible-agregar>Agregar persona</button>
+    </div>
+
+    <p class="guardado" data-guardado aria-live="polite"></p>
+    <!-- Aviso de envío sin .aviso-texto: el núcleo lo crea. -->
+    <div class="aviso aviso-bloqueo" data-estado-envio role="alert" tabindex="-1" hidden></div>
+    <div class="acciones"><button type="button" class="btn btn-primario" data-accion="enviar">Enviar</button></div>
+  </form>
+  <!-- Pantalla de acuse sin su módulo (como si acuse.js no hubiera cargado). -->
+  <section class="tarjeta" data-acuse hidden><h2 class="titulo-paso">Recibido</h2></section>
+</main>
+<script src="envio-config.js"></script>
+<script src="../../codigo/js/validaciones.config.js"></script>
+<script src="../../codigo/js/iconos.js"></script>
+<script src="../../codigo/js/formkit.core.js"></script>
+<script src="../../codigo/modulos/archivos/archivos.js"></script>
+<script src="../../codigo/modulos/combo/combo.js"></script>
+<script src="../../codigo/modulos/repetibles/repetibles.js"></script>
+<script src="../../codigo/modulos/identificadores/identificadores.js"></script>
+<script src="../../codigo/modulos/tooltip/tooltip.js"></script>
+</body>
+</html>

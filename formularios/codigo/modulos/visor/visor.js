@@ -159,7 +159,9 @@
     abreDialogo();
     if (url === estado.url && (estado.doc || estado.imagen)) return;
     if (observador) observador.disconnect();
-    estado = { doc: null, imagen: false, url, zoom: AJUSTAR, giro: 0, tarea: estado.tarea + 1 };
+    /* El documento anterior se cierra, con su hilo de pdf.js: abrir varios no los deja vivos. */
+    if (estado.carga) estado.carga.destroy().catch(() => {});
+    estado = { doc: null, carga: null, imagen: false, url, zoom: AJUSTAR, giro: 0, tarea: estado.tarea + 1 };
     hojas.replaceChildren();
     contador.textContent = '';
     if (esImagen(tipo, archivo || url)) {
@@ -167,6 +169,8 @@
       const img = document.createElement('img');
       img.className = 'visor-lienzo visor-imagen';
       img.alt = titulo;
+      /* Una imagen que no existe o está dañada no deja el visor en blanco: se dice, como con un PDF. */
+      img.addEventListener('error', () => { if (estado.url !== url) return; img.hidden = true; di(M.visorError); });
       img.src = url;
       hojas.replaceChildren(img);
       di('');
@@ -182,7 +186,9 @@
       return;
     }
     try {
-      const doc = await m.getDocument({ url, standardFontDataUrl: new URL('standard_fonts/', base()).href, isEvalSupported: false }).promise;
+      const tarea = m.getDocument({ url, standardFontDataUrl: new URL('standard_fonts/', base()).href, isEvalSupported: false });
+      estado.carga = tarea;
+      const doc = await tarea.promise;
       if (estado.url !== url) return;
       estado.doc = doc;
       di('');

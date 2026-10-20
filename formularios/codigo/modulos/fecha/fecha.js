@@ -54,7 +54,7 @@
       for (const b of $$('[data-ahora]', form)) if (!b.textContent.trim()) b.textContent = M.ahora;
       for (const campo of $$('[data-campo][data-formato="fecha"]', form)) {
         const ctl = controlPrincipal(campo.dataset.campo);
-        if (ctl && campo.hasAttribute('data-no-futura') && !ctl.max) ctl.max = cfg.hoyISO();
+        if (ctl && campo.hasAttribute('data-no-futura') && !ctl.max) { ctl.max = cfg.hoyISO(); ctl.dataset.maxHoy = ''; }
       }
 
       /* Edad cumplida desde la fecha de nacimiento, con «hoy» de la Ciudad de

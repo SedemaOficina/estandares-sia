@@ -69,6 +69,7 @@
         const btnConfirmar = $('[data-mapa-confirmar]', el);
         const btnGeo = $('[data-mapa-geolocalizar]', el);
         const inLat = $('[data-mapa-lat]', el), inLon = $('[data-mapa-lon]', el);
+        let geoAviso = null;
         const s = { punto: null, confirmado: false, fuera: false, exigeConfirmar: cont.hasAttribute('data-confirmar') };
         estadoDe.set(el, s);
 
@@ -95,6 +96,7 @@
           if (inLat) inLat.value = p.lat.toFixed(6); if (inLon) inLon.value = p.lon.toFixed(6);
           const texto = plantilla(M.mapaPunto, { lat: p.lat.toFixed(5), lon: p.lon.toFixed(5) });
           if (salida) salida.textContent = s.fuera ? `${texto} ${M.mapaFuera}` : texto;
+          if (geoAviso) geoAviso.hidden = true;
           if (btnConfirmar) { btnConfirmar.hidden = !s.exigeConfirmar || s.fuera; btnConfirmar.textContent = M.mapaConfirmar; btnConfirmar.removeAttribute('aria-pressed'); }
           if (s.fuera) marca(el.dataset.campo, bbox.mensaje); else limpia(el.dataset.campo);
           if (!silencioso) anuncia(salida ? salida.textContent : texto);
@@ -102,8 +104,15 @@
         };
 
         mapa.on('click', (e) => s.coloca({ lat: e.latlng.lat, lon: e.latlng.lng }));
-        /* Teclado: con el mapa enfocado, Enter coloca el punto en el centro; las flechas lo desplazan (Leaflet). */
-        cont.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const c = mapa.getCenter(); s.coloca({ lat: c.lat, lon: c.lng }); } });
+        /* Teclado: con el mapa enfocado, Enter coloca el punto en el centro; las flechas lo desplazan (Leaflet).
+           Enter sobre «+», «−» u otro botón del mapa hace lo de ese botón y nada más. */
+        cont.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.target.closest('.leaflet-control, a, button')) { const c = mapa.getCenter(); s.coloca({ lat: c.lat, lon: c.lng }); } });
+        /* Si no se obtiene la ubicación, el aviso va en su propio renglón: el texto del punto ya
+           elegido se queda como estaba. */
+        const avisoGeo = () => {
+          if (!geoAviso) { geoAviso = document.createElement('p'); geoAviso.className = 'ayuda mapa-geo-aviso'; (salida || btnGeo).after(geoAviso); }
+          return geoAviso;
+        };
         s.confirma = (silencioso = false) => {
           if (!s.punto) return;
           s.confirmado = true;
@@ -114,7 +123,7 @@
         if (btnConfirmar) btnConfirmar.addEventListener('click', () => s.confirma());
         if (btnGeo && cont.hasAttribute('data-geolocalizacion') && navigator.geolocation) {
           btnGeo.hidden = false;
-          btnGeo.addEventListener('click', () => { btnGeo.setAttribute('aria-busy', 'true'); navigator.geolocation.getCurrentPosition((pos) => { btnGeo.removeAttribute('aria-busy'); s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude }); mapa.setView([pos.coords.latitude, pos.coords.longitude], 16); }, () => { btnGeo.removeAttribute('aria-busy'); anuncia(M.mapaSinUbicacion, { cortes: true, visible: salida }); }, { timeout: 10000 }); });
+          btnGeo.addEventListener('click', () => { btnGeo.setAttribute('aria-busy', 'true'); navigator.geolocation.getCurrentPosition((pos) => { btnGeo.removeAttribute('aria-busy'); s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude }); mapa.setView([pos.coords.latitude, pos.coords.longitude], 16); }, () => { btnGeo.removeAttribute('aria-busy'); anuncia(M.mapaSinUbicacion, { cortes: true, visible: avisoGeo() }); }, { timeout: 10000 }); });
         }
         /* La alternativa manual (campo data-formato="coordenadas") también mueve el punto. */
         const manual = $$('[data-formato="coordenadas"] input', form)[0];

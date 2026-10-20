@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.6.0
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.6.1
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -64,8 +64,21 @@
   /* Fecha y hora para leer («17 de octubre de 2026 a las 23:27»), en la zona de la
      configuración y con su reloj: 24 horas salvo fechas.horas24 = false. */
   const relojDe = (cfg) => ((cfg.fechas || {}).horas24 === false ? 'h12' : 'h23');
+  /* Se arma por partes para que diga lo mismo en todo navegador (el acuse es un
+     comprobante): «19 de octubre de 2026 a las 10:00». Una fecha sin hora
+     (AAAA-MM-DD) es ese día, sin hora: leída como hora UTC sería el día anterior
+     en la Ciudad. Lo que no es una fecha da ''. */
   function fechaHora(valor, cfg = FormKit.config) {
-    return new Date(valor).toLocaleString(cfg.idioma, { dateStyle: 'long', timeStyle: 'short', timeZone: (cfg.fechas || {}).zonaHoraria, hourCycle: relojDe(cfg) });
+    const soloFecha = typeof valor === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(valor);
+    const f = soloFecha ? new Date(`${valor}T12:00:00Z`) : new Date(typeof valor === 'string' && /^\d+$/.test(valor) ? Number(valor) : valor);
+    if (valor === null || valor === undefined || valor === '' || Number.isNaN(f.getTime())) return '';
+    const partes = new Intl.DateTimeFormat(cfg.idioma, { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: relojDe(cfg), timeZone: soloFecha ? 'UTC' : (cfg.fechas || {}).zonaHoraria }).formatToParts(f);
+    const g = (t) => (partes.find((p) => p.type === t) || {}).value || '';
+    const fecha = `${g('day')} de ${g('month')} de ${g('year')}`;
+    if (soloFecha) return fecha;
+    const doce = relojDe(cfg) === 'h12';
+    const hora = `${doce ? g('hour') : g('hour').padStart(2, '0')}:${g('minute')}${doce ? ` ${g('dayPeriod')}` : ''}`;
+    return plantilla((cfg.mensajes || {}).fechaHora || '{fecha} a las {hora}', { fecha, hora });
   }
 
   /* Fusión profunda de la configuración base con los ajustes del formulario
@@ -221,7 +234,9 @@
 
     /* ----- Campos ----- */
     const envolturas = () => $$('[data-campo]', form);
-    const envoltura = (n) => $(`[data-campo="${n}"]`, form);
+    /* El nombre va escapado: uno con comillas (de un borrador alterado o del servidor) no rompe el selector. */
+    const escapa = (n) => (global.CSS && CSS.escape ? CSS.escape(String(n)) : String(n).replace(/["\\]/g, '\\$&'));
+    const envoltura = (n) => $(`[data-campo="${escapa(n)}"]`, form);
     const nombres = () => envolturas().map((el) => el.dataset.campo);
 
     /* Un dato que calcula la página (data-auxiliar): no tiene controles, no
@@ -311,6 +326,8 @@
       for (const k of ['min', 'max', 'step', 'minlength', 'maxlength']) if (c.hasAttribute(k)) a[k] = c.getAttribute(k);
       if (c.hasAttribute('data-legible')) a.legible = true;
       for (const [k, v] of Object.entries(envoltura(n).dataset)) a[k] = v;
+      /* «Hoy» se calcula al validar, no al cargar: con la página abierta al pasar la medianoche, hoy ya es otro día. */
+      if (c.hasAttribute && c.hasAttribute('data-max-hoy')) { const hoy = cfg.hoyISO(); a.max = hoy; if (c.max !== hoy) c.max = hoy; }
       /* Mínimo o máximo que dependen de otras respuestas: data-min-segun="clave"
          usa la función FORMKIT_CONFIG.limitesSegun[clave](datos); el servidor
          recibe la misma función en opciones.limitesSegun. */
@@ -385,7 +402,7 @@
 
       /* Fecha y hora: límites por omisión (hoy) cuando el campo lo declara. */
       const ctl = controlPrincipal(n);
-      if (ctl && el.dataset.formato === 'fecha' && el.hasAttribute('data-no-futura') && !ctl.max) ctl.max = cfg.hoyISO();
+      if (ctl && el.dataset.formato === 'fecha' && el.hasAttribute('data-no-futura') && !ctl.max) { ctl.max = cfg.hoyISO(); ctl.dataset.maxHoy = ''; }
 
       /* Contraseña: botón «Mostrar» / «Ocultar» dentro del campo, a la derecha
          (aria-pressed), para revisar lo escrito; el control va en
@@ -692,6 +709,7 @@
     const versionBorrador = form.dataset.borradorVersion || '1';
     let temporizadorBorrador = 0;
     let temporizadorGuardado = 0;
+    let sinAlmacenAvisado = false;
     let arrancado = false;
     let terminado = false;
     const indicador = $('[data-guardado]');
@@ -764,6 +782,8 @@
       for (const x of suscritosBorrador) if (x.estado) Object.assign(extra, x.estado());
       const ok = almacen.escribe(claveBorrador, JSON.stringify({ v: versionBorrador, t: Date.now(), datos: datosBorrador(), ...extra }));
       avisaBorrador('escribe');
+      /* Sin almacén (lleno o bloqueado), se dice una vez y queda a la vista: la persona sabe que no hay borrador. */
+      if (!ok && !sinAlmacenAvisado) { sinAlmacenAvisado = true; if (indicador) { indicador.textContent = M.borradorSinAlmacen; indicador.setAttribute('data-visible', ''); } else aviso(form, { tono: 'advertencia', texto: M.borradorSinAlmacen }); }
       if (ok && indicador) {
         indicador.textContent = M.borradorGuardado;
         indicador.setAttribute('data-visible', '');
@@ -801,7 +821,7 @@
         const t = tipoDe(el);
         if (tipos.has(t)) { if (tipos.get(t).restaura) tipos.get(t).restaura(el, v); continue; }
         if (t === 'opcion') { const r = $$('input[type="radio"]', el).find((x) => x.value === v); if (r) r.checked = true; }
-        else if (t === 'multiple') $$('input[type="checkbox"]', el).forEach((c) => { c.checked = (v || []).includes(c.value); });
+        else if (t === 'multiple') $$('input[type="checkbox"]', el).forEach((c) => { c.checked = Array.isArray(v) && v.includes(c.value); });
         else if (t === 'casilla') $('input', el).checked = !!v;
         else { const c = controlPrincipal(n); if (c) { c.value = v; if (c.tagName === 'SELECT') c.toggleAttribute('data-vacio', !c.value); } }
       }
@@ -823,9 +843,14 @@
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
         if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); contesta(); }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const seguro = $('[data-borrador="conservar"]', franja); if (seguro) seguro.focus(); } else { borraBorrador(); contesta(); } }
+        else if (a.dataset.borrador === 'descartar') {
+          if (confirma) { confirma.hidden = false; const seguro = $('[data-borrador="conservar"]', franja); if (seguro) seguro.focus(); }
+          /* Sin la confirmación en el HTML, se pregunta con el módulo modal; borrar sin preguntar no (FRM-38). */
+          else if (FormKit.confirma) FormKit.confirma(a, { titulo: M.borradorDescartarTitulo, texto: M.borradorDescartarTexto, si: M.borradorDescartarSi, peligro: true }).then((ok) => { if (ok) { borraBorrador(); contesta(); } });
+          else console.warn('FormKit: la franja del borrador necesita [data-borrador-confirma] o el módulo «modal» para confirmar antes de descartar.');
+        }
         else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); contesta(); }
-        else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador="recuperar"]', franja).focus(); }
+        else if (a.dataset.borrador === 'conservar') { if (confirma) confirma.hidden = true; const r = $('[data-borrador="recuperar"]', franja); if (r) r.focus(); }
       });
     }
 
@@ -854,7 +879,18 @@
     function envioPorOmision(payload, { signal }) {
       const destino = form.getAttribute('action');
       if (!destino || destino === '#') return Promise.reject(new Error('FormKit: el formulario no declara action ni opciones.enviar'));
-      return fetch(destino, { method: form.getAttribute('method') || 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': payload.meta.idempotencia }, body: JSON.stringify(payload), signal })
+      /* Con archivos, multipart: la parte «payload» lleva el JSON (cada archivo con su
+         número de parte, sin los bytes) y cada archivo va como una parte «archivo», en ese
+         orden. Sin archivos, JSON. En JSON un archivo llegaría como {} y se perdería. */
+      const cabeceras = { 'Idempotency-Key': payload.meta.idempotencia };
+      let cuerpo;
+      if ((payload.archivos || []).some((a) => a && a.blob instanceof Blob)) {
+        let parte = 0;
+        cuerpo = new FormData();
+        cuerpo.append('payload', JSON.stringify({ ...payload, archivos: payload.archivos.map(({ blob, ...resto }) => (blob instanceof Blob ? { ...resto, parte: parte++ } : resto)) }));
+        for (const a of payload.archivos) if (a && a.blob instanceof Blob) cuerpo.append('archivo', a.blob, a.nombre);
+      } else { cabeceras['Content-Type'] = 'application/json'; cuerpo = JSON.stringify(payload); }
+      return fetch(destino, { method: form.getAttribute('method') || 'POST', headers: cabeceras, body: cuerpo, signal })
         .then(async (r) => {
           if (r.status === 429) { const e = new Error('limite'); e.limite = true; throw e; }
           if (!r.ok) {
@@ -895,23 +931,37 @@
       const textoOriginal = boton ? boton.textContent : '';
       if (boton) { boton.setAttribute('aria-disabled', 'true'); boton.setAttribute('aria-busy', 'true'); boton.textContent = M.enviando; }
       const control = new AbortController();
-      const plazo = setTimeout(() => control.abort(), cfg.envio.timeoutMs);
+      let plazo = 0;
+      /* El aviso de envío, con su texto (si el HTML no trae .aviso-texto, se crea). */
+      const pintaAvisoEnvio = (texto) => {
+        if (!avisoEnvio) { anuncia(texto, true); return; }
+        let t = $('.aviso-texto', avisoEnvio);
+        if (!t) { t = document.createElement('span'); t.className = 'aviso-texto'; avisoEnvio.appendChild(t); }
+        t.textContent = texto; avisoEnvio.hidden = false; avisoEnvio.focus();
+      };
       let respuesta;
       try {
         for (const def of tipos.values()) if (def.antesDeEnviar) await def.antesDeEnviar(form);
         const enviarFn = opciones.enviar || envioPorOmision;
-        respuesta = await enviarFn(arma(), { signal: control.signal });
+        /* El plazo corre desde que se envía (no mientras se preparan las fotos) y vale aunque
+           un enviar propio no atienda la señal: el botón no se queda en «Enviando…». */
+        plazo = setTimeout(() => control.abort(), cfg.envio.timeoutMs);
+        const vence = new Promise((ok, mal) => control.signal.addEventListener('abort', () => mal(new Error('plazo')), { once: true }));
+        respuesta = await Promise.race([enviarFn(arma(), { signal: control.signal }), vence]);
       } catch (e) {
-        /* Errores por campo devueltos por el servidor: junto a cada campo y en el resumen. */
-        const porCampo = e && Array.isArray(e.errores) ? e.errores.filter((x) => x && marcaError(x.campo, x.mensaje)) : [];
+        /* Errores devueltos por el servidor: los de un campo, junto a él y en el resumen; los
+           que no son de un campo de la página, con sus palabras en el aviso de envío. */
+        const errores = e && Array.isArray(e.errores) ? e.errores.filter((x) => x && typeof x.mensaje === 'string' && x.mensaje) : [];
+        const porCampo = errores.filter((x) => typeof x.campo === 'string' && x.campo && marcaError(x.campo, x.mensaje));
+        const sinCampo = errores.filter((x) => !porCampo.includes(x)).map((x) => x.mensaje).join(' ');
         if (porCampo.length) {
           const fallos = porCampo.map((x) => ({ campo: x.campo, mensaje: x.mensaje }));
           if (!(FormKit.ganchos.erroresServidor && FormKit.ganchos.erroresServidor(form, fallos))) muestraResumen(form, fallos, 'servidor');
+          if (sinCampo) pintaAvisoEnvio(sinCampo);
           if (opciones.alFallar) opciones.alFallar(e, form);
           return false;
         }
-        const texto = e && e.limite ? M.envioLimite : control.signal.aborted ? M.envioTimeout : M.envioError;
-        if (avisoEnvio) { $('.aviso-texto', avisoEnvio).textContent = texto; avisoEnvio.hidden = false; avisoEnvio.focus(); } else anuncia(texto, true);
+        pintaAvisoEnvio(sinCampo || (e && e.limite ? M.envioLimite : control.signal.aborted ? M.envioTimeout : M.envioError));
         if (opciones.alFallar) opciones.alFallar(e, form);
         return false;
       } finally {
@@ -925,8 +975,14 @@
       idempotencia = '';
       clearTimeout(temporizadorBorrador);
       const recibido = respuesta && typeof respuesta === 'object' ? respuesta : {};
-      try { if (opciones.alEnviar) opciones.alEnviar(recibido, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: recibido })); }
-      catch (e) { console.error('FormKit: el envío se recibió, pero falló lo que la página hace después (alEnviar).', e); if (!form.hidden) aviso(form, { tono: 'ok', texto: M.envioRecibido, foco: true }); }
+      try {
+        if (opciones.alEnviar) opciones.alEnviar(recibido, form);
+        else {
+          form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: recibido }));
+          /* La página tiene un acuse pero su módulo no cargó: al menos se dice que llegó, con su folio. */
+          if ($('[data-acuse]')) aviso(form, { tono: 'ok', texto: recibido.folio ? plantilla(M.envioRecibidoFolio, { folio: recibido.folio }) : M.envioRecibido, foco: true });
+        }
+      } catch (e) { console.error('FormKit: el envío se recibió, pero falló lo que la página hace después (alEnviar).', e); if (!form.hidden) aviso(form, { tono: 'ok', texto: M.envioRecibido, foco: true }); }
       if (claveBorrador) borraBorrador();
       if (franja) { franja.hidden = true; franjaPendiente = false; }
       return true;
@@ -1037,10 +1093,17 @@
     const activos = [];
     for (const [nombre, def] of modulos) {
       const ambito = def.fueraDelFormulario ? document : form;
-      if (!def.selector || $(def.selector, ambito)) { if (def.tipos) for (const [t, d] of Object.entries(def.tipos)) tipos.set(t, d); activos.push([nombre, def]); }
+      /* También cuenta lo que trae la plantilla de una fila que se agregará después. */
+      const enPlantilla = () => $$('template', form).some((t) => t.content.querySelector(def.selector));
+      if (!def.selector || $(def.selector, ambito) || enPlantilla()) { if (def.tipos) for (const [t, d] of Object.entries(def.tipos)) tipos.set(t, d); activos.push([nombre, def]); }
     }
     for (const n of nombres()) preparaCampo(n);
-    for (const [, def] of activos) if (def.iniciar) def.iniciar(form, ctx);
+    /* Cada módulo arranca por su cuenta: si uno falla (un catálogo con una fila rara), los
+       demás y el formulario siguen funcionando, y la consola dice cuál fue. */
+    for (const [nombre, def] of activos) {
+      if (!def.iniciar) continue;
+      try { def.iniciar(form, ctx); } catch (e) { console.error(`FormKit: el módulo «${nombre}» no arrancó.`, e); }
+    }
     for (const s of $$('select', form)) s.toggleAttribute('data-vacio', !s.value);
     aplicaCondicionales();
     purgaBorradoresVencidos(cfg.borrador.ttlDias);
@@ -1050,6 +1113,10 @@
     }
     arrancado = true;
     form.dataset.formkit = 'listo';
+    /* El aviso «la página no terminó de cargar» ([data-carga-pendiente]) está en el HTML: si el
+       núcleo arrancó, se oculta. En un formulario por pasos lo oculta el módulo de pasos al
+       mostrar el primero (si pasos.js no cargó, el aviso se queda). */
+    if (!$('[data-paso]', form)) for (const a of $$('[data-carga-pendiente]')) a.hidden = true;
 
     const instancia = {
       ctx,

@@ -39,10 +39,11 @@
         restaura: (el, v) => { const i = el.querySelector('[data-combo] input'); if (i) i.value = v || ''; },
         valida: (el, v) => {
           const wrap = el.querySelector('[data-combo]');
-          if (wrap.hasAttribute('data-libre')) return '';
+          /* Libre, o cerrada pero sin catálogo (no cargó): se acepta lo escrito y el aviso lo dice. */
+          if (wrap.hasAttribute('data-libre') || wrap.hasAttribute('data-sin-catalogo')) return '';
           const lista = catalogo(wrap);
           const n = FormKit.utilidades.normalizaBusqueda(v);
-          return lista.some((o) => FormKit.utilidades.normalizaBusqueda(o.nombre) === n) ? '' : FormKit.config.plantilla(FormKit.config.mensajes.soloLista, { etiqueta: el.querySelector('.etiqueta') ? el.querySelector('.etiqueta').textContent.replace(/\*|\(obligatorio\)/g, '').trim() : el.dataset.campo });
+          return lista.some((o) => FormKit.utilidades.normalizaBusqueda(o.nombre) === n) ? '' : FormKit.config.plantilla(FormKit.config.mensajes.soloLista, { etiqueta: etiquetaDe(el) });
         },
         /* En una lista cerrada viaja el nombre como está en el catálogo («Coyoacán», aunque se
            escriba «coyoacan») y, si el catálogo trae una clave propia ({nombre, valor}), también
@@ -51,6 +52,8 @@
           for (const wrap of form.querySelectorAll('[data-combo]:not([data-libre])')) {
             const campo = wrap.closest('[data-campo]').dataset.campo;
             if (!(campo in payload.datos)) continue;
+            /* Sin catálogo, el servidor lo sabe: lo escrito a mano se revisa al recibirlo. */
+            if (wrap.hasAttribute('data-sin-catalogo')) { (payload.meta.sin_catalogo = payload.meta.sin_catalogo || []).push(campo); continue; }
             const o = opcionDe(wrap, payload.datos[campo]);
             if (!o) continue;
             payload.datos[campo] = o.nombre;
@@ -61,13 +64,28 @@
     },
     iniciar(form, ctx) {
       const { $, $$, anuncia, plantilla, M, cfg, normalizaBusqueda, limpia, programaBorrador } = ctx;
-      for (const wrap of $$('[data-combo]', form)) {
+      for (const wrap of $$('[data-combo]', form)) arma(wrap);
+      /* Las filas que se agregan después (repetibles) traen sus propias listas. */
+      form.addEventListener('formkit:fila', (e) => { for (const wrap of $$('[data-combo]', e.detail.fila)) arma(wrap); });
+
+      function arma(wrap) {
+        if (wrap.dataset.comboListo !== undefined) return;
+        wrap.dataset.comboListo = '';
         const campo = wrap.closest('[data-campo]');
         const n = campo.dataset.campo;
         const entrada = $('input', wrap);
         const lista = $('.combo-lista', wrap);
         const opciones = catalogo(wrap);
-        const libre = wrap.hasAttribute('data-libre');
+        /* Una lista cerrada cuyo catálogo no cargó: no se puede elegir nada, así que se deja
+           escribir a mano y se dice con un aviso a la vista (decisión de la Secretaría). */
+        if (!opciones.length && !wrap.hasAttribute('data-libre')) {
+          wrap.setAttribute('data-sin-catalogo', '');
+          const nota = document.createElement('div'); nota.className = 'combo-sin-lista';
+          wrap.after(nota);
+          FormKit.aviso(nota, { tono: 'advertencia', texto: M.comboSinLista });
+          console.warn(`FormKit: el catálogo «${wrap.dataset.catalogo}» de «${n}» no cargó; la lista acepta lo escrito y el envío lo señala en meta.sin_catalogo.`);
+        }
+        const libre = wrap.hasAttribute('data-libre') || wrap.hasAttribute('data-sin-catalogo');
         lista.id = lista.id || ctx.idUnico(`lista-${n}`);
         lista.setAttribute('role', 'listbox');
         const etq = $('.etiqueta', campo);
@@ -84,7 +102,7 @@
         function marcaActiva(k) {
           $$('[role="option"]', lista).forEach((li, i) => li.setAttribute('aria-selected', String(i === k)));
           activa = k;
-          const li = k >= 0 ? $(`#${lista.id}-${k}`) : null;
+          const li = k >= 0 ? document.getElementById(`${lista.id}-${k}`) : null;
           if (li) { entrada.setAttribute('aria-activedescendant', li.id); li.scrollIntoView({ block: 'nearest' }); } else entrada.removeAttribute('aria-activedescendant');
         }
         function elige(k) {
@@ -147,6 +165,15 @@
       }
     }
   });
+
+  /* La etiqueta sin el asterisco ni la palabra que lo lee el lector («obligatorio» o la que diga la configuración). */
+  function etiquetaDe(el) {
+    const e = el.querySelector('.etiqueta');
+    if (!e) return el.dataset.campo;
+    const c = e.cloneNode(true);
+    for (const x of c.querySelectorAll('.marca-oblig,.solo-lector')) x.remove();
+    return c.textContent.replace(/\s+/g, ' ').trim();
+  }
 
   /* La opción del catálogo que corresponde a un texto, sin acentos ni mayúsculas. */
   function opcionDe(wrap, texto) {

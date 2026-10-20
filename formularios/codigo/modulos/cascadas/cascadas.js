@@ -117,14 +117,14 @@
         });
         if (por.cp) por.cp.addEventListener('input', () => { if (por.cp.value.length === 5) desdeCp(); });
         pinta();
-        /* Al restaurar un borrador, las listas hijas se reconstruyen desde el
-           padre restaurado y después se reponen los valores guardados. */
-        const anterior = FormKit.ganchos.restauraBorrador;
-        FormKit.ganchos.restauraBorrador = (f, b) => {
-          if (anterior) anterior(f, b);
-          pinta();
-          for (const n of orden) { const c = por[n]; const v = (b.datos || {})[campoDe(c).dataset.campo]; if (c && v !== undefined && c.value !== v) { c.value = v; c.toggleAttribute('data-vacio', !c.value); pinta(n); } }
-        };
+        /* Al restaurar el borrador de este formulario, las listas hijas se reconstruyen
+           desde el padre restaurado y después se reponen los valores guardados. */
+        ctx.alBorrador({
+          restaura: (b) => {
+            pinta();
+            for (const n of orden) { const c = por[n]; const v = (b.datos || {})[campoDe(c).dataset.campo]; if (c && typeof v === 'string' && c.value !== v) { c.value = v; c.toggleAttribute('data-vacio', !c.value); pinta(n); } }
+          }
+        });
         /* La cruzada cp ↔ colonia (advertencia) se declara sola si no está. */
         if (por.cp && por.colonia) { const campoCp = campoDe(por.cp); if (!campoCp.dataset.cruzada) { campoCp.dataset.cruzada = 'cp-colonia'; campoCp.dataset.cruzadaCampos = `cp=${campoCp.dataset.campo} colonia=${campoDe(por.colonia).dataset.campo}`; campoCp.dataset.catalogo = cont.dataset.catalogo; } }
       }

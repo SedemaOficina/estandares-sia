@@ -53,7 +53,13 @@ Todo `<form data-formkit>` se inicia solo al cargar la página con `window.FORMK
 
 ```js
 const instancia = FormKit.iniciar(form, {
-  enviar(payload, { signal }) { return fetch(…, { signal }).then(r => r.json()); },  // si falta, POST JSON a action
+  // Si falta, el envío por omisión (POST a action; ver abajo). Uno propio revisa la respuesta:
+  async enviar(payload, { signal }) {
+    const r = await fetch('/api/solicitudes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal });
+    const cuerpo = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(`HTTP ${r.status}`), { errores: cuerpo.errores || [] });  // 4xx: errores junto a su campo
+    return cuerpo;  // {folio, fecha}; sin folio, el acuse lo dice con palabras
+  },
   alEnviar(respuesta, form) { … },   // si falta, se emite el evento formkit:enviado en el form
   alFallar(error, form) { … }
 });
@@ -63,7 +69,11 @@ instancia.inventario();  // datos personales: campo, uso, finalidad, sensible, a
 instancia.marcaError('curp', 'Ya hay una cuenta con esta CURP.');  // error que viene de fuera, junto a su campo
 ```
 
-**Errores que devuelve el servidor.** Si el envío falla con un cuerpo `{errores: [{campo, mensaje}]}` (la misma forma que devuelve `validar.mjs`), cada mensaje se pinta junto a su campo y en el resumen de errores; por pasos, se abre el primer paso con error. El envío por omisión lo lee de una respuesta que no es 2xx; una función `enviar` propia rechaza con un error que lleve la propiedad `errores`. `FormKit.marcaError(campo, mensaje)` hace lo mismo desde cualquier código de la página, en el formulario que tenga ese campo.
+**Errores que devuelve el servidor.** Si el envío falla con un cuerpo `{errores: [{campo, mensaje}]}` (la misma forma que devuelve `validar.mjs`), cada mensaje se pinta junto a su campo y en el resumen de errores; por pasos, se abre el primer paso con error. El envío por omisión lo lee de una respuesta que no es 2xx; una función `enviar` propia rechaza con un error que lleve la propiedad `errores`. `FormKit.marcaError(campo, mensaje)` hace lo mismo desde cualquier código de la página, en el formulario que tenga ese campo. Un error sin campo, o con un campo que la página no tiene, se dice con sus palabras en el aviso de envío (`[data-estado-envio]`): el motivo del servidor no se pierde.
+
+**Envío por omisión.** Sin `enviar` propio, el núcleo envía a `action` con la cabecera `Idempotency-Key`. Sin archivos, en JSON. Con archivos, en `multipart/form-data`: la parte `payload` lleva el JSON (cada archivo con su número de `parte`, sin los bytes) y cada archivo va como una parte `archivo`, en ese orden; el servidor junta cada `parte` con su archivo. En JSON un archivo llegaría vacío y se perdería.
+
+**Plazo.** El envío tiene `FORMKIT_CONFIG.envio.timeoutMs` para responder; corre desde que se envía (no mientras se preparan las fotos) y vale aunque un `enviar` propio no atienda `signal`: al vencer, el botón vuelve a su texto y el aviso dice que el envío tardó demasiado y que lo capturado sigue ahí. Si una foto que se procesaba termina con error, el envío se detiene y el error se dice junto a su campo.
 
 **Un envío recibido es un envío recibido.** Un 2xx cuenta como recibido aunque no traiga JSON (204, «OK»); una función `enviar` propia que resuelve `null` o un objeto sin folio, también. Desde ese momento nada cuenta como envío fallido: si `alEnviar` lanza un error, la consola lo dice y la persona ve «Tu envío se recibió. No lo envíes de nuevo.» El borrador se borra después de mostrar el acuse. La clave de idempotencia es la misma en cada reintento mientras no se logre enviar, y se renueva tras un envío logrado: si el formulario sigue en pantalla para otro registro (captura en serie), el siguiente gesto de la persona empieza otro registro, con otra clave y su propio borrador.
 
@@ -103,9 +113,16 @@ Toda pregunta es una **envoltura** con `data-campo` que contiene etiqueta, ayuda
 | `data-sin-mostrar` | En un campo de contraseña, quita el botón «Mostrar contraseña». |
 | `min`, `max`, `step`, `minlength`, `maxlength`, `inputmode`, `autocomplete`, `enterkeyhint` (en el control) | Límites y teclado; el esquema del servidor los lee. |
 
-En el `<form>`: `data-formkit` (arranque automático; `data-formkit="manual"` para iniciarlo desde la página), `data-borrador="clave"` y `data-borrador-version="n"` (borrador local), `action`/`method` (envío por omisión), `novalidate` lo pone el núcleo. Piezas del formulario: `[data-estado-envio]` (aviso de fallo de envío; se oculta cuando la persona cambia un dato o vuelve a enviar, no al mover el foco), `[data-franja-borrador]` con `[data-borrador="recuperar|descartar|descartar-si|conservar"]`, `[data-trampa]` (campo señuelo), `[data-accion="enviar|siguiente|atras"]`.
+En el `<form>`: `data-formkit` (arranque automático; `data-formkit="manual"` para iniciarlo desde la página), `data-borrador="clave"` y `data-borrador-version="n"` (borrador local), `action`/`method` (envío por omisión), `novalidate` lo pone el núcleo. Piezas del formulario:
 
-Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({indice, paso, total}), `formkit:pagina` ({pagina, tamano, desde, hasta}, en el nav), `formkit:tabla` (repintar tabla).
+- `[data-estado-envio]`: aviso de fallo de envío; se oculta cuando la persona cambia un dato o vuelve a enviar, no al mover el foco. El texto va en su `.aviso-texto` (si no lo trae, el núcleo lo crea).
+- `[data-franja-borrador]` con `[data-borrador="recuperar|descartar|descartar-si|conservar|no-guardar"]`, `[data-borrador-fecha]` (dónde va la fecha del borrador) y `[data-borrador-confirma]` (la pregunta «¿Descartar el borrador?»). Sin `[data-borrador-confirma]`, «Empezar de nuevo» pregunta con el módulo `modal`; sin ninguno de los dos no borra y la consola lo dice.
+- `[data-guardado]`: renglón «Borrador guardado en este dispositivo.»; también dice si el borrador no se puede guardar (almacén lleno o bloqueado).
+- `[data-carga-pendiente]`: aviso visible en el HTML («La página no terminó de cargar. Recárgala…»). El núcleo lo oculta al arrancar y, por pasos, el módulo de pasos al mostrar el primero: si falta un archivo del estándar, la persona lo ve en lugar de una pantalla vacía. En una página, el botón de enviar es `type="button"` con `data-accion="enviar"`: sin el núcleo no envía nada.
+- `[data-recordatorio]` con `[data-recordatorio-texto]`: lo que la persona eligió al principio, a la vista en los pasos siguientes (módulo `pasos`).
+- `[data-trampa]` (campo señuelo), `[data-accion="enviar|siguiente|atras"]`.
+
+Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({indice, paso, total}), `formkit:fila` ({fila}, en el form, al agregar una fila repetible: los módulos preparan sus campos), `formkit:pagina` ({pagina, tamano, desde, hasta}, en el nav), `formkit:tabla` (repintar tabla).
 
 **Módulo `enlace-mapa`.** Un contenedor `[data-enlace-mapa="<data-campo destino>"]` con su `label`, un `input` (sin `data-campo` ni `name`: el enlace no viaja) y un `[data-enlace-mapa-estado]` para el aviso. Al pegar o al salir, escribe `lat, lon` con 6 decimales en el campo destino (`data-formato="coordenadas"`), que valida el núcleo y, si hay `mapa`, mueve el punto. Toma el último lugar marcado del enlace (`!3d…!4d…`), luego `q=`/`ll=`/`/place/`, y sólo al final el centro de la pantalla (`@`), con aviso. Acomoda en el campo destino coordenadas al revés, en grados-minutos-segundos, con coma decimal o con la longitud sin signo menos. `FormKit.leeCoordenadas(texto)` es la función pura.
 
@@ -179,7 +196,7 @@ Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({
 }
 ```
 
-Sólo viajan los campos activos (visibles por condición) con valor, ya normalizados. Los repetibles van como `grupo.índice.campo`. Una lista cerrada (combo) envía el nombre como está en el catálogo y, si el catálogo trae una clave propia, ésta en `payload.claves[campo]`. El mapa aporta `{type: "Point", coordinates: [lon, lat]}`. La cabecera `Idempotency-Key` lleva la misma clave mientras no se logre enviar. El servidor valida con `codigo/servidor/validar.mjs` y el esquema que se deriva del HTML:
+Sólo viajan los campos activos (visibles por condición) con valor, ya normalizados. Los repetibles van como `grupo.índice.campo`. Una lista cerrada (combo) envía el nombre como está en el catálogo y, si el catálogo trae una clave propia, ésta en `payload.claves[campo]`. El mapa aporta `{type: "Point", coordinates: [lon, lat]}`. Una lista cerrada cuyo catálogo no cargó acepta lo escrito y lo dice en `meta.sin_catalogo` (los campos); `validar.mjs` lo acepta con una señal para revisarlo. Con el envío por omisión y archivos, el cuerpo es `multipart/form-data`: este JSON en la parte `payload`, con `parte` en cada archivo, y los bytes en las partes `archivo`, en el mismo orden. La cabecera `Idempotency-Key` lleva la misma clave mientras no se logre enviar. El servidor valida con `codigo/servidor/validar.mjs` y el esquema que se deriva del HTML:
 
 ```sh
 node herramientas/esquema-desde-html.mjs tu-formulario.html esquema.json

@@ -28,7 +28,8 @@
       for (const b of $$('[data-descarga]')) {
         if (!b.querySelector('.icono')) b.prepend(icono('descarga'));
         pintaDetalle(b);
-        if (b.target === '_blank') { const s = document.createElement('span'); s.className = 'solo-lector'; s.textContent = ` ${FormKit.config.mensajes.enlaceNuevaPestana}`; b.appendChild(s); }
+        /* Una sola vez, aunque la página tenga dos formularios. */
+        if (b.target === '_blank' && !b.querySelector('[data-nueva-pestana]')) { const s = document.createElement('span'); s.className = 'solo-lector'; s.dataset.nuevaPestana = ''; s.textContent = ` ${FormKit.config.mensajes.enlaceNuevaPestana}`; b.appendChild(s); }
       }
       function pintaDetalle(b) {
         const partes = [b.dataset.formato, b.dataset.peso].filter(Boolean);

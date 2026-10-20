@@ -62,7 +62,8 @@
         detecta: (el) => !!el.querySelector('[data-archivos]'),
         controles: (el) => [el.querySelector('.zona-carga')],
         valorDe: (el) => ((archivosPorCampo.get(el) || []).filter((a) => a.estado !== 'error').length ? String(archivosPorCampo.get(el).length) : ''),
-        textoDe: (el) => (archivosPorCampo.get(el) || []).map((a) => a.nombre).join(', '),
+        /* La revisión dice lo que se envía: sin los archivos que quedaron con error. */
+        textoDe: (el) => (archivosPorCampo.get(el) || []).filter((a) => a.estado !== 'error').map((a) => a.nombre).join(', '),
         enBorrador: false,
         fueraDeDatos: true,
         alArmar: (form, payload) => {
@@ -72,7 +73,15 @@
             if (lista) for (const a of lista) if (a.estado !== 'error') payload.archivos.push({ campo: el.dataset.campo, nombre: a.nombre, tipo: a.tipo, size: a.size, original: a.original, sha256_original: a.sha256_original, optimizada: !!a.optimizada, dimensiones: a.dimensiones, fecha_captura: a.fecha_captura, lat_captura: a.lat_captura, lon_captura: a.lon_captura, blob: a.blob });
           }
         },
-        antesDeEnviar: async (form) => { for (const el of form.querySelectorAll('[data-campo]')) for (const a of archivosPorCampo.get(el) || []) if (a.promesa) await a.promesa; }
+        /* Se espera a que terminen las fotos que se procesan. Si alguna termina con error, el envío
+           se detiene y el error se dice junto a su campo: no se envía sin ella en silencio. */
+        antesDeEnviar: async (form) => {
+          const pendientes = [];
+          for (const el of form.querySelectorAll('[data-campo]')) for (const a of archivosPorCampo.get(el) || []) if (a.promesa) pendientes.push({ el, a, promesa: a.promesa });
+          for (const x of pendientes) await x.promesa;
+          const fallidos = pendientes.filter((x) => x.a.estado === 'error');
+          if (fallidos.length) throw Object.assign(new Error('archivos'), { errores: fallidos.map((x) => ({ campo: x.el.dataset.campo, mensaje: FormKit.config.plantilla(FormKit.config.mensajes.archFalloAlEnviar, { nombre: x.a.nombre, motivo: x.a.motivo }) })) });
+        }
       }
     },
     iniciar(form, ctx) {
@@ -88,12 +97,14 @@
         };
       }
       const ext = (nombre) => String(nombre || '').split('.').pop().toLowerCase();
+      /* El peso de un archivo que pasa del límite: si redondeado se ve igual al límite, «más de 8 MB». */
+      const pesoSobre = (bytes, mb) => (pesoTxt(bytes) === pesoTxt(mb * BYTES_POR_MB) ? plantilla(M.archMasDe, { mb }) : pesoTxt(bytes));
       const formatosTxt = (c) => cfg.formatosArchivo(c.extensiones);
       /* Nombre saneado: sin rutas ni caracteres que no se ven o que invierten el texto
-         («recibo‮fdp.png» se leería «recibognp.pdf»), acotado y, si se recorta, con su
+         («recibo[U+202E]fdp.png» se leería «recibognp.pdf»), acotado y, si se recorta, con su
          extensión (el servidor la necesita para saber qué es). */
       const saneaNombre = (n) => {
-        const limpio = String(n || 'archivo').split(/[\\/]/).pop().replace(/[\u0000-\u001F\u007F-\u009F​-‏‪-‮⁠-⁤⁦-⁩﻿]/g, '').replace(/\s+/g, ' ').trim() || 'archivo';
+        const limpio = String(n || 'archivo').split(/[\\/]/).pop().replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF]/g, '').replace(/\s+/g, ' ').trim() || 'archivo';
         if (limpio.length <= A.nombreMax) return limpio;
         const e = limpio.match(/\.[A-Za-z0-9]{1,10}$/);
         return e ? `${limpio.slice(0, A.nombreMax - e[0].length)}${e[0]}` : limpio.slice(0, A.nombreMax);
@@ -204,7 +215,7 @@
           const e = ext(f.name);
           if (!firmaCoincide(buf, e)) throw Object.assign(new Error('firma'), { motivo: M.archRechazoFirma });
           a.sha256_original = await huellaDe(buf);
-          if (a.sha256_original && lista.some((x) => x !== a && x.sha256_original === a.sha256_original)) throw Object.assign(new Error('duplicado'), { motivo: M.archRechazoDuplicado });
+          if (a.sha256_original && lista.some((x) => x !== a && x.estado !== 'error' && x.sha256_original === a.sha256_original)) throw Object.assign(new Error('duplicado'), { motivo: M.archRechazoDuplicado });
           const esFoto = A.optimiza.tipos.includes(e);
           if (esFoto) {
             const meta = ['jpg', 'jpeg'].includes(e) ? leeExif(buf) : {};
@@ -224,8 +235,8 @@
             a.vista = URL.createObjectURL(a.blob);
           } else a.blob = f;
           /* El límite se mide DESPUÉS de optimizar: una foto de 30 MB que queda en 1 MB no se rechaza por lo que pesaba. */
-          if (a.size > c.mb * BYTES_POR_MB) throw Object.assign(new Error('peso'), { motivo: plantilla(a.optimizada ? M.archRechazoOptimizada : M.archRechazoPeso, { peso: pesoTxt(a.size), mb: c.mb }) });
-          const total = lista.filter((x) => x.estado !== 'error').reduce((s, x) => s + (x.size || 0), 0);
+          if (a.size > c.mb * BYTES_POR_MB) throw Object.assign(new Error('peso'), { motivo: plantilla(a.optimizada ? M.archRechazoOptimizada : M.archRechazoPeso, { peso: pesoSobre(a.size, c.mb), mb: c.mb }) });
+          const total = lista.filter((x) => x === a || x.estado === 'listo').reduce((s, x) => s + (x.size || 0), 0);
           if (total > c.mbTotal * BYTES_POR_MB) throw Object.assign(new Error('total'), { motivo: plantilla(M.archRechazoTotal, { mb: c.mbTotal }) });
           a.estado = 'listo';
           anuncia(plantilla(M.archAgregado, { nombre: a.nombre }));
@@ -234,7 +245,12 @@
           a.codigo = err.message;
           a.motivo = err.motivo || M.archRechazoProceso;
           a.archivoOriginal = f;
-        }).then(() => { delete a.promesa; pinta(el); if (a.estado === 'listo') { limpia(el.dataset.campo); programaBorrador(); } });
+        }).then(() => {
+          delete a.promesa;
+          if (!lista.includes(a)) { if (a.vista) URL.revokeObjectURL(a.vista); return; }
+          pinta(el);
+          if (a.estado === 'listo') { limpia(el.dataset.campo); programaBorrador(); }
+        });
       }
 
       function agrega(archivos, el) {
@@ -249,7 +265,7 @@
           if (!admite) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoTipo, { formatos: formatosTxt(c) }) }); continue; }
           if (f.size < A.minBytes) { rechazos.push({ nombre, motivo: M.archRechazoVacio }); continue; }
           const esFoto = A.optimiza.tipos.includes(ext(f.name));
-          if (!esFoto && f.size > c.mb * BYTES_POR_MB) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoPeso, { peso: pesoTxt(f.size), mb: c.mb }) }); continue; }
+          if (!esFoto && f.size > c.mb * BYTES_POR_MB) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoPeso, { peso: pesoSobre(f.size, c.mb), mb: c.mb }) }); continue; }
           const a = { nombre, size: f.size, original: f.size, tipo: f.type, fuente: f };
           lista.push(a);
           procesa(f, a, el, c);
@@ -263,10 +279,10 @@
         const dest = $('[data-rechazos]', el);
         if (!dest) return;
         dest.textContent = '';
+        if (rechazos.length) dest.setAttribute('role', 'alert');
         for (const r of rechazos) {
           const d = document.createElement('p');
           d.className = 'arch-rechazo';
-          d.setAttribute('role', 'alert');
           const t = document.createElement('strong'); t.textContent = plantilla(M.archRechazoTitulo, { nombre: r.nombre });
           d.append(icono('error', 'icono icono-sm'), t, document.createTextNode(` ${r.motivo}`));
           dest.appendChild(d);
@@ -276,6 +292,8 @@
       function pinta(el) {
         const ul = $('.lista-arch', el);
         const lista = archivosPorCampo.get(el);
+        /* Si el foco estaba en un botón de la lista, vuelve al mismo después de repintarla. */
+        const conFocoEn = ul.contains(document.activeElement) ? (document.activeElement.dataset.quitar !== undefined ? `[data-quitar="${document.activeElement.dataset.quitar}"]` : document.activeElement.dataset.reintentar !== undefined ? `[data-reintentar="${document.activeElement.dataset.reintentar}"]` : null) : null;
         ul.textContent = '';
         lista.forEach((a, i) => {
           const li = document.createElement('li');
@@ -299,6 +317,7 @@
           li.appendChild(q);
           ul.appendChild(li);
         });
+        if (conFocoEn) { const b = $(conFocoEn, ul) || $(`[data-quitar="${conFocoEn.match(/\d+/)[0]}"]`, ul); if (b) b.focus(); }
         /* Con el máximo ya cargado, «Elegir archivo» y la cámara se ocultan (data-lleno): a la vista,
            la persona creía que no había subido nada. Vuelven al quitar un archivo. */
         const cont = $('[data-archivos]', el);
@@ -362,8 +381,11 @@
       }
 
       /* Un archivo soltado fuera de la zona haría que el navegador lo abriera y la persona perdiera todo. */
-      window.addEventListener('dragover', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
-      window.addEventListener('drop', (e) => { if (!e.target.closest || !e.target.closest('.zona-carga')) e.preventDefault(); });
+      const traeArchivos = (e) => !!e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files');
+      window.addEventListener('dragover', (e) => { if (traeArchivos(e) && (!e.target.closest || !e.target.closest('.zona-carga'))) e.preventDefault(); });
+      window.addEventListener('drop', (e) => { if (traeArchivos(e) && (!e.target.closest || !e.target.closest('.zona-carga'))) e.preventDefault(); });
+      /* Sin https (crypto.subtle) no hay huella SHA-256: no se detectan duplicados ni viaja la huella. */
+      if (!(window.crypto && crypto.subtle)) console.warn('FormKit: sin https no se calcula la huella SHA-256 de los archivos ni se detectan duplicados.');
 
       /* Archivos en el borrador. El estándar no los guarda en el dispositivo (FRM-43); si la
          página da un proveedor, FormKit.iniciar(form, { borradorArchivos: { guarda(campo, archivos),
@@ -381,7 +403,7 @@
       };
       ctx.alBorrador({
         escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo' && a.fuente).map((a) => paraProveedor(a, configDe(el))))),
-        restaura: () => conProveedor((p, el) => p.lee && Promise.resolve(p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); })),
+        restaura: () => conProveedor((p, el) => p.lee && Promise.resolve().then(() => p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); }, () => FormKit.aviso($('[data-rechazos]', el) || el, { tono: 'advertencia', texto: M.archProveedorFallo }))),
         borra: () => conProveedor((p, el) => p.borra && p.borra(el.dataset.campo))
       });
 

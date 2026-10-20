@@ -19,7 +19,8 @@
     const barra = el.querySelector('progress');
     const txt = el.querySelector('[data-progreso-texto]');
     if (!barra) return;
-    if (valor === null || valor === undefined) { barra.removeAttribute('value'); if (txt) txt.textContent = FormKit.config.mensajes.cargando; return; }
+    /* Sin valor conocido, el lector oye «Cargando…», no el porcentaje que tenía antes. */
+    if (valor === null || valor === undefined) { barra.removeAttribute('value'); barra.setAttribute('aria-valuetext', FormKit.config.mensajes.cargando); if (txt) txt.textContent = FormKit.config.mensajes.cargando; return; }
     const max = Number(barra.max || 100);
     const v = Math.max(0, Math.min(max, Number(valor)));
     barra.value = v;

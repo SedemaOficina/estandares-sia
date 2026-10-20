@@ -14,7 +14,7 @@ import { pathToFileURL } from 'node:url';
 import { mkdtempSync, writeFileSync, readFileSync, copyFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
-import { sirve, abreNavegador, abrePagina, abrePlantilla, PERFILES, PAGINAS, RAIZ, visible, continuar, llenaSolicitud, llenaLugar, aceptaDeclaraciones, pngRuido, jpegConExif, ocultosVisibles, FRASE_LEGIBLE } from './ayudas.mjs';
+import { sirve, abreNavegador, abrePagina, abrePlantilla, PERFILES, PAGINAS, RAIZ, visible, continuar, llenaSolicitud, llenaLugar, aceptaDeclaraciones, pngRuido, jpegConExif, ocultosVisibles, FRASE_LEGIBLE, PNG_1x1, nuevaPagina } from './ayudas.mjs';
 
 let servidor, navegador;
 test.before(async () => { servidor = await sirve(); navegador = await abreNavegador(); });
@@ -384,7 +384,7 @@ async function servidorCon(origen) {
   let ruta = resolve(RAIZ, 'codigo/plantillas', `${origen}.html`);
   if (origen.startsWith('<')) { const dir = mkdtempSync(resolve(tmpdir(), 'esquema-')); ruta = resolve(dir, 'f.html'); writeFileSync(ruta, `<form>${origen}</form>`); }
   const esquema = JSON.parse(execFileSync(process.execPath, [resolve(RAIZ, 'herramientas/esquema-desde-html.mjs'), ruta], { encoding: 'utf8' }));
-  return { valida: (datos, opciones = {}, archivos = []) => validaPayload({ datos, archivos, meta: {} }, esquema, opciones), C: globalThis.FORMKIT_CATALOGOS, esquema };
+  return { valida: (datos, opciones = {}, archivos = [], meta = {}) => validaPayload({ datos, archivos, meta }, esquema, opciones), C: globalThis.FORMKIT_CATALOGOS, esquema };
 }
 const de = (r, campo) => r.errores.filter((e) => e.campo === campo).map((e) => e.mensaje);
 
@@ -433,7 +433,7 @@ test('servidor: límites de archivos del campo y de la configuración del formul
   assert.ok(de(valida({}, {}, [pdf('a.pdf'), pdf('b.pdf'), pdf('c.pdf'), pdf('d.pdf')]), 'docs').length, '4 con data-max 3 no pasan');
   assert.ok(de(valida({}, {}, [pdf('a.pdf', 1.5), pdf('b.pdf', 1.5)]), 'docs').some((m) => /2 MB/.test(m)), 'el total del campo (data-total-mb) se respeta');
   assert.deepEqual(de(valida({}, {}, [pdf('oficio.pdf'), { ...pdf('foto.jpg'), tipo: 'image/jpeg' }]), 'docs'), [], 'con «PDF, JPG», pdf y jpg pasan');
-  assert.ok(de(valida({}, {}, [pdf('recibo‮fdp.pdf')]), 'docs').length, 'un nombre con un carácter que invierte el texto no pasa');
+  assert.ok(de(valida({}, {}, [pdf('recibo\u202Efdp.pdf')]), 'docs').length, 'un nombre con un carácter que invierte el texto no pasa');
   const r = valida({}, {}, [{ ...pdf('foto.jpg'), lat_captura: 19.4, lon_captura: -99.1, fecha_captura: '2026-10-01T10:00:00' }]);
   assert.ok(r.senales.some((s) => /ubicación de captura/.test(s)), 'la ubicación que el campo no pide deja una señal');
   assert.equal(r.archivos[0].lat_captura, undefined, 'y se quita de la copia que recibe el sistema');
@@ -490,4 +490,380 @@ test('el nombre de un archivo largo se recorta conservando su extensión (A1-07)
   const nombre = (await p.locator('[data-campo="fotos"] .arch-nombre').textContent()).trim();
   assert.ok(nombre.length <= 120 && nombre.endsWith('.pdf'), `«${nombre}»`);
   await p.context().close();
+});
+
+/* ----- Bloque 4 (1.6.1): robustez de carga y envío ----- */
+
+const RUTA_ENVIO = 'pruebas/paginas/envio.html';
+const abreEnvio = (consulta = '') => abrePagina(navegador, servidor.url, RUTA_ENVIO, { consulta, contexto: PERFILES.escritorio.contexto });
+const ENTRADA_FOTOS = '[data-campo="fotos"] input[type="file"]';
+const pdfDe = (marca, bytes = 2000) => Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(bytes, marca)]);
+const paginaErrores = (p) => p.registro.filter((x) => x.startsWith('pageerror'));
+/* Una página escrita en la prueba, servida junto a las de prueba para que sus rutas relativas funcionen. */
+async function enMemoria(html, contexto = {}) {
+  const p = await nuevaPagina(navegador, { ...PERFILES.escritorio.contexto, ...contexto });
+  const url = `${servidor.url}/pruebas/paginas/en-memoria.html`;
+  await p.route(url, (r) => r.fulfill({ contentType: 'text/html; charset=utf-8', body: html }));
+  await p.goto(url);
+  return p;
+}
+const NUCLEO = '<script src="../../codigo/js/validaciones.config.js"></script><script src="../../codigo/js/iconos.js"></script><script src="../../codigo/js/formkit.core.js"></script>';
+
+test('envío por omisión: los archivos viajan en multipart; un rechazo del servidor se dice completo, aunque el aviso no traiga dónde escribirlo (B5-07, B5-08, B5-12)', async () => {
+  const p = await abreEnvio();
+  const llegadas = [];
+  await p.route('**/recibe', (r) => {
+    llegadas.push({ tipo: r.request().headers()['content-type'] || '', cuerpo: r.request().postDataBuffer() || Buffer.alloc(0) });
+    r.fulfill({ status: 422, contentType: 'application/json', body: JSON.stringify({ errores: [{ campo: 'nombre', mensaje: 'Ya hay un registro con ese nombre.' }, { campo: 'no_existe', mensaje: 'La convocatoria cerró el 1 de octubre.' }, { campo: 'a"b', mensaje: 'Revisa los datos.' }] }) });
+  });
+  await p.fill('#nombre', 'Grupo de prueba');
+  await p.setInputFiles(ENTRADA_FOTOS, [{ name: 'oficio.pdf', mimeType: 'application/pdf', buffer: pdfDe('MARCA-DE-PRUEBA ') }]);
+  await p.waitForSelector('[data-campo="fotos"] .arch[data-estado="listo"]', { state: 'attached' });
+  await p.click('[data-accion="enviar"]');
+  await p.waitForSelector('[data-estado-envio]:not([hidden])', { timeout: 5000 });
+  const { tipo, cuerpo } = llegadas[0];
+  assert.match(tipo, /^multipart\/form-data; boundary=/, 'con archivos, el envío por omisión es multipart');
+  const texto = cuerpo.toString('latin1');
+  assert.ok(texto.includes('MARCA-DE-PRUEBA'), 'los bytes del archivo llegan');
+  assert.match(texto, /name="archivo"; filename="oficio\.pdf"/);
+  const json = JSON.parse(texto.match(/name="payload"\r\n\r\n(.*?)\r\n--/s)[1]);
+  assert.equal(json.datos.nombre, 'Grupo de prueba');
+  assert.deepEqual([json.archivos[0].nombre, json.archivos[0].parte, 'blob' in json.archivos[0]], ['oficio.pdf', 0, false], 'el JSON dice qué parte es cada archivo');
+  assert.match(await error(p, 'nombre'), /Ya hay un registro con ese nombre\./, 'el error de un campo va junto a él');
+  assert.match(await p.locator('[data-estado-envio]').textContent(), /La convocatoria cerró el 1 de octubre\. Revisa los datos\./, 'los demás, con sus palabras, en el aviso de envío');
+  assert.deepEqual(paginaErrores(p), []);
+  await p.context().close();
+});
+
+test('un envío propio que nunca responde ni atiende la señal no deja el botón en «Enviando…» (B5-13)', async () => {
+  const p = await abreEnvio('?colgado');
+  await p.fill('#nombre', 'Grupo');
+  const boton = p.locator('[data-accion="enviar"]');
+  await boton.click();
+  await p.waitForSelector('[data-estado-envio]:not([hidden])', { timeout: 4000 });
+  assert.equal((await boton.textContent()).trim(), 'Enviar', 'el botón vuelve a su texto');
+  assert.equal(await boton.getAttribute('aria-busy'), null);
+  assert.match(await p.locator('[data-estado-envio]').textContent(), /tardó demasiado/);
+  await p.context().close();
+});
+
+test('sin el módulo de acuse, un envío recibido se dice con su folio (B5-10)', async () => {
+  const p = await abreEnvio();
+  await p.route('**/recibe', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '{"folio":"F-77"}' }));
+  await p.fill('#nombre', 'Grupo');
+  await p.click('[data-accion="enviar"]');
+  await p.waitForSelector('#formulario > [data-aviso-formkit]', { timeout: 5000 });
+  assert.match(await p.locator('#formulario > [data-aviso-formkit]').textContent(), /se recibió con el folio F-77/);
+  await p.context().close();
+});
+
+test('si falta un archivo del estándar la página lo dice, y sin el núcleo el botón de una página no envía (B5-04)', async () => {
+  for (const [plantilla, falta] of [['por-pasos', 'pasos/pasos.js'], ['una-pagina', 'js/formkit.core.js'], ['por-pasos', 'js/formkit.core.js']]) {
+    const p = await nuevaPagina(navegador, PERFILES.escritorio.contexto);
+    await p.route(`**/${falta}`, (r) => r.abort());
+    const envios = []; p.on('request', (r) => { if (r.method() === 'POST') envios.push(r.url()); });
+    await p.goto(`${servidor.url}/${PAGINAS[plantilla]}`);
+    await p.waitForLoadState('load');
+    assert.ok(await p.locator('[data-carga-pendiente]').isVisible(), `${plantilla} sin ${falta}: el aviso se ve`);
+    if (plantilla === 'una-pagina') {
+      await p.fill('#nombre', 'Fulana');
+      await p.click('[data-accion="enviar"]');
+      await p.waitForTimeout(400);
+      assert.deepEqual(envios, [], 'el botón no envía nada a medias');
+      assert.equal(await p.inputValue('#nombre'), 'Fulana', 'y lo escrito sigue ahí');
+    }
+    await p.context().close();
+  }
+  for (const plantilla of ['por-pasos', 'una-pagina']) {
+    const p = await abrePagina(navegador, servidor.url, PAGINAS[plantilla], { contexto: PERFILES.escritorio.contexto });
+    await p.waitForSelector('form[data-formkit="listo"]');
+    assert.ok(await p.locator('[data-carga-pendiente]').isHidden(), `${plantilla}: con todo cargado el aviso no se ve`);
+    await p.context().close();
+  }
+});
+
+test('lista cerrada sin catálogo: lo dice, acepta lo escrito y el servidor lo recibe con una señal; un módulo que falla no detiene a los demás (B5-02, B5-03)', async () => {
+  const p = await nuevaPagina(navegador, PERFILES.escritorio.contexto);
+  await p.route('**/tooltip/tooltip.js', async (r) => { const resp = await r.fetch(); r.fulfill({ response: resp, body: `${await resp.text()}\nFormKit.registra('roto', { iniciar() { throw new Error('módulo roto'); } });` }); });
+  const consola = []; p.on('console', (m) => consola.push(m.text()));
+  await p.goto(`${servidor.url}/${RUTA_ENVIO}`);
+  await p.waitForSelector('form[data-formkit="listo"]', { timeout: 3000 });
+  assert.ok(consola.some((t) => /«roto» no arrancó/.test(t)), 'la consola dice qué módulo falló');
+  assert.match(await p.locator('[data-campo="alcaldia"] .combo-sin-lista').textContent(), /La lista no cargó/, 'el aviso está a la vista');
+  await p.fill('#alcaldia', 'Coyoakan'); await p.keyboard.press('Tab');
+  assert.equal(await error(p, 'alcaldia'), '', 'lo escrito se acepta');
+  const meta = await instancia(p, () => FormKit.iniciar(document.querySelector('form')).payload().meta);
+  assert.deepEqual(meta.sin_catalogo, ['alcaldia'], 'y el envío lo señala');
+  await p.context().close();
+  const { valida } = await servidorCon('<div class="campo" data-campo="alcaldia" data-uso="x."><label class="etiqueta" for="a">Alcaldía</label><div class="combo" data-combo data-catalogo="alcaldias"><input class="control" id="a" name="alcaldia"></div></div>');
+  const r = valida({ alcaldia: 'Coyoakan' }, { catalogos: { alcaldias: ['Coyoacán', 'Tlalpan'] } }, [], { sin_catalogo: ['alcaldia'] });
+  assert.deepEqual(de(r, 'alcaldia'), [], 'el servidor no lo rechaza');
+  assert.ok(r.senales.some((s) => /a mano/.test(s)), 'pero lo señala para revisarlo');
+  assert.ok(de(valida({ alcaldia: 'Coyoakan' }, { catalogos: { alcaldias: ['Coyoacán', 'Tlalpan'] } }), 'alcaldia').length, 'sin la señal, fuera del catálogo no pasa');
+});
+
+test('si el equipo no deja guardar el borrador, se dice (B5-14)', async () => {
+  const p = await nuevaPagina(navegador, PERFILES.escritorio.contexto);
+  await p.addInitScript(() => { Storage.prototype.setItem = function () { throw new DOMException('lleno', 'QuotaExceededError'); }; });
+  await p.goto(`${servidor.url}/${RUTA_ENVIO}`);
+  await p.fill('#nombre', 'Grupo');
+  await p.waitForTimeout(1000);
+  assert.match(await p.locator('[data-guardado]').textContent(), /no permite guardar el borrador/);
+  assert.deepEqual(paginaErrores(p), []);
+  await p.context().close();
+});
+
+test('un borrador alterado no deja la pantalla vacía ni detiene el formulario (E3-07)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  await p.evaluate(() => localStorage.setItem('sia-plantilla-pasos', JSON.stringify({ v: '1', t: Date.now(), datos: {}, paso: -1, hechos: [0, 9, 'a'] })));
+  await p.reload(); await p.waitForSelector('form[data-formkit="listo"]');
+  await p.click('[data-borrador="recuperar"]');
+  assert.equal(await p.locator('[data-paso]:not([hidden])').count(), 1, 'con «paso: -1» se ve el primer paso');
+  await p.evaluate(() => localStorage.setItem('sia-plantilla-pasos', JSON.stringify({ v: '1', t: Date.now() + 30 * 86400000, datos: { descripcion: 'del futuro' } })));
+  await p.reload(); await p.waitForSelector('form[data-formkit="listo"]');
+  assert.ok(await p.locator('[data-franja-borrador]').isHidden(), 'un borrador con fecha en el futuro no se ofrece');
+  assert.equal(await p.evaluate(() => localStorage.getItem('sia-plantilla-pasos')), null, 'y se borra');
+  assert.deepEqual(paginaErrores(p), []);
+  await p.context().close();
+
+  const q = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
+  await q.evaluate(() => {
+    localStorage.setItem('sia-plantilla-una-pagina', JSON.stringify({ v: '1', t: Date.now(), datos: { intereses: 5, nombre: 'Fulana' } }));
+    localStorage.setItem(`${FormKit.config.chips.clave}:sia-plantilla-una-pagina:alcaldia`, 'null');
+  });
+  await q.reload(); await q.waitForSelector('form[data-formkit="listo"]', { timeout: 3000 });
+  await q.click('[data-borrador="recuperar"]');
+  assert.equal(await q.inputValue('#nombre'), 'Fulana', 'lo demás se recupera');
+  assert.equal(await q.locator('[data-campo="intereses"] input:checked').count(), 0, '«intereses: 5» no marca nada');
+  assert.deepEqual(paginaErrores(q), [], 'sin errores con opciones que no son lista ni con un historial de sugerencias raro');
+  await q.context().close();
+});
+
+test('«Hoy» después de medianoche, con la página abierta desde antes, no marca la fecha como futura (E3-08)', async () => {
+  const p = await nuevaPagina(navegador, { ...PERFILES.escritorio.contexto, timezoneId: 'America/Mexico_City' });
+  await p.clock.install({ time: new Date('2026-10-20T05:59:50Z') });
+  await p.goto(`${servidor.url}/${RUTA}`);
+  await p.waitForSelector('form[data-formkit="listo"]');
+  await p.clock.fastForward(20000);
+  await p.click('[data-campo="dia"] [data-hoy]');
+  assert.equal(await p.inputValue('#dia'), '20/10/2026');
+  assert.equal(await error(p, 'dia'), '', 'el nuevo día no es una fecha futura');
+  await p.context().close();
+  /* La fecha AAAA-MM-DD lleva su máximo en el control: también se recalcula. */
+  const q = await nuevaPagina(navegador, { ...PERFILES.escritorio.contexto, timezoneId: 'America/Mexico_City' });
+  await q.clock.install({ time: new Date('2026-10-20T05:59:50Z') });
+  await q.goto(`${servidor.url}/${PAGINAS['por-pasos']}`);
+  await q.waitForSelector('form[data-formkit="listo"]');
+  await q.clock.fastForward(20000);
+  await q.click('[data-campo="fecha_hechos"] [data-hoy]');
+  assert.equal(await q.inputValue('#fecha_hechos'), '2026-10-20');
+  assert.equal(await error(q, 'fecha_hechos'), '', 'en la plantilla por pasos, tampoco');
+  assert.equal(await q.getAttribute('#fecha_hechos', 'max'), '2026-10-20', 'y el calendario ya permite el día nuevo');
+  await q.context().close();
+});
+
+test('caracteres invisibles, dígitos de ancho completo, años fuera de rango y 100 000 claves desconocidas (E3-09, E3-10, E3-12)', async () => {
+  const campo = (n, f) => `<div class="campo" data-campo="${n}"${f ? ` data-formato="${f}"` : ''} data-uso="x."><label class="etiqueta" for="${n}">${n}</label><input class="control" id="${n}" name="${n}"></div>`;
+  const { valida } = await servidorCon(campo('texto') + campo('correo', 'correo') + campo('telefono', 'telefono') + campo('fecha', 'fecha') + campo('dma', 'fecha-dma'));
+  const r = valida({ texto: 'Hola\u0000 mun\u0007do', correo: 'ana\u200B@ejemplo.mx', telefono: '\uFF15\uFF15\uFF11\uFF12\uFF13\uFF14\uFF15\uFF16\uFF17\uFF18' });
+  assert.deepEqual(r.errores, []);
+  assert.deepEqual([r.datos.texto, r.datos.correo, r.datos.telefono], ['Hola mundo', 'ana@ejemplo.mx', '5512345678'], 'sin caracteres de control ni invisibles; los dígitos de ancho completo cuentan');
+  for (const [fecha, dma] of [['0100-01-01', '01/01/0100'], ['9999-12-31', '31/12/9999']]) {
+    const x = valida({ fecha, dma });
+    assert.match(de(x, 'fecha').join(), /entre 1900 y 2100/, `«${fecha}» no pasa`);
+    assert.ok(de(x, 'dma').length, `«${dma}» no pasa`);
+  }
+  const muchas = Object.fromEntries(Array.from({ length: 100000 }, (_, i) => [`x${i}`, '1']));
+  const t0 = Date.now();
+  const y = valida(muchas);
+  assert.ok(y.errores.length <= 21, `${y.errores.length} errores: los primeros y un resumen, no 100 000`);
+  assert.ok(Date.now() - t0 < 1500, `${Date.now() - t0} ms`);
+  const p = await abre();
+  await p.fill('#dia', '01/01/0100'); await p.keyboard.press('Tab');
+  assert.match(await error(p, 'dia'), /entre 1900 y 2100/, 'en pantalla también');
+  await p.context().close();
+});
+
+test('archivos: un aviso para muchos rechazos, una imagen rechazada se puede volver a elegir, «más de 8 MB» y la revisión sólo dice lo que se envía (E3-11, E3-13, F2-03)', async () => {
+  const p = await abreEnvio();
+  await p.setInputFiles(ENTRADA_FOTOS, [{ name: 'grande.pdf', mimeType: 'application/pdf', buffer: pdfDe('a', 8 * 1048576 + 1 - 9) }]);
+  const rechazo = await p.locator('[data-campo="fotos"] [data-rechazos]').textContent();
+  assert.match(rechazo, /más de 8 MB/, `«${rechazo}»`);
+  assert.doesNotMatch(rechazo, /8\.0 MB/);
+  await p.setInputFiles(ENTRADA_FOTOS, Array.from({ length: 12 }, (_, i) => ({ name: `doc-${i}.pdf`, mimeType: 'application/pdf', buffer: pdfDe(`marca ${i} `) })));
+  await p.waitForFunction(() => document.querySelectorAll('[data-campo="fotos"] .arch[data-estado="listo"]').length === 3);
+  assert.equal(await p.locator('[data-campo="fotos"] .arch-rechazo').count(), 9, 'se dicen los 9 rechazos');
+  assert.equal(await p.locator('[data-campo="fotos"] [data-rechazos][role="alert"]').count(), 1, 'en un solo aviso');
+  assert.equal(await p.locator('[data-campo="fotos"] .arch-rechazo[role="alert"]').count(), 0, 'no nueve avisos a la vez');
+  await p.context().close();
+
+  const q = await abreEnvio();
+  await q.setInputFiles(ENTRADA_FOTOS, [{ name: 'oficio.pdf', mimeType: 'application/pdf', buffer: pdfDe('oficio ') }, { name: 'falso.jpg', mimeType: 'image/jpeg', buffer: pdfDe('no es foto ') }]);
+  await q.waitForFunction(() => !document.querySelector('[data-campo="fotos"] .arch[data-estado="procesando"]'));
+  assert.equal(await instancia(q, () => FormKit.iniciar(document.querySelector('form')).ctx.textoDeValor('fotos')), 'oficio.pdf', 'la revisión no lista lo que no se envía');
+  const chica = [{ name: 'chica.png', mimeType: 'image/png', buffer: pngRuido(100, 100) }];
+  await q.setInputFiles(ENTRADA_FOTOS, chica);
+  await q.waitForFunction(() => document.querySelectorAll('[data-campo="fotos"] .arch[data-estado="error"]').length === 2);
+  await q.setInputFiles(ENTRADA_FOTOS, chica);
+  await q.waitForFunction(() => document.querySelectorAll('[data-campo="fotos"] .arch[data-estado="error"]').length === 3);
+  const ultimo = await q.locator('[data-campo="fotos"] .arch[data-estado="error"]').last().textContent();
+  assert.doesNotMatch(ultimo, /ya adjuntaste/i, 'volver a elegirla no dice que está repetida');
+  await q.context().close();
+});
+
+test('fotos: varias juntas no suman su peso original, y si una que se procesa falla, el envío se detiene y lo dice (E3-04)', async () => {
+  const p = await abreEnvio();
+  const envios = []; await p.route('**/recibe', (r) => { envios.push(1); r.fulfill({ status: 200, body: '{}' }); });
+  await p.setInputFiles(ENTRADA_FOTOS, [1, 2, 3].map((i) => ({ name: `foto-${i}.png`, mimeType: 'image/png', buffer: pngRuido(2400, 1800) })));
+  await p.waitForFunction(() => !document.querySelector('[data-campo="fotos"] .arch[data-estado="procesando"]'), null, { timeout: 30000 });
+  assert.equal(await p.locator('[data-campo="fotos"] .arch[data-estado="listo"]').count(), 3, `ninguna se rechaza por «se superan los 25 MB»: ${await p.locator('[data-campo="fotos"] .lista-arch').textContent()}`);
+  await p.context().close();
+
+  const q = await abreEnvio();
+  const llegadas = []; await q.route('**/recibe', (r) => { llegadas.push(1); r.fulfill({ status: 200, body: '{}' }); });
+  await q.fill('#nombre', 'Grupo');
+  await q.evaluate((bytes) => {
+    const el = document.querySelector('[data-campo="fotos"]');
+    FormKit.archivos.agrega([new File([new Uint8Array(bytes)], 'chica.png', { type: 'image/png' })], el);
+    document.querySelector('[data-accion="enviar"]').click();
+  }, [...PNG_1x1]);
+  await q.waitForFunction(() => document.querySelector('[data-campo="fotos"] .err').textContent.trim());
+  assert.match(await error(q, 'fotos'), /No se agregó «chica\.png»/, 'el error se dice junto al campo');
+  assert.deepEqual(llegadas, [], 'y no se envía sin ella');
+  await q.context().close();
+});
+
+test('archivos: si el proveedor no puede devolverlos al recuperar, se dice; el foco no se pierde cuando termina otro archivo (F2-06, F2-07)', async () => {
+  const p = await nuevaPagina(navegador, PERFILES.escritorio.contexto);
+  /* Un proveedor que no responde al recuperar (sin red, sesión vencida). */
+  await p.route('**/borrador-pagina.js', async (r) => { const resp = await r.fetch(); r.fulfill({ response: resp, body: (await resp.text()).replace('lee: (campo) =>', "lee: () => Promise.reject(new Error('sin red')), leeAntes: (campo) =>") }); });
+  await p.goto(`${servidor.url}/pruebas/paginas/borrador.html`);
+  await p.fill('#nombre', 'Con proveedor');
+  await p.waitForTimeout(900);
+  await p.reload();
+  await p.waitForSelector('[data-campo="documento"] [data-aviso-formkit]', { timeout: 3000 });
+  assert.match(await p.locator('[data-campo="documento"] [data-aviso-formkit]').textContent(), /No se pudieron recuperar los archivos/);
+  await p.context().close();
+
+  const q = await abreEnvio();
+  await q.setInputFiles(ENTRADA_FOTOS, [{ name: 'oficio.pdf', mimeType: 'application/pdf', buffer: pdfDe('oficio ') }]);
+  await q.waitForSelector('[data-campo="fotos"] .arch[data-estado="listo"]', { state: 'attached' });
+  await q.setInputFiles(ENTRADA_FOTOS, [{ name: 'foto.png', mimeType: 'image/png', buffer: pngRuido(2000, 1500) }]);
+  await q.locator('[data-campo="fotos"] .arch').first().locator('[data-quitar]').focus();
+  await q.waitForFunction(() => document.querySelectorAll('[data-campo="fotos"] .arch[data-estado="listo"]').length === 2, null, { timeout: 20000 });
+  const foco = await q.evaluate(() => { const a = document.activeElement; return a && a.closest('.arch') ? a.closest('.arch').querySelector('.arch-nombre').textContent.trim() : a.tagName; });
+  assert.equal(foco, 'oficio.pdf', 'el foco sigue en el botón de quitar del primer archivo');
+  await q.context().close();
+});
+
+test('filas agregadas: la CURP pasa a mayúsculas, la ayuda «?» abre y la lista funciona aunque el nombre lleve puntos (F2-09, F2-12)', async () => {
+  const p = await abreEnvio();
+  await p.click('[data-repetible-agregar]');
+  const fila = p.locator('.repetible-fila').first();
+  await fila.locator('input[id$="-curp"]').fill('puef900515hdfrjl04');
+  assert.equal(await fila.locator('input[id$="-curp"]').inputValue(), 'PUEF900515HDFRJL04');
+  await fila.locator('.tooltip-btn').click();
+  assert.ok(await fila.locator('.tooltip-texto').isVisible(), 'la ayuda abre');
+  const lista = fila.locator('input[id$="-alc"]');
+  await lista.click(); await lista.pressSequentially('coy');
+  await p.keyboard.press('ArrowDown'); await p.keyboard.press('Enter');
+  assert.equal(await lista.inputValue(), 'Coyoacán');
+  assert.deepEqual(paginaErrores(p), []);
+  await p.context().close();
+});
+
+test('mapa: coordenadas sin signo menos llegan al mapa corregidas, Enter en «+» no pone el punto y una ubicación fallida no borra el punto (F2-04, F2-05, F2-12)', async () => {
+  const p = await nuevaPagina(navegador, PERFILES.escritorio.contexto);
+  await p.route('**/plantillas/por-pasos.html', async (r) => { const resp = await r.fetch(); r.fulfill({ response: resp, body: (await resp.text()).replace('data-mapa data-confirmar', 'data-mapa data-confirmar data-geolocalizacion') }); });
+  await p.goto(`${servidor.url}/${PAGINAS['por-pasos']}`);
+  await p.evaluate(() => localStorage.clear());
+  await llenaSolicitud(p); await continuar(p);
+  const estado = () => p.evaluate(() => { const s = FormKit.mapa.estadoDe(document.querySelector('[data-campo="punto"]')); return { punto: s.punto, fuera: s.fuera }; });
+  await p.locator('.leaflet-control-zoom-in').focus();
+  await p.keyboard.press('Enter');
+  assert.equal((await estado()).punto, null, 'Enter sobre «+» acerca y nada más');
+  await p.fill('#coordenadas', '19.4326, 99.1332'); await p.keyboard.press('Tab');
+  assert.match(await p.inputValue('#coordenadas'), /^19\.4326(00)?, ?-99\.1332(00)?$/, 'el campo queda corregido');
+  const s = await estado();
+  assert.ok(s.punto && s.punto.lon < 0 && !s.fuera, `el mapa recibe lo corregido: ${JSON.stringify(s)}`);
+  const antes = await p.locator('[data-mapa-coords]').textContent();
+  await p.click('[data-mapa-geolocalizar]');
+  await p.waitForSelector('.mapa-geo-aviso:not([hidden])', { timeout: 12000 });
+  assert.equal(await p.locator('[data-mapa-coords]').textContent(), antes, 'el texto del punto se queda');
+  assert.match(await p.locator('.mapa-geo-aviso').textContent(), /No se pudo obtener tu ubicación/);
+  await p.context().close();
+});
+
+test('visor: una imagen que no carga lo dice, y abrir varios PDF no deja vivos sus hilos (B5-11, F2-12)', async () => {
+  const p = await nuevaPagina(navegador, PERFILES.escritorio.contexto);
+  await p.route('**/muestras/identificacion-muestra.png', (r) => r.fulfill({ status: 404, body: '' }));
+  await p.goto(`${servidor.url}/${PAGINAS.guia}`);
+  const ver = (archivo) => p.evaluate((a) => document.querySelector(`[data-visor-url$="${a}"]`).click(), archivo);
+  await ver('identificacion-muestra.png');
+  await p.waitForFunction(() => /No se pudo mostrar/.test(document.querySelector('[data-visor-aviso]').textContent) && !document.querySelector('[data-visor-aviso]').hidden, null, { timeout: 5000 });
+  for (const a of ['comprobante-muestra.pdf', 'identificacion-muestra.png', 'comprobante-muestra.pdf', 'identificacion-muestra.png', 'comprobante-muestra.pdf']) {
+    await ver(a);
+    if (a.endsWith('.pdf')) await p.waitForSelector('[data-visor-hojas] canvas', { timeout: 10000 });
+  }
+  let hilos = p.workers().length;
+  for (let i = 0; i < 20 && hilos > 1; i++) { await p.waitForTimeout(150); hilos = p.workers().length; }
+  assert.ok(hilos <= 1, `${hilos} hilos de pdf.js vivos`);
+  await p.context().close();
+});
+
+test('fechas del servidor sin hora o mal escritas, tabla con todo filtrado, progreso sin valor y un solo «(se abre en otra pestaña)» (B5-09, F2-12)', async () => {
+  const p = await enMemoria(`<!doctype html><html lang="es-MX"><head><meta charset="utf-8"><title>Prueba</title></head><body>
+<form data-formkit action="#"><div class="campo" data-campo="a" data-uso="Prueba."><label class="etiqueta" for="a">A</label><input class="control" id="a" name="a"></div></form>
+<form data-formkit action="#"><div class="campo" data-campo="b" data-uso="Prueba."><label class="etiqueta" for="b">B</label><input class="control" id="b" name="b"></div></form>
+<div id="r1"></div><div id="r2"></div>
+<div class="progreso" data-progreso><label class="progreso-etq" for="pg">Subiendo</label><progress class="progreso-barra" id="pg" max="100" value="40"></progress><span class="progreso-txt" data-progreso-texto aria-hidden="true">40 %</span></div>
+<div class="tabla-marco" data-tabla><table class="tabla"><caption>Personas</caption><thead><tr><th scope="col">Nombre</th></tr></thead><tbody><tr><td>Ana</td></tr><tr><td>Beto</td></tr></tbody></table><p class="tabla-vacia" data-tabla-vacia hidden>No hay resultados con esos filtros.</p></div>
+<a class="btn descarga" href="#" target="_blank" data-descarga data-formato="PDF" data-peso="120 KB">Descargar guía</a>
+${NUCLEO}<script src="../../codigo/modulos/resultado/resultado.js"></script><script src="../../codigo/modulos/progreso/progreso.js"></script><script src="../../codigo/modulos/tabla/tabla.js"></script><script src="../../codigo/modulos/descarga/descarga.js"></script></body></html>`);
+  await p.waitForFunction(() => [...document.querySelectorAll('form')].every((f) => f.dataset.formkit === 'listo'));
+  const r = await p.evaluate(() => {
+    FormKit.resultado(document.getElementById('r1'), { tono: 'terminado', titulo: 'Listo', hora: '2026-10-19' });
+    FormKit.resultado(document.getElementById('r2'), { tono: 'terminado', titulo: 'Listo', hora: 'ayer por la tarde' });
+    const el = document.querySelector('[data-progreso]'); FormKit.progreso(el, 70); FormKit.progreso(el, null);
+    for (const tr of document.querySelectorAll('tbody tr')) tr.hidden = true;
+    document.querySelector('[data-tabla]').dispatchEvent(new CustomEvent('formkit:tabla'));
+    return {
+      sinHora: document.querySelector('#r1 time').textContent, conTexto: document.querySelector('#r2 .resultado-titulo') && document.querySelector('#r2 time').dateTime,
+      valuetext: el.querySelector('progress').getAttribute('aria-valuetext'),
+      vacia: document.querySelector('[data-tabla-vacia]').hidden,
+      descarga: document.querySelector('[data-descarga]').textContent.replace(/\s+/g, ' ').trim()
+    };
+  });
+  assert.equal(r.sinHora, '19 de octubre de 2026', 'una fecha sin hora es ese día, no el anterior');
+  assert.ok(r.conTexto, 'una fecha mal escrita no deja la pantalla sin resultado');
+  assert.notEqual(r.valuetext, '70 por ciento', 'el progreso sin valor no repite el porcentaje anterior');
+  assert.equal(r.vacia, false, 'con todas las filas ocultas se dice que no hay resultados');
+  assert.equal((r.descarga.match(/otra pestaña/g) || []).length, 1, `«${r.descarga}»`);
+  assert.deepEqual(paginaErrores(p), []);
+  await p.context().close();
+});
+
+test('«Empezar de nuevo» sin la pregunta en el HTML pregunta con el módulo modal; no borra sin preguntar (B5-12)', async () => {
+  const html = `<!doctype html><html lang="es-MX"><head><meta charset="utf-8"><title>Prueba</title><link rel="stylesheet" href="../../codigo/css/tokens.css"><link rel="stylesheet" href="../../codigo/css/base.css"><link rel="stylesheet" href="../../codigo/css/nucleo.css"><link rel="stylesheet" href="../../codigo/modulos/modal/modal.css"></head><body><main class="pagina">
+<div class="franja" data-franja-borrador hidden><p class="franja-texto">Hay un borrador guardado el <span data-borrador-fecha></span>.</p>
+<button type="button" class="btn btn-secundario" data-borrador="recuperar">Recuperar borrador</button><button type="button" class="btn btn-secundario" data-borrador="descartar">Empezar de nuevo</button></div>
+<form data-formkit data-borrador="prueba-descartar" data-borrador-version="1" action="#"><div class="campo" data-campo="a" data-uso="Prueba."><label class="etiqueta" for="a">A</label><input class="control" id="a" name="a"></div></form>
+</main>${NUCLEO}<script src="../../codigo/modulos/modal/modal.js"></script></body></html>`;
+  const p = await enMemoria(html);
+  await p.evaluate(() => localStorage.setItem('prueba-descartar', JSON.stringify({ v: '1', t: Date.now(), datos: { a: 'Lo de ayer' } })));
+  await p.reload();
+  await p.click('[data-borrador="descartar"]');
+  await p.waitForSelector('dialog[open]', { timeout: 2000 });
+  assert.notEqual(await p.evaluate(() => localStorage.getItem('prueba-descartar')), null, 'mientras pregunta, el borrador sigue');
+  await p.click('dialog[open] [data-r="si"]');
+  await p.waitForFunction(() => localStorage.getItem('prueba-descartar') === null);
+  assert.ok(await p.locator('[data-franja-borrador]').isHidden(), 'al confirmar se borra y la franja se va');
+  assert.deepEqual(paginaErrores(p), []);
+  await p.context().close();
+});
+
+test('el código no lleva caracteres invisibles ni que inviertan el texto escritos tal cual', () => {
+  const archivos = execFileSync('git', ['ls-files', 'codigo', 'herramientas', 'pruebas', 'guia-visual'], { cwd: RAIZ, encoding: 'utf8' }).trim().split('\n').filter((f) => /\.(m?js|html|css)$/.test(f) && !/artefacto\.html$/.test(f));
+  const con = archivos.filter((f) => /[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/.test(readFileSync(resolve(RAIZ, f), 'utf8')));
+  assert.deepEqual(con, [], 'se escriben como \\u200B, que se ve al leer el código');
 });

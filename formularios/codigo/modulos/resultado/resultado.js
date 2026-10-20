@@ -63,7 +63,12 @@
     cabeza.append(marca, h);
 
     /* «Quedó guardado a las 14:30 · Ana López»: la hora en la zona del formulario. */
-    const cuando = hora ? new Date(hora) : new Date();
+    /* Una fecha sin hora (AAAA-MM-DD) es ese día: se lee a mediodía para que no salga el día
+       anterior. Lo que no es una fecha no detiene la pantalla: se usa la hora de ahora. */
+    const soloFecha = typeof hora === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(hora);
+    const leida = hora ? new Date(soloFecha ? `${hora}T12:00:00Z` : hora) : null;
+    if (leida && Number.isNaN(leida.getTime())) console.warn(`FormKit: «${hora}» no es una fecha; el resultado usa la hora de ahora.`);
+    const cuando = leida && !Number.isNaN(leida.getTime()) ? leida : new Date();
     const zona = { timeZone: cfg.fechas.zonaHoraria };
     const horaTxt = cuando.toLocaleTimeString(cfg.idioma, { ...zona, hour: '2-digit', minute: '2-digit', hourCycle: FormKit.utilidades.relojDe(cfg) });
     const dia = (d) => d.toLocaleDateString(cfg.idioma, { ...zona, dateStyle: 'long' });
@@ -71,8 +76,8 @@
     const meta = document.createElement('p');
     meta.className = 'resultado-meta';
     const tiempo = document.createElement('time');
-    tiempo.dateTime = cuando.toISOString();
-    tiempo.textContent = esHoy ? plantilla(M.resultadoHora, { hora: horaTxt }) : plantilla(M.resultadoFechaHora, { fecha: dia(cuando), hora: horaTxt });
+    tiempo.dateTime = soloFecha ? hora : cuando.toISOString();
+    tiempo.textContent = soloFecha ? FormKit.utilidades.fechaHora(hora, cfg) : esHoy ? plantilla(M.resultadoHora, { hora: horaTxt }) : plantilla(M.resultadoFechaHora, { fecha: dia(cuando), hora: horaTxt });
     meta.appendChild(tiempo);
     if (quien) meta.append(document.createTextNode(' · '), Object.assign(document.createElement('span'), { className: 'resultado-quien', textContent: quien }));
 

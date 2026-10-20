@@ -33,34 +33,34 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 |---|---|---|---|---|---|---|
 | `opciones` | Opciones elegibles | BASE | pregunta | — | 5.1 KB | — |
 | `otro` | Opción «Otro» con especificación | RECOMENDADO | pregunta | opciones | — | 4.2 KB |
-| `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 9.4 KB |
+| `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 11.2 KB |
 | `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.7 KB |
-| `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 4.1 KB |
-| `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 1.1 KB | 9.1 KB |
+| `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 4.4 KB |
+| `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 1.1 KB | 9.4 KB |
 | `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.6 KB |
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
-| `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.8 KB |
+| `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 9.0 KB |
 | `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.4 KB | 3.2 KB |
 | `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.2 KB | 6.4 KB |
-| `resultado` | Resultado de una decisión | RECOMENDADO | retroalimentacion | — | 2.5 KB | 5.7 KB |
+| `resultado` | Resultado de una decisión | RECOMENDADO | retroalimentacion | — | 2.5 KB | 6.3 KB |
 | `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 2.1 KB | 5.7 KB |
 | `copiar` | Copiar y compartir | RECOMENDADO | retroalimentacion | — | 542 B | 4.0 KB |
-| `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 3.9 KB |
+| `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 4.1 KB |
 | `acordeon` | Acordeón y secciones plegables | OPCIONAL | navegacion | — | 2.0 KB | — |
 | `pestanas` | Pestañas | OPCIONAL | navegacion | — | 1.1 KB | 2.9 KB |
 | `migas` | Migas de pan | OPCIONAL | navegacion | — | 2.5 KB | — |
-| `progreso` | Barra de progreso | OPCIONAL | navegacion | — | 1.1 KB | 1.8 KB |
+| `progreso` | Barra de progreso | OPCIONAL | navegacion | — | 1.1 KB | 2.0 KB |
 | `paginacion` | Paginación de resultados | OPCIONAL | navegacion | — | 2.1 KB | 6.0 KB |
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
-| `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
-| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 4.4 KB | 7.2 KB |
+| `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.9 KB |
+| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 4.4 KB | 7.3 KB |
 | `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.9 KB |
-| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 24.9 KB |
-| `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.8 KB |
-| `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 10.0 KB |
-| `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 7.8 KB |
+| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 27.2 KB |
+| `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 12.2 KB |
+| `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 10.6 KB |
+| `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
 | `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 8.6 KB |
-| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 2.0 KB | 8.5 KB |
+| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 2.0 KB | 8.6 KB |
 
 ### Opciones elegibles (`opciones`) · BASE
 
@@ -109,7 +109,7 @@ Campo de texto que aparece al elegir «Otro» en radios, casillas, select o tarj
 
 ### Lista desplegable con búsqueda (`combo`) · RECOMENDADO
 
-Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, anuncia resultados; cerrado por omisión, libre con data-libre.
+Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, anuncia resultados; cerrado por omisión, libre con data-libre. Si el catálogo de una lista cerrada no carga, acepta lo escrito con un aviso a la vista y lo señala en meta.sin_catalogo.
 
 **Cuándo.** Catálogos de 8 o más valores (alcaldías, giros, especies).
 
@@ -127,6 +127,7 @@ Combobox ARIA 1.2 para catálogos largos: filtra sin acentos, teclado completo, 
 - Mezclar select nativo y combo en el mismo formulario.
 - Escribir el catálogo a mano en el código.
 - Aceptar valor libre sin decirlo.
+- Dejar una lista cerrada sin salida cuando su catálogo no carga.
 
 ### Fecha y hora con «Hoy» y atajos (`fecha`) · RECOMENDADO
 
@@ -174,7 +175,7 @@ Campos con formato cerrado: mayúsculas al escribir, validación por capas desde
 
 ### Grupos repetibles («Agregar otro») (`repetibles`) · OPCIONAL
 
-Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos. El número de una fila no se reutiliza, y el borrador rehace las filas que había.
+Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos. El número de una fila no se reutiliza, y el borrador rehace las filas que había. Cada fila nueva lanza formkit:fila, y los módulos (mayúsculas de la CURP, ayuda «?», listas) preparan sus campos.
 
 **Cuándo.** La cantidad de elementos la decide la persona.
 

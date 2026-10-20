@@ -42,6 +42,12 @@
     </ol>
   </nav>
 
+  <!-- Se ve sólo si la página no terminó de cargar (falta un archivo del estándar): el núcleo lo oculta al arrancar. -->
+  <div class="aviso aviso-advertencia" data-carga-pendiente>
+    <svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg>
+    <div class="aviso-texto"><p><strong class="aviso-titulo">La página no terminó de cargar.</strong> Recárgala; si sigue igual, inténtalo más tarde o con otro navegador. Mientras tanto, el botón «Enviar registro» no envía nada.</p></div>
+  </div>
+
   <!-- Borrador recuperado: sólo aparece si hay uno vigente en este dispositivo. «No guardar en este equipo» lo borra y no guarda nada mientras la pestaña siga abierta (equipos compartidos). -->
   <div class="franja" data-franja-borrador hidden>
     <p class="franja-texto">Hay un borrador guardado el <span data-borrador-fecha></span>. Guardar el avance no es enviar el registro.</p>
@@ -213,7 +219,8 @@
     <p class="aviso aviso-bloqueo estado-envio" data-estado-envio role="alert" tabindex="-1" hidden><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"></span></p>
 
     <div class="acciones">
-      <button type="submit" class="btn btn-primario" data-accion="enviar">Enviar registro</button>
+      <!-- type="button": sin el núcleo no se envía nada a medias; con él, este botón envía. -->
+      <button type="button" class="btn btn-primario" data-accion="enviar">Enviar registro</button>
     </div>
   </form>
 

@@ -26,13 +26,18 @@
       /* La lista se lee al momento: los tooltips que otro formulario de la
          misma página agregue después también se cierran con Escape o clic fuera. */
       const todos = () => $$('[data-tooltip]');
-      for (const t of todos()) {
-        const b = t.querySelector('button'); const txt = t.querySelector('.tooltip-texto');
-        if (!b || !txt || t.dataset.listo !== undefined) continue;
-        t.dataset.listo = '';
-        txt.id = txt.id || FormKit.utilidades.idUnico('tt');
-        b.addEventListener('click', () => pon(t, txt.hidden));
-      }
+      const prepara = () => {
+        for (const t of todos()) {
+          const b = t.querySelector('button'); const txt = t.querySelector('.tooltip-texto');
+          if (!b || !txt || t.dataset.listo !== undefined) continue;
+          t.dataset.listo = '';
+          txt.id = txt.id || FormKit.utilidades.idUnico('tt');
+          b.addEventListener('click', () => pon(t, txt.hidden));
+        }
+      };
+      prepara();
+      /* Las filas que se agregan después (repetibles) traen sus propias ayudas. */
+      form.addEventListener('formkit:fila', prepara);
       function pon(t, abrir) {
         const b = t.querySelector('button'); const txt = t.querySelector('.tooltip-texto');
         if (abrir) for (const o of todos()) if (o !== t) pon(o, false);

@@ -1,5 +1,75 @@
 # Historial de cambios
 
+## 1.6.1 · 2026-10-20
+
+Cuarto bloque de la auditoría del 19 oct 2026: robustez de carga y envío. Cada hallazgo lleva su clave del informe y una prueba en `08-auditoria` que falla con 1.6.0 y pasa ahora.
+
+**Si algo no carga, la persona lo sabe.**
+- **B5-04 · Un archivo del estándar que no carga** (FRM-71, decisión de la Secretaría): por pasos, la pantalla quedaba vacía; en una página, «Enviar» mandaba el formulario a medias y se perdía lo capturado. Ahora:
+  - las dos plantillas llevan escrito el aviso «La página no terminó de cargar. Recárgala…» (`[data-carga-pendiente]`), que el núcleo oculta al arrancar (por pasos, el módulo de pasos al mostrar el primero);
+  - en una página, el botón de enviar es `type="button"` con `data-accion="enviar"`: sin el núcleo no envía nada.
+- **B5-03 · Un módulo que falla** (núcleo): detenía a todos los demás. Ahora cada módulo arranca por su cuenta y la consola dice cuál falló.
+- **B5-02 · Lista cerrada sin catálogo** (`combo`, FRM-19, decisión de la Secretaría): no había forma de elegir nada. Ahora acepta lo escrito, lo dice con un aviso a la vista y el envío lo señala en `meta.sin_catalogo`; el servidor lo acepta con una señal para revisarlo.
+- **B5-10 · Sin el módulo de acuse**: tras un envío aceptado no aparecía nada y el borrador se borraba. Ahora se dice «Tu envío se recibió con el folio…».
+
+**El envío.**
+- **B5-07 · Archivos con el envío por omisión** (núcleo, FRM-44, decisión de la Secretaría): iban en JSON y llegaban vacíos. Ahora, con archivos, el envío es `multipart/form-data`: la parte `payload` lleva el JSON (cada archivo con su número de `parte`) y cada archivo va en una parte `archivo`, en orden.
+- **B5-08 · Rechazo del servidor**: un error sin campo conocido se perdía, y un nombre de campo con comillas detenía todo sin avisar. Ahora los errores de un campo van junto a él y los demás, con sus palabras, en el aviso de envío.
+- **B5-12 · Piezas del formulario**:
+  - un aviso de envío sin `.aviso-texto` detenía el envío fallido sin avisar: ahora el núcleo lo crea;
+  - sin `[data-borrador-confirma]`, «Empezar de nuevo» borraba sin preguntar: ahora pregunta con el módulo `modal`, o no borra y la consola lo dice (FRM-38);
+  - `docs/06` describe `[data-borrador-fecha]`, `[data-guardado]`, `[data-carga-pendiente]` y `[data-recordatorio-texto]`.
+- **B5-13 · Plazo**: un `enviar` propio que no atiende la señal dejaba el botón en «Enviando…» para siempre. Ahora el plazo vale de todos modos y corre desde que se envía, no mientras se preparan las fotos.
+- **B5-06 · Ejemplo de la documentación**: el `enviar` de ejemplo mostraba un acuse vacío ante un rechazo. Ahora revisa `r.ok`, rechaza con `{errores}` y devuelve `{folio, fecha}`.
+- **E3-04 · Varias fotos juntas** (`archivos`): una se rechazaba por «se superan los 25 MB» porque contaba el peso original de las que se procesaban; y si una fallaba al enviar, se enviaba sin ella. Ahora el total cuenta lo ya optimizado, y si una foto termina con error al enviar, el envío se detiene y lo dice junto al campo.
+
+**Fechas y datos raros.**
+- **B5-09 · Fechas del servidor** (`resultado`): una fecha sin hora salía un día antes y una que no era fecha dejaba la pantalla sin resultado. Ahora la primera es ese día y la segunda usa la hora de llegada (la consola lo dice).
+- **B5-14 · Almacén lleno o bloqueado**: el borrador no se guardaba y nada lo decía. Ahora el renglón del borrador dice que este equipo no permite guardarlo.
+- **E3-07 · Borrador alterado**: un paso fuera de rango dejaba la pantalla vacía, unas opciones que no eran lista detenían el formulario y un historial de sugerencias raro impedía arrancar. Ahora se ignora lo que no tiene forma, y un borrador con fecha en el futuro se borra.
+- **E3-08 · «Hoy» después de medianoche**: con la página abierta desde antes, el día nuevo contaba como fecha futura. Ahora «Hoy» y «no futura» se calculan al momento (FRM-20).
+- **E3-09 · Caracteres invisibles**: el texto admitía caracteres de control, un correo con un espacio de ancho cero pasaba y un teléfono con dígitos de ancho completo se borraba. Ahora se quitan los invisibles y esos dígitos cuentan (FRM-30).
+- **E3-10 · Años sin rango**: «0100» y «9999» se aceptaban. Ahora el año va de 1900 a 2100 cuando ningún otro límite lo dice; en día/mes/año, «01/01/0100» se leía como el año «100» y pasaba.
+- **E3-12 · Claves desconocidas** (servidor): 100 000 claves daban 100 000 errores. Ahora van los primeros 20 y un resumen (FRM-33).
+
+**Archivos** (FRM-52).
+- **E3-11**: doce archivos con máximo de tres daban nueve avisos a la vez; ahora es uno. Una imagen rechazada ya se puede volver a elegir sin que diga «ya adjuntaste ese mismo archivo».
+- **E3-13**: 8 MB y un byte decía «pesa 8.0 MB y el máximo es 8 MB»; ahora dice «más de 8 MB».
+- **F2-03**: la revisión listaba archivos rechazados que no se envían; ahora sólo lo que viaja.
+- **F2-06**: si el proveedor del borrador no podía devolver los archivos, nadie se enteraba; ahora se dice.
+- **F2-07**: el foco se perdía cuando terminaba de procesarse otro archivo; ahora se queda donde estaba.
+- **F2-12**: un archivo quitado a medio proceso deja de ocupar memoria; soltar texto en un campo ya funciona (sólo se detiene soltar archivos fuera de la zona); sin https, la consola dice que no hay huella ni detección de duplicados.
+
+**Módulos.**
+- **F2-09 · Filas agregadas** (`repetibles`, FRM-71): los módulos no preparaban sus campos: la CURP no pasaba a mayúsculas y la ayuda «?» no abría. Ahora cada fila nueva lanza `formkit:fila` y los módulos (`identificadores`, `tooltip`, `combo`) la preparan; un módulo se activa también si su selector sólo está en la plantilla de la fila. En la guía, la muestra de grupos repetibles lleva una CURP con su ayuda.
+- **F2-04 · Coordenadas sin signo menos** (`enlace-mapa`): el campo se corregía pero el mapa seguía «fuera de la Ciudad». Ahora el mapa recibe lo corregido.
+- **F2-05 · Enter sobre «+» o «−»** (`mapa`): además de acercar, ponía el punto. Ahora sólo acerca o aleja.
+- **B5-11 · Imagen que no carga** (`visor`): quedaba rota o en blanco, sin aviso. Ahora se dice como con un PDF.
+- **F2-12, lo demás**:
+  - `visor`: abrir varios PDF ya no deja vivos sus hilos de pdf.js;
+  - `mapa`: si no se obtiene la ubicación, el aviso va en su propio renglón y el punto ya elegido se queda;
+  - `combo`: funciona en una fila cuyo nombre lleva puntos (`personas.0.alcaldia`), y su mensaje usa la etiqueta sin la palabra «obligatorio», aunque la configuración la cambie;
+  - `tabla`: dice «No hay resultados» también cuando un filtro oculta todas las filas;
+  - `progreso`: sin valor, el lector oye «Cargando…» y no el porcentaje anterior;
+  - `descarga`: «(se abre en otra pestaña)» se dice una vez aunque haya dos formularios.
+
+**Código.** Los caracteres invisibles y los que invierten el texto ya no van escritos tal cual en el código (`validaciones.config.js`, `validar.mjs`, `archivos.js`): van como `\u200B`, que se ve al leer. Una prueba lo revisa.
+
+**Guía visual**: la muestra de avisos lleva el de «La página no terminó de cargar»; la de lista con búsqueda, cómo queda si la lista no cargó; la de grupos repetibles, una CURP con ayuda «?» en cada fila.
+
+**Mensajes nuevos** (215 en total): `envioRecibidoFolio`, `borradorSinAlmacen`, `borradorDescartarTitulo`, `borradorDescartarTexto`, `borradorDescartarSi`, `archMasDe`, `archFalloAlEnviar`, `archProveedorFallo`, `comboSinLista`, `fmtFechaAnio` y `fechaHora`. Cambia `fmtFechaDmaAnio` («entre 1900 y 2100»).
+
+**Reglas**: FRM-19, 20, 24, 30, 33, 38, 42, 44, 49, 52, 71 y 82 dicen lo nuevo.
+
+**Pruebas**: dieciocho casos nuevos en `08-auditoria` (43 en total) y la página de prueba `pruebas/paginas/envio.html`.
+
+**Qué puede cambiar un proyecto**:
+- agregar a su HTML el aviso `[data-carga-pendiente]` y, en una página, cambiar su botón de enviar a `type="button"`;
+- si usa el envío por omisión con archivos, recibir `multipart/form-data` en su servidor;
+- si su `enviar` propio rechaza, hacerlo con `{errores}`, como el ejemplo de `docs/06`;
+- leer `meta.sin_catalogo` y las señales del servidor;
+- quitar los rodeos propios para filas agregadas, coordenadas sin signo o el plazo del envío.
+
 ## 1.6.0 · 2026-10-20
 
 Tercer bloque de la auditoría del 19 oct 2026: el servidor valida igual que la pantalla (FRM-33). Es versión menor porque el esquema lleva datos nuevos y `validaPayload` devuelve dos cosas más (`claves` y `archivos`). Cada hallazgo lleva su clave del informe y una prueba en `08-auditoria`.
@@ -16,7 +86,7 @@ Tercer bloque de la auditoría del 19 oct 2026: el servidor valida igual que la 
 - **A1-08 · Fecha de nacimiento y edad que salen de la CURP**: el servidor aceptaba otras. Ahora la fecha declara `curp-fecha` y la edad la cruzada nueva `edad-calculada`, en la plantilla de una página y en los bloques de la guía.
 - **A1-09 · Cruzadas en filas repetibles**: el servidor se las saltaba. Ahora la cruzada del patrón (`personas.#.nac`) se aplica a cada fila.
 - **A1-16 · Datos de captura de una foto**: si el campo no pide `conservarExif`, la fecha y la ubicación de captura que lleguen se descartan con una señal. `validaPayload` devuelve en `archivos` las copias limpias.
-- **E1-06 · Nombres de archivo**: con caracteres invisibles o que invierten el texto («recibo‮fdp.png» se lee «recibognp.pdf»), o muy largos, pasaban en los dos lados. Ahora el navegador los quita y el servidor los rechaza.
+- **E1-06 · Nombres de archivo**: con caracteres invisibles o que invierten el texto («recibo[U+202E]fdp.png» se lee «recibognp.pdf»), o muy largos, pasaban en los dos lados. Ahora el navegador los quita y el servidor los rechaza.
 
 **Lo que el servidor rechazaba y la pantalla no.**
 - **A1-03 · Advertencias**: una cruzada que en pantalla sólo advierte (`curp-sexo`, `curp-entidad`, `cp-colonia`) se rechazaba siempre en el servidor. Una persona trans podía llenar todo y no enviarlo nunca. Ahora el esquema toma el nivel de la configuración, como el navegador: es advertencia y deja una señal.

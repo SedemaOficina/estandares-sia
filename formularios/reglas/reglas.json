@@ -332,7 +332,7 @@
    "id": "FRM-19",
    "seccion": 3,
    "titulo": "La lista desplegable con búsqueda es cerrada por omisión",
-   "regla": "El combo (módulo «combo») filtra desde la primera letra, se opera con flechas, Enter y Escape, y sólo acepta valores del catálogo. Con data-libre acepta lo escrito. Se usa a partir de 8 opciones; con menos, radios o select nativo. La lista se abre sólo cuando la persona escribe en el campo: si la página lo llena (al retomar un borrador), no se abre ni anuncia. En una lista cerrada viaja el nombre como está en el catálogo («Coyoacán», aunque se escriba «coyoacan»; al salir del campo ya se ve así) y, si el catálogo trae una clave propia ({nombre, valor}), también ésta en payload.claves; el servidor hace lo mismo y la devuelve en claves.",
+   "regla": "El combo (módulo «combo») filtra desde la primera letra, se opera con flechas, Enter y Escape, y sólo acepta valores del catálogo. Con data-libre acepta lo escrito. Se usa a partir de 8 opciones; con menos, radios o select nativo. La lista se abre sólo cuando la persona escribe en el campo: si la página lo llena (al retomar un borrador), no se abre ni anuncia. En una lista cerrada viaja el nombre como está en el catálogo («Coyoacán», aunque se escriba «coyoacan»; al salir del campo ya se ve así) y, si el catálogo trae una clave propia ({nombre, valor}), también ésta en payload.claves; el servidor hace lo mismo y la devuelve en claves. Si el catálogo de una lista cerrada no carga, la lista acepta lo escrito, lo dice con un aviso a la vista («La lista no cargó…») y el envío lo señala en meta.sin_catalogo; el servidor lo acepta con una señal para revisarlo. Una lista dentro de una fila agregada funciona igual, aunque su nombre lleve puntos.",
    "porque": "Un valor libre en un campo de catálogo rompe la consulta; un select de 40 opciones es intransitable en el teléfono.",
    "nivel": "RECOMENDADO",
    "origen": [
@@ -344,13 +344,13 @@
     "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "04-modulos.prueba.mjs: combo; 08: nombre oficial y clave del catálogo (A1-10)"
+   "verificacion": "04-modulos.prueba.mjs: combo; 08: nombre oficial y clave del catálogo (A1-10); 08: lista sin catálogo (B5-02) y en filas agregadas (F2-09)"
   },
   {
    "id": "FRM-20",
    "seccion": 3,
    "titulo": "Fechas con «Hoy», horas con «Ahora», rangos con atajos, sin fechas imposibles y edad calculada",
-   "regla": "Los campos de fecha son type=date con botón «Hoy» (módulo «fecha»); los de hora, «Ahora». La fecha de nacimiento no usa calendario: se escribe día/mes/año (formato «fecha-dma», 23/07/1985), la escritura se acomoda sola y la cruza con la CURP curp-fecha (o curp-fecha-dma). Un rango declara data-rango y atajos; la fecha final anterior a la inicial es una validación cruzada. data-no-futura rechaza fechas posteriores a hoy, que el servidor resuelve con su propio reloj. La edad no se escribe: se calcula de la fecha de nacimiento (escrita o tomada de la CURP) en un campo de solo lectura (data-deriva=\"edad=…\"), o se pide en rangos sin huecos ni encimados cuando basta el grupo de edad. En una fecha día/mes/año, «Hoy» escribe la fecha en día/mes/año, y una fecha AAAA-MM-DD completa (pegada o del autocompletado) se pasa a día/mes/año. La edad mínima o máxima (cruzada edad) y el periodo (rango-fechas) se revisan igual con fechas día/mes/año.",
+   "regla": "Los campos de fecha son type=date con botón «Hoy» (módulo «fecha»); los de hora, «Ahora». La fecha de nacimiento no usa calendario: se escribe día/mes/año (formato «fecha-dma», 23/07/1985), la escritura se acomoda sola y la cruza con la CURP curp-fecha (o curp-fecha-dma). Un rango declara data-rango y atajos; la fecha final anterior a la inicial es una validación cruzada. data-no-futura rechaza fechas posteriores a hoy, que el servidor resuelve con su propio reloj. La edad no se escribe: se calcula de la fecha de nacimiento (escrita o tomada de la CURP) en un campo de solo lectura (data-deriva=\"edad=…\"), o se pide en rangos sin huecos ni encimados cuando basta el grupo de edad. En una fecha día/mes/año, «Hoy» escribe la fecha en día/mes/año, y una fecha AAAA-MM-DD completa (pegada o del autocompletado) se pasa a día/mes/año. La edad mínima o máxima (cruzada edad) y el periodo (rango-fechas) se revisan igual con fechas día/mes/año. «Hoy» y el límite «no futura» se calculan al momento, no al abrir la página: después de medianoche, «Hoy» es el día nuevo.",
    "porque": "Escribir la fecha de hoy es el caso más frecuente; un rango invertido o una fecha futura de nacimiento son errores silenciosos; una edad escrita junto a la fecha puede contradecirla. El calendario obliga a recorrer décadas para llegar a una fecha de nacimiento, y en México nadie la escribe como AAAA-MM-DD.",
    "nivel": "RECOMENDADO",
    "origen": [
@@ -361,7 +361,7 @@
     "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "02-una-pagina: rango y atajos; 06-servidor: max «hoy»; 06 y 07: fecha día/mes/año; 08: edad y periodo con fecha día/mes/año (A1-01), «Hoy» y fecha pegada (E3-06)"
+   "verificacion": "02-una-pagina: rango y atajos; 06-servidor: max «hoy»; 06 y 07: fecha día/mes/año; 08: edad y periodo con fecha día/mes/año (A1-01), «Hoy» y fecha pegada (E3-06); 08: «Hoy» después de medianoche (E3-08)"
   },
   {
    "id": "FRM-21",
@@ -409,7 +409,7 @@
    "id": "FRM-24",
    "seccion": 3,
    "titulo": "Pestañas, acordeón, migas, progreso, paginación, ayuda desplegable, tabla y visor de documentos son módulos con teclado completo",
-   "regla": "Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que se inicia sola también sin formulario, vuelve a leer sus encabezados cuando la página avisa con formkit:tabla, en teléfono se vuelve tarjetas con rótulo y valor en dos columnas fijas (el rótulo gris de peso normal y el dato que destaca, como en toda lista de rótulo y dato) y en computadora lleva la línea de cada fila bajo todas sus columnas, con el contenido centrado en vertical, sin partir botones, folios (.mono) ni etiquetas, y con la columna de acciones al ancho de sus botones; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con un solo contador «Hoja n de total», en su barra, acercar y girar, fijo junto a lo que se revisa en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor, que se busca junto a la copia del estándar o en la ruta que diga la configuración.",
+   "regla": "Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que se inicia sola también sin formulario, vuelve a leer sus encabezados cuando la página avisa con formkit:tabla, en teléfono se vuelve tarjetas con rótulo y valor en dos columnas fijas (el rótulo gris de peso normal y el dato que destaca, como en toda lista de rótulo y dato) y en computadora lleva la línea de cada fila bajo todas sus columnas, con el contenido centrado en vertical, sin partir botones, folios (.mono) ni etiquetas, y con la columna de acciones al ancho de sus botones; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con un solo contador «Hoja n de total», en su barra, acercar y girar, fijo junto a lo que se revisa en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor, que se busca junto a la copia del estándar o en la ruta que diga la configuración. Una imagen que no carga en el visor se dice como un PDF que no carga, y abrir varios PDF no deja vivos sus hilos. La tabla dice «No hay resultados» también cuando un filtro oculta todas las filas; el progreso sin valor dice «Cargando…», no el porcentaje anterior; «(se abre en otra pestaña)» se dice una vez aunque haya dos formularios; la ayuda desplegable abre también en las filas agregadas.",
    "porque": "Un componente a medias (sólo ratón, sólo escritorio) excluye a una parte de las personas y obliga a rehacerlo después. Un ícono que repite lo que ya se lee obliga a abrirlo para nada.",
    "nivel": "OPCIONAL",
    "origen": [
@@ -425,10 +425,11 @@
     "P145 (proyecto de acreditaciones, 18 oct 2026)",
     "P146 (proyecto de acreditaciones, 18 oct 2026)",
     "P147 (proyecto de acreditaciones, 18 oct 2026)",
-    "auditoría del estándar, 18 oct 2026"
+    "auditoría del estándar, 18 oct 2026",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos; auditar-campos D5; 07: tabla filtrada y visor; 07: tabla sin partir datos, contador del visor, rótulos (P145 a P147)"
+   "verificacion": "04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos; auditar-campos D5; 07: tabla filtrada y visor; 07: tabla sin partir datos, contador del visor, rótulos (P145 a P147); 08: visor, tabla, progreso y descarga (B5-11, F2-12)"
   },
   {
    "id": "FRM-25",
@@ -511,7 +512,7 @@
    "id": "FRM-30",
    "seccion": 4,
    "titulo": "Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, folio fiscal, contraseña",
-   "regla": "Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el RFC conserva la Ñ (se quitan los acentos, no la tilde de la Ñ); el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir (AAAA-MM-DD es el formato interno; toda fecha que el formulario escribe o anuncia a la persona va en día/mes/año), y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos. En el número, una coma se toma como punto decimal («12,5»), salvo que agrupe miles («1,500», «12,345.50»): eso no se adivina, se pide escribirlo sin comas. Una fecha escrita no pasa de 20 caracteres y ninguna expresión del catálogo tarda más con un texto largo.",
+   "regla": "Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el RFC conserva la Ñ (se quitan los acentos, no la tilde de la Ñ); el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir (AAAA-MM-DD es el formato interno; toda fecha que el formulario escribe o anuncia a la persona va en día/mes/año), y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos. En el número, una coma se toma como punto decimal («12,5»), salvo que agrupe miles («1,500», «12,345.50»): eso no se adivina, se pide escribirlo sin comas. Una fecha escrita no pasa de 20 caracteres y ninguna expresión del catálogo tarda más con un texto largo. El año de una fecha va de 1900 a 2100 cuando ningún otro límite lo dice («0100» y «9999» son errores de dedo). El texto pierde los caracteres de control y los invisibles (como el espacio de ancho cero), y los dígitos de ancho completo cuentan como dígitos.",
    "porque": "Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.",
    "nivel": "BASE",
    "origen": [
@@ -528,7 +529,7 @@
     "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "guía: probador; 06-servidor; validaciones.config.js; 06: RFC con Ñ (P129); 08: «1,500» (F2-01), texto enorme en una fecha (E3-03)"
+   "verificacion": "guía: probador; 06-servidor; validaciones.config.js; 06: RFC con Ñ (P129); 08: «1,500» (F2-01), texto enorme en una fecha (E3-03); 08: invisibles, ancho completo y años (E3-09, E3-10)"
   },
   {
    "id": "FRM-31",
@@ -561,7 +562,7 @@
    "id": "FRM-33",
    "seccion": 4,
    "titulo": "El navegador ayuda; el servidor defiende con las mismas reglas",
-   "regla": "Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor del sistema además revisa la firma de los archivos, el límite por origen y la idempotencia (fuera de validar.mjs, que valida los datos). El esquema del servidor se toma sólo de lo que está dentro del <form>: un control de la página fuera de él no es parte de ningún campo. El servidor revisa el largo máximo (maxlength) antes de normalizar, como lo limita el navegador. El servidor aplica también: el nivel de cada cruzada como en el navegador (una que no bloquea, como curp-sexo, es advertencia y deja una señal), el mínimo y el máximo de opciones, el periodo de un data-rango, las cruzadas dentro de cada fila de un grupo repetible, los límites de archivos del campo (data-max, data-mb, data-total-mb) y la configuración del formulario (validaPayload(…, { config: FORMKIT_CONFIG }), basta lo que cambia). Sin un catálogo que el esquema pide, lo que depende de él no se acepta ni se rechaza en silencio: queda una señal.",
+   "regla": "Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor del sistema además revisa la firma de los archivos, el límite por origen y la idempotencia (fuera de validar.mjs, que valida los datos). El esquema del servidor se toma sólo de lo que está dentro del <form>: un control de la página fuera de él no es parte de ningún campo. El servidor revisa el largo máximo (maxlength) antes de normalizar, como lo limita el navegador. El servidor aplica también: el nivel de cada cruzada como en el navegador (una que no bloquea, como curp-sexo, es advertencia y deja una señal), el mínimo y el máximo de opciones, el periodo de un data-rango, las cruzadas dentro de cada fila de un grupo repetible, los límites de archivos del campo (data-max, data-mb, data-total-mb) y la configuración del formulario (validaPayload(…, { config: FORMKIT_CONFIG }), basta lo que cambia). Sin un catálogo que el esquema pide, lo que depende de él no se acepta ni se rechaza en silencio: queda una señal. Las claves que el esquema no conoce se rechazan con los primeros 20 errores y un resumen, no con uno por clave.",
    "porque": "La validación del navegador se salta con una petición directa; una segunda lista de reglas se desactualiza.",
    "nivel": "BASE",
    "origen": [
@@ -572,7 +573,7 @@
     "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "06-servidor-y-herramientas.prueba.mjs; 04-modulos: esquema vs navegador; 08: validaPayload con 1 MB en una fecha (E3-03); 08: paridad del servidor (A1-02 a A1-09)"
+   "verificacion": "06-servidor-y-herramientas.prueba.mjs; 04-modulos: esquema vs navegador; 08: validaPayload con 1 MB en una fecha (E3-03); 08: paridad del servidor (A1-02 a A1-09); 08: 100 000 claves desconocidas (E3-12)"
   },
   {
    "id": "FRM-34",
@@ -638,17 +639,18 @@
    "id": "FRM-38",
    "seccion": 5,
    "titulo": "Toda acción que no se deshace o que afecta a otra persona pide confirmación dentro de la página, con sus consecuencias",
-   "regla": "Rechazar, cancelar, cerrar un trámite, descartar, eliminar o quitar algo con datos que no se recuperan (una fila con lo capturado, FRM-22) abren un diálogo nativo con role=alertdialog (FormKit.confirma): la pregunta nombra la acción y su objeto («¿Rechazar la solicitud EJ-123?»), la lista dice qué pasará (consecuencias), «No se puede deshacer.» se escribe con su icono cuando aplica (irreversible), el botón que actúa repite el verbo («Rechazar solicitud», nunca «Aceptar») y va en rojo relleno si es destructivo, y el foco inicial va a «Volver sin cambios». Escape vuelve sin cambios y el foco regresa al botón que lo abrió. Guardar una nota, quitar un archivo que se puede volver a elegir u otra acción recuperable no pide confirmación. Una confirmación en línea, dentro de la misma pantalla (descartar el borrador), sigue las mismas reglas: el foco va a la opción segura y el botón repite el verbo. Nunca window.confirm.",
+   "regla": "Rechazar, cancelar, cerrar un trámite, descartar, eliminar o quitar algo con datos que no se recuperan (una fila con lo capturado, FRM-22) abren un diálogo nativo con role=alertdialog (FormKit.confirma): la pregunta nombra la acción y su objeto («¿Rechazar la solicitud EJ-123?»), la lista dice qué pasará (consecuencias), «No se puede deshacer.» se escribe con su icono cuando aplica (irreversible), el botón que actúa repite el verbo («Rechazar solicitud», nunca «Aceptar») y va en rojo relleno si es destructivo, y el foco inicial va a «Volver sin cambios». Escape vuelve sin cambios y el foco regresa al botón que lo abrió. Guardar una nota, quitar un archivo que se puede volver a elegir u otra acción recuperable no pide confirmación. Una confirmación en línea, dentro de la misma pantalla (descartar el borrador), sigue las mismas reglas: el foco va a la opción segura y el botón repite el verbo. Nunca window.confirm. Si la franja del borrador no trae su pregunta en el HTML ([data-borrador-confirma]), «Empezar de nuevo» pregunta con el módulo «modal»; nunca borra sin preguntar.",
    "porque": "window.confirm no se puede estilizar ni accesibilizar y en algunos visores no aparece; un diálogo que enfoca «Eliminar» borra con Enter por accidente; preguntar igual para guardar una nota que para cerrar un trámite enseña a confirmar sin leer.",
    "nivel": "RECOMENDADO",
    "origen": [
     "A FRM-44",
     "B FRM-ACC-04",
     "P113 (proyecto de acreditaciones, 17 oct 2026)",
-    "auditoría del estándar, 18 oct 2026"
+    "auditoría del estándar, 18 oct 2026",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "04-modulos: diálogo de confirmación; 02-una-pagina: quitar fila; 07: consecuencias y foco (P113)"
+   "verificacion": "04-modulos: diálogo de confirmación; 02-una-pagina: quitar fila; 07: consecuencias y foco (P113); 08: descartar sin la pregunta en el HTML (B5-12)"
   },
   {
    "id": "FRM-39",
@@ -697,7 +699,7 @@
    "id": "FRM-42",
    "seccion": 6,
    "titulo": "Todo formulario largo guarda borrador en el dispositivo y lo ofrece al volver",
-   "regla": "Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja («Hay un borrador guardado el …») con «Recuperar borrador» y «Empezar de nuevo»; «Empezar de nuevo» pide confirmación en la franja, con el foco en «Conservar» y el botón «Descartar borrador» (FRM-38). Sin franja en la página, el borrador se recupera solo al volver. El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas. El borrador empieza con el primer gesto de la persona en el formulario (escribir, elegir, tocar, soltar un archivo): lo que la página escribe sola, como al precargar una solicitud para continuarla, no crea un borrador. Mientras la franja espera la respuesta de la persona, no se guarda nada: lo que escriba antes de elegir no reemplaza al borrador guardado. Con su respuesta, el borrador vuelve a guardarse. La franja ofrece también «No guardar en este equipo» ([data-borrador=\"no-guardar\"]): borra el borrador y, mientras la pestaña siga abierta, no se guarda nada (equipos compartidos). Al abrir cualquier formulario del estándar se borran los borradores vencidos de todo el sitio, no sólo el suyo, y un borrador con fecha futura se descarta.",
+   "regla": "Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja («Hay un borrador guardado el …») con «Recuperar borrador» y «Empezar de nuevo»; «Empezar de nuevo» pide confirmación en la franja, con el foco en «Conservar» y el botón «Descartar borrador» (FRM-38). Sin franja en la página, el borrador se recupera solo al volver. El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas. El borrador empieza con el primer gesto de la persona en el formulario (escribir, elegir, tocar, soltar un archivo): lo que la página escribe sola, como al precargar una solicitud para continuarla, no crea un borrador. Mientras la franja espera la respuesta de la persona, no se guarda nada: lo que escriba antes de elegir no reemplaza al borrador guardado. Con su respuesta, el borrador vuelve a guardarse. La franja ofrece también «No guardar en este equipo» ([data-borrador=\"no-guardar\"]): borra el borrador y, mientras la pestaña siga abierta, no se guarda nada (equipos compartidos). Al abrir cualquier formulario del estándar se borran los borradores vencidos de todo el sitio, no sólo el suyo, y un borrador con fecha futura se descarta. Un borrador alterado (paso fuera de rango, opciones que no son lista, historial de sugerencias raro) no detiene el formulario, y uno con fecha en el futuro se borra. Si el equipo no deja guardar (almacén lleno o bloqueado), el renglón del borrador lo dice.",
    "porque": "Perder diez minutos de captura por cerrar la pestaña es la causa principal de abandono.",
    "nivel": "RECOMENDADO",
    "origen": [
@@ -710,7 +712,7 @@
     "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "01-por-pasos: borrador se guarda, se ofrece y se restaura; 07: la precarga no crea borrador (P148); 08: escribir antes de contestar la franja (C4-01); 08: borradores vencidos de otros formularios y «No guardar en este equipo» (E1-05)"
+   "verificacion": "01-por-pasos: borrador se guarda, se ofrece y se restaura; 07: la precarga no crea borrador (P148); 08: escribir antes de contestar la franja (C4-01); 08: borradores vencidos de otros formularios y «No guardar en este equipo» (E1-05); 08: borrador alterado y almacén que no guarda (E3-07, B5-14)"
   },
   {
    "id": "FRM-43",
@@ -734,7 +736,7 @@
    "id": "FRM-44",
    "seccion": 6,
    "titulo": "Todo envío tiene límite de espera, clave de idempotencia y dice qué pasó",
-   "regla": "El envío lleva AbortController con plazo configurable y una clave de idempotencia por envío, la misma en cada reintento hasta que el servidor lo reciba. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver». El aviso de un envío fallido se queda hasta que la persona cambia un dato o vuelve a enviar: no se oculta al mover el foco, porque el botón de abajo subiría a media pulsación y el clic se perdería. Un 2xx es un envío recibido aunque no traiga JSON (204, «OK», null): no se dice que falló. Desde que el servidor lo recibe nada cuenta como envío fallido; si lo que la página hace después falla, se dice que el envío se recibió y que no se envíe de nuevo. El borrador se borra después de mostrar el acuse. Tras un envío logrado la clave se renueva: si el formulario sigue en pantalla (captura en serie), el siguiente registro lleva otra clave y vuelve a guardar borrador.",
+   "regla": "El envío lleva AbortController con plazo configurable y una clave de idempotencia por envío, la misma en cada reintento hasta que el servidor lo reciba. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver». El aviso de un envío fallido se queda hasta que la persona cambia un dato o vuelve a enviar: no se oculta al mover el foco, porque el botón de abajo subiría a media pulsación y el clic se perdería. Un 2xx es un envío recibido aunque no traiga JSON (204, «OK», null): no se dice que falló. Desde que el servidor lo recibe nada cuenta como envío fallido; si lo que la página hace después falla, se dice que el envío se recibió y que no se envíe de nuevo. El borrador se borra después de mostrar el acuse. Tras un envío logrado la clave se renueva: si el formulario sigue en pantalla (captura en serie), el siguiente registro lleva otra clave y vuelve a guardar borrador. Sin enviar propio, el envío por omisión va en JSON y, con archivos, en multipart/form-data: la parte payload lleva el JSON y cada archivo va en una parte archivo, en orden. El plazo corre desde que se envía y vale aunque un enviar propio no atienda la señal. Un rechazo se dice completo: los errores de un campo junto a él y los demás, con sus palabras, en el aviso de envío. Si la página tiene acuse y su módulo no cargó, un envío recibido se dice con su folio. Si una foto que se procesaba termina con error, el envío se detiene y lo dice junto al campo.",
    "porque": "Un giro eterno y una pantalla en blanco son el peor error posible; un reenvío sin idempotencia duplica registros.",
    "nivel": "BASE",
    "origen": [
@@ -746,7 +748,7 @@
     "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "01-por-pasos: error simulado, límite y éxito; 07: aviso de envío fallido; 08: envíos recibidos sin JSON (B5-05), captura en serie (C4-08)"
+   "verificacion": "01-por-pasos: error simulado, límite y éxito; 07: aviso de envío fallido; 08: envíos recibidos sin JSON (B5-05), captura en serie (C4-08); 08: multipart, rechazo completo, plazo, sin acuse y foto con error (B5-07, B5-08, B5-10, B5-13, E3-04)"
   },
   {
    "id": "FRM-45",
@@ -808,7 +810,7 @@
    "id": "FRM-49",
    "seccion": 7,
    "titulo": "El punto en el mapa se coloca con toque, arrastre o teclado, se confirma y no se pide geolocalización por omisión",
-   "regla": "El mapa (Leaflet autoalojado con gestos: un dedo desplaza la página, dos el mapa) coloca el punto al tocar, permite arrastrarlo y, con el mapa enfocado, Enter lo coloca en el centro. Con data-confirmar el punto debe confirmarse. Las coordenadas se dicen en texto como latitud, longitud; viajan como punto GeoJSON [lon, lat] en EPSG:4326 con seis decimales. La geolocalización del dispositivo sólo se ofrece con data-geolocalizacion. El ámbito se acota y un punto fuera se dice al momento. Al recuperar el borrador, el punto confirmado vuelve confirmado.",
+   "regla": "El mapa (Leaflet autoalojado con gestos: un dedo desplaza la página, dos el mapa) coloca el punto al tocar, permite arrastrarlo y, con el mapa enfocado, Enter lo coloca en el centro. Con data-confirmar el punto debe confirmarse. Las coordenadas se dicen en texto como latitud, longitud; viajan como punto GeoJSON [lon, lat] en EPSG:4326 con seis decimales. La geolocalización del dispositivo sólo se ofrece con data-geolocalizacion. El ámbito se acota y un punto fuera se dice al momento. Al recuperar el borrador, el punto confirmado vuelve confirmado. Enter sobre «+» o «−» acerca o aleja y nada más. Si no se obtiene la ubicación, el aviso va en su propio renglón y el punto ya elegido se queda. Las coordenadas que el enlace corrige (sin signo menos) llegan al mapa ya corregidas.",
    "porque": "Un mapa que atrapa el desplazamiento del teléfono bloquea la página; un punto sin confirmar se envía por un roce; pedir permiso de ubicación sin motivo ahuyenta.",
    "nivel": "OPCIONAL",
    "origen": [
@@ -820,7 +822,7 @@
     "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "01-por-pasos: mapa toca, confirma; mapa.js; 08: borrador con el punto confirmado (F2-02)"
+   "verificacion": "01-por-pasos: mapa toca, confirma; mapa.js; 08: borrador con el punto confirmado (F2-02); 08: mapa (F2-04, F2-05)"
   },
   {
    "id": "FRM-50",
@@ -859,16 +861,17 @@
    "id": "FRM-52",
    "seccion": 8,
    "titulo": "Cada rechazo dice su motivo y cada archivo muestra su estado",
-   "regla": "Lo que se sabe sin leer el archivo (tipo, peso, número, vacío, duplicado) se rechaza en el acto con motivo; lo que exige leerlo (firma real, dimensiones, optimización) se muestra en la lista con estado, progreso y «Reintentar». El tipo real se verifica por firma (bytes iniciales), no por extensión; los duplicados por SHA-256; el nombre se sanea. El archivo listo se ve en verde, con su estado escrito; con el máximo ya cargado, «Elegir archivo» y la cámara se ocultan (y el foco pasa a «Quitar») y vuelven al quitar un archivo; con un solo archivo o un solo formato, los textos van en singular.",
+   "regla": "Lo que se sabe sin leer el archivo (tipo, peso, número, vacío, duplicado) se rechaza en el acto con motivo; lo que exige leerlo (firma real, dimensiones, optimización) se muestra en la lista con estado, progreso y «Reintentar». El tipo real se verifica por firma (bytes iniciales), no por extensión; los duplicados por SHA-256; el nombre se sanea. El archivo listo se ve en verde, con su estado escrito; con el máximo ya cargado, «Elegir archivo» y la cámara se ocultan (y el foco pasa a «Quitar») y vuelven al quitar un archivo; con un solo archivo o un solo formato, los textos van en singular. Muchos rechazos de una vez se dicen en un solo aviso; una imagen rechazada se puede volver a elegir; un archivo apenas sobre el límite dice «más de 8 MB», no «pesa 8.0 MB». El total se mide con lo ya optimizado: varias fotos elegidas juntas no suman su peso original. La revisión sólo lista lo que se envía. Si el proveedor del borrador no puede devolver los archivos, se dice. Al terminar de procesarse otro archivo, el foco se queda donde estaba.",
    "porque": "«Archivo no válido» no dice qué cambiar; un .jpg que no es imagen pasa la extensión y rompe el servidor.",
    "nivel": "RECOMENDADO",
    "origen": [
     "A FRM-61",
     "B FRM-ARC-03",
-    "P71 (proyecto de acreditaciones, 17 oct 2026)"
+    "P71 (proyecto de acreditaciones, 17 oct 2026)",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "01-por-pasos: rechazo inmediato con motivo, error tras leer; 07: máximo cargado"
+   "verificacion": "01-por-pasos: rechazo inmediato con motivo, error tras leer; 07: máximo cargado; 08: rechazos, peso, total, revisión, proveedor y foco (E3-11, E3-13, E3-04, F2-03, F2-06, F2-07)"
   },
   {
    "id": "FRM-53",
@@ -1148,7 +1151,7 @@
    "id": "FRM-71",
    "seccion": 11,
    "titulo": "Núcleo obligatorio y módulos independientes con manifiesto",
-   "regla": "El núcleo (tokens, base, nucleo, validaciones.config, iconos, formkit.core) va siempre; cada módulo vive en su carpeta con su CSS y su JS, declara en codigo/manifiesto.json nivel, propósito, cuándo, cuándo no, dependencias, accesibilidad y comportamiento en teléfono y escritorio, y se activa solo si el formulario contiene su selector. Los módulos de ámbito documento se inician una sola vez aunque la página tenga varios formularios. Cada formulario se inicia una sola vez: una segunda llamada a FormKit.iniciar le suma sus opciones y devuelve la misma instancia. Un módulo que también sirve sin formulario (tabla, visor, estado) se inicia solo al cargar la página.",
+   "regla": "El núcleo (tokens, base, nucleo, validaciones.config, iconos, formkit.core) va siempre; cada módulo vive en su carpeta con su CSS y su JS, declara en codigo/manifiesto.json nivel, propósito, cuándo, cuándo no, dependencias, accesibilidad y comportamiento en teléfono y escritorio, y se activa solo si el formulario contiene su selector. Los módulos de ámbito documento se inician una sola vez aunque la página tenga varios formularios. Cada formulario se inicia una sola vez: una segunda llamada a FormKit.iniciar le suma sus opciones y devuelve la misma instancia. Un módulo que también sirve sin formulario (tabla, visor, estado) se inicia solo al cargar la página. Cada módulo arranca por su cuenta: si uno falla, los demás y el formulario siguen, y la consola dice cuál. Un módulo también se activa si su selector está en la plantilla de una fila repetible, y prepara los campos de cada fila que se agrega (evento formkit:fila). Cada formulario lleva en el HTML el aviso «La página no terminó de cargar» ([data-carga-pendiente]), que el núcleo oculta al arrancar (por pasos, el módulo de pasos al mostrar el primero); en una página, el botón de enviar es type=\"button\": sin el núcleo no envía nada.",
    "porque": "Un paquete monolítico se copia entero o no se copia; un módulo sin ficha se usa mal.",
    "nivel": "BASE",
    "origen": [
@@ -1156,10 +1159,11 @@
     "encargo 7",
     "P110 (proyecto de acreditaciones, 17 oct 2026)",
     "P111 (proyecto de acreditaciones, 17 oct 2026)",
-    "auditoría del estándar, 18 oct 2026"
+    "auditoría del estándar, 18 oct 2026",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "06-servidor: manifiesto; 04-modulos: varios formularios en una página"
+   "verificacion": "06-servidor: manifiesto; 04-modulos: varios formularios en una página; 08: módulo que falla, aviso de carga y filas agregadas (B5-03, B5-04, F2-09)"
   },
   {
    "id": "FRM-72",
@@ -1311,15 +1315,16 @@
    "id": "FRM-82",
    "seccion": 5,
    "titulo": "Una decisión del personal termina en un resultado que dice qué pasó, a qué hora y quién",
-   "regla": "Al validar, rechazar, devolver para corregir, turnar o cerrar un trámite, la pantalla muestra el resultado (módulo «resultado», FormKit.resultado): título con el resultado y su objeto («Solicitud EJ-123 rechazada»), el tono de una de las cinco familias de FRM-83 en icono y palabras, «Quedó guardado a las HH:MM · quien» con la hora de la Ciudad (y la fecha si no fue hoy), el motivo citado tal como se escribió, lo que sigue como secuencia numerada (pasos, FRM-84) y una acción para seguir. El panel de decisión que ya no aplica se oculta. El foco va al título y se anuncia.",
+   "regla": "Al validar, rechazar, devolver para corregir, turnar o cerrar un trámite, la pantalla muestra el resultado (módulo «resultado», FormKit.resultado): título con el resultado y su objeto («Solicitud EJ-123 rechazada»), el tono de una de las cinco familias de FRM-83 en icono y palabras, «Quedó guardado a las HH:MM · quien» con la hora de la Ciudad (y la fecha si no fue hoy), el motivo citado tal como se escribió, lo que sigue como secuencia numerada (pasos, FRM-84) y una acción para seguir. El panel de decisión que ya no aplica se oculta. El foco va al título y se anuncia. Una fecha del servidor sin hora es ese día (no el anterior), y una que no es fecha no deja la pantalla sin resultado.",
    "porque": "Sin un resultado claro, quien decide no sabe si su decisión quedó registrada, y sin hora ni nombre no hay a quién preguntar.",
    "nivel": "RECOMENDADO",
    "origen": [
     "P113 (proyecto de acreditaciones, 17 oct 2026)",
-    "P119 (proyecto de acreditaciones, 17 oct 2026)"
+    "P119 (proyecto de acreditaciones, 17 oct 2026)",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "mejor práctica adicional",
-   "verificacion": "guía: resultado; 07: resultado con hora, quién y motivo (P113) y con lo que sigue (P119)"
+   "verificacion": "guía: resultado; 07: resultado con hora, quién y motivo (P113) y con lo que sigue (P119); 08: fechas del servidor (B5-09)"
   },
   {
    "id": "FRM-83",

@@ -28,6 +28,8 @@
    una letra, como en href="#i-ayuda"). El número de una fila no se reutiliza:
    si se quita la fila 1 de tres, la siguiente que se agregue es la 3, así cada
    fila conserva su nombre y su id, y el borrador guarda qué números tenía.
+   Cada fila agregada lanza en el formulario el evento «formkit:fila» con
+   detail.fila, para que los módulos preparen sus campos.
    ========================================================= */
 (function () {
   'use strict';
@@ -90,6 +92,8 @@
           lista.insertBefore(fila, filas().find((f) => numeroDe(f) > i) || null);
           for (const c of $$('[data-campo]', fila)) preparaCampo(c.dataset.campo);
           renumera();
+          /* Los módulos que preparan campos (mayúsculas de la CURP, ayudas «?») atienden la fila nueva. */
+          form.dispatchEvent(new CustomEvent('formkit:fila', { detail: { fila } }));
           if (silencio) return fila;
           if (foco) { const primero = $('input,select,textarea', fila); if (primero) primero.focus(); }
           anuncia(plantilla(M.repetibleAgregado, { etiqueta: rep.dataset.etiqueta || rep.dataset.repetible, n: filas().indexOf(fila) + 1 }));

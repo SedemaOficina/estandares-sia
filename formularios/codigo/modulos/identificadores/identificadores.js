@@ -28,11 +28,16 @@
     selector: '[data-formato="curp"],[data-formato="rfc"],[data-formato="folio"]',
     iniciar(form, ctx) {
       const { $$, cfg, anuncia, controlPrincipal, envoltura, etiquetaDe, validaCampo } = ctx;
-      for (const campo of $$('[data-campo]', form)) {
+      for (const campo of $$('[data-campo]', form)) prepara(campo);
+      /* Las filas que se agregan después (repetibles) traen sus propios campos. */
+      form.addEventListener('formkit:fila', (e) => { for (const campo of $$('[data-campo]', e.detail.fila)) prepara(campo); });
+
+      function prepara(campo) {
         const f = campo.dataset.formato;
-        if (!MAYUSCULAS.includes(f)) continue;
+        if (!MAYUSCULAS.includes(f)) return;
         const ctl = controlPrincipal(campo.dataset.campo);
-        if (!ctl) continue;
+        if (!ctl || ctl.dataset.identificador !== undefined) return;
+        ctl.dataset.identificador = '';
         ctl.setAttribute('autocapitalize', 'characters');
         ctl.setAttribute('spellcheck', 'false');
         if (f === 'curp' && !ctl.maxLength) ctl.maxLength = cfg.curp.largo;
