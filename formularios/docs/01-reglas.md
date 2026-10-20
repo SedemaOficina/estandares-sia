@@ -72,33 +72,33 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-05 · Una pantalla de revisión antes de enviar, con «Editar» que aterriza en el campo
 
-**Regla.** Los formularios por pasos muestran todo lo capturado agrupado por paso antes de enviar (módulo «revision»). Cada bloque lleva «Editar», que abre el paso y enfoca el campo correspondiente. «Editar» se queda junto al valor, arriba y a la derecha, aunque el valor ocupe varios renglones. En cada dato, el rótulo va en gris y peso normal, sin fondo, y el dato destaca, como en toda lista de rótulo y dato (la tabla del teléfono, el acuse).
+**Regla.** Los formularios por pasos muestran todo lo capturado agrupado por paso antes de enviar (módulo «revision»). Cada bloque lleva «Editar», que abre el paso y enfoca el campo correspondiente. «Editar» se queda junto al valor, arriba y a la derecha, aunque el valor ocupe varios renglones. En cada dato, el rótulo va en gris y peso normal, sin fondo, y el dato destaca, como en toda lista de rótulo y dato (la tabla del teléfono, el acuse). La revisión dice lo mismo que se envía: un punto del mapa que falta confirmar se ve como «sin confirmar: no se envía».
 
 **Por qué.** Revisar antes de enviar evita envíos equivocados y repeticiones; «Editar» que sólo cambia de paso obliga a buscar el campo.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-08; P72 (proyecto de acreditaciones, 17 oct 2026); P147 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-08; P72 (proyecto de acreditaciones, 17 oct 2026); P147 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos.prueba.mjs: «Editar» aterriza en el campo; 07: «Editar» junto al valor largo; 07: rótulo de la revisión (P147)
+**Verificación.** 01-por-pasos.prueba.mjs: «Editar» aterriza en el campo; 07: «Editar» junto al valor largo; 07: rótulo de la revisión (P147); 08: punto sin confirmar en la revisión (F2-02)
 
 ### FRM-06 · Un acuse con folio al terminar
 
-**Regla.** Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue como secuencia numerada (FRM-84), si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia. La fecha y la hora de recepción se escriben en la zona de la Ciudad y en 24 horas («17 de octubre de 2026 a las 23:27»); con fechas.horas24 = false, en 12 horas con a. m. y p. m.
+**Regla.** Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue como secuencia numerada (FRM-84), si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia. La fecha y la hora de recepción se escriben en la zona de la Ciudad y en 24 horas («17 de octubre de 2026 a las 23:27»); con fechas.horas24 = false, en 12 horas con a. m. y p. m. El folio y la fecha (no los datos de la persona) se guardan en el dispositivo: si la persona recarga la página, vuelve a ver su acuse durante acuse.horasVisible (24 horas), y «Llenar otra solicitud» ([data-acuse-nuevo]) lo olvida y abre el formulario vacío. Mientras se ve el acuse o la pantalla de límite, la barra de pasos, la franja del borrador y el aviso de guardado no se ven. Si la respuesta no trae folio, el acuse lo dice con palabras; si no trae fecha válida, usa la hora en que llegó.
 
 **Por qué.** Sin acuse la persona no sabe si terminó; sin folio no puede dar seguimiento.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-09; B FRM-EST-03; P72 (proyecto de acreditaciones, 17 oct 2026); P128 (proyecto de acreditaciones, 18 oct 2026) · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-09; B FRM-EST-03; P72 (proyecto de acreditaciones, 17 oct 2026); P128 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs; 07: relleno y acción del acuse; 07: fecha en 24 horas (P128)
+**Verificación.** 01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs; 07: relleno y acción del acuse; 07: fecha en 24 horas (P128); 08: el acuse sobrevive a una recarga (C4-07)
 
 ### FRM-07 · La pregunta condicional existe sólo mientras aplica
 
-**Regla.** Un bloque con data-si="campo=valor|valor2" (en cualquier elemento: div, section, article, fieldset…) se muestra sólo si la respuesta coincide; dentro de otro bloque condicional, exige las dos. Mientras está oculto no se valida ni viaja en el envío; lo escrito se conserva por si la persona vuelve a cambiar de opinión. El servidor descarta con señal lo que llegue de un bloque cuya condición no se cumple. El esquema del servidor lee la condición de todos los elementos que rodean al campo, no sólo de los div.
+**Regla.** Un bloque con data-si="campo=valor|valor2" (en cualquier elemento: div, section, article, fieldset…) se muestra sólo si la respuesta coincide; dentro de otro bloque condicional, exige las dos. Mientras está oculto no se valida ni viaja en el envío; lo escrito se conserva por si la persona vuelve a cambiar de opinión. El servidor descarta con señal lo que llegue de un bloque cuya condición no se cumple. El esquema del servidor lee la condición de todos los elementos que rodean al campo, no sólo de los div. Oculto quiere decir que no se ve: ningún estilo del renglón (.fila) le gana al atributo hidden (decisión C9).
 
 **Por qué.** Validar lo oculto bloquea sin motivo visible; borrar lo escrito castiga explorar; aceptar en el servidor lo que no se pidió es una puerta.
 
-**Nivel.** BASE · **Origen.** A FRM-11; B FRM-EST-05; P38 (proyecto de acreditaciones, 15 oct 2026); P81 (proyecto de acreditaciones, 17 oct 2026) · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-11; B FRM-EST-05; P38 (proyecto de acreditaciones, 15 oct 2026); P81 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: contacto condicional; 06-servidor: condiciones anidadas y en cualquier elemento; 07: condiciones encadenadas
+**Verificación.** 01-por-pasos: contacto condicional; 06-servidor: condiciones anidadas y en cualquier elemento; 07: condiciones encadenadas; 08: campo oculto dentro de un renglón (B1-01)
 
 ### FRM-08 · Enlace de salto al contenido y una sola jerarquía de encabezados
 
@@ -226,13 +226,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-20 · Fechas con «Hoy», horas con «Ahora», rangos con atajos, sin fechas imposibles y edad calculada
 
-**Regla.** Los campos de fecha son type=date con botón «Hoy» (módulo «fecha»); los de hora, «Ahora». La fecha de nacimiento no usa calendario: se escribe día/mes/año (formato «fecha-dma», 23/07/1985), la escritura se acomoda sola y la cruza con la CURP curp-fecha (o curp-fecha-dma). Un rango declara data-rango y atajos; la fecha final anterior a la inicial es una validación cruzada. data-no-futura rechaza fechas posteriores a hoy, que el servidor resuelve con su propio reloj. La edad no se escribe: se calcula de la fecha de nacimiento (escrita o tomada de la CURP) en un campo de solo lectura (data-deriva="edad=…"), o se pide en rangos sin huecos ni encimados cuando basta el grupo de edad.
+**Regla.** Los campos de fecha son type=date con botón «Hoy» (módulo «fecha»); los de hora, «Ahora». La fecha de nacimiento no usa calendario: se escribe día/mes/año (formato «fecha-dma», 23/07/1985), la escritura se acomoda sola y la cruza con la CURP curp-fecha (o curp-fecha-dma). Un rango declara data-rango y atajos; la fecha final anterior a la inicial es una validación cruzada. data-no-futura rechaza fechas posteriores a hoy, que el servidor resuelve con su propio reloj. La edad no se escribe: se calcula de la fecha de nacimiento (escrita o tomada de la CURP) en un campo de solo lectura (data-deriva="edad=…"), o se pide en rangos sin huecos ni encimados cuando basta el grupo de edad. En una fecha día/mes/año, «Hoy» escribe la fecha en día/mes/año, y una fecha AAAA-MM-DD completa (pegada o del autocompletado) se pasa a día/mes/año. La edad mínima o máxima (cruzada edad) y el periodo (rango-fechas) se revisan igual con fechas día/mes/año.
 
 **Por qué.** Escribir la fecha de hoy es el caso más frecuente; un rango invertido o una fecha futura de nacimiento son errores silenciosos; una edad escrita junto a la fecha puede contradecirla. El calendario obliga a recorrer décadas para llegar a una fecha de nacimiento, y en México nadie la escribe como AAAA-MM-DD.
 
-**Nivel.** RECOMENDADO · **Origen.** encargo 5.2; A FRM-29; edad calculada o en rangos (la Secretaría, 14 oct 2026); P70 (proyecto de acreditaciones, 16 oct 2026) · *decisión del encargo*
+**Nivel.** RECOMENDADO · **Origen.** encargo 5.2; A FRM-29; edad calculada o en rangos (la Secretaría, 14 oct 2026); P70 (proyecto de acreditaciones, 16 oct 2026); auditoría del estándar, 19 oct 2026 · *decisión del encargo*
 
-**Verificación.** 02-una-pagina: rango y atajos; 06-servidor: max «hoy»; 06 y 07: fecha día/mes/año
+**Verificación.** 02-una-pagina: rango y atajos; 06-servidor: max «hoy»; 06 y 07: fecha día/mes/año; 08: edad y periodo con fecha día/mes/año (A1-01), «Hoy» y fecha pegada (E3-06)
 
 ### FRM-21 · CURP de 18 caracteres con derivados en solo lectura y cruzada con la fecha de nacimiento y con el nombre
 
@@ -246,13 +246,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-22 · Grupos repetibles con mínimo, máximo y confirmación para quitar
 
-**Regla.** «Agregar otro» (módulo «repetibles») clona una plantilla con índice, enfoca el primer campo de la fila nueva, respeta data-min y data-max (el botón se marca con aria-disabled, no desaparece) y pide confirmación antes de quitar una fila con contenido.
+**Regla.** «Agregar otro» (módulo «repetibles») clona una plantilla con índice, enfoca el primer campo de la fila nueva, respeta data-min y data-max (el botón se marca con aria-disabled, no desaparece) y pide confirmación antes de quitar una fila con contenido. El número de una fila no se reutiliza: si se quita una fila de en medio, la siguiente que se agrega lleva un número nuevo, así ninguna fila repite nombre ni id y todas viajan en el envío. El borrador guarda qué filas había y las rehace al recuperarlo, con todos sus valores (también Sí/No y casillas), sin pasar del máximo.
 
 **Por qué.** Sin límite se capturan listas infinitas; sin confirmación se pierde lo escrito con un toque.
 
-**Nivel.** OPCIONAL · **Origen.** encargo 5.2 · *decisión del encargo*
+**Nivel.** OPCIONAL · **Origen.** encargo 5.2; auditoría del estándar, 19 oct 2026 · *decisión del encargo*
 
-**Verificación.** 02-una-pagina: repetibles; 04-modulos
+**Verificación.** 02-una-pagina: repetibles; 04-modulos; 08: quitar una fila de en medio y agregar otra (E3-01), borrador con más filas que el máximo (E3-02)
 
 ### FRM-23 · Interruptor sólo para ajustes de efecto inmediato; escala sobre radios
 
@@ -328,13 +328,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-30 · Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, folio fiscal, contraseña
 
-**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el RFC conserva la Ñ (se quitan los acentos, no la tilde de la Ñ); el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir (AAAA-MM-DD es el formato interno; toda fecha que el formulario escribe o anuncia a la persona va en día/mes/año), y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos.
+**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el RFC conserva la Ñ (se quitan los acentos, no la tilde de la Ñ); el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir (AAAA-MM-DD es el formato interno; toda fecha que el formulario escribe o anuncia a la persona va en día/mes/año), y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos. En el número, una coma se toma como punto decimal («12,5»), salvo que agrupe miles («1,500», «12,345.50»): eso no se adivina, se pide escribirlo sin comas. Una fecha escrita no pasa de 20 caracteres y ninguna expresión del catálogo tarda más con un texto largo.
 
 **Por qué.** Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.
 
-**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026); P42 (proyecto de acreditaciones, 15 oct 2026); P73 (proyecto de acreditaciones, 17 oct 2026); P82 (proyecto de acreditaciones, 17 oct 2026); P98 (proyecto de acreditaciones, 17 oct 2026); P112 (proyecto de acreditaciones, 17 oct 2026); P129 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión del encargo*
+**Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026); P42 (proyecto de acreditaciones, 15 oct 2026); P73 (proyecto de acreditaciones, 17 oct 2026); P82 (proyecto de acreditaciones, 17 oct 2026); P98 (proyecto de acreditaciones, 17 oct 2026); P112 (proyecto de acreditaciones, 17 oct 2026); P129 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión del encargo*
 
-**Verificación.** guía: probador; 06-servidor; validaciones.config.js; 06: RFC con Ñ (P129)
+**Verificación.** guía: probador; 06-servidor; validaciones.config.js; 06: RFC con Ñ (P129); 08: «1,500» (F2-01), texto enorme en una fecha (E3-03)
 
 ### FRM-31 · Las validaciones cruzadas marcan los campos implicados y pueden ser advertencia
 
@@ -358,13 +358,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-33 · El navegador ayuda; el servidor defiende con las mismas reglas
 
-**Regla.** Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor del sistema además revisa la firma de los archivos, el límite por origen y la idempotencia (fuera de validar.mjs, que valida los datos). El esquema del servidor se toma sólo de lo que está dentro del <form>: un control de la página fuera de él no es parte de ningún campo.
+**Regla.** Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor del sistema además revisa la firma de los archivos, el límite por origen y la idempotencia (fuera de validar.mjs, que valida los datos). El esquema del servidor se toma sólo de lo que está dentro del <form>: un control de la página fuera de él no es parte de ningún campo. El servidor revisa el largo máximo (maxlength) antes de normalizar, como lo limita el navegador.
 
 **Por qué.** La validación del navegador se salta con una petición directa; una segunda lista de reglas se desactualiza.
 
-**Nivel.** BASE · **Origen.** A FRM-70; B FRM-VAL-08; P90 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-70; B FRM-VAL-08; P90 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 06-servidor-y-herramientas.prueba.mjs; 04-modulos: esquema vs navegador
+**Verificación.** 06-servidor-y-herramientas.prueba.mjs; 04-modulos: esquema vs navegador; 08: validaPayload con 1 MB en una fecha (E3-03)
 
 ## 5. Acciones y retroalimentación
 
@@ -482,13 +482,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-42 · Todo formulario largo guarda borrador en el dispositivo y lo ofrece al volver
 
-**Regla.** Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja («Hay un borrador guardado el …») con «Recuperar borrador» y «Empezar de nuevo»; «Empezar de nuevo» pide confirmación en la franja, con el foco en «Conservar» y el botón «Descartar borrador» (FRM-38). Sin franja en la página, el borrador se recupera solo al volver. El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas. El borrador empieza con el primer gesto de la persona en el formulario (escribir, elegir, tocar, soltar un archivo): lo que la página escribe sola, como al precargar una solicitud para continuarla, no crea un borrador.
+**Regla.** Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja («Hay un borrador guardado el …») con «Recuperar borrador» y «Empezar de nuevo»; «Empezar de nuevo» pide confirmación en la franja, con el foco en «Conservar» y el botón «Descartar borrador» (FRM-38). Sin franja en la página, el borrador se recupera solo al volver. El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas. El borrador empieza con el primer gesto de la persona en el formulario (escribir, elegir, tocar, soltar un archivo): lo que la página escribe sola, como al precargar una solicitud para continuarla, no crea un borrador. Mientras la franja espera la respuesta de la persona, no se guarda nada: lo que escriba antes de elegir no reemplaza al borrador guardado. Con su respuesta, el borrador vuelve a guardarse.
 
 **Por qué.** Perder diez minutos de captura por cerrar la pestaña es la causa principal de abandono.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-14; A FRM-17; B FRM-EST-04; P128 (proyecto de acreditaciones, 18 oct 2026); P148 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-14; A FRM-17; B FRM-EST-04; P128 (proyecto de acreditaciones, 18 oct 2026); P148 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: borrador se guarda, se ofrece y se restaura; 07: la precarga no crea borrador (P148)
+**Verificación.** 01-por-pasos: borrador se guarda, se ofrece y se restaura; 07: la precarga no crea borrador (P148); 08: escribir antes de contestar la franja (C4-01)
 
 ### FRM-43 · El borrador del dispositivo nunca guarda campos sensibles ni archivos, y se invalida con la estructura
 
@@ -502,13 +502,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-44 · Todo envío tiene límite de espera, clave de idempotencia y dice qué pasó
 
-**Regla.** El envío lleva AbortController con plazo configurable y una clave de idempotencia por envío, la misma en cada reintento hasta que el servidor lo reciba. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver». El aviso de un envío fallido se queda hasta que la persona cambia un dato o vuelve a enviar: no se oculta al mover el foco, porque el botón de abajo subiría a media pulsación y el clic se perdería.
+**Regla.** El envío lleva AbortController con plazo configurable y una clave de idempotencia por envío, la misma en cada reintento hasta que el servidor lo reciba. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver». El aviso de un envío fallido se queda hasta que la persona cambia un dato o vuelve a enviar: no se oculta al mover el foco, porque el botón de abajo subiría a media pulsación y el clic se perdería. Un 2xx es un envío recibido aunque no traiga JSON (204, «OK», null): no se dice que falló. Desde que el servidor lo recibe nada cuenta como envío fallido; si lo que la página hace después falla, se dice que el envío se recibió y que no se envíe de nuevo. El borrador se borra después de mostrar el acuse. Tras un envío logrado la clave se renueva: si el formulario sigue en pantalla (captura en serie), el siguiente registro lleva otra clave y vuelve a guardar borrador.
 
 **Por qué.** Un giro eterno y una pantalla en blanco son el peor error posible; un reenvío sin idempotencia duplica registros.
 
-**Nivel.** BASE · **Origen.** A FRM-42; A FRM-43; B FRM-SEG-02; P87 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-42; A FRM-43; B FRM-SEG-02; P87 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: error simulado, límite y éxito; 07: aviso de envío fallido
+**Verificación.** 01-por-pasos: error simulado, límite y éxito; 07: aviso de envío fallido; 08: envíos recibidos sin JSON (B5-05), captura en serie (C4-08)
 
 ### FRM-45 · El envío no se duplica
 
@@ -554,13 +554,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-49 · El punto en el mapa se coloca con toque, arrastre o teclado, se confirma y no se pide geolocalización por omisión
 
-**Regla.** El mapa (Leaflet autoalojado con gestos: un dedo desplaza la página, dos el mapa) coloca el punto al tocar, permite arrastrarlo y, con el mapa enfocado, Enter lo coloca en el centro. Con data-confirmar el punto debe confirmarse. Las coordenadas se dicen en texto como latitud, longitud; viajan como punto GeoJSON [lon, lat] en EPSG:4326 con seis decimales. La geolocalización del dispositivo sólo se ofrece con data-geolocalizacion. El ámbito se acota y un punto fuera se dice al momento.
+**Regla.** El mapa (Leaflet autoalojado con gestos: un dedo desplaza la página, dos el mapa) coloca el punto al tocar, permite arrastrarlo y, con el mapa enfocado, Enter lo coloca en el centro. Con data-confirmar el punto debe confirmarse. Las coordenadas se dicen en texto como latitud, longitud; viajan como punto GeoJSON [lon, lat] en EPSG:4326 con seis decimales. La geolocalización del dispositivo sólo se ofrece con data-geolocalizacion. El ámbito se acota y un punto fuera se dice al momento. Al recuperar el borrador, el punto confirmado vuelve confirmado.
 
 **Por qué.** Un mapa que atrapa el desplazamiento del teléfono bloquea la página; un punto sin confirmar se envía por un roce; pedir permiso de ubicación sin motivo ahuyenta.
 
-**Nivel.** OPCIONAL · **Origen.** A FRM-53; A FRM-54; B FRM-UBI-01; B FRM-UBI-03; auditoría del estándar, 18 oct 2026 · *decisión heredada*
+**Nivel.** OPCIONAL · **Origen.** A FRM-53; A FRM-54; B FRM-UBI-01; B FRM-UBI-03; auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: mapa toca, confirma; mapa.js
+**Verificación.** 01-por-pasos: mapa toca, confirma; mapa.js; 08: borrador con el punto confirmado (F2-02)
 
 ### FRM-50 · El mapa base, el marcador y el cruce son del proyecto, no de un tercero
 

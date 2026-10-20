@@ -70,8 +70,11 @@
     }
 
     /* Par suelto con punto o coma decimal. Sin decimales no se toma:
-       «19 99» suele ser parte de una dirección, no coordenadas. */
-    m = s.match(/^\(?\s*(-?\d{1,3}[.,]\d+)\s*[,;\s]\s*(-?\d{1,3}[.,]\d+)\s*\)?$/);
+       «19 99» suele ser parte de una dirección, no coordenadas. Un par escrito
+       no pasa de 80 caracteres, y el separador no se traslapa con los espacios
+       de alrededor: un texto largo no frena la página. */
+    if (s.length > 80) return null;
+    m = s.match(/^\(?\s*(-?\d{1,3}[.,]\d+)(?:\s*[,;]\s*|\s+)(-?\d{1,3}[.,]\d+)\s*\)?$/);
     return m ? par(m[1], m[2], 'texto') : null;
   }
   const fmt = (r) => `${r.lat.toFixed(6)}, ${r.lon.toFixed(6)}`;

@@ -1,6 +1,6 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -80,10 +80,10 @@
     "tamano": {
       "tokens.css": 8535,
       "base.css": 6625,
-      "nucleo.css": 19313,
-      "validaciones.config.js": 44996,
+      "nucleo.css": 19504,
+      "validaciones.config.js": 46440,
       "iconos.js": 6047,
-      "formkit.core.js": 54780
+      "formkit.core.js": 56700
     }
   },
   "modulos": [
@@ -200,7 +200,7 @@
       },
       "tamano": {
         "css": 1003,
-        "js": 7302
+        "js": 7843
       }
     },
     {
@@ -236,7 +236,7 @@
       "titulo": "Grupos repetibles («Agregar otro»)",
       "nivel": "OPCIONAL",
       "tipo": "pregunta",
-      "proposito": "Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos.",
+      "proposito": "Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos. El número de una fila no se reutiliza, y el borrador rehace las filas que había.",
       "cuando": "La cantidad de elementos la decide la persona.",
       "cuandoNo": "Siempre son exactamente N (ponlos fijos).",
       "dependencias": [
@@ -249,7 +249,8 @@
       "errores": [
         "Nombres de campo repetidos entre filas.",
         "Quitar sin confirmar una fila con datos.",
-        "Sin máximo."
+        "Sin máximo.",
+        "Numerar las filas por su posición: al quitar una de en medio y agregar otra, dos filas repetirían nombre y una no se enviaría."
       ],
       "archivos": {
         "css": "codigo/modulos/repetibles/repetibles.css",
@@ -257,7 +258,7 @@
       },
       "tamano": {
         "css": 1103,
-        "js": 7898
+        "js": 9298
       }
     },
     {
@@ -376,7 +377,7 @@
       "titulo": "Acuse y «qué sigue»",
       "nivel": "RECOMENDADO",
       "tipo": "retroalimentacion",
-      "proposito": "Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones).",
+      "proposito": "Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones). Sobrevive a una recarga: el folio y la fecha se vuelven a mostrar durante acuse.horasVisible, y [data-acuse-nuevo] abre el formulario vacío.",
       "cuando": "Todo envío que genere folio.",
       "cuandoNo": "Capturas internas sin acuse.",
       "dependencias": [
@@ -391,7 +392,8 @@
         "Folio con aspecto de botón.",
         "No borrar el borrador al recibir.",
         "Acuse sin una acción para seguir.",
-        "Quitarle el relleno lateral a la tarjeta del acuse: en teléfono los botones quedan pegados a la orilla."
+        "Quitarle el relleno lateral a la tarjeta del acuse: en teléfono los botones quedan pegados a la orilla.",
+        "Perder el folio al recargar la página."
       ],
       "archivos": {
         "css": "codigo/modulos/acuse/acuse.css",
@@ -399,7 +401,7 @@
       },
       "tamano": {
         "css": 2250,
-        "js": 4043
+        "js": 6506
       }
     },
     {
@@ -842,7 +844,7 @@
       },
       "tamano": {
         "css": 2754,
-        "js": 9669
+        "js": 10212
       }
     },
     {
@@ -871,7 +873,7 @@
       },
       "tamano": {
         "css": 0,
-        "js": 7781
+        "js": 7975
       }
     },
     {
@@ -928,5 +930,5 @@
       }
     }
   ],
-  "generado": "2026-10-19T01:20:06.093Z"
+  "generado": "2026-10-20T21:02:16.997Z"
 }

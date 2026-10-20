@@ -21,9 +21,9 @@ Qué se valida, cuándo, con qué mensaje y dónde vive la regla. Fuente única:
 | `cp` | 5 dígitos; si hay ámbito configurado, dentro del rango | Sólo dígitos; **se conserva como texto** | El código postal lleva 5 dígitos. Ejemplo: 01000 · Ese código postal no es de la Ciudad de México: van del 01000 al 16999 | numeric |
 | `curp` | 18 caracteres; estructura `AAAA######HAAAAA##`; fecha real en posiciones 5–10 y no futura; entidad válida en 12–13; dígito verificador (activable) *[estructura y algoritmo a confirmar con RENAPO: Fuente: __]* | Mayúsculas, sin acentos ni espacios | La CURP tiene 18 caracteres; escribiste 17 · La fecha dentro de la CURP no es una fecha real · El último carácter no coincide con el resto | text |
 | `rfc` | 12 (moral) o 13 (física) caracteres; fecha real *[estructura a confirmar con el SAT: Fuente: __]* | Mayúsculas, sin acentos (la Ñ se conserva), sin espacios ni guiones | El RFC lleva 3 o 4 letras, 6 dígitos de fecha y 3 caracteres finales. Ejemplo: XAXX010101000 | text |
-| `numero` | Número entero o decimal; `min`, `max`, `step` del campo (el paso cuenta desde el mínimo y admite decimales: `step="0.5"`); `data-min-segun`/`data-max-segun` para un límite que depende de otra respuesta | Coma → punto | Escribe sólo números; para decimales usa punto · El valor máximo es 20 · Usa múltiplos de 0.5 · Escribe un número entero, sin decimales | decimal |
+| `numero` | Número entero o decimal; `min`, `max`, `step` del campo (el paso cuenta desde el mínimo y admite decimales: `step="0.5"`); `data-min-segun`/`data-max-segun` para un límite que depende de otra respuesta. Una coma que agrupa miles (1,500 · 12,345.50) no se adivina: se pide escribir el número sin comas | Coma decimal → punto (12,5 → 12.5) | Escribe el número sin comas, por ejemplo 1500 · Escribe sólo números; para decimales usa punto · El valor máximo es 20 · Usa múltiplos de 0.5 · Escribe un número entero, sin decimales | decimal |
 | `fecha` | AAAA-MM-DD existente; `min`/`max`; `data-no-futura` = máximo hoy | Recorta | Escribe una fecha real… Ejemplo: 2026-03-15 · La fecha no puede ser posterior a hoy | numeric |
-| `fecha-dma` | Fecha real escrita día/mes/año (23/07/1985, también con guiones, puntos, espacios, los ocho dígitos juntos o AAAA-MM-DD del autocompletado); año desde 1900; `data-no-futura` = máximo hoy. Para la fecha de nacimiento, sin calendario; la escritura se acomoda sola (módulo `fecha`) | Queda como DD/MM/AAAA | Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985 · La fecha no puede ser posterior a hoy | numeric |
+| `fecha-dma` | Fecha real escrita día/mes/año (23/07/1985, también con guiones, puntos, espacios, los ocho dígitos juntos o AAAA-MM-DD del autocompletado, que al pegarse se pasa a día/mes/año); año desde 1900; `data-no-futura` = máximo hoy; «Hoy» escribe la fecha en día/mes/año. Para la fecha de nacimiento, sin calendario; la escritura se acomoda sola (módulo `fecha`). Más de 20 caracteres no es una fecha | Queda como DD/MM/AAAA | Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985 · La fecha no puede ser posterior a hoy | numeric |
 | `hora` | HH:MM de 24 horas | Recorta | Escribe la hora en formato de 24 horas, HH:MM. Ejemplo: 14:30 | numeric |
 | `texto` | `minlength`/`maxlength`; con `data-legible`, forma de texto (vocales, palabras, sin tecleo al azar) | Quita caracteres de control, colapsa espacios | Escribe al menos 40 caracteres; van 12 · Descríbelo con tus palabras, en una o dos frases completas | text |
 | `coordenadas` | «lat,lon» dentro de rango y del ámbito configurado | Sin espacios | Escribe latitud y longitud separadas por coma. Ejemplo: 19.4326,-99.1332 | decimal |
@@ -44,10 +44,10 @@ Se evalúan cuando todos sus campos tienen valor; marcan el campo que las lleva 
 | `curp-entidad` | `curp`, `entidad` | no | La entidad de nacimiento coincide con las posiciones 12–13. |
 | `curp-nombre` | `curp`, `nombre`, `primer` | sí | Las letras 1, 2, 4, 14 y 16 corresponden al nombre y al primer apellido: sin partículas (DE, DEL, LA, LOS, Y, MC, VAN…), con el segundo nombre si el primero es MARÍA o JOSÉ, la Ñ como X y la segunda letra en X si las cuatro primeras forman una palabra altisonante *[reglas de formación de RENAPO, simplificadas; a confirmar: Fuente: __]*. |
 | `curp-segundo-apellido` | `curp`, `segundo` (opcional) | sí | Las letras 3 y 15 corresponden al segundo apellido; sin segundo apellido, la CURP lleva X en las dos. |
-| `rango-fechas` | `inicio`, `fin` | sí | La fecha final no es anterior a la inicial. |
+| `rango-fechas` | `inicio`, `fin` | sí | La fecha final no es anterior a la inicial; las fechas pueden ser AAAA-MM-DD o día/mes/año. |
 | `rango-horas` | `inicio`, `fin` | sí | La hora final es posterior a la inicial el mismo día. |
 | `igual` | `original`, `confirmacion` | sí | Confirmación idéntica (correo, contraseña). |
-| `edad` | `fecha` (+ `data-edad-min`/`data-edad-max`) | sí | Edad calculada dentro del rango que exige el formulario. |
+| `edad` | `fecha` (+ `data-edad-min`/`data-edad-max`) | sí | Edad calculada dentro del rango que exige el formulario; la fecha puede ser AAAA-MM-DD o día/mes/año. |
 | `cp-colonia` | `cp`, `colonia` (+ `data-catalogo`) | **no** | El CP pertenece a la colonia según el catálogo. El módulo `cascadas` la declara sola. |
 
 Ejemplo: `<div class="campo" data-campo="nac" data-formato="fecha" data-cruzada="curp-fecha" data-cruzada-campos="curp=curp fecha=nac">`.
@@ -77,7 +77,7 @@ Lo que se sabe sin leer el archivo se rechaza en el acto (`.arch-rechazo`); lo q
 
 ## 5. Mensajes
 
-Los 198 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc., también los de cada formato (`fmt…`) y de cada cruzada (`cz…`). Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo, y el servidor recibe los mismos en `validaPayload(…, { mensajes })`. Registro: tuteo, frase corta, qué hacer primero. Un sistema que habla de usted cambia ahí los que se vean; por ejemplo, `FORMKIT_CONFIG.mensajes = { fmtTelefono: 'Escriba 10 dígitos, sin lada internacional.' }`. Formatos y cruzadas leen también de la configuración del formulario el ámbito (`ambito.cp`, `ambito.coordenadas`) y la CURP (`curp.verificarDigito`). También van ahí los títulos del resumen de errores (`resumenUno`, `resumenServidorVarios`…), los de la confirmación (`confirmaNo`, `confirmaIrreversible`…) y los del resultado (`resultadoHora`, `resultadoMotivo`, `resultadoQueSigue`).
+Los 202 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc., también los de cada formato (`fmt…`) y de cada cruzada (`cz…`). Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo, y el servidor recibe los mismos en `validaPayload(…, { mensajes })`. Registro: tuteo, frase corta, qué hacer primero. Un sistema que habla de usted cambia ahí los que se vean; por ejemplo, `FORMKIT_CONFIG.mensajes = { fmtTelefono: 'Escriba 10 dígitos, sin lada internacional.' }`. Formatos y cruzadas leen también de la configuración del formulario el ámbito (`ambito.cp`, `ambito.coordenadas`) y la CURP (`curp.verificarDigito`). También van ahí los títulos del resumen de errores (`resumenUno`, `resumenServidorVarios`…), los de la confirmación (`confirmaNo`, `confirmaIrreversible`…) y los del resultado (`resultadoHora`, `resultadoMotivo`, `resultadoQueSigue`).
 
 ## 6. Configuración por formulario (`FORMKIT_CONFIG`)
 
@@ -91,13 +91,14 @@ Los 198 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.
 | `archivos.*` | tabla anterior | Límites, firmas, optimización, EXIF. |
 | `borrador` | 14 días, 600 ms, 2.5 s visible | Caducidad, retardo de guardado, duración de «Guardado». |
 | `envio.timeoutMs` | 15 000 | Plazo del envío. |
+| `acuse.horasVisible` | 24 | Horas en que el acuse (folio y fecha, sin datos de la persona) se vuelve a mostrar si la persona recarga la página. |
 | `combo.maxResultados` | 8 | Opciones visibles en el combo. |
 | `cruzadas` | las de la sección 3 | Cruzadas propias del formulario. |
 | `limitesSegun` | vacío | Funciones `(datos) => número` para `data-min-segun`/`data-max-segun`. |
 | `chips` | 5, `sia-chips` | Máximo de chips del historial y clave del almacén local (la lista fija no guarda nada). |
 | `visor` | pdf.js junto al paquete; fijo desde 1024 px | Dónde está pdf.js (`pdfjs`), desde qué ancho el visor queda fijo junto a la revisión (`fijoDesde`) y la espera para repintar (`retardoMs`). |
 | `mapa` | sin teselas | Proveedor, atribución, centro, zoom. |
-| `mensajes` | 198 textos | Cualquier mensaje, también los de formatos y cruzadas. |
+| `mensajes` | 202 textos | Cualquier mensaje, también los de formatos y cruzadas. |
 
 ## 7. En el servidor
 

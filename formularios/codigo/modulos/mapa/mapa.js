@@ -47,9 +47,11 @@
         detecta: (el) => !!el.querySelector('[data-mapa]'),
         controles: (el) => [el.querySelector('[data-mapa]')],
         valorDe: (el) => { const s = estadoDe.get(el); return s && s.punto && (!s.exigeConfirmar || s.confirmado) ? `${s.punto.lat.toFixed(6)},${s.punto.lon.toFixed(6)}` : ''; },
-        textoDe: (el) => { const s = estadoDe.get(el); return s && s.punto ? `${s.punto.lat.toFixed(5)}, ${s.punto.lon.toFixed(5)}` : ''; },
+        /* La revisión dice lo mismo que se envía: un punto sin confirmar se ve como tal. */
+        textoDe: (el) => { const s = estadoDe.get(el); if (!s || !s.punto) return ''; const t = `${s.punto.lat.toFixed(5)}, ${s.punto.lon.toFixed(5)}`; return s.exigeConfirmar && !s.confirmado ? `${t} · ${FormKit.config.mensajes.mapaSinConfirmar}` : t; },
         enBorrador: true,
-        restaura: (el, v) => { const s = estadoDe.get(el); if (s && v) { const [lat, lon] = v.split(',').map(Number); s.coloca({ lat, lon }, true); } },
+        /* En el borrador sólo hay un punto si ya contaba (confirmado, si se pide): se recupera así. */
+        restaura: (el, v) => { const s = estadoDe.get(el); if (s && v && s.coloca) { const [lat, lon] = v.split(',').map(Number); s.coloca({ lat, lon }, true); if (s.exigeConfirmar && s.confirma) s.confirma(true); } },
         valida: (el) => { const s = estadoDe.get(el); return s && s.fuera ? FormKit.config.ambito.coordenadas.mensaje : ''; },
         alArmar: (form, payload) => { for (const el of form.querySelectorAll('[data-campo]')) { const s = estadoDe.get(el); if (s && s.punto && payload.datos[el.dataset.campo]) payload.datos[el.dataset.campo] = { type: 'Point', coordinates: [Number(s.punto.lon.toFixed(6)), Number(s.punto.lat.toFixed(6))] }; } }
       }
@@ -102,7 +104,14 @@
         mapa.on('click', (e) => s.coloca({ lat: e.latlng.lat, lon: e.latlng.lng }));
         /* Teclado: con el mapa enfocado, Enter coloca el punto en el centro; las flechas lo desplazan (Leaflet). */
         cont.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const c = mapa.getCenter(); s.coloca({ lat: c.lat, lon: c.lng }); } });
-        if (btnConfirmar) btnConfirmar.addEventListener('click', () => { if (!s.punto) return; s.confirmado = true; btnConfirmar.textContent = M.mapaConfirmado; btnConfirmar.setAttribute('aria-pressed', 'true'); limpia(el.dataset.campo); anuncia(`${M.mapaConfirmado}.`); programaBorrador(); });
+        s.confirma = (silencioso = false) => {
+          if (!s.punto) return;
+          s.confirmado = true;
+          if (btnConfirmar) { btnConfirmar.textContent = M.mapaConfirmado; btnConfirmar.setAttribute('aria-pressed', 'true'); }
+          limpia(el.dataset.campo);
+          if (!silencioso) { anuncia(`${M.mapaConfirmado}.`); programaBorrador(); }
+        };
+        if (btnConfirmar) btnConfirmar.addEventListener('click', () => s.confirma());
         if (btnGeo && cont.hasAttribute('data-geolocalizacion') && navigator.geolocation) {
           btnGeo.hidden = false;
           btnGeo.addEventListener('click', () => { btnGeo.setAttribute('aria-busy', 'true'); navigator.geolocation.getCurrentPosition((pos) => { btnGeo.removeAttribute('aria-busy'); s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude }); mapa.setView([pos.coords.latitude, pos.coords.longitude], 16); }, () => { btnGeo.removeAttribute('aria-busy'); anuncia(M.mapaSinUbicacion, { cortes: true, visible: salida }); }, { timeout: 10000 }); });

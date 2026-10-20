@@ -34,14 +34,14 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `opciones` | Opciones elegibles | BASE | pregunta | — | 5.1 KB | — |
 | `otro` | Opción «Otro» con especificación | RECOMENDADO | pregunta | opciones | — | 4.2 KB |
 | `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 7.9 KB |
-| `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.1 KB |
+| `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.7 KB |
 | `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 4.1 KB |
-| `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 1.1 KB | 7.7 KB |
+| `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 1.1 KB | 9.1 KB |
 | `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.6 KB |
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
 | `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 8.8 KB |
 | `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.4 KB | 3.2 KB |
-| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.2 KB | 3.9 KB |
+| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.2 KB | 6.4 KB |
 | `resultado` | Resultado de una decisión | RECOMENDADO | retroalimentacion | — | 2.5 KB | 5.7 KB |
 | `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 2.1 KB | 5.7 KB |
 | `copiar` | Copiar y compartir | RECOMENDADO | retroalimentacion | — | 542 B | 4.0 KB |
@@ -57,8 +57,8 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.9 KB |
 | `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 23.6 KB |
 | `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.8 KB |
-| `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 9.4 KB |
-| `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 7.6 KB |
+| `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 10.0 KB |
+| `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 7.8 KB |
 | `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 7.4 KB |
 | `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 2.0 KB | 8.5 KB |
 
@@ -174,7 +174,7 @@ Campos con formato cerrado: mayúsculas al escribir, validación por capas desde
 
 ### Grupos repetibles («Agregar otro») (`repetibles`) · OPCIONAL
 
-Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos.
+Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plantilla; mínimo y máximo; quitar con confirmación si hay datos. El número de una fila no se reutiliza, y el borrador rehace las filas que había.
 
 **Cuándo.** La cantidad de elementos la decide la persona.
 
@@ -192,6 +192,7 @@ Varias filas de un mismo bloque (personas, domicilios, partidas) desde una plant
 - Nombres de campo repetidos entre filas.
 - Quitar sin confirmar una fila con datos.
 - Sin máximo.
+- Numerar las filas por su posición: al quitar una de en medio y agregar otra, dos filas repetirían nombre y una no se enviaría.
 
 ### Interruptor (`toggle`) · OPCIONAL
 
@@ -278,7 +279,7 @@ Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el camp
 
 ### Acuse y «qué sigue» (`acuse`) · RECOMENDADO
 
-Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones).
+Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones). Sobrevive a una recarga: el folio y la fecha se vuelven a mostrar durante acuse.horasVisible, y [data-acuse-nuevo] abre el formulario vacío.
 
 **Cuándo.** Todo envío que genere folio.
 
@@ -298,6 +299,7 @@ Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo,
 - No borrar el borrador al recibir.
 - Acuse sin una acción para seguir.
 - Quitarle el relleno lateral a la tarjeta del acuse: en teléfono los botones quedan pegados a la orilla.
+- Perder el folio al recargar la página.
 
 ### Resultado de una decisión (`resultado`) · RECOMENDADO
 

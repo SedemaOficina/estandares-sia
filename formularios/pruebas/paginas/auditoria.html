@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de la auditoría del 19 oct</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../../codigo/css/tokens.css">
+<link rel="stylesheet" href="../../codigo/css/base.css">
+<link rel="stylesheet" href="../../codigo/css/nucleo.css">
+<link rel="stylesheet" href="../../codigo/modulos/opciones/opciones.css">
+<link rel="stylesheet" href="../../codigo/modulos/fecha/fecha.css">
+<link rel="stylesheet" href="../../codigo/modulos/repetibles/repetibles.css">
+<link rel="stylesheet" href="../../codigo/modulos/modal/modal.css">
+</head>
+<body>
+<main class="pagina" id="contenido">
+  <h1 class="titulo-pagina">Prueba de la auditoría del 19 oct</h1>
+  <!-- Página sólo para pruebas automáticas: los casos de la auditoría del 19 oct 2026. Datos ficticios. -->
+  <form id="formulario" class="tarjeta" data-formkit data-borrador="prueba-auditoria" data-borrador-version="1" action="/recibe" method="post">
+
+    <!-- Número con coma de miles: se pide escribirlo sin comas; una coma decimal se acepta. -->
+    <div class="campo" data-campo="cantidad" data-formato="numero" data-uso="Prueba.">
+      <label class="etiqueta" for="cantidad">Cantidad</label>
+      <input class="control control-corto" id="cantidad" name="cantidad" type="text" inputmode="decimal" step="any" autocomplete="off">
+    </div>
+
+    <!-- Fecha de nacimiento día/mes/año con edad mínima, como el bloque de la guía. -->
+    <div class="campo" data-campo="fn" data-formato="fecha-dma" data-no-futura data-cruzada="edad" data-cruzada-campos="fecha=fn" data-edad-min="18" data-uso="Prueba.">
+      <label class="etiqueta" for="fn">Fecha de nacimiento</label>
+      <input class="control control-corto" id="fn" name="fn" type="text" inputmode="numeric" maxlength="10" autocomplete="off">
+    </div>
+
+    <!-- Fecha día/mes/año con «Hoy». -->
+    <div class="campo fecha" data-campo="dia" data-formato="fecha-dma" data-no-futura data-uso="Prueba.">
+      <label class="etiqueta" for="dia">Fecha del hecho</label>
+      <div class="fecha-grupo">
+        <input class="control control-corto" id="dia" name="dia" type="text" inputmode="numeric" maxlength="10" autocomplete="off">
+        <button type="button" class="btn btn-secundario fecha-hoy" data-hoy>Hoy</button>
+      </div>
+    </div>
+
+    <!-- Periodo con fechas día/mes/año. -->
+    <div class="fila">
+      <div class="campo" data-campo="desde" data-formato="fecha-dma" data-uso="Prueba.">
+        <label class="etiqueta" for="desde">Desde</label>
+        <input class="control control-corto" id="desde" name="desde" type="text" inputmode="numeric" maxlength="10" autocomplete="off">
+      </div>
+      <div class="campo" data-campo="hasta" data-formato="fecha-dma" data-cruzada="rango-fechas" data-cruzada-campos="inicio=desde fin=hasta" data-uso="Prueba.">
+        <label class="etiqueta" for="hasta">Hasta</label>
+        <input class="control control-corto" id="hasta" name="hasta" type="text" inputmode="numeric" maxlength="10" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Grupo repetible con un nombre obligatorio y un Sí/No por fila. -->
+    <div class="repetible" data-repetible="personas" data-max="3" data-etiqueta="Persona">
+      <p class="etiqueta">Personas (hasta 3)</p>
+      <ol class="repetible-lista" data-repetible-lista></ol>
+      <template data-repetible-plantilla>
+        <li>
+          <div class="campo" data-campo="personas.#.nombre" data-formato="nombre" data-requerido data-uso="Prueba."><label class="etiqueta" for="pe-#-n">Nombre</label><input class="control" id="pe-#-n" name="personas[#][nombre]" type="text" maxlength="80" autocomplete="off"></div>
+          <fieldset class="grupo" data-campo="personas.#.menor" data-uso="Prueba.">
+            <legend class="etiqueta">¿Es menor de edad?</legend>
+            <div class="opciones-lista">
+              <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="personas[#][menor]" value="si"><span><span class="opcion-nombre">Sí</span></span></label>
+              <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="personas[#][menor]" value="no"><span><span class="opcion-nombre">No</span></span></label>
+            </div>
+          </fieldset>
+        </li>
+      </template>
+      <button type="button" class="btn btn-secundario" data-repetible-agregar><svg class="icono" aria-hidden="true"><use href="#i-mas"></use></svg>Agregar persona</button>
+    </div>
+
+    <p class="aviso aviso-bloqueo estado-envio" data-estado-envio role="alert" tabindex="-1" hidden><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"></span></p>
+    <div class="acciones"><button type="submit" class="btn btn-primario" data-accion="enviar">Enviar</button></div>
+  </form>
+</main>
+<script src="auditoria-config.js"></script>
+<script src="../../codigo/js/validaciones.config.js"></script>
+<script src="../../codigo/js/iconos.js"></script>
+<script src="../../codigo/js/formkit.core.js"></script>
+<script src="../../codigo/modulos/fecha/fecha.js"></script>
+<script src="../../codigo/modulos/repetibles/repetibles.js"></script>
+<script src="../../codigo/modulos/modal/modal.js"></script>
+</body>
+</html>

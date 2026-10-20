@@ -40,15 +40,20 @@
 
   /* Fecha escrita como día/mes/año (formato «fecha-dma»): 23/07/1985,
      23-07-1985, 23.07.1985, 23 07 1985 o 23071985; también AAAA-MM-DD, que es
-     lo que pone el autocompletado del navegador. */
+     lo que pone el autocompletado del navegador. Una fecha escrita no pasa de
+     20 caracteres, y el separador no se traslapa con los espacios de alrededor:
+     un texto largo no frena la página ni el servidor. */
   function partesDma(v) {
     const t = String(v || '').trim();
-    let m = t.match(/^(\d{1,2})\s*[/.\- ]\s*(\d{1,2})\s*[/.\- ]\s*(\d{4})$/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (t.length > 20) return null;
+    let m = t.match(/^(\d{1,2})(?:\s*[/.\-]\s*|\s+)(\d{1,2})(?:\s*[/.\-]\s*|\s+)(\d{4})$/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
     if (m) return { d: Number(m[1]), m: Number(m[2]), a: Number(m[3]) };
     m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     return m ? { d: Number(m[3]), m: Number(m[2]), a: Number(m[1]) } : null;
   }
   const dosCifras = (n) => String(n).padStart(2, '0');
+  /* Número con comas de miles: 1,500 · 12,345 · 1,234.50. */
+  const CON_MILES = /^-?\d{1,3}(,\d{3})+(\.\d+)?$/;
   /* «23/07/1985» → «1985-07-23»; '' si no es una fecha real. */
   const isoDeDma = (v) => { const p = partesDma(v); return p && esFechaReal(p.a, p.m, p.d) ? `${p.a}-${dosCifras(p.m)}-${dosCifras(p.d)}` : ''; };
   /* «1985-07-23» → «23/07/1985». */
@@ -286,9 +291,12 @@
     numero: {
       descripcion: 'Número entero o decimal con mínimo, máximo y paso configurables en el campo',
       inputmode: 'decimal', autocomplete: 'off',
-      normaliza: (v) => recorta(v).replace(/\s/g, '').replace(',', '.'),
+      /* Una coma se toma como punto decimal («12,5» → 12.5), salvo que agrupe miles
+         («1,500», «12,345.50»): eso no se adivina, se pide escribirlo sin comas. */
+      normaliza: (v) => { const t = recorta(v).replace(/\s/g, ''); return CON_MILES.test(t) ? t : t.replace(',', '.'); },
       valida: (v, a = {}, cfg = CONFIG) => {
         const M = cfg.mensajes;
+        if (CON_MILES.test(v)) return plantilla(M.fmtNumeroMiles, { numero: v.replace(/,/g, '') });
         if (!/^-?\d+(\.\d+)?$/.test(v)) return M.fmtNumero;
         const n = Number(v);
         /* El paso cuenta desde el mínimo, como en HTML; con tolerancia de redondeo para pasos decimales. */
@@ -455,7 +463,8 @@
     'rango-fechas': {
       descripcion: 'La fecha final no es anterior a la inicial',
       campos: ['inicio', 'fin'], bloquea: true,
-      valida: ({ inicio, fin }, a = {}, cfg = CONFIG) => (fin >= inicio ? '' : cfg.mensajes.czRangoFechas)
+      /* Se comparan como AAAA-MM-DD aunque se escriban día/mes/año («fecha-dma»). */
+      valida: ({ inicio, fin }, a = {}, cfg = CONFIG) => ((isoDeDma(fin) || fin) >= (isoDeDma(inicio) || inicio) ? '' : cfg.mensajes.czRangoFechas)
     },
     'rango-horas': {
       descripcion: 'La hora final es posterior a la inicial cuando es el mismo día',
@@ -471,7 +480,10 @@
       descripcion: 'Edad calculada dentro de la mínima y máxima que exige el formulario',
       campos: ['fecha'], bloquea: true,
       valida: ({ fecha }, a = {}, cfg = CONFIG) => {
-        const e = edadEn(fecha, hoyISO());
+        /* La fecha llega como AAAA-MM-DD o, con «fecha-dma», como día/mes/año. */
+        const iso = isoDeDma(fecha);
+        if (!iso) return '';
+        const e = edadEn(iso, hoyISO());
         if (a.edadMin !== undefined && e < Number(a.edadMin)) return plantilla(cfg.mensajes.edadMinima, { edad: a.edadMin });
         if (a.edadMax !== undefined && e > Number(a.edadMax)) return plantilla(cfg.mensajes.edadMaxima, { edad: a.edadMax });
         return '';
@@ -517,7 +529,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.5.1',
+    version: '1.5.2',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -534,6 +546,9 @@
     archivos: ARCHIVOS,
     borrador: { ttlDias: 14, retardoMs: 600, visibleMs: 2500 },
     envio: { timeoutMs: 15000 },
+    /* El acuse (folio y fecha, sin datos de la persona) se guarda en el dispositivo
+       y se vuelve a mostrar si la persona recarga la página durante estas horas. */
+    acuse: { horasVisible: 24 },
     anuncios: { retardoMs: 50 },
     combo: { maxResultados: 8 },
     chips: { max: 5, clave: 'sia-chips' },
@@ -574,6 +589,7 @@
       fmtRfc: 'El RFC lleva 3 o 4 letras, 6 dígitos de fecha y 3 caracteres finales. Ejemplo: XAXX010101000',
       fmtRfcFecha: 'La fecha dentro del RFC no es una fecha real. Revísala.',
       fmtNumero: 'Escribe sólo números; para decimales usa punto. Ejemplo: 12.5',
+      fmtNumeroMiles: 'Escribe el número sin comas, por ejemplo {numero}.',
       fmtNumeroEntero: 'Escribe un número entero, sin decimales.',
       fmtNumeroPaso: 'Usa múltiplos de {paso}.',
       fmtNumeroMin: 'El valor mínimo es {min}.',
@@ -643,6 +659,8 @@
       envioError: 'No se pudo enviar. Lo que capturaste sigue aquí; intenta de nuevo.',
       envioTimeout: 'El envío tardó demasiado y se detuvo. Lo que capturaste sigue aquí; intenta de nuevo.',
       envioLimite: 'Por ahora no podemos recibir más envíos desde este dispositivo. Lo que capturaste no se perdió; intenta más tarde.',
+      envioRecibido: 'Tu envío se recibió. No lo envíes de nuevo.',
+      acuseSinFolio: 'No llegó el folio. Guarda esta pantalla como constancia de tu envío.',
       archOptimizando: 'Optimizando…',
       archOptimizada: '{peso} · optimizada',
       archPeso: '{peso}',
@@ -731,6 +749,7 @@
       mapaMarcador: 'Punto marcado; arrástralo para moverlo',
       mapaConfirmar: 'Confirmar punto',
       mapaConfirmado: 'Punto confirmado',
+      mapaSinConfirmar: 'sin confirmar: no se envía',
       mapaSinUbicacion: 'No se pudo obtener tu ubicación. Toca el mapa o escribe la dirección.',
       cargando: 'Cargando…',
       repetibleAgregado: '{etiqueta} {n} agregado.',
@@ -758,7 +777,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.1
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.2
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -1439,16 +1458,24 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
        (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
        después la página o los módulos entra en el mismo borrador. */
     let personaActuo = false;
-    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
-    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
-       módulo se suscribe y el núcleo le avisa al escribir, restaurar o borrar el borrador. */
+    /* Un formulario que sigue en pantalla después de un envío logrado (captura en
+       serie) empieza otro registro con el siguiente gesto: vuelve el borrador y la
+       clave de idempotencia es otra. */
+    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (!e.isTrusted) return; personaActuo = true; if (terminado) { terminado = false; idempotencia = ''; } }, true);
+    /* Mientras la franja espera que la persona elija «Recuperar» o «Empezar de nuevo»,
+       no se escribe nada: lo que escriba antes no reemplaza al borrador guardado. */
+    let franjaPendiente = false;
+    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor; las
+       filas de un repetible): el módulo se suscribe y el núcleo le avisa al escribir,
+       restaurar o borrar el borrador. Con estado() aporta campos propios al borrador y
+       con prepara(b) rehace su estructura (las filas) antes de que se repongan los valores. */
     const suscritosBorrador = [];
     const alBorrador = (def) => { suscritosBorrador.push(def); };
     const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
     function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado || !personaActuo) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo || franjaPendiente) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -1463,6 +1490,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     }
     function escribeBorrador() {
       const extra = FormKit.ganchos.estadoBorrador ? FormKit.ganchos.estadoBorrador(form) : {};
+      for (const x of suscritosBorrador) if (x.estado) Object.assign(extra, x.estado());
       const ok = almacen.escribe(claveBorrador, JSON.stringify({ v: versionBorrador, t: Date.now(), datos: datosBorrador(), ...extra }));
       avisaBorrador('escribe');
       if (ok && indicador) {
@@ -1474,7 +1502,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     }
     /* Si la persona cierra o cambia de pestaña antes de que venza el retardo,
        el borrador pendiente se escribe en ese momento. */
-    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
+    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado && !franjaPendiente) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
 
     function leeBorrador() {
       const crudo = almacen.lee(claveBorrador);
@@ -1486,6 +1514,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       } catch (e) { borraBorrador(); return null; }
     }
     function restauraBorrador(b) {
+      avisaBorrador('prepara', b);
       for (const [n, v] of Object.entries(b.datos || {})) {
         const el = envoltura(n);
         if (!el) continue;
@@ -1504,15 +1533,18 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     }
     function iniciaFranja(b) {
       franja.hidden = false;
+      franjaPendiente = true;
       const f = $('[data-borrador-fecha]', franja);
       if (f) f.textContent = fechaHora(b.t, cfg);
+      /* Con la respuesta de la persona, el borrador vuelve a guardarse con lo que haya en pantalla. */
+      const contesta = () => { franja.hidden = true; franjaPendiente = false; programaBorrador(); };
       franja.addEventListener('click', (e) => {
         const a = e.target.closest('[data-borrador]');
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
-        if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const seguro = $('[data-borrador="conservar"]', franja); if (seguro) seguro.focus(); } else { borraBorrador(); franja.hidden = true; } }
-        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
+        if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); contesta(); }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const seguro = $('[data-borrador="conservar"]', franja); if (seguro) seguro.focus(); } else { borraBorrador(); contesta(); } }
+        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); contesta(); }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador="recuperar"]', franja).focus(); }
       });
     }
@@ -1552,7 +1584,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
             if (cuerpo && Array.isArray(cuerpo.errores)) e.errores = cuerpo.errores;
             throw e;
           }
-          return r.json();
+          /* Un 2xx es un envío recibido aunque no traiga JSON (204, «OK»): no se le dice a la persona que falló. */
+          const texto = await r.text().catch(() => '');
+          try { return texto ? JSON.parse(texto) : {}; } catch (e) { return {}; }
         });
     }
 
@@ -1582,15 +1616,11 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       if (boton) { boton.setAttribute('aria-disabled', 'true'); boton.setAttribute('aria-busy', 'true'); boton.textContent = M.enviando; }
       const control = new AbortController();
       const plazo = setTimeout(() => control.abort(), cfg.envio.timeoutMs);
+      let respuesta;
       try {
         for (const def of tipos.values()) if (def.antesDeEnviar) await def.antesDeEnviar(form);
         const enviarFn = opciones.enviar || envioPorOmision;
-        const respuesta = await enviarFn(arma(), { signal: control.signal });
-        terminado = true;
-        clearTimeout(temporizadorBorrador);
-        if (claveBorrador) borraBorrador();
-        if (opciones.alEnviar) opciones.alEnviar(respuesta, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: respuesta }));
-        return true;
+        respuesta = await enviarFn(arma(), { signal: control.signal });
       } catch (e) {
         /* Errores por campo devueltos por el servidor: junto a cada campo y en el resumen. */
         const porCampo = e && Array.isArray(e.errores) ? e.errores.filter((x) => x && marcaError(x.campo, x.mensaje)) : [];
@@ -1608,6 +1638,18 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         clearTimeout(plazo);
         if (boton) { boton.removeAttribute('aria-disabled'); boton.removeAttribute('aria-busy'); boton.textContent = textoOriginal; }
       }
+      /* Recibido. Desde aquí nada cuenta como envío fallido: si la página falla al
+         mostrar el acuse, la persona no debe reenviar. El borrador se borra después
+         de mostrar el acuse, y la clave se renueva para el siguiente registro. */
+      terminado = true;
+      idempotencia = '';
+      clearTimeout(temporizadorBorrador);
+      const recibido = respuesta && typeof respuesta === 'object' ? respuesta : {};
+      try { if (opciones.alEnviar) opciones.alEnviar(recibido, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: recibido })); }
+      catch (e) { console.error('FormKit: el envío se recibió, pero falló lo que la página hace después (alEnviar).', e); if (!form.hidden) aviso(form, { tono: 'ok', texto: M.envioRecibido, foco: true }); }
+      if (claveBorrador) borraBorrador();
+      if (franja) { franja.hidden = true; franjaPendiente = false; }
+      return true;
     }
 
     /* ----- Eventos (todos aquí; ninguno en el HTML) ----- */
@@ -2037,7 +2079,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const campo = b.closest('[data-campo]');
         const ctl = campo && controlPrincipal(campo.dataset.campo);
         if (!ctl) return;
-        ctl.value = b.hasAttribute('data-hoy') ? cfg.hoyISO() : cfg.ahoraHM();
+        /* En una fecha día/mes/año, «Hoy» se escribe en ese formato. */
+        const hoy = campo.dataset.formato === 'fecha-dma' ? cfg.dmaDeIso(cfg.hoyISO()) : cfg.hoyISO();
+        ctl.value = b.hasAttribute('data-hoy') ? hoy : cfg.ahoraHM();
         ctl.dispatchEvent(new Event('input', { bubbles: true }));
         ctl.dispatchEvent(new Event('change', { bubbles: true }));
         ctx.estadoDe(campo.dataset.campo).tocado = true;
@@ -2064,6 +2108,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const ctl = controlPrincipal(campo.dataset.campo);
         if (!ctl || ctl.tagName !== 'INPUT') continue;
         ctl.addEventListener('input', (e) => {
+          /* Una fecha AAAA-MM-DD completa (pegada o del autocompletado) se pasa a
+             día/mes/año; la escritura guiada la leería como día 19, mes 85… */
+          const dma = /^\d{4}-\d{2}-\d{2}$/.test(ctl.value.trim()) ? cfg.dmaDeIso(ctl.value.trim()) : '';
+          if (dma) { ctl.value = dma; ctl.setSelectionRange(dma.length, dma.length); return; }
           if ((e.inputType && e.inputType.startsWith('delete')) || ctl.selectionStart !== ctl.value.length) return;
           const v = cfg.guiaFechaDma(ctl.value);
           if (v !== ctl.value) { ctl.value = v; ctl.setSelectionRange(v.length, v.length); }
@@ -2237,7 +2285,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
        </template>
        <button type="button" class="btn btn-secundario" data-repetible-agregar>Agregar otro</button>
      </div>
-   El carácter # se sustituye por el índice de la fila.
+   El carácter # se sustituye por el número de la fila (no el que va antes de
+   una letra, como en href="#i-ayuda"). El número de una fila no se reutiliza:
+   si se quita la fila 1 de tres, la siguiente que se agregue es la 3, así cada
+   fila conserva su nombre y su id, y el borrador guarda qué números tenía.
    ========================================================= */
 (function () {
   'use strict';
@@ -2245,6 +2296,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     selector: '[data-repetible]',
     iniciar(form, ctx) {
       const { $, $$, M, plantilla, anuncia, preparaCampo, icono, valorDe, limpia, programaBorrador } = ctx;
+      /* Por grupo: cómo agregar una fila con un número dado y qué números tiene. */
+      const grupos = new Map();
 
       for (const rep of $$('[data-repetible]', form)) {
         const lista = $('[data-repetible-lista]', rep);
@@ -2255,6 +2308,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (btnAgregar && !btnAgregar.textContent.trim()) btnAgregar.textContent = M.filaAgregar;
 
         function filas() { return $$(':scope > .repetible-fila', lista); }
+        const numeroDe = (fila) => Number(fila.dataset.numero);
+        /* El siguiente número libre: nunca uno que ya se usó en este grupo. */
+        let proximo = 0;
         /* El límite de filas se dice también en pantalla, junto a «Agregar» (FRM-40). */
         let notaLimite = null;
         function avisaLimite(texto) {
@@ -2271,14 +2327,18 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           });
           if (btnAgregar) { const lleno = max && filas().length >= max; btnAgregar.setAttribute('aria-disabled', String(!!lleno)); }
         }
-        function agrega(foco = true) {
-          if (max && filas().length >= max) { avisaLimite(plantilla(M.repetibleMax, { max, etiqueta: rep.dataset.etiqueta || '' })); return null; }
+        /* numero: el de una fila que se recupera del borrador; silencio: sin foco, anuncio
+           ni borrador nuevo (al recuperar). */
+        function agrega(foco = true, { numero = proximo, silencio = false } = {}) {
+          if (max && filas().length >= max) { if (!silencio) avisaLimite(plantilla(M.repetibleMax, { max, etiqueta: rep.dataset.etiqueta || '' })); return null; }
           quitaLimite();
-          const i = filas().length;
-          const html = tpl.innerHTML.replace(/#/g, String(i));
+          const i = numero;
+          proximo = Math.max(proximo, i + 1);
+          const html = tpl.innerHTML.replace(/#(?![A-Za-z])/g, String(i));
           const cont = document.createElement('div'); cont.innerHTML = html;
           const fila = cont.firstElementChild;
           fila.classList.add('repetible-fila');
+          fila.dataset.numero = String(i);
           /* Encabezado de la fila y botón de quitar, si la plantilla no los trae. */
           if (!$('.repetible-cabecera', fila)) {
             const cab = document.createElement('div'); cab.className = 'repetible-cabecera';
@@ -2287,21 +2347,23 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
             q.append(icono('eliminar'));
             cab.append(tit, q); fila.prepend(cab);
           }
-          lista.appendChild(fila);
+          /* En orden de número, por si se recupera una fila de en medio. */
+          lista.insertBefore(fila, filas().find((f) => numeroDe(f) > i) || null);
           for (const c of $$('[data-campo]', fila)) preparaCampo(c.dataset.campo);
           renumera();
+          if (silencio) return fila;
           if (foco) { const primero = $('input,select,textarea', fila); if (primero) primero.focus(); }
-          anuncia(plantilla(M.repetibleAgregado, { etiqueta: rep.dataset.etiqueta || rep.dataset.repetible, n: i + 1 }));
+          anuncia(plantilla(M.repetibleAgregado, { etiqueta: rep.dataset.etiqueta || rep.dataset.repetible, n: filas().indexOf(fila) + 1 }));
           programaBorrador();
           return fila;
         }
+        function retira(fila) { for (const c of $$('[data-campo]', fila)) limpia(c.dataset.campo); fila.remove(); }
         function tieneDatos(fila) { return $$('[data-campo]', fila).some((c) => { const v = valorDe(c.dataset.campo); return Array.isArray(v) ? v.length : v; }); }
         function quita(fila) {
           const idx = filas().indexOf(fila);
           if (min && filas().length <= min) { avisaLimite(plantilla(M.repetibleMin, { min, etiqueta: rep.dataset.etiqueta || '' })); return; }
           quitaLimite();
-          for (const c of $$('[data-campo]', fila)) limpia(c.dataset.campo);
-          fila.remove();
+          retira(fila);
           renumera();
           const siguiente = filas()[Math.min(idx, filas().length - 1)];
           (siguiente ? $('[data-repetible-quitar]', siguiente) : btnAgregar).focus();
@@ -2327,21 +2389,27 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         while (filas().length < iniciales) agrega(false);
         renumera();
 
+        grupos.set(rep.dataset.repetible, {
+          numeros: () => filas().map(numeroDe),
+          /* Deja exactamente las filas que tenía el borrador, sin pasar del máximo ni
+             bajar del mínimo; los valores los repone después el núcleo. */
+          recupera(guardado) {
+            const lista = Array.isArray(guardado) ? guardado : Array.from({ length: Number(guardado) || 0 }, (_, k) => k);
+            let numeros = [...new Set(lista.map(Number).filter((n) => Number.isInteger(n) && n >= 0 && n < 10000))].sort((a, b) => a - b);
+            if (max) numeros = numeros.slice(0, max);
+            for (const f of filas()) if (!numeros.includes(numeroDe(f)) && filas().length > min) retira(f);
+            for (const n of numeros) if (!filas().some((f) => numeroDe(f) === n) && !agrega(false, { numero: n, silencio: true })) break;
+            renumera();
+          }
+        });
       }
 
-      /* Las filas que el borrador no conoce se recrean al restaurar: se
-         guardan cuántas filas tenía cada repetible. */
-      FormKit.ganchos.estadoBorrador = (f) => ({ repetibles: Object.fromEntries($$('[data-repetible]', f).map((r) => [r.dataset.repetible, $$(':scope > .repetible-fila', $('[data-repetible-lista]', r)).length])) });
-      const anterior = FormKit.ganchos.restauraBorrador;
-      FormKit.ganchos.restauraBorrador = (f, b) => {
-        if (anterior) anterior(f, b);
-        for (const r of $$('[data-repetible]', f)) {
-          const n = (b.repetibles || {})[r.dataset.repetible] || 0;
-          const lista = $('[data-repetible-lista]', r);
-          while ($$(':scope > .repetible-fila', lista).length < n) $('[data-repetible-agregar]', r).click();
-          for (const c of $$('[data-campo]', r)) { const v = (b.datos || {})[c.dataset.campo]; const ctl = ctx.controlPrincipal(c.dataset.campo); if (ctl && v !== undefined && ctl.type !== 'radio' && ctl.type !== 'checkbox') ctl.value = v; }
-        }
-      };
+      /* El borrador guarda qué números de fila tenía cada grupo y, al recuperarlo, las
+         filas se rehacen antes de reponer los valores (también radios y casillas). */
+      ctx.alBorrador({
+        estado: () => ({ repetibles: Object.fromEntries([...grupos].map(([nombre, g]) => [nombre, g.numeros()])) }),
+        prepara: (b) => { for (const [nombre, g] of grupos) if (b && b.repetibles && nombre in b.repetibles) g.recupera(b.repetibles[nombre]); }
+      });
     }
   });
 }());
@@ -2681,7 +2749,17 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
      </section>
    La respuesta del servidor debe traer {folio, fecha} y opcionalmente
    {acuseUrl, acusePeso, acuseNombre}. La fecha se escribe con
-   FormKit.utilidades.fechaHora (zona de la Ciudad, 24 horas).
+   FormKit.utilidades.fechaHora (zona de la Ciudad, 24 horas); sin folio, el
+   acuse lo dice con palabras, y sin fecha válida usa la hora en que llegó.
+
+   El folio y la fecha (no los datos de la persona) se guardan en el
+   dispositivo: si la persona recarga la página, vuelve a ver su acuse durante
+   cfg.acuse.horasVisible. Un botón [data-acuse-nuevo] en el acuse («Llenar
+   otra solicitud») lo olvida y abre el formulario vacío.
+
+   Mientras se ve el acuse o el límite, lo que acompaña al formulario fuera de
+   él (la barra de pasos .barra-fija, la franja del borrador y el aviso de
+   guardado) se oculta, y vuelve como estaba al regresar al formulario.
    ========================================================= */
 (function () {
   'use strict';
@@ -2689,27 +2767,39 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     selector: '[data-acuse]',
     fueraDelFormulario: true,
     iniciar(form, ctx) {
-      const { $, cfg, anuncia, opciones } = ctx;
+      const { $, $$, cfg, M, anuncia, opciones, almacen } = ctx;
       const sec = $('[data-acuse]');
       const limite = $('[data-limite]');
       if (!sec) return;
+      const clave = form.dataset.borrador ? `${form.dataset.borrador}:acuse` : '';
+      const acompana = $$('.barra-fija, [data-franja-borrador], [data-guardado]');
+      const estabaOculto = new Map();
 
+      /* El título que se ve: en un formulario por pasos, el del paso abierto. */
+      const tituloVisible = (destino) => $$('.titulo-paso', destino).find((h) => !h.closest('[hidden]')) || $('.titulo-paso', destino);
       function muestraSolo(destino) {
+        if (destino === form) { for (const el of acompana) if (estabaOculto.has(el)) el.hidden = estabaOculto.get(el); estabaOculto.clear(); }
+        else for (const el of acompana) { if (!estabaOculto.has(el)) estabaOculto.set(el, el.hidden); el.hidden = true; }
         for (const s of [form, sec, limite]) if (s) s.hidden = s !== destino;
-        const h = $('.titulo-paso', destino);
+        const h = tituloVisible(destino);
         if (h) { h.tabIndex = -1; h.focus(); anuncia(h.textContent); }
       }
 
-      function pinta(respuesta) {
+      function pinta(respuesta, { recuperado = false } = {}) {
+        const r = respuesta && typeof respuesta === 'object' ? respuesta : {};
+        const fechaValida = r.fecha && !Number.isNaN(new Date(r.fecha).getTime()) ? r.fecha : new Date().toISOString();
         const folio = $('[data-acuse-folio]', sec);
-        if (folio) folio.textContent = respuesta.folio || '';
+        if (folio) folio.textContent = r.folio || M.acuseSinFolio;
+        const copiar = $('[data-copiar="#folio"]', sec);
+        if (copiar) copiar.hidden = !r.folio;
         const fecha = $('[data-acuse-fecha]', sec);
-        if (fecha) fecha.textContent = respuesta.fecha ? FormKit.utilidades.fechaHora(respuesta.fecha, cfg) : '';
+        if (fecha) fecha.textContent = FormKit.utilidades.fechaHora(fechaValida, cfg);
         const desc = $('[data-acuse-descarga]', sec);
         if (desc) {
-          desc.hidden = !respuesta.acuseUrl;
-          if (respuesta.acuseUrl) { desc.href = respuesta.acuseUrl; desc.download = respuesta.acuseNombre || `acuse-${respuesta.folio || ''}.pdf`; if (respuesta.acusePeso) { const peso = $('[data-acuse-peso]', desc); if (peso) peso.textContent = respuesta.acusePeso; } }
+          desc.hidden = !r.acuseUrl;
+          if (r.acuseUrl) { desc.href = r.acuseUrl; desc.download = r.acuseNombre || `acuse-${r.folio || ''}.pdf`; if (r.acusePeso) { const peso = $('[data-acuse-peso]', desc); if (peso) peso.textContent = r.acusePeso; } }
         }
+        if (clave && !recuperado) almacen.escribe(clave, JSON.stringify({ folio: r.folio || '', fecha: fechaValida, t: Date.now() }));
         muestraSolo(sec);
       }
 
@@ -2722,6 +2812,18 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
       /* «Volver» desde la pantalla de límite devuelve al formulario donde estaba. */
       if (limite) limite.addEventListener('click', (e) => { if (e.target.closest('[data-accion="reintentar"]')) muestraSolo(form); });
+
+      /* «Llenar otra solicitud»: se olvida el acuse y la página empieza de cero. */
+      sec.addEventListener('click', (e) => { if (!e.target.closest('[data-acuse-nuevo]')) return; if (clave) almacen.borra(clave); location.reload(); });
+
+      /* Acuse de un envío reciente: la persona recargó o volvió a la página. */
+      if (clave) {
+        let guardado = null;
+        try { guardado = JSON.parse(almacen.lee(clave) || 'null'); } catch (e) { guardado = null; }
+        const vigente = guardado && typeof guardado.t === 'number' && Date.now() - guardado.t >= 0 && Date.now() - guardado.t < cfg.acuse.horasVisible * 3600000;
+        if (vigente) pinta(guardado, { recuperado: true });
+        else if (guardado !== null) almacen.borra(clave);
+      }
 
       FormKit.acuse = { pinta, muestraSolo };
     }
@@ -4204,9 +4306,11 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         detecta: (el) => !!el.querySelector('[data-mapa]'),
         controles: (el) => [el.querySelector('[data-mapa]')],
         valorDe: (el) => { const s = estadoDe.get(el); return s && s.punto && (!s.exigeConfirmar || s.confirmado) ? `${s.punto.lat.toFixed(6)},${s.punto.lon.toFixed(6)}` : ''; },
-        textoDe: (el) => { const s = estadoDe.get(el); return s && s.punto ? `${s.punto.lat.toFixed(5)}, ${s.punto.lon.toFixed(5)}` : ''; },
+        /* La revisión dice lo mismo que se envía: un punto sin confirmar se ve como tal. */
+        textoDe: (el) => { const s = estadoDe.get(el); if (!s || !s.punto) return ''; const t = `${s.punto.lat.toFixed(5)}, ${s.punto.lon.toFixed(5)}`; return s.exigeConfirmar && !s.confirmado ? `${t} · ${FormKit.config.mensajes.mapaSinConfirmar}` : t; },
         enBorrador: true,
-        restaura: (el, v) => { const s = estadoDe.get(el); if (s && v) { const [lat, lon] = v.split(',').map(Number); s.coloca({ lat, lon }, true); } },
+        /* En el borrador sólo hay un punto si ya contaba (confirmado, si se pide): se recupera así. */
+        restaura: (el, v) => { const s = estadoDe.get(el); if (s && v && s.coloca) { const [lat, lon] = v.split(',').map(Number); s.coloca({ lat, lon }, true); if (s.exigeConfirmar && s.confirma) s.confirma(true); } },
         valida: (el) => { const s = estadoDe.get(el); return s && s.fuera ? FormKit.config.ambito.coordenadas.mensaje : ''; },
         alArmar: (form, payload) => { for (const el of form.querySelectorAll('[data-campo]')) { const s = estadoDe.get(el); if (s && s.punto && payload.datos[el.dataset.campo]) payload.datos[el.dataset.campo] = { type: 'Point', coordinates: [Number(s.punto.lon.toFixed(6)), Number(s.punto.lat.toFixed(6))] }; } }
       }
@@ -4259,7 +4363,14 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         mapa.on('click', (e) => s.coloca({ lat: e.latlng.lat, lon: e.latlng.lng }));
         /* Teclado: con el mapa enfocado, Enter coloca el punto en el centro; las flechas lo desplazan (Leaflet). */
         cont.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const c = mapa.getCenter(); s.coloca({ lat: c.lat, lon: c.lng }); } });
-        if (btnConfirmar) btnConfirmar.addEventListener('click', () => { if (!s.punto) return; s.confirmado = true; btnConfirmar.textContent = M.mapaConfirmado; btnConfirmar.setAttribute('aria-pressed', 'true'); limpia(el.dataset.campo); anuncia(`${M.mapaConfirmado}.`); programaBorrador(); });
+        s.confirma = (silencioso = false) => {
+          if (!s.punto) return;
+          s.confirmado = true;
+          if (btnConfirmar) { btnConfirmar.textContent = M.mapaConfirmado; btnConfirmar.setAttribute('aria-pressed', 'true'); }
+          limpia(el.dataset.campo);
+          if (!silencioso) { anuncia(`${M.mapaConfirmado}.`); programaBorrador(); }
+        };
+        if (btnConfirmar) btnConfirmar.addEventListener('click', () => s.confirma());
         if (btnGeo && cont.hasAttribute('data-geolocalizacion') && navigator.geolocation) {
           btnGeo.hidden = false;
           btnGeo.addEventListener('click', () => { btnGeo.setAttribute('aria-busy', 'true'); navigator.geolocation.getCurrentPosition((pos) => { btnGeo.removeAttribute('aria-busy'); s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude }); mapa.setView([pos.coords.latitude, pos.coords.longitude], 16); }, () => { btnGeo.removeAttribute('aria-busy'); anuncia(M.mapaSinUbicacion, { cortes: true, visible: salida }); }, { timeout: 10000 }); });
@@ -4352,8 +4463,11 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     }
 
     /* Par suelto con punto o coma decimal. Sin decimales no se toma:
-       «19 99» suele ser parte de una dirección, no coordenadas. */
-    m = s.match(/^\(?\s*(-?\d{1,3}[.,]\d+)\s*[,;\s]\s*(-?\d{1,3}[.,]\d+)\s*\)?$/);
+       «19 99» suele ser parte de una dirección, no coordenadas. Un par escrito
+       no pasa de 80 caracteres, y el separador no se traslapa con los espacios
+       de alrededor: un texto largo no frena la página. */
+    if (s.length > 80) return null;
+    m = s.match(/^\(?\s*(-?\d{1,3}[.,]\d+)(?:\s*[,;]\s*|\s+)(-?\d{1,3}[.,]\d+)\s*\)?$/);
     return m ? par(m[1], m[2], 'texto') : null;
   }
   const fmt = (r) => `${r.lat.toFixed(6)}, ${r.lon.toFixed(6)}`;

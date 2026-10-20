@@ -1,5 +1,39 @@
 # Historial de cambios
 
+## 1.5.2 · 2026-10-20
+
+Primer bloque de la auditoría profesional del 19 oct 2026 (informe fuera del repositorio): lo que perdía o falseaba datos. Cada hallazgo lleva su clave del informe y una prueba en `08-auditoria` que falla con 1.5.1 y pasa ahora.
+
+**Datos que se perdían.**
+- **E3-01 · Grupos repetibles** (`repetibles`, FRM-22): la fila nueva tomaba el número de la cantidad de filas. Si la persona quitaba una de en medio y agregaba otra, dos filas quedaban con el mismo nombre y el mismo id, una no se enviaba ni se validaba, y aun así salía el acuse. Ahora el número de una fila no se reutiliza. El borrador guarda qué filas había y, al recuperarlo, las rehace antes de reponer los valores.
+- **F2-08 · Repetibles en el borrador** (`repetibles`): ahora vuelven también los Sí/No y las casillas de cada fila. El módulo se suscribe con `ctx.alBorrador({ estado, prepara })` (dos acciones nuevas del núcleo) y deja de pisar el gancho `estadoBorrador`; antes, con `pasos` cargado primero, el borrador perdía el paso. El `#` de la plantilla de filas ya no rompe referencias como `href="#i-ayuda"`.
+- **E3-02 · Borrador con más filas que el máximo** (`repetibles`): si un proyecto bajaba `data-max`, el borrador anterior congelaba la página en cada visita. Ahora se rehacen sólo las filas que caben.
+- **C4-01 · Franja del borrador** (núcleo, FRM-42): si la persona escribía antes de elegir «Recuperar» o «Empezar de nuevo», el borrador guardado se reemplazaba. Ahora, mientras la franja espera, no se guarda nada (decisión de la Secretaría).
+- **C4-07 · El acuse sobrevive a una recarga** (`acuse`, FRM-06): al recargar, la persona perdía su folio. Ahora el folio y la fecha (no sus datos) se guardan en el dispositivo y se vuelven a mostrar durante `acuse.horasVisible` (24 horas; configuración nueva). El botón nuevo `[data-acuse-nuevo]` («Llenar otra solicitud», «Hacer otro registro») lo olvida y abre el formulario vacío. Va en las dos plantillas (decisión de la Secretaría).
+- **C4-08 · Captura en serie** (núcleo, FRM-44): en un formulario que sigue en pantalla después de enviar, el segundo registro llevaba la misma clave de idempotencia y ya no guardaba borrador. Ahora, tras un envío logrado, la clave se renueva y el siguiente gesto de la persona empieza otro registro.
+- **F2-02 · Punto del mapa** (`mapa`, FRM-05 y FRM-49): «Revisa antes de enviar» mostraba un punto sin confirmar que no se enviaba, y al recuperar el borrador el punto confirmado se perdía. Ahora la revisión dice «sin confirmar: no se envía» y el borrador recupera el punto confirmado. Sin Leaflet, recuperar el borrador ya no falla.
+
+**Datos falsos.**
+- **F2-01 · «1,500»** (formato `numero`, FRM-30): se guardaba como 1.5, en pantalla y en el servidor. Ahora una coma que agrupa miles pide «Escribe el número sin comas, por ejemplo 1500»; «12,5» se sigue leyendo como 12.5 (decisión de la Secretaría).
+- **A1-01 · Edad con fecha día/mes/año** (cruzadas `edad` y `rango-fechas`, FRM-20): con el bloque «Fecha de nacimiento» de la guía, la edad mínima no se aplicaba nunca y un periodo día/mes/año se comparaba como texto. Ahora las dos cruzadas leen la fecha en cualquiera de los dos formatos, en el navegador y en el servidor.
+- **E3-06 · Fecha AAAA-MM-DD en una fecha día/mes/año** (`fecha`): pegada o del autocompletado se leía como «19/08/5072», y «Hoy» escribía «20/02/6101». Ahora se pasa a día/mes/año.
+
+**Pantalla y envío.**
+- **B1-01 · Campo condicional dentro de un renglón** (`nucleo.css`, FRM-07, decisión C9): `.fila > .campo` le ganaba a `[hidden]`. La colonia oculta seguía a la vista y lo que se elegía ahí no se enviaba. Ahora lleva `:not([hidden])`.
+- **B5-05 · Envío recibido** (núcleo, FRM-44): un 2xx sin JSON (204, «OK»), una respuesta `null` o un `alEnviar` que fallaba decían «No se pudo enviar», y el borrador ya se había borrado. Ahora un 2xx es un envío recibido. Si lo que la página hace después falla, se ve «Tu envío se recibió. No lo envíes de nuevo.». El borrador se borra después de mostrar el acuse.
+- **E3-03 · Textos enormes** (`fecha-dma`, `enlace-mapa`, servidor; FRM-30 y FRM-33): una fecha con muchos espacios tardaba con el cuadrado del largo (100 000 espacios: hasta 15 s en el servidor). Ahora una fecha de más de 20 caracteres no se prueba, los separadores no se traslapan, el par de coordenadas no pasa de 80 caracteres y el servidor revisa `maxlength` antes de normalizar. 1 MB tarda menos de 100 ms.
+- **De paso, en el acuse** (`acuse`): sin folio, el acuse lo dice con palabras («No llegó el folio…»); sin fecha válida, usa la hora en que llegó (B5-09). Mientras se ve el acuse o el límite, no se ven la barra de pasos, la franja del borrador ni el aviso de guardado (C4-03, C4-09). Al volver de la pantalla de límite, el foco va al título del paso abierto, no al del paso 1 (C4-04).
+
+**Mensajes nuevos** (202 en total): `fmtNumeroMiles`, `envioRecibido`, `acuseSinFolio`, `mapaSinConfirmar`.
+
+**Reglas**: FRM-05, 06, 07, 20, 22, 30, 33, 42, 44 y 49 dicen lo nuevo.
+
+**Guía**: la muestra «Superficie» dice cómo escribir decimales; las fichas de `repetibles` y `acuse` describen el comportamiento nuevo; el acuse se ve en las plantillas.
+
+**Pruebas**: archivo nuevo `08-auditoria` con 12 pruebas (148 en total) sobre una página nueva (`pruebas/paginas/auditoria.html`). Corridas sobre 1.5.1, fallan las 12; la de textos enormes tardó 494 s.
+
+**Qué puede quitar un proyecto**: cualquier rodeo propio para los repetibles, para «1,500», para la edad con fecha día/mes/año o para un `alEnviar` que leía `null`. Las plantillas copiadas necesitan el botón `[data-acuse-nuevo]` en su acuse.
+
 ## 1.5.1 · 2026-10-18
 
 Auditoría completa del estándar, sin hallazgos nuevos de un proyecto. Busca dos cosas: que el estándar sea general para cualquier formulario sin importar su tema, y que código, reglas y documentación digan lo mismo.

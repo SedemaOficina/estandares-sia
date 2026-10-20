@@ -28,7 +28,17 @@
      </section>
    La respuesta del servidor debe traer {folio, fecha} y opcionalmente
    {acuseUrl, acusePeso, acuseNombre}. La fecha se escribe con
-   FormKit.utilidades.fechaHora (zona de la Ciudad, 24 horas).
+   FormKit.utilidades.fechaHora (zona de la Ciudad, 24 horas); sin folio, el
+   acuse lo dice con palabras, y sin fecha válida usa la hora en que llegó.
+
+   El folio y la fecha (no los datos de la persona) se guardan en el
+   dispositivo: si la persona recarga la página, vuelve a ver su acuse durante
+   cfg.acuse.horasVisible. Un botón [data-acuse-nuevo] en el acuse («Llenar
+   otra solicitud») lo olvida y abre el formulario vacío.
+
+   Mientras se ve el acuse o el límite, lo que acompaña al formulario fuera de
+   él (la barra de pasos .barra-fija, la franja del borrador y el aviso de
+   guardado) se oculta, y vuelve como estaba al regresar al formulario.
    ========================================================= */
 (function () {
   'use strict';
@@ -36,27 +46,39 @@
     selector: '[data-acuse]',
     fueraDelFormulario: true,
     iniciar(form, ctx) {
-      const { $, cfg, anuncia, opciones } = ctx;
+      const { $, $$, cfg, M, anuncia, opciones, almacen } = ctx;
       const sec = $('[data-acuse]');
       const limite = $('[data-limite]');
       if (!sec) return;
+      const clave = form.dataset.borrador ? `${form.dataset.borrador}:acuse` : '';
+      const acompana = $$('.barra-fija, [data-franja-borrador], [data-guardado]');
+      const estabaOculto = new Map();
 
+      /* El título que se ve: en un formulario por pasos, el del paso abierto. */
+      const tituloVisible = (destino) => $$('.titulo-paso', destino).find((h) => !h.closest('[hidden]')) || $('.titulo-paso', destino);
       function muestraSolo(destino) {
+        if (destino === form) { for (const el of acompana) if (estabaOculto.has(el)) el.hidden = estabaOculto.get(el); estabaOculto.clear(); }
+        else for (const el of acompana) { if (!estabaOculto.has(el)) estabaOculto.set(el, el.hidden); el.hidden = true; }
         for (const s of [form, sec, limite]) if (s) s.hidden = s !== destino;
-        const h = $('.titulo-paso', destino);
+        const h = tituloVisible(destino);
         if (h) { h.tabIndex = -1; h.focus(); anuncia(h.textContent); }
       }
 
-      function pinta(respuesta) {
+      function pinta(respuesta, { recuperado = false } = {}) {
+        const r = respuesta && typeof respuesta === 'object' ? respuesta : {};
+        const fechaValida = r.fecha && !Number.isNaN(new Date(r.fecha).getTime()) ? r.fecha : new Date().toISOString();
         const folio = $('[data-acuse-folio]', sec);
-        if (folio) folio.textContent = respuesta.folio || '';
+        if (folio) folio.textContent = r.folio || M.acuseSinFolio;
+        const copiar = $('[data-copiar="#folio"]', sec);
+        if (copiar) copiar.hidden = !r.folio;
         const fecha = $('[data-acuse-fecha]', sec);
-        if (fecha) fecha.textContent = respuesta.fecha ? FormKit.utilidades.fechaHora(respuesta.fecha, cfg) : '';
+        if (fecha) fecha.textContent = FormKit.utilidades.fechaHora(fechaValida, cfg);
         const desc = $('[data-acuse-descarga]', sec);
         if (desc) {
-          desc.hidden = !respuesta.acuseUrl;
-          if (respuesta.acuseUrl) { desc.href = respuesta.acuseUrl; desc.download = respuesta.acuseNombre || `acuse-${respuesta.folio || ''}.pdf`; if (respuesta.acusePeso) { const peso = $('[data-acuse-peso]', desc); if (peso) peso.textContent = respuesta.acusePeso; } }
+          desc.hidden = !r.acuseUrl;
+          if (r.acuseUrl) { desc.href = r.acuseUrl; desc.download = r.acuseNombre || `acuse-${r.folio || ''}.pdf`; if (r.acusePeso) { const peso = $('[data-acuse-peso]', desc); if (peso) peso.textContent = r.acusePeso; } }
         }
+        if (clave && !recuperado) almacen.escribe(clave, JSON.stringify({ folio: r.folio || '', fecha: fechaValida, t: Date.now() }));
         muestraSolo(sec);
       }
 
@@ -69,6 +91,18 @@
 
       /* «Volver» desde la pantalla de límite devuelve al formulario donde estaba. */
       if (limite) limite.addEventListener('click', (e) => { if (e.target.closest('[data-accion="reintentar"]')) muestraSolo(form); });
+
+      /* «Llenar otra solicitud»: se olvida el acuse y la página empieza de cero. */
+      sec.addEventListener('click', (e) => { if (!e.target.closest('[data-acuse-nuevo]')) return; if (clave) almacen.borra(clave); location.reload(); });
+
+      /* Acuse de un envío reciente: la persona recargó o volvió a la página. */
+      if (clave) {
+        let guardado = null;
+        try { guardado = JSON.parse(almacen.lee(clave) || 'null'); } catch (e) { guardado = null; }
+        const vigente = guardado && typeof guardado.t === 'number' && Date.now() - guardado.t >= 0 && Date.now() - guardado.t < cfg.acuse.horasVisible * 3600000;
+        if (vigente) pinta(guardado, { recuperado: true });
+        else if (guardado !== null) almacen.borra(clave);
+      }
 
       FormKit.acuse = { pinta, muestraSolo };
     }

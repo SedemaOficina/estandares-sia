@@ -38,7 +38,9 @@
         const campo = b.closest('[data-campo]');
         const ctl = campo && controlPrincipal(campo.dataset.campo);
         if (!ctl) return;
-        ctl.value = b.hasAttribute('data-hoy') ? cfg.hoyISO() : cfg.ahoraHM();
+        /* En una fecha día/mes/año, «Hoy» se escribe en ese formato. */
+        const hoy = campo.dataset.formato === 'fecha-dma' ? cfg.dmaDeIso(cfg.hoyISO()) : cfg.hoyISO();
+        ctl.value = b.hasAttribute('data-hoy') ? hoy : cfg.ahoraHM();
         ctl.dispatchEvent(new Event('input', { bubbles: true }));
         ctl.dispatchEvent(new Event('change', { bubbles: true }));
         ctx.estadoDe(campo.dataset.campo).tocado = true;
@@ -65,6 +67,10 @@
         const ctl = controlPrincipal(campo.dataset.campo);
         if (!ctl || ctl.tagName !== 'INPUT') continue;
         ctl.addEventListener('input', (e) => {
+          /* Una fecha AAAA-MM-DD completa (pegada o del autocompletado) se pasa a
+             día/mes/año; la escritura guiada la leería como día 19, mes 85… */
+          const dma = /^\d{4}-\d{2}-\d{2}$/.test(ctl.value.trim()) ? cfg.dmaDeIso(ctl.value.trim()) : '';
+          if (dma) { ctl.value = dma; ctl.setSelectionRange(dma.length, dma.length); return; }
           if ((e.inputType && e.inputType.startsWith('delete')) || ctl.selectionStart !== ctl.value.length) return;
           const v = cfg.guiaFechaDma(ctl.value);
           if (v !== ctl.value) { ctl.value = v; ctl.setSelectionRange(v.length, v.length); }

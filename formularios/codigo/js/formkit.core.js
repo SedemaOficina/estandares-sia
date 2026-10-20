@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.1
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.2
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -680,16 +680,24 @@
        (un evento confiable: escribir, elegir, tocar, soltar un archivo). Lo que cambien
        después la página o los módulos entra en el mismo borrador. */
     let personaActuo = false;
-    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (e.isTrusted) personaActuo = true; }, true);
-    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor): el
-       módulo se suscribe y el núcleo le avisa al escribir, restaurar o borrar el borrador. */
+    /* Un formulario que sigue en pantalla después de un envío logrado (captura en
+       serie) empieza otro registro con el siguiente gesto: vuelve el borrador y la
+       clave de idempotencia es otra. */
+    for (const t of ['input', 'change', 'click', 'drop']) form.addEventListener(t, (e) => { if (!e.isTrusted) return; personaActuo = true; if (terminado) { terminado = false; idempotencia = ''; } }, true);
+    /* Mientras la franja espera que la persona elija «Recuperar» o «Empezar de nuevo»,
+       no se escribe nada: lo que escriba antes no reemplaza al borrador guardado. */
+    let franjaPendiente = false;
+    /* Lo que va en el borrador además de los datos (los archivos, con su proveedor; las
+       filas de un repetible): el módulo se suscribe y el núcleo le avisa al escribir,
+       restaurar o borrar el borrador. Con estado() aporta campos propios al borrador y
+       con prepara(b) rehace su estructura (las filas) antes de que se repongan los valores. */
     const suscritosBorrador = [];
     const alBorrador = (def) => { suscritosBorrador.push(def); };
     const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
     function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado || !personaActuo) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo || franjaPendiente) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -704,6 +712,7 @@
     }
     function escribeBorrador() {
       const extra = FormKit.ganchos.estadoBorrador ? FormKit.ganchos.estadoBorrador(form) : {};
+      for (const x of suscritosBorrador) if (x.estado) Object.assign(extra, x.estado());
       const ok = almacen.escribe(claveBorrador, JSON.stringify({ v: versionBorrador, t: Date.now(), datos: datosBorrador(), ...extra }));
       avisaBorrador('escribe');
       if (ok && indicador) {
@@ -715,7 +724,7 @@
     }
     /* Si la persona cierra o cambia de pestaña antes de que venza el retardo,
        el borrador pendiente se escribe en ese momento. */
-    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
+    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado && !franjaPendiente) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
 
     function leeBorrador() {
       const crudo = almacen.lee(claveBorrador);
@@ -727,6 +736,7 @@
       } catch (e) { borraBorrador(); return null; }
     }
     function restauraBorrador(b) {
+      avisaBorrador('prepara', b);
       for (const [n, v] of Object.entries(b.datos || {})) {
         const el = envoltura(n);
         if (!el) continue;
@@ -745,15 +755,18 @@
     }
     function iniciaFranja(b) {
       franja.hidden = false;
+      franjaPendiente = true;
       const f = $('[data-borrador-fecha]', franja);
       if (f) f.textContent = fechaHora(b.t, cfg);
+      /* Con la respuesta de la persona, el borrador vuelve a guardarse con lo que haya en pantalla. */
+      const contesta = () => { franja.hidden = true; franjaPendiente = false; programaBorrador(); };
       franja.addEventListener('click', (e) => {
         const a = e.target.closest('[data-borrador]');
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
-        if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); franja.hidden = true; }
-        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const seguro = $('[data-borrador="conservar"]', franja); if (seguro) seguro.focus(); } else { borraBorrador(); franja.hidden = true; } }
-        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); franja.hidden = true; }
+        if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); contesta(); }
+        else if (a.dataset.borrador === 'descartar') { if (confirma) { confirma.hidden = false; const seguro = $('[data-borrador="conservar"]', franja); if (seguro) seguro.focus(); } else { borraBorrador(); contesta(); } }
+        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); contesta(); }
         else if (a.dataset.borrador === 'conservar') { confirma.hidden = true; $('[data-borrador="recuperar"]', franja).focus(); }
       });
     }
@@ -793,7 +806,9 @@
             if (cuerpo && Array.isArray(cuerpo.errores)) e.errores = cuerpo.errores;
             throw e;
           }
-          return r.json();
+          /* Un 2xx es un envío recibido aunque no traiga JSON (204, «OK»): no se le dice a la persona que falló. */
+          const texto = await r.text().catch(() => '');
+          try { return texto ? JSON.parse(texto) : {}; } catch (e) { return {}; }
         });
     }
 
@@ -823,15 +838,11 @@
       if (boton) { boton.setAttribute('aria-disabled', 'true'); boton.setAttribute('aria-busy', 'true'); boton.textContent = M.enviando; }
       const control = new AbortController();
       const plazo = setTimeout(() => control.abort(), cfg.envio.timeoutMs);
+      let respuesta;
       try {
         for (const def of tipos.values()) if (def.antesDeEnviar) await def.antesDeEnviar(form);
         const enviarFn = opciones.enviar || envioPorOmision;
-        const respuesta = await enviarFn(arma(), { signal: control.signal });
-        terminado = true;
-        clearTimeout(temporizadorBorrador);
-        if (claveBorrador) borraBorrador();
-        if (opciones.alEnviar) opciones.alEnviar(respuesta, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: respuesta }));
-        return true;
+        respuesta = await enviarFn(arma(), { signal: control.signal });
       } catch (e) {
         /* Errores por campo devueltos por el servidor: junto a cada campo y en el resumen. */
         const porCampo = e && Array.isArray(e.errores) ? e.errores.filter((x) => x && marcaError(x.campo, x.mensaje)) : [];
@@ -849,6 +860,18 @@
         clearTimeout(plazo);
         if (boton) { boton.removeAttribute('aria-disabled'); boton.removeAttribute('aria-busy'); boton.textContent = textoOriginal; }
       }
+      /* Recibido. Desde aquí nada cuenta como envío fallido: si la página falla al
+         mostrar el acuse, la persona no debe reenviar. El borrador se borra después
+         de mostrar el acuse, y la clave se renueva para el siguiente registro. */
+      terminado = true;
+      idempotencia = '';
+      clearTimeout(temporizadorBorrador);
+      const recibido = respuesta && typeof respuesta === 'object' ? respuesta : {};
+      try { if (opciones.alEnviar) opciones.alEnviar(recibido, form); else form.dispatchEvent(new CustomEvent('formkit:enviado', { detail: recibido })); }
+      catch (e) { console.error('FormKit: el envío se recibió, pero falló lo que la página hace después (alEnviar).', e); if (!form.hidden) aviso(form, { tono: 'ok', texto: M.envioRecibido, foco: true }); }
+      if (claveBorrador) borraBorrador();
+      if (franja) { franja.hidden = true; franjaPendiente = false; }
+      return true;
     }
 
     /* ----- Eventos (todos aquí; ninguno en el HTML) ----- */

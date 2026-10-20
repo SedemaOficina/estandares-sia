@@ -167,6 +167,9 @@ export function validaPayload(payload, esquema, opciones = {}) {
     /* Texto con formato: normalizar, validar y conservar lo normalizado. */
     const f = cfg.formatos[c.formato || (c.tipo === 'textarea' ? 'texto' : '')];
     if (f) {
+      /* El largo se revisa antes de normalizar, como lo limita el navegador: un texto
+         enorme no llega a la expresión del formato. */
+      if (c.atributos?.maxlength && v.length > Number(c.atributos.maxlength)) { errores.push({ campo: n, mensaje: plantilla(M.maximoCaracteres, { max: c.atributos.maxlength, etiqueta: c.etiqueta }) }); return; }
       v = f.normaliza(v);
       datos[n] = v;
       const atr = { ...(c.atributos || {}) };

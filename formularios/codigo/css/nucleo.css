@@ -406,10 +406,12 @@
 
 /* Alineación de campos que comparten renglón: el renglón declara cuatro
    filas (etiqueta, ayuda, control, error) y cada campo las adopta con
-   subgrid, de modo que las columnas alinean aunque unos lleven ayuda y otros no. */
+   subgrid, de modo que las columnas alinean aunque unos lleven ayuda y otros no.
+   Con :not([hidden]): este selector pesa más que [hidden] y, sin él, un campo
+   condicional oculto dentro del renglón se seguiría viendo (C9). */
 @supports (grid-template-rows: subgrid){
   .fila,.fila-3,.fila-2-1{grid-template-rows:auto auto auto auto;row-gap:0}
-  .fila > .campo,.fila-3 > .campo,.fila-2-1 > .campo{display:grid;grid-template-rows:subgrid;grid-row:span 4;gap:0;align-content:start}
+  .fila > .campo:not([hidden]),.fila-3 > .campo:not([hidden]),.fila-2-1 > .campo:not([hidden]){display:grid;grid-template-rows:subgrid;grid-row:span 4;gap:0;align-content:start}
   .etiqueta{grid-row:1}
   .ayuda{grid-row:2}
   .control,.select,.control-grupo,.contrasena-caja{grid-row:3}

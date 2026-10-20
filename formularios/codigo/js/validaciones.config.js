@@ -38,15 +38,20 @@
 
   /* Fecha escrita como día/mes/año (formato «fecha-dma»): 23/07/1985,
      23-07-1985, 23.07.1985, 23 07 1985 o 23071985; también AAAA-MM-DD, que es
-     lo que pone el autocompletado del navegador. */
+     lo que pone el autocompletado del navegador. Una fecha escrita no pasa de
+     20 caracteres, y el separador no se traslapa con los espacios de alrededor:
+     un texto largo no frena la página ni el servidor. */
   function partesDma(v) {
     const t = String(v || '').trim();
-    let m = t.match(/^(\d{1,2})\s*[/.\- ]\s*(\d{1,2})\s*[/.\- ]\s*(\d{4})$/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (t.length > 20) return null;
+    let m = t.match(/^(\d{1,2})(?:\s*[/.\-]\s*|\s+)(\d{1,2})(?:\s*[/.\-]\s*|\s+)(\d{4})$/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
     if (m) return { d: Number(m[1]), m: Number(m[2]), a: Number(m[3]) };
     m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     return m ? { d: Number(m[3]), m: Number(m[2]), a: Number(m[1]) } : null;
   }
   const dosCifras = (n) => String(n).padStart(2, '0');
+  /* Número con comas de miles: 1,500 · 12,345 · 1,234.50. */
+  const CON_MILES = /^-?\d{1,3}(,\d{3})+(\.\d+)?$/;
   /* «23/07/1985» → «1985-07-23»; '' si no es una fecha real. */
   const isoDeDma = (v) => { const p = partesDma(v); return p && esFechaReal(p.a, p.m, p.d) ? `${p.a}-${dosCifras(p.m)}-${dosCifras(p.d)}` : ''; };
   /* «1985-07-23» → «23/07/1985». */
@@ -284,9 +289,12 @@
     numero: {
       descripcion: 'Número entero o decimal con mínimo, máximo y paso configurables en el campo',
       inputmode: 'decimal', autocomplete: 'off',
-      normaliza: (v) => recorta(v).replace(/\s/g, '').replace(',', '.'),
+      /* Una coma se toma como punto decimal («12,5» → 12.5), salvo que agrupe miles
+         («1,500», «12,345.50»): eso no se adivina, se pide escribirlo sin comas. */
+      normaliza: (v) => { const t = recorta(v).replace(/\s/g, ''); return CON_MILES.test(t) ? t : t.replace(',', '.'); },
       valida: (v, a = {}, cfg = CONFIG) => {
         const M = cfg.mensajes;
+        if (CON_MILES.test(v)) return plantilla(M.fmtNumeroMiles, { numero: v.replace(/,/g, '') });
         if (!/^-?\d+(\.\d+)?$/.test(v)) return M.fmtNumero;
         const n = Number(v);
         /* El paso cuenta desde el mínimo, como en HTML; con tolerancia de redondeo para pasos decimales. */
@@ -453,7 +461,8 @@
     'rango-fechas': {
       descripcion: 'La fecha final no es anterior a la inicial',
       campos: ['inicio', 'fin'], bloquea: true,
-      valida: ({ inicio, fin }, a = {}, cfg = CONFIG) => (fin >= inicio ? '' : cfg.mensajes.czRangoFechas)
+      /* Se comparan como AAAA-MM-DD aunque se escriban día/mes/año («fecha-dma»). */
+      valida: ({ inicio, fin }, a = {}, cfg = CONFIG) => ((isoDeDma(fin) || fin) >= (isoDeDma(inicio) || inicio) ? '' : cfg.mensajes.czRangoFechas)
     },
     'rango-horas': {
       descripcion: 'La hora final es posterior a la inicial cuando es el mismo día',
@@ -469,7 +478,10 @@
       descripcion: 'Edad calculada dentro de la mínima y máxima que exige el formulario',
       campos: ['fecha'], bloquea: true,
       valida: ({ fecha }, a = {}, cfg = CONFIG) => {
-        const e = edadEn(fecha, hoyISO());
+        /* La fecha llega como AAAA-MM-DD o, con «fecha-dma», como día/mes/año. */
+        const iso = isoDeDma(fecha);
+        if (!iso) return '';
+        const e = edadEn(iso, hoyISO());
         if (a.edadMin !== undefined && e < Number(a.edadMin)) return plantilla(cfg.mensajes.edadMinima, { edad: a.edadMin });
         if (a.edadMax !== undefined && e > Number(a.edadMax)) return plantilla(cfg.mensajes.edadMaxima, { edad: a.edadMax });
         return '';
@@ -515,7 +527,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.5.1',
+    version: '1.5.2',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -532,6 +544,9 @@
     archivos: ARCHIVOS,
     borrador: { ttlDias: 14, retardoMs: 600, visibleMs: 2500 },
     envio: { timeoutMs: 15000 },
+    /* El acuse (folio y fecha, sin datos de la persona) se guarda en el dispositivo
+       y se vuelve a mostrar si la persona recarga la página durante estas horas. */
+    acuse: { horasVisible: 24 },
     anuncios: { retardoMs: 50 },
     combo: { maxResultados: 8 },
     chips: { max: 5, clave: 'sia-chips' },
@@ -572,6 +587,7 @@
       fmtRfc: 'El RFC lleva 3 o 4 letras, 6 dígitos de fecha y 3 caracteres finales. Ejemplo: XAXX010101000',
       fmtRfcFecha: 'La fecha dentro del RFC no es una fecha real. Revísala.',
       fmtNumero: 'Escribe sólo números; para decimales usa punto. Ejemplo: 12.5',
+      fmtNumeroMiles: 'Escribe el número sin comas, por ejemplo {numero}.',
       fmtNumeroEntero: 'Escribe un número entero, sin decimales.',
       fmtNumeroPaso: 'Usa múltiplos de {paso}.',
       fmtNumeroMin: 'El valor mínimo es {min}.',
@@ -641,6 +657,8 @@
       envioError: 'No se pudo enviar. Lo que capturaste sigue aquí; intenta de nuevo.',
       envioTimeout: 'El envío tardó demasiado y se detuvo. Lo que capturaste sigue aquí; intenta de nuevo.',
       envioLimite: 'Por ahora no podemos recibir más envíos desde este dispositivo. Lo que capturaste no se perdió; intenta más tarde.',
+      envioRecibido: 'Tu envío se recibió. No lo envíes de nuevo.',
+      acuseSinFolio: 'No llegó el folio. Guarda esta pantalla como constancia de tu envío.',
       archOptimizando: 'Optimizando…',
       archOptimizada: '{peso} · optimizada',
       archPeso: '{peso}',
@@ -729,6 +747,7 @@
       mapaMarcador: 'Punto marcado; arrástralo para moverlo',
       mapaConfirmar: 'Confirmar punto',
       mapaConfirmado: 'Punto confirmado',
+      mapaSinConfirmar: 'sin confirmar: no se envía',
       mapaSinUbicacion: 'No se pudo obtener tu ubicación. Toca el mapa o escribe la dirección.',
       cargando: 'Cargando…',
       repetibleAgregado: '{etiqueta} {n} agregado.',
