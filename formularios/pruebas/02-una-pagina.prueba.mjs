@@ -23,10 +23,10 @@ for (const perfil of Object.values(PERFILES)) {
     const p = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: perfil.contexto });
 
     /* Nombre coherente con la CURP ficticia (cruzadas curp-nombre y curp-segundo-apellido). */
-    await p.fill('#nombre', 'Juan'); await p.fill('#apellido_paterno', 'Pérez'); await p.fill('#apellido_materno', 'García');
+    await p.fill('#nombre', 'Fulano'); await p.fill('#apellido_paterno', 'Prueba'); await p.fill('#apellido_materno', 'Ejemplo');
     /* CURP: mayúsculas al escribir, 18 caracteres, deriva la fecha de nacimiento a un campo de solo lectura. */
-    await p.fill('#curp', 'pegj900515hdfrrn09'); await p.keyboard.press('Tab');
-    assert.equal(await p.inputValue('#curp'), 'PEGJ900515HDFRRN09', 'la CURP se normaliza a mayúsculas');
+    await p.fill('#curp', 'puef900515hdfrjl04'); await p.keyboard.press('Tab');
+    assert.equal(await p.inputValue('#curp'), 'PUEF900515HDFRJL04', 'la CURP se normaliza a mayúsculas');
     assert.equal(await p.inputValue('#nacimiento'), '1990-05-15', 'la fecha de nacimiento se deriva');
     assert.match(await p.inputValue('#edad'), /^\d+$/, 'la edad se calcula con la fecha');
     assert.equal(await nivel(p, 'curp'), null, 'la CURP ficticia es estructuralmente válida');
@@ -109,7 +109,7 @@ for (const perfil of Object.values(PERFILES)) {
     assert.equal(await p.locator('.resumen-errores').count(), 0, `no quedan errores: ${(await p.locator('.resumen-errores a').allTextContents()).join(' | ')}`);
     assert.ok(await p.locator('[data-acuse]').isVisible(), 'aparece el acuse');
     assert.ok(caja.payload);
-    assert.equal(caja.payload.datos.curp, 'PEGJ900515HDFRRN09');
+    assert.equal(caja.payload.datos.curp, 'PUEF900515HDFRJL04');
     assert.equal(caja.payload.datos.intereses_otro, 'Compostaje');
     assert.equal(caja.payload.datos.intereses.length, 3);
     assert.equal(caja.payload.datos.avisos, 'si', 'el interruptor viaja como valor del campo oculto');

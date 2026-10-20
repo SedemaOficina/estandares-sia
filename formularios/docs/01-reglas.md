@@ -482,23 +482,23 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-42 · Todo formulario largo guarda borrador en el dispositivo y lo ofrece al volver
 
-**Regla.** Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja («Hay un borrador guardado el …») con «Recuperar borrador» y «Empezar de nuevo»; «Empezar de nuevo» pide confirmación en la franja, con el foco en «Conservar» y el botón «Descartar borrador» (FRM-38). Sin franja en la página, el borrador se recupera solo al volver. El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas. El borrador empieza con el primer gesto de la persona en el formulario (escribir, elegir, tocar, soltar un archivo): lo que la página escribe sola, como al precargar una solicitud para continuarla, no crea un borrador. Mientras la franja espera la respuesta de la persona, no se guarda nada: lo que escriba antes de elegir no reemplaza al borrador guardado. Con su respuesta, el borrador vuelve a guardarse.
+**Regla.** Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja («Hay un borrador guardado el …») con «Recuperar borrador» y «Empezar de nuevo»; «Empezar de nuevo» pide confirmación en la franja, con el foco en «Conservar» y el botón «Descartar borrador» (FRM-38). Sin franja en la página, el borrador se recupera solo al volver. El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas. El borrador empieza con el primer gesto de la persona en el formulario (escribir, elegir, tocar, soltar un archivo): lo que la página escribe sola, como al precargar una solicitud para continuarla, no crea un borrador. Mientras la franja espera la respuesta de la persona, no se guarda nada: lo que escriba antes de elegir no reemplaza al borrador guardado. Con su respuesta, el borrador vuelve a guardarse. La franja ofrece también «No guardar en este equipo» ([data-borrador="no-guardar"]): borra el borrador y, mientras la pestaña siga abierta, no se guarda nada (equipos compartidos). Al abrir cualquier formulario del estándar se borran los borradores vencidos de todo el sitio, no sólo el suyo, y un borrador con fecha futura se descarta.
 
 **Por qué.** Perder diez minutos de captura por cerrar la pestaña es la causa principal de abandono.
 
 **Nivel.** RECOMENDADO · **Origen.** A FRM-14; A FRM-17; B FRM-EST-04; P128 (proyecto de acreditaciones, 18 oct 2026); P148 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: borrador se guarda, se ofrece y se restaura; 07: la precarga no crea borrador (P148); 08: escribir antes de contestar la franja (C4-01)
+**Verificación.** 01-por-pasos: borrador se guarda, se ofrece y se restaura; 07: la precarga no crea borrador (P148); 08: escribir antes de contestar la franja (C4-01); 08: borradores vencidos de otros formularios y «No guardar en este equipo» (E1-05)
 
 ### FRM-43 · El borrador del dispositivo nunca guarda campos sensibles ni archivos, y se invalida con la estructura
 
-**Regla.** Los campos con data-sensible y los archivos no se guardan en el borrador del dispositivo: los sensibles se piden de nuevo. Los archivos vuelven sólo si la página da un proveedor (FormKit.iniciar(form, { borradorArchivos: { guarda, lee, borra } })), que decide dónde guardarlos, por ejemplo en su servidor; el estándar nunca los guarda en el dispositivo por su cuenta. El proveedor recibe cada archivo como lo eligió la persona; una foto JPG, sin sus metadatos (EXIF, ubicación) si el formulario no pide conservarExif. Un borrador de otra versión del formulario o caducado no se ofrece. El borrador se escribe también al salir de la página (pagehide) y se borra al enviar.
+**Regla.** Los campos con data-sensible y los archivos no se guardan en el borrador del dispositivo: los sensibles se piden de nuevo. Los archivos vuelven sólo si la página da un proveedor (FormKit.iniciar(form, { borradorArchivos: { guarda, lee, borra } })), que decide dónde guardarlos, por ejemplo en su servidor; el estándar nunca los guarda en el dispositivo por su cuenta. El proveedor recibe cada archivo tal como se enviaría: sin conservarExif, la foto ya limpia (sin EXIF ni ubicación, sea JPG, PNG o WebP), derecha y, si se recodificó, con nombre .jpg, para que al volver coincida su firma. Un borrador de otra versión del formulario o caducado no se ofrece. El borrador se escribe también al salir de la página (pagehide) y se borra al enviar. Tampoco van al borrador las contraseñas y los códigos (type="password", formato contrasena, autocomplete *-password, one-time-code, cc-*), aunque el campo no declare data-sensible, ni lo que se calcula de un dato sensible (la fecha de nacimiento que sale de la CURP, la edad que sale de esa fecha).
 
 **Por qué.** Un nombre y un correo en el almacén local de una computadora compartida son una fuga; un borrador viejo contra un formulario nuevo produce datos inconsistentes.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-15; A FRM-16; B FRM-DP-03; P148 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-15; A FRM-16; B FRM-DP-03; P148 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: lo sensible se pide de nuevo; el borrador se borra al enviar; 07: archivos con el proveedor de la página (P148)
+**Verificación.** 01-por-pasos: lo sensible se pide de nuevo; el borrador se borra al enviar; 07: archivos con el proveedor de la página (P148); 08: contraseña sin data-sensible (E1-02), PNG con ubicación al proveedor (E1-03), fecha derivada de la CURP (E1-01)
 
 ### FRM-44 · Todo envío tiene límite de espera, clave de idempotencia y dice qué pasó
 
@@ -596,13 +596,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-53 · Las fotografías se optimizan en el navegador y se conserva la huella del original
 
-**Regla.** Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6). Sin conservarExif, la foto viaja siempre recodificada, sin EXIF ni ubicación, aunque así pese más que la original; si no se puede recodificar, al JPG se le quitan los metadatos (EXIF, XMP e IPTC). Si tampoco se pueden quitar, la foto se agrega como está: una foto no se rechaza por sus metadatos.
+**Regla.** Las imágenes se redimensionan al lado mayor configurado y se recomprimen antes de subir; viaja la huella SHA-256 del original y, sólo si conservarExif está activo, la fecha y la ubicación EXIF (desactivado por omisión, decisión C6). Sin conservarExif, la foto viaja siempre recodificada, sin EXIF ni ubicación, aunque así pese más que la original; si no se puede recodificar, al JPG se le quitan los metadatos (EXIF, XMP e IPTC). Si tampoco se pueden quitar, la foto se agrega como está: una foto no se rechaza por sus metadatos. La foto recodificada viaja con nombre .jpg (es un JPG), y un campo que admite png o webp admite también ese JPG, en el navegador y en el servidor. Al quitar los metadatos de un JPG también se quita lo que venga pegado después del fin de la imagen.
 
 **Por qué.** Una foto de 12 MB no sube con red limitada; sin huella no se prueba que la imagen es la que se tomó; el EXIF revela la ubicación de quien toma la foto.
 
-**Nivel.** RECOMENDADO · **Origen.** A FRM-62; A FRM-63; B FRM-ARC-02; C6; P127 (proyecto de acreditaciones, 18 oct 2026); decisión de la Secretaría, 18 oct 2026: no rechazar una foto por sus metadatos · *decisión heredada*
+**Nivel.** RECOMENDADO · **Origen.** A FRM-62; A FRM-63; B FRM-ARC-02; C6; P127 (proyecto de acreditaciones, 18 oct 2026); decisión de la Secretaría, 18 oct 2026: no rechazar una foto por sus metadatos; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: sha256 en payload; validaciones.config.js ARCHIVOS; 07: foto sin EXIF aunque la recodificada pese más o no se pueda recodificar; la que no se puede limpiar se agrega (P127)
+**Verificación.** 01-por-pasos: sha256 en payload; validaciones.config.js ARCHIVOS; 07: foto sin EXIF aunque la recodificada pese más o no se pueda recodificar; la que no se puede limpiar se agrega (P127); 08: PNG recodificado como .jpg (E3-05)
 
 ### FRM-54 · El servidor revalida los archivos
 
@@ -618,13 +618,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-55 · No se pide un dato sin uso declarado; los personales declaran finalidad; los sensibles no se guardan
 
-**Regla.** Todo campo declara data-uso. Los datos personales declaran data-finalidad y, los de identidad o contacto, data-sensible. herramientas/auditar-campos.mjs lo comprueba y el inventario (FormKit.iniciar().inventario()) lo enumera para el aviso de privacidad.
+**Regla.** Todo campo declara data-uso. Los datos personales declaran data-finalidad y, los de identidad o contacto, data-sensible. herramientas/auditar-campos.mjs lo comprueba y el inventario (FormKit.iniciar().inventario()) lo enumera para el aviso de privacidad. Un dato de identidad o contacto (por su formato o su autocompletado) es personal aunque no lo declare: sin data-finalidad, auditar-campos falla, salvo un comentario «no personal: motivo» (la dirección de un predio, un probador). Una contraseña declara data-sensible. Lo que se calcula de un dato sensible es sensible. El inventario lista también los campos de los grupos repetibles, con su patrón (grupo.#.campo), aunque todavía no haya filas.
 
 **Por qué.** Un dato «por si acaso» es un dato personal que hay que resguardar, justificar y suprimir con reglas.
 
-**Nivel.** BASE · **Origen.** A FRM-80; A FRM-82; B FRM-CMP-09; norma 1.8 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-80; A FRM-82; B FRM-CMP-09; norma 1.8; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** herramientas/auditar-campos.mjs D1–D3
+**Verificación.** herramientas/auditar-campos.mjs D1–D3; 08: auditar-campos con un nombre sin finalidad y una contraseña sin data-sensible; inventario con acompañantes (E1-01, E1-02)
 
 ### FRM-56 · El aviso de privacidad se lee en pantalla antes de enviar y los fundamentos sin verificar quedan en hueco
 

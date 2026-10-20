@@ -45,7 +45,7 @@ test('«Otro»: aparece al elegirlo, es obligatorio, rechaza repetir una opción
 
 test('cruzada CURP ↔ fecha de nacimiento: marca ambos campos, nivel configurable, se libera al corregir', async () => {
   const p = await abreGuia();
-  await p.fill('#pr_curp', 'pegj900515hdfrrn09'); await p.keyboard.press('Tab');
+  await p.fill('#pr_curp', 'puef900515hdfrjl04'); await p.keyboard.press('Tab');
   assert.equal(await p.inputValue('#pr_nac_derivada'), '1990-05-15');
   await p.fill('#pr_nac', '1990-05-16'); await p.focus('#pr_curp');
   assert.equal(await err(p, 'pr_nac').getAttribute('data-nivel'), 'error');
@@ -61,7 +61,7 @@ test('CURP: 18 caracteres, estructura, fecha real, entidad y dígito verificador
     import('${pathToFileURL(resolve(RAIZ, 'codigo/js/validaciones.config.js')).href}').then(() => {
       const f = globalThis.FORMKIT_VALIDACIONES.formatos.curp;
       const v = (x) => f.valida(f.normaliza(x));
-      console.log(JSON.stringify([v('PEGJ900515HDFRRN09'), v('PEGJ900515HDFRRN0'), v('PEGJ901345HDFRRN09'), v('PEGJ900515HZZRRN09'), v('PEGJ900515HDFRRN00'), f.deriva('PEGJ900515HDFRRN09').fechaNacimiento]));
+      console.log(JSON.stringify([v('PUEF900515HDFRJL04'), v('PUEF900515HDFRJL0'), v('PUEF901345HDFRJL04'), v('PUEF900515HZZRJL04'), v('PUEF900515HDFRJL00'), f.deriva('PUEF900515HDFRJL04').fechaNacimiento]));
     });`], { encoding: 'utf8' });
   const [ok, corta, fecha, entidad, digito, derivada] = JSON.parse(salida.trim());
   assert.equal(ok, '');

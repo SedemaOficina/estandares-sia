@@ -1,6 +1,6 @@
 {
   "formulario": "una-pagina.html",
-  "generado": "2026-10-16T15:09:05.647Z",
+  "generado": "2026-10-20T21:19:53.395Z",
   "campos": {
     "nombre": {
       "etiqueta": "Nombre(s)",
@@ -83,8 +83,9 @@
       "tipo": "texto",
       "requerido": false,
       "formato": "fecha",
-      "sensible": false,
+      "sensible": true,
       "uso": "Derivada de la CURP; no se pide por separado.",
+      "finalidad": "Identificar a la persona registrada.",
       "atributos": {
         "deriva": "edad=edad"
       },
@@ -125,6 +126,7 @@
       "formato": "correo",
       "sensible": true,
       "uso": "Evitar errores de captura en el correo.",
+      "finalidad": "Enviar la confirmación del registro.",
       "atributos": {
         "maxlength": "120"
       },
@@ -261,8 +263,9 @@
       "tipo": "texto",
       "requerido": true,
       "formato": "nombre",
-      "sensible": false,
+      "sensible": true,
       "uso": "Registrar acompañantes.",
+      "finalidad": "Registrar a quienes acompañan a la persona en la actividad.",
       "atributos": {
         "maxlength": "80"
       },
@@ -273,8 +276,9 @@
       "tipo": "texto",
       "requerido": false,
       "formato": "numero",
-      "sensible": false,
+      "sensible": true,
       "uso": "Adecuar la actividad a la edad.",
+      "finalidad": "Adecuar la actividad a la edad de quien acompaña.",
       "atributos": {
         "min": "0",
         "max": "120",

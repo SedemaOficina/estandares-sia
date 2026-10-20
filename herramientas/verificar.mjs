@@ -50,6 +50,9 @@ console.log(`${faltan.length ? '✗' : '✓'} Portada: archivos${faltan.length ?
 corre('Portada: sintaxis del guion', '.', ['--check', 'guia-visual/portada.js']);
 corre('Pendientes: sintaxis de la lista', '.', ['--check', 'guia-visual/pendientes.js']);
 
+console.log('— Repositorio público —');
+corre('Secretos y archivos que no deben subir', '.', ['herramientas/secretos.mjs']);
+
 const fallan = resultados.filter((r) => !r.ok);
 console.log(`\n${fallan.length ? 'FALLA' : 'CORRECTO'} · ${resultados.length} comprobaciones, ${fallan.length} con falla`);
 console.log('Pendiente fuera de esta orden: en formularios/, «npm install» y «npm run verificar» (construcción y pruebas en navegador).');

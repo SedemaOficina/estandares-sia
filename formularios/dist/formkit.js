@@ -529,7 +529,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.5.2',
+    version: '1.5.3',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -760,7 +760,8 @@
       paginacionMas: 'Cargar más',
       paginacionActual: 'Página {n}, actual',
       compartido: 'Compartido.',
-      borradorRecuperado: 'Borrador recuperado en este dispositivo.'
+      borradorRecuperado: 'Borrador recuperado en este dispositivo.',
+      borradorNoGuardar: 'Nada se guarda en este equipo mientras esta pestaña siga abierta. Si la cierras antes de enviar, lo que capturaste se pierde.'
     }
   };
 
@@ -777,7 +778,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.2
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.3
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -813,6 +814,27 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   const BYTES_POR_MB = 1048576;
   const BYTES_POR_KB = 1024;
   const MS_POR_DIA = 86400000;
+  /* Autocompletado de un secreto: nunca va al borrador del dispositivo. */
+  const AUTOCOMPLETE_SECRETO = /(^|\s)(current-password|new-password|one-time-code|cc-[a-z-]+)$/;
+  /* Un borrador del estándar: {v, t, datos}. */
+  const esBorrador = (b) => !!b && typeof b === 'object' && typeof b.v === 'string' && typeof b.t === 'number' && !!b.datos && typeof b.datos === 'object';
+  const vencido = (t, ttlDias) => Date.now() - t > ttlDias * MS_POR_DIA || t > Date.now() + MS_POR_DIA;
+  /* Al abrir cualquier formulario se borran los borradores vencidos de todo el sitio, no
+     sólo el suyo: en un equipo compartido no queda nada de nadie más allá de su caducidad. */
+  let purgado = false;
+  function purgaBorradoresVencidos(ttlDias) {
+    if (purgado) return;
+    purgado = true;
+    try {
+      const ls = global.localStorage;
+      for (let i = ls.length - 1; i >= 0; i--) {
+        const k = ls.key(i);
+        let b = null;
+        try { b = JSON.parse(ls.getItem(k)); } catch (e) { continue; }
+        if (esBorrador(b) && vencido(b.t, ttlDias)) ls.removeItem(k);
+      }
+    } catch (e) { /* sin almacén */ }
+  }
   const pesoTxt = (b) => (b < BYTES_POR_MB ? `${Math.max(1, Math.round(b / BYTES_POR_KB))} KB` : `${(b / BYTES_POR_MB).toFixed(1)} MB`);
   const normalizaBusqueda = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   let contadorIds = 0;
@@ -1473,17 +1495,45 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     const alBorrador = (def) => { suscritosBorrador.push(def); };
     const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
     function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
+    /* Lo que nunca va al borrador del dispositivo: lo sensible (data-sensible), toda
+       contraseña o código aunque el campo no lo declare, y lo que se calcula de algo que
+       no va (la fecha que sale de la CURP, la edad que sale de esa fecha). */
+    function fueraDelBorrador() {
+      const fuera = new Set();
+      for (const n of nombres()) {
+        const el = envoltura(n);
+        const c = controlPrincipal(n);
+        const ac = c ? c.getAttribute('autocomplete') || '' : '';
+        if (el.hasAttribute('data-sensible') || el.dataset.formato === 'contrasena' || (c && c.type === 'password') || AUTOCOMPLETE_SECRETO.test(ac)) fuera.add(n);
+      }
+      const pendientes = [...fuera];
+      while (pendientes.length) {
+        const el = envoltura(pendientes.pop());
+        const deriva = el && el.dataset.deriva ? el.dataset.deriva : '';
+        for (const par of deriva.split(/\s+/).filter(Boolean)) {
+          const destino = par.split('=')[1];
+          if (destino && !fuera.has(destino) && envoltura(destino)) { fuera.add(destino); pendientes.push(destino); }
+        }
+      }
+      return fuera;
+    }
+    /* «No guardar en este equipo» ([data-borrador="no-guardar"]): mientras la pestaña siga
+       abierta, nada se guarda en el dispositivo. */
+    const claveNoGuardar = `${claveBorrador}:no-guardar`;
+    let noGuardar = false;
+    try { noGuardar = !!claveBorrador && global.sessionStorage.getItem(claveNoGuardar) === '1'; } catch (e) { /* sin almacén de sesión */ }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado || !personaActuo || franjaPendiente) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo || franjaPendiente || noGuardar) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
     function datosBorrador() {
       const datos = {};
+      const fuera = fueraDelBorrador();
       for (const n of nombres()) {
         const el = envoltura(n);
-        if (el.hasAttribute('data-sensible') || tipoDe(el) === 'auxiliar' || tipos.has(tipoDe(el)) && !tipos.get(tipoDe(el)).enBorrador) continue;
+        if (fuera.has(n) || tipoDe(el) === 'auxiliar' || tipos.has(tipoDe(el)) && !tipos.get(tipoDe(el)).enBorrador) continue;
         datos[n] = valorDe(n);
       }
       return datos;
@@ -1502,14 +1552,23 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     }
     /* Si la persona cierra o cambia de pestaña antes de que venza el retardo,
        el borrador pendiente se escribe en ese momento. */
-    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado && !franjaPendiente) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
+    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado && !franjaPendiente && !noGuardar) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
+    function dejaDeGuardar() {
+      noGuardar = true;
+      clearTimeout(temporizadorBorrador);
+      borraBorrador();
+      try { global.sessionStorage.setItem(claveNoGuardar, '1'); } catch (e) { /* sin almacén de sesión: dura hasta recargar */ }
+      if (franja) { franja.hidden = true; franjaPendiente = false; }
+      aviso(form, { tono: 'neutro', texto: M.borradorNoGuardar, foco: true });
+    }
+    document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-borrador="no-guardar"]'); if (b && claveBorrador && (form.contains(b) || (franja && franja.contains(b)))) dejaDeGuardar(); });
 
     function leeBorrador() {
       const crudo = almacen.lee(claveBorrador);
       if (!crudo) return null;
       try {
         const b = JSON.parse(crudo);
-        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { borraBorrador(); return null; }
+        if (!esBorrador(b) || b.v !== versionBorrador || vencido(b.t, cfg.borrador.ttlDias)) { borraBorrador(); return null; }
         return b;
       } catch (e) { borraBorrador(); return null; }
     }
@@ -1763,7 +1822,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     for (const [, def] of activos) if (def.iniciar) def.iniciar(form, ctx);
     for (const s of $$('select', form)) s.toggleAttribute('data-vacio', !s.value);
     aplicaCondicionales();
-    if (claveBorrador) {
+    purgaBorradoresVencidos(cfg.borrador.ttlDias);
+    if (claveBorrador && !noGuardar) {
       const previo = leeBorrador();
       if (previo) { if (franja) iniciaFranja(previo); else restauraBorrador(previo); }
     }
@@ -1778,7 +1838,20 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       enviar,
       marcaError,
       /* Inventario de datos personales: qué se pide, para qué y con qué finalidad (FRM-55). */
-      inventario: () => nombres().map((n) => { const d = envoltura(n).dataset; return { campo: n, etiqueta: etiquetaDe(n), obligatorio: esObligatorio(n), uso: d.uso || '', datoPersonal: d.finalidad !== undefined, finalidad: d.finalidad || '', sensible: d.sensible !== undefined, formato: d.formato || '', autocomplete: controlPrincipal(n) ? controlPrincipal(n).getAttribute('autocomplete') || '' : '' }; })
+      /* «sensible»: no va al borrador del dispositivo (también lo derivado de algo sensible).
+         Los campos de un grupo repetible se listan una vez, con su patrón (grupo.#.campo),
+         aunque todavía no haya filas. */
+      inventario: () => {
+        const fuera = fueraDelBorrador();
+        const lista = nombres().filter((n) => !/\.\d+\./.test(n)).map((n) => { const d = envoltura(n).dataset; return { campo: n, etiqueta: etiquetaDe(n), obligatorio: esObligatorio(n), uso: d.uso || '', datoPersonal: d.finalidad !== undefined, finalidad: d.finalidad || '', sensible: fuera.has(n), formato: d.formato || '', autocomplete: controlPrincipal(n) ? controlPrincipal(n).getAttribute('autocomplete') || '' : '' }; });
+        for (const tpl of $$('template[data-repetible-plantilla]', form)) {
+          for (const el of tpl.content.querySelectorAll('[data-campo]')) {
+            const d = el.dataset; const c = el.querySelector('input, select, textarea'); const et = el.querySelector('.etiqueta');
+            lista.push({ campo: d.campo, etiqueta: et ? et.textContent.trim() : d.campo, obligatorio: d.requerido !== undefined, uso: d.uso || '', datoPersonal: d.finalidad !== undefined, finalidad: d.finalidad || '', sensible: d.sensible !== undefined || d.formato === 'contrasena', formato: d.formato || '', autocomplete: c ? c.getAttribute('autocomplete') || '' : '' });
+          }
+        }
+        return lista;
+      }
     };
     instancias.push(instancia);
     iniciados.set(form, { instancia, extra });
@@ -3791,7 +3864,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       }
 
       /* Quita de un JPG sus metadatos (APP1: EXIF y XMP; APP13: IPTC) sin tocar
-         la imagen. null si el archivo no se puede leer como JPG. */
+         la imagen, y lo que venga pegado después de su fin (FFD9), como otra
+         imagen con su propia ubicación. null si el archivo no se puede leer como JPG. */
       function sinExif(buf) {
         const v = new DataView(buf);
         if (v.byteLength < 4 || v.getUint16(0) !== 0xFFD8) return null;
@@ -3800,7 +3874,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         while (o + 4 <= v.byteLength) {
           const m = v.getUint16(o);
           if ((m & 0xFF00) !== 0xFF00) return null;
-          if (m === 0xFFDA) { partes.push(buf.slice(o)); return new Blob(partes, { type: 'image/jpeg' }); }
+          if (m === 0xFFDA) {
+            const bytes = new Uint8Array(buf);
+            let fin = bytes.length;
+            for (let i = o + 2; i + 1 < bytes.length; i++) if (bytes[i] === 0xFF && bytes[i + 1] === 0xD9) { fin = i + 2; break; }
+            partes.push(buf.slice(o, fin));
+            return new Blob(partes, { type: 'image/jpeg' });
+          }
           const fin = o + 2 + v.getUint16(o + 2);
           if (fin > v.byteLength) return null;
           if (m !== 0xFFE1 && m !== 0xFFED) partes.push(buf.slice(o, fin));
@@ -3836,9 +3916,6 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           a.sha256_original = await huellaDe(buf);
           if (a.sha256_original && lista.some((x) => x !== a && x.sha256_original === a.sha256_original)) throw Object.assign(new Error('duplicado'), { motivo: M.archRechazoDuplicado });
           const esFoto = A.optimiza.tipos.includes(e);
-          /* Lo que recibe el proveedor del borrador tampoco lleva la ubicación sin conservarExif:
-             de un JPG se le da la copia sin metadatos, con el mismo nombre y formato. */
-          if (esFoto && !c.conservarExif && ['jpg', 'jpeg'].includes(e)) { const limpio = sinExif(buf); if (limpio) a.fuente = new File([limpio], f.name, { type: f.type || 'image/jpeg' }); }
           if (esFoto) {
             const meta = ['jpg', 'jpeg'].includes(e) ? leeExif(buf) : {};
             if (c.conservarExif) { if (meta.fecha) a.fecha_captura = meta.fecha; if (meta.lat !== undefined) { a.lat_captura = meta.lat; a.lon_captura = meta.lon; } }
@@ -3848,7 +3925,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
                aunque así pese más que la original. Si no se pudo recodificar, al JPG se le quitan los
                metadatos; si tampoco se puede, la foto se agrega como está: la Secretaría decidió no
                rechazar una foto por sus metadatos (18 oct 2026). */
-            if (opt && (opt.blob.size < f.size || !c.conservarExif)) { a.blob = opt.blob; a.size = opt.blob.size; a.tipo = 'image/jpeg'; a.optimizada = opt.blob.size < f.size; a.dimensiones = `${opt.ancho}x${opt.alto}`; }
+            /* Recodificada, es un JPG: el nombre lo dice, para que la firma que revisa el servidor coincida. */
+            if (opt && (opt.blob.size < f.size || !c.conservarExif)) { a.blob = opt.blob; a.size = opt.blob.size; a.tipo = 'image/jpeg'; a.optimizada = opt.blob.size < f.size; a.dimensiones = `${opt.ancho}x${opt.alto}`; if (!['jpg', 'jpeg'].includes(e)) a.nombre = `${a.nombre.replace(/\.[^.]*$/, '')}.jpg`; }
             else if (!c.conservarExif) {
               const limpio = ['jpg', 'jpeg'].includes(e) ? sinExif(buf) : null;
               a.blob = limpio || f; a.size = a.blob.size; a.optimizada = false;
@@ -3876,7 +3954,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         for (const f of archivos) {
           const nombre = saneaNombre(f.name);
           if (lista.filter((x) => x.estado !== 'error').length >= c.max) { rechazos.push({ nombre, motivo: plantilla(c.max === 1 ? M.archRechazoMaxUno : M.archRechazoMax, { max: c.max }) }); continue; }
-          if (!c.extensiones.includes(ext(f.name))) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoTipo, { formatos: formatosTxt(c) }) }); continue; }
+          /* Un JPG también vale donde se admite una foto que se recodifica a JPG (png, webp): así vuelve del proveedor. */
+          const admite = c.extensiones.includes(ext(f.name)) || (['jpg', 'jpeg'].includes(ext(f.name)) && c.extensiones.some((x) => A.optimiza.tipos.includes(x)));
+          if (!admite) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoTipo, { formatos: formatosTxt(c) }) }); continue; }
           if (f.size < A.minBytes) { rechazos.push({ nombre, motivo: M.archRechazoVacio }); continue; }
           const esFoto = A.optimiza.tipos.includes(ext(f.name));
           if (!esFoto && f.size > c.mb * BYTES_POR_MB) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoPeso, { peso: pesoTxt(f.size), mb: c.mb }) }); continue; }
@@ -3998,13 +4078,19 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       /* Archivos en el borrador. El estándar no los guarda en el dispositivo (FRM-43); si la
          página da un proveedor, FormKit.iniciar(form, { borradorArchivos: { guarda(campo, archivos),
          lee(campo), borra(campo) } }), al escribir el borrador se le pasan los archivos listos de
-         cada campo, como los eligió la persona (un JPG, sin metadatos si no se pide conservarExif);
-         al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
+         cada campo tal como se enviarían: sin conservarExif, la foto ya limpia (sin ubicación, de
+         cualquier formato) y derecha, y con nombre .jpg si se recodificó, para que al volver
+         coincida su firma. Al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
          El proveedor decide dónde guardarlos (en el servidor, en el almacén del sistema). */
       const camposArchivo = () => $$('[data-archivos]', form).map((c) => c.closest('[data-campo]'));
       const conProveedor = (fn) => { const p = ctx.opciones.borradorArchivos; if (!p) return; for (const el of camposArchivo()) Promise.resolve().then(() => fn(p, el)).catch(() => { /* un proveedor que falla no detiene el formulario */ }); };
+      const paraProveedor = (a, c) => {
+        if (c.conservarExif || !a.blob || a.blob === a.fuente) return a.fuente;
+        const nombre = a.tipo === 'image/jpeg' && !/\.jpe?g$/i.test(a.nombre) ? `${a.nombre.replace(/\.[^.]*$/, '')}.jpg` : a.nombre;
+        return new File([a.blob], nombre, { type: a.tipo || a.blob.type });
+      };
       ctx.alBorrador({
-        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo' && a.fuente).map((a) => a.fuente))),
+        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo' && a.fuente).map((a) => paraProveedor(a, configDe(el))))),
         restaura: () => conProveedor((p, el) => p.lee && Promise.resolve(p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); })),
         borra: () => conProveedor((p, el) => p.borra && p.borra(el.dataset.campo))
       });

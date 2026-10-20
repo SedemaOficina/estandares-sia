@@ -55,7 +55,7 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.7 KB |
 | `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 4.4 KB | 7.2 KB |
 | `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.9 KB |
-| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 23.6 KB |
+| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 24.5 KB |
 | `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 11.8 KB |
 | `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 10.0 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 7.8 KB |

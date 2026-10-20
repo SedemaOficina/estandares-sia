@@ -8,10 +8,13 @@
    ========================================================= */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { sirve, abreNavegador, abrePagina, abrePlantilla, PERFILES, RAIZ, visible, continuar, llenaSolicitud, llenaLugar, aceptaDeclaraciones, pngRuido, ocultosVisibles, FRASE_LEGIBLE } from './ayudas.mjs';
+import { mkdtempSync, writeFileSync, readFileSync, copyFileSync, mkdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { createHash } from 'node:crypto';
+import { sirve, abreNavegador, abrePagina, abrePlantilla, PERFILES, PAGINAS, RAIZ, visible, continuar, llenaSolicitud, llenaLugar, aceptaDeclaraciones, pngRuido, jpegConExif, ocultosVisibles, FRASE_LEGIBLE } from './ayudas.mjs';
 
 let servidor, navegador;
 test.before(async () => { servidor = await sirve(); navegador = await abreNavegador(); });
@@ -223,4 +226,150 @@ test('fecha día/mes/año: una fecha AAAA-MM-DD pegada y el botón «Hoy» queda
   assert.equal(await p.inputValue('#dia'), hoy);
   assert.equal(await error(p, 'dia'), '');
   await p.context().close();
+});
+
+/* ----- Bloque 2 (1.5.3): datos personales y paquete ----- */
+
+test('la plantilla de una página no deja en el equipo la fecha de nacimiento ni a los acompañantes, y ofrece el borrador en vez de restaurarlo solo (E1-01)', async () => {
+  const p = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
+  await p.fill('#nombre', 'Fulano'); await p.fill('#apellido_paterno', 'Prueba'); await p.fill('#apellido_materno', 'Ejemplo');
+  await p.fill('#curp', 'PUEF900515HDFRJL04'); await p.keyboard.press('Tab');
+  await p.locator('[data-repetible-agregar]').click();
+  await p.locator('.repetible-fila input').first().fill('Nombre De Acompañante');
+  await p.waitForTimeout(900);
+  const b = await p.evaluate(() => JSON.parse(localStorage.getItem('sia-plantilla-una-pagina') || 'null'));
+  assert.ok(b, 'hay borrador');
+  assert.deepEqual(Object.keys(b.datos).filter((k) => /nacimiento|edad|acompanantes/.test(k)), [], 'ni la fecha que sale de la CURP, ni la edad, ni los acompañantes');
+  const inventario = await p.evaluate(() => FormKit.iniciar(document.querySelector('form')).inventario());
+  const de = (c) => inventario.find((x) => x.campo === c);
+  assert.equal(de('nacimiento').sensible, true, 'el inventario dice que la fecha no va al borrador');
+  assert.equal(de('acompanantes.#.nombre').datoPersonal, true, 'y lista a los acompañantes como dato personal, aunque no haya filas');
+  await p.reload(); await p.waitForTimeout(300);
+  assert.ok(await p.locator('[data-franja-borrador]').isVisible(), 'al volver, se ofrece el borrador: no se restaura solo');
+  assert.equal(await p.inputValue('#nombre'), '', 'nada aparece sin que la persona lo pida');
+  await p.context().close();
+  const dir = mkdtempSync(resolve(tmpdir(), 'auditar-campos-'));
+  writeFileSync(resolve(dir, 'f.html'), '<form><div class="campo" data-campo="otro_nombre" data-formato="nombre" data-uso="x."><label class="etiqueta" for="otro_nombre">Nombre</label><input class="control" id="otro_nombre" name="otro_nombre" autocomplete="name"></div></form>');
+  const r = spawnSync(process.execPath, [resolve(RAIZ, 'herramientas/auditar-campos.mjs'), resolve(dir, 'f.html')], { encoding: 'utf8' });
+  assert.notEqual(r.status, 0, 'auditar-campos falla con un nombre sin data-finalidad');
+  assert.match(r.stdout + r.stderr, /D3.*sin data-finalidad/);
+});
+
+test('una contraseña nunca entra al borrador, aunque el campo no lo declare (E1-02)', async () => {
+  const p = await abre();
+  await p.fill('#clave', 'Mi frase secreta de prueba 2026');
+  await p.fill('#cantidad', '7');
+  await p.waitForTimeout(900);
+  const b = await p.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), CLAVE);
+  assert.equal(b.datos.cantidad, '7');
+  assert.equal(b.datos.clave, undefined, 'la contraseña no está');
+  await p.context().close();
+  const dir = mkdtempSync(resolve(tmpdir(), 'auditar-campos-'));
+  writeFileSync(resolve(dir, 'f.html'), '<form><div class="campo" data-campo="c" data-formato="contrasena" data-uso="x."><label class="etiqueta" for="c">Contraseña</label><input class="control" id="c" name="c" type="password" autocomplete="new-password"></div></form>');
+  const r = spawnSync(process.execPath, [resolve(RAIZ, 'herramientas/auditar-campos.mjs'), resolve(dir, 'f.html')], { encoding: 'utf8' });
+  assert.match(r.stdout + r.stderr, /contraseña sin data-sensible/, 'auditar-campos pide declararla');
+});
+
+/* PNG con un bloque eXIf (donde viajaría la ubicación), insertado tras IHDR. */
+function crc32(buf) { let c = ~0; for (const b of buf) { c ^= b; for (let k = 0; k < 8; k++) c = (c >>> 1) ^ (0xEDB88320 & -(c & 1)); } return ~c >>> 0; }
+function pngConExif(png) {
+  const datos = Buffer.concat([Buffer.from('Exif\0\0'), Buffer.from('GPS de prueba 19.4326 -99.1332')]);
+  const tipo = Buffer.from('eXIf');
+  const largo = Buffer.alloc(4); largo.writeUInt32BE(datos.length);
+  const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(Buffer.concat([tipo, datos])));
+  return Buffer.concat([png.subarray(0, 33), largo, tipo, datos, crc, png.subarray(33)]);
+}
+
+test('el proveedor del borrador recibe lo mismo que se envía: un PNG con ubicación llega limpio y como JPG, y vuelve igual (E1-03, E1-04, E3-05)', async () => {
+  const p = await abrePagina(navegador, servidor.url, 'pruebas/paginas/borrador.html', { contexto: PERFILES.escritorio.contexto });
+  await p.fill('#nombre', 'Con captura');
+  await p.setInputFiles('[data-campo="documento"] input[type="file"]', [{ name: 'captura.png', mimeType: 'image/png', buffer: pngConExif(pngRuido(400, 300)) }]);
+  await p.waitForSelector('[data-campo="documento"] .arch[data-estado="listo"]');
+  await p.waitForFunction(() => JSON.parse(sessionStorage.getItem('arch-documento') || '[]').length);
+  const guardada = await p.evaluate(() => JSON.parse(sessionStorage.getItem('arch-documento'))[0]);
+  const bytes = Buffer.from(guardada.datos.split(',')[1], 'base64');
+  assert.equal(guardada.nombre, 'captura.jpg', 'con el nombre de lo que es');
+  assert.equal(bytes[0], 0xFF, 'un JPG');
+  assert.ok(!bytes.includes(Buffer.from('eXIf')) && !bytes.includes(Buffer.from('Exif\0')) && !bytes.includes(Buffer.from('GPS de prueba')), 'sin la ubicación');
+  const enviado = await p.evaluate(() => { const a = FormKit.archivos.de(document.querySelector('[data-campo="documento"]'))[0]; return { nombre: a.nombre, size: a.size, tipo: a.tipo }; });
+  assert.deepEqual(enviado, { nombre: 'captura.jpg', size: bytes.length, tipo: 'image/jpeg' }, 'lo mismo que se envía: nombre, peso y tipo');
+  await p.reload();
+  await p.waitForSelector('[data-campo="documento"] .arch[data-estado="listo"]');
+  assert.equal((await p.locator('[data-campo="documento"] .arch-nombre').textContent()).trim(), 'captura.jpg', 'y vuelve del proveedor sin rechazo');
+  await p.context().close();
+});
+
+test('borradores de equipos compartidos: se borran los vencidos de todo el sitio y «No guardar en este equipo» no deja nada (E1-05)', async () => {
+  const p = await abre();
+  const viejo = Date.now() - 15 * 86400000;
+  await p.evaluate((t) => {
+    localStorage.setItem('otro-formulario', JSON.stringify({ v: '1', t, datos: { nombre: 'Persona anterior' } }));
+    localStorage.setItem('del-futuro', JSON.stringify({ v: '1', t: Date.now() + 10 * 365 * 86400000, datos: {} }));
+    localStorage.setItem('otra-cosa', JSON.stringify({ t: 1, preferencia: 'oscuro' }));
+  }, viejo);
+  await p.reload(); await p.waitForTimeout(200);
+  const quedan = await p.evaluate(() => ['otro-formulario', 'del-futuro', 'otra-cosa'].filter((k) => localStorage.getItem(k) !== null));
+  assert.deepEqual(quedan, ['otra-cosa'], 'se borran los borradores vencidos de otros formularios; lo que no es un borrador se queda');
+  await p.context().close();
+
+  const q = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  await q.fill('#descripcion', FRASE_LEGIBLE);
+  await q.waitForTimeout(900);
+  await q.reload(); await q.waitForTimeout(300);
+  await q.click('[data-borrador="no-guardar"]');
+  assert.equal(await q.evaluate(() => localStorage.getItem('sia-plantilla-pasos')), null, 'se borra el borrador anterior');
+  assert.match(await q.locator('[data-aviso-formkit]').textContent(), /Nada se guarda en este equipo/, 'y se dice con palabras');
+  await q.fill('#descripcion', `${FRASE_LEGIBLE} Otra vez.`);
+  await q.waitForTimeout(900);
+  assert.equal(await q.evaluate(() => localStorage.getItem('sia-plantilla-pasos')), null, 'lo que se escriba después tampoco se guarda');
+  await q.context().close();
+});
+
+/* Nombres de los archivos dentro de un ZIP (directorio central). */
+function nombresEnZip(buf) {
+  const nombres = [];
+  const fin = buf.lastIndexOf(Buffer.from([0x50, 0x4B, 0x05, 0x06]));
+  let o = buf.readUInt32LE(fin + 16);
+  for (let k = 0, n = buf.readUInt16LE(fin + 10); k < n; k++) {
+    const largo = buf.readUInt16LE(o + 28), extra = buf.readUInt16LE(o + 30), coment = buf.readUInt16LE(o + 32);
+    nombres.push(buf.subarray(o + 46, o + 46 + largo).toString('utf8'));
+    o += 46 + largo + extra + coment;
+  }
+  return nombres;
+}
+
+test('el paquete sólo lleva lo guardado en Git, se arma en Windows, sale igual dos veces y lleva sus huellas; la revisión de secretos los detecta (F4-01, F4-02, F4-03, F4-04)', () => {
+  const raizRepo = resolve(RAIZ, '..');
+  const dir = mkdtempSync(resolve(tmpdir(), 'paquete-'));
+  const clon = resolve(dir, 'clon');
+  const firma = ['-c', 'user.name=prueba', '-c', 'user.email=prueba@ejemplo.local'];
+  execFileSync('git', ['clone', '-q', raizRepo, clon]);
+  /* Las herramientas que se prueban son las de esta copia de trabajo. */
+  copyFileSync(resolve(RAIZ, 'herramientas/construir.mjs'), resolve(clon, 'formularios/herramientas/construir.mjs'));
+  mkdirSync(resolve(clon, 'herramientas'), { recursive: true });
+  copyFileSync(resolve(raizRepo, 'herramientas/secretos.mjs'), resolve(clon, 'herramientas/secretos.mjs'));
+  copyFileSync(resolve(raizRepo, '.gitignore'), resolve(clon, '.gitignore'));
+  execFileSync('git', ['add', '-A'], { cwd: clon });
+  execFileSync('git', [...firma, 'commit', '-qm', 'herramientas', '--allow-empty'], { cwd: clon });
+  const limpio = spawnSync(process.execPath, ['herramientas/secretos.mjs'], { cwd: clon, encoding: 'utf8' });
+  assert.equal(limpio.status, 0, `sin testigos, la revisión de secretos pasa: ${limpio.stdout}`);
+  /* Los testigos se arman al correr: escritos tal cual, la revisión de secretos señalaría este archivo. */
+  const llave = ['-----BEGIN', 'PRIVATE', 'KEY-----'].join(' ');
+  const asignacion = `const ${['api', 'key'].join('_')} = "${'abcdefghij'.repeat(2)}12345";`;
+  const testigos = { 'formularios/claves.local.json': '{"llave":"x"}', 'formularios/.env': 'CLAVE=1', 'formularios/llave.pem': 'x', 'formularios/notas.txt': llave, 'formularios/respaldo.orig': 'x', 'formularios/codigo/secreto.js': asignacion, 'formularios/notas-de-trabajo.md': 'notas sin guardar' };
+  for (const [f, t] of Object.entries(testigos)) writeFileSync(resolve(clon, f), t);
+  const conTestigos = spawnSync(process.execPath, ['herramientas/secretos.mjs'], { cwd: clon, encoding: 'utf8' });
+  assert.notEqual(conTestigos.status, 0, 'con testigos, falla');
+  for (const f of ['formularios/notas.txt', 'formularios/codigo/secreto.js']) assert.ok(conTestigos.stdout.includes(f), `señala ${f}`);
+  const arma = () => { const r = spawnSync(process.execPath, ['herramientas/construir.mjs', '--zip'], { cwd: resolve(clon, 'formularios'), encoding: 'utf8' }); assert.equal(r.status, 0, r.stderr || r.stdout); };
+  arma();
+  const version = JSON.parse(readFileSync(resolve(clon, 'formularios/codigo/manifiesto.json'), 'utf8')).version;
+  const zip = resolve(clon, `estandar-formularios-v${version}.zip`);
+  const huella1 = createHash('sha256').update(readFileSync(zip)).digest('hex');
+  assert.equal(readFileSync(`${zip}.sha256`, 'utf8').split(' ')[0], huella1, 'junto al ZIP va su huella');
+  const nombres = nombresEnZip(readFileSync(zip));
+  for (const f of Object.keys(testigos)) assert.ok(!nombres.includes(f), `${f} no entra al paquete`);
+  assert.ok(nombres.includes('formularios/HUELLAS.sha256') && nombres.includes('formularios/codigo/js/formkit.core.js'), 'lleva sus huellas y el núcleo');
+  arma();
+  assert.equal(createHash('sha256').update(readFileSync(zip)).digest('hex'), huella1, 'dos construcciones del mismo commit dan el mismo ZIP');
 });

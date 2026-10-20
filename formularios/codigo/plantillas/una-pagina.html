@@ -42,6 +42,19 @@
     </ol>
   </nav>
 
+  <!-- Borrador recuperado: sólo aparece si hay uno vigente en este dispositivo. «No guardar en este equipo» lo borra y no guarda nada mientras la pestaña siga abierta (equipos compartidos). -->
+  <div class="franja" data-franja-borrador hidden>
+    <p class="franja-texto">Hay un borrador guardado el <span data-borrador-fecha></span>. Guardar el avance no es enviar el registro.</p>
+    <button type="button" class="btn btn-secundario" data-borrador="recuperar">Recuperar borrador</button>
+    <button type="button" class="btn btn-secundario" data-borrador="descartar">Empezar de nuevo</button>
+    <button type="button" class="btn-enlace" data-borrador="no-guardar">No guardar en este equipo</button>
+    <div class="aviso aviso-advertencia" data-borrador-confirma hidden>
+      <svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg>
+      <div class="aviso-texto"><p><strong class="aviso-titulo">¿Descartar el borrador?</strong> Se borra lo que capturaste en este dispositivo y no se puede deshacer.</p>
+        <div class="acciones"><button type="button" class="btn-enlace" data-borrador="conservar">Conservar</button><button type="button" class="btn btn-peligro" data-borrador="descartar-si">Descartar borrador</button></div></div>
+    </div>
+  </div>
+
   <p class="guardado" data-guardado aria-live="polite"></p>
 
   <form id="formulario" class="tarjeta" data-formkit data-borrador="sia-plantilla-una-pagina" data-borrador-version="1" action="#" method="post">
@@ -75,7 +88,7 @@
           <p class="ayuda">Son 18 caracteres. Tu fecha de nacimiento se toma de ella.</p>
           <input class="control" id="curp" name="curp" type="text" maxlength="18" autocomplete="off" spellcheck="false">
         </div>
-        <div class="campo" data-campo="nacimiento" data-formato="fecha" data-deriva="edad=edad" data-uso="Derivada de la CURP; no se pide por separado.">
+        <div class="campo" data-campo="nacimiento" data-formato="fecha" data-deriva="edad=edad" data-sensible data-uso="Derivada de la CURP; no se pide por separado." data-finalidad="Identificar a la persona registrada.">
           <label class="etiqueta" for="nacimiento">Fecha de nacimiento</label>
           <p class="ayuda">Si no es correcta, corrige la CURP.</p>
           <input class="control control-corto" id="nacimiento" name="nacimiento" type="date" readonly autocomplete="bday">
@@ -94,7 +107,8 @@
         <label class="etiqueta" for="correo">Correo electrónico</label>
         <input class="control" id="correo" name="correo" type="email" maxlength="120" autocomplete="email">
       </div>
-      <div class="campo" data-campo="correo2" data-formato="correo" data-requerido data-sensible data-uso="Evitar errores de captura en el correo." data-cruzada="igual" data-cruzada-campos="original=correo confirmacion=correo2">
+      <!-- autocomplete off: la confirmación se escribe a mano, para notar un error de dedo. -->
+      <div class="campo" data-campo="correo2" data-formato="correo" data-requerido data-sensible data-finalidad="Enviar la confirmación del registro." data-uso="Evitar errores de captura en el correo." data-cruzada="igual" data-cruzada-campos="original=correo confirmacion=correo2">
         <label class="etiqueta" for="correo2">Confirma tu correo</label>
         <input class="control" id="correo2" name="correo2" type="email" maxlength="120" autocomplete="off">
       </div>
@@ -171,9 +185,11 @@
       <ol class="repetible-lista" data-repetible-lista></ol>
       <template data-repetible-plantilla>
         <li>
+          <!-- autocomplete off: son datos de terceros (quien acompaña), no de quien llena. -->
           <div class="fila">
-            <div class="campo" data-campo="acompanantes.#.nombre" data-formato="nombre" data-requerido data-uso="Registrar acompañantes."><label class="etiqueta" for="ac-#-n">Nombre</label><input class="control" id="ac-#-n" name="acompanantes[#][nombre]" type="text" maxlength="80" autocomplete="off"></div>
-            <div class="campo" data-campo="acompanantes.#.edad" data-formato="numero" data-uso="Adecuar la actividad a la edad."><label class="etiqueta" for="ac-#-e">Edad</label><input class="control control-corto" id="ac-#-e" name="acompanantes[#][edad]" type="text" inputmode="numeric" min="0" max="120" step="1" autocomplete="off"></div>
+            <div class="campo" data-campo="acompanantes.#.nombre" data-formato="nombre" data-requerido data-sensible data-uso="Registrar acompañantes." data-finalidad="Registrar a quienes acompañan a la persona en la actividad."><label class="etiqueta" for="ac-#-n">Nombre</label><input class="control" id="ac-#-n" name="acompanantes[#][nombre]" type="text" maxlength="80" autocomplete="off"></div>
+            <!-- autocomplete off: también es dato de un tercero. -->
+            <div class="campo" data-campo="acompanantes.#.edad" data-formato="numero" data-sensible data-uso="Adecuar la actividad a la edad." data-finalidad="Adecuar la actividad a la edad de quien acompaña."><label class="etiqueta" for="ac-#-e">Edad</label><input class="control control-corto" id="ac-#-e" name="acompanantes[#][edad]" type="text" inputmode="numeric" min="0" max="120" step="1" autocomplete="off"></div>
           </div>
         </li>
       </template>
@@ -221,7 +237,7 @@
 
 <dialog class="dialogo" id="dialogo-privacidad" aria-labelledby="titulo-privacidad">
   <h2 class="titulo-bloque dialogo-titulo" id="titulo-privacidad">Aviso de privacidad simplificado</h2>
-  <p class="priv-parrafo">La Secretaría del Medio Ambiente recaba estos datos para operar el programa de ejemplo. Las sugerencias de alcaldía y el borrador se guardan sólo en este dispositivo.</p>
+  <p class="priv-parrafo">La Secretaría del Medio Ambiente recaba estos datos para operar el programa de ejemplo. Las sugerencias de alcaldía y el borrador se guardan sólo en este dispositivo. El borrador no guarda tu CURP, tus datos de contacto, los de quienes te acompañan, contraseñas ni archivos, y se borra solo a los 14 días o al enviar.</p>
   <p class="priv-parrafo">Fundamento: <span class="pendiente">[Art. __, fracc. __]</span>. Pendiente de verificación.</p>
   <div class="dialogo-cierre"><button type="button" class="btn btn-primario" data-cierra-dialogo>Cerrar</button></div>
 </dialog>

@@ -1,5 +1,44 @@
 # Historial de cambios
 
+## 1.5.3 · 2026-10-20
+
+Segundo bloque de la auditoría del 19 oct 2026: datos personales en el dispositivo y el paquete. Cada hallazgo lleva su clave del informe y una prueba en `08-auditoria` que falla con 1.5.2 y pasa ahora.
+
+**Lo que se queda en el equipo.**
+- **E1-01 · Plantilla de una página** (FRM-43, FRM-55): el borrador guardaba la fecha de nacimiento que sale de la CURP y el nombre y la edad de los acompañantes (posibles menores), y se restauraba solo, sin preguntar. En un equipo compartido, la siguiente persona los veía. Ahora:
+  - lo que se calcula de un dato sensible (`data-deriva`) es sensible: la fecha que sale de la CURP y la edad que sale de esa fecha no van al borrador;
+  - los acompañantes llevan `data-sensible` y `data-finalidad`;
+  - la plantilla tiene franja de borrador: se ofrece, no se restaura sola;
+  - el bloque de identificación de la guía (`b_nacimiento`) también va marcado.
+  
+  `inventario()` marca como sensible todo lo que no va al borrador y lista los campos de los grupos repetibles con su patrón, aunque no haya filas.
+- **E1-02 · Contraseñas** (núcleo, FRM-43): una contraseña sin `data-sensible` se guardaba en claro. Ahora nunca entran al borrador las contraseñas ni los códigos (`type="password"`, formato `contrasena`, `autocomplete` `*-password`, `one-time-code`, `cc-*`), aunque el campo no lo declare.
+- **E1-05 · Equipos compartidos** (núcleo, FRM-42): al abrir cualquier formulario del estándar se borran los borradores vencidos de todo el sitio, no sólo el suyo, y los que tienen fecha futura. La franja ofrece «No guardar en este equipo» (`[data-borrador="no-guardar"]`): borra el borrador y no guarda nada mientras la pestaña siga abierta (decisión de la Secretaría). El aviso de privacidad de las plantillas dice qué no guarda el borrador y cuándo se borra.
+- **Auditoría de campos** (`auditar-campos`, D3, FRM-55): un dato de identidad o contacto sin `data-finalidad` ya falla, aunque no la declare (salvo un comentario «no personal: motivo»), y una contraseña sin `data-sensible`, también. Se marcaron los campos de la guía y de la plantilla que no la tenían (confirmación de correo, CURP y RFC de muestra, personas de muestra). Se anotaron como no personales la dirección y el código postal del predio y el probador de formatos.
+
+**Fotos y archivos.**
+- **E1-03 y E1-04 · Proveedor del borrador** (`archivos`, FRM-43): recibía un PNG o un WebP con su ubicación, y una foto vertical volvía girada al recuperar el borrador. Ahora recibe lo mismo que se envía: la foto ya limpia y derecha (decisión de la Secretaría). Al quitar los metadatos de un JPG también se quita lo que venga pegado después del fin de la imagen.
+- **E3-05 · Foto recodificada** (`archivos`, FRM-53): viajaba como JPEG con nombre «.png». Ahora viaja como `.jpg`. Un campo que admite png o webp admite también ese JPG, en el navegador y en el servidor.
+
+**El paquete.**
+- **F4-01 y F4-02 · ZIP** (`construir.mjs`): `npm run zip` no funcionaba en Windows (usaba `zip`), borraba antes el ZIP anterior y metía todo lo que hubiera en la carpeta, aunque Git lo ignorara (llaves, notas locales, respaldos). Ahora se arma con Git (`git archive`) desde el último commit. Sólo lleva lo guardado, y dos construcciones del mismo commit dan el mismo ZIP (decisión de la Secretaría).
+- **F4-04 · Huellas del paquete**: el ZIP lleva dentro `HUELLAS.sha256`, una por archivo, y junto a él su `.sha256`.
+- **F4-03 · Que no se publique una llave**: el `.gitignore` cubre archivos de entorno, llaves, respaldos y el ZIP. La verificación de la raíz tiene una comprobación nueva, `herramientas/secretos.mjs`. Revisa lo guardado y lo que entraría con `git add`, por nombre y por contenido (llaves privadas, fichas de acceso de servicios comunes, contraseñas escritas).
+
+**Datos de prueba.** La CURP de ejemplo tenía forma válida y correspondía a un nombre muy común; podía ser de una persona real. Ahora es la de «Fulano Prueba Ejemplo» (`PUEF900515HDFRJL04`), con dígito verificador válido (decisión de la Secretaría). Cambió en la guía, el probador y las pruebas.
+
+**Mensajes nuevos** (203 en total): `borradorNoGuardar`.
+
+**Reglas**: FRM-42, 43, 53 y 55 dicen lo nuevo.
+
+**Pruebas**: cinco casos nuevos en `08-auditoria` (17 en total, 153 en el paquete). Corridos sobre la versión anterior, fallan los cinco. La prueba P148 de `07` espera ahora que el proveedor reciba y devuelva la foto como JPG.
+
+**Qué puede cambiar un proyecto**:
+- si copió la plantilla de una página, agrega la franja del borrador y marca a sus acompañantes;
+- si tiene campos de identidad sin `data-finalidad`, `auditar-campos` se los señala;
+- si usaba la CURP de ejemplo anterior en sus pruebas, cámbiala por la nueva;
+- si armaba el ZIP a mano, usa `npm run zip`.
+
 ## 1.5.2 · 2026-10-20
 
 Primer bloque de la auditoría profesional del 19 oct 2026 (informe fuera del repositorio): lo que perdía o falseaba datos. Cada hallazgo lleva su clave del informe y una prueba en `08-auditoria` que falla con 1.5.1 y pasa ahora.

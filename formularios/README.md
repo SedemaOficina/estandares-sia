@@ -1,4 +1,4 @@
-# Estándar de formularios web del SIA · versión 1.5.2
+# Estándar de formularios web del SIA · versión 1.5.3
 
 Paquete genérico de estilos, componentes, validaciones y reglas para construir formularios web del Sistema de Información Ambiental de la Secretaría del Medio Ambiente de la Ciudad de México. Es un **manual para quien programa**: se copia lo que el formulario necesita, se declara cada campo con atributos y se verifica con las herramientas incluidas. Funciona en teléfono y en escritorio, sin dependencias y sin pedir nada a terceros.
 
@@ -52,7 +52,7 @@ npm run probar              # sólo las pruebas
 npm run auditar             # sólo el auditor de CSS
 npm run construir           # regenera iconos, manifiesto, dist, esquemas y docs/04
 npm run artefacto           # además la guía autocontenida
-npm run zip                 # el paquete completo en ../estandar-formularios-v1.5.2.zip
+npm run zip                 # el paquete en ../estandar-formularios-vX.Y.Z.zip, con su .sha256: sólo lo guardado en Git (guarda antes los cambios)
 npm run capturas            # evidencia visual en verificacion/capturas/
 ```
 

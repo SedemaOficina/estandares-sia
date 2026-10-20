@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.2
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.3
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -35,6 +35,27 @@
   const BYTES_POR_MB = 1048576;
   const BYTES_POR_KB = 1024;
   const MS_POR_DIA = 86400000;
+  /* Autocompletado de un secreto: nunca va al borrador del dispositivo. */
+  const AUTOCOMPLETE_SECRETO = /(^|\s)(current-password|new-password|one-time-code|cc-[a-z-]+)$/;
+  /* Un borrador del estándar: {v, t, datos}. */
+  const esBorrador = (b) => !!b && typeof b === 'object' && typeof b.v === 'string' && typeof b.t === 'number' && !!b.datos && typeof b.datos === 'object';
+  const vencido = (t, ttlDias) => Date.now() - t > ttlDias * MS_POR_DIA || t > Date.now() + MS_POR_DIA;
+  /* Al abrir cualquier formulario se borran los borradores vencidos de todo el sitio, no
+     sólo el suyo: en un equipo compartido no queda nada de nadie más allá de su caducidad. */
+  let purgado = false;
+  function purgaBorradoresVencidos(ttlDias) {
+    if (purgado) return;
+    purgado = true;
+    try {
+      const ls = global.localStorage;
+      for (let i = ls.length - 1; i >= 0; i--) {
+        const k = ls.key(i);
+        let b = null;
+        try { b = JSON.parse(ls.getItem(k)); } catch (e) { continue; }
+        if (esBorrador(b) && vencido(b.t, ttlDias)) ls.removeItem(k);
+      }
+    } catch (e) { /* sin almacén */ }
+  }
   const pesoTxt = (b) => (b < BYTES_POR_MB ? `${Math.max(1, Math.round(b / BYTES_POR_KB))} KB` : `${(b / BYTES_POR_MB).toFixed(1)} MB`);
   const normalizaBusqueda = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   let contadorIds = 0;
@@ -695,17 +716,45 @@
     const alBorrador = (def) => { suscritosBorrador.push(def); };
     const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
     function borraBorrador() { almacen.borra(claveBorrador); avisaBorrador('borra'); }
+    /* Lo que nunca va al borrador del dispositivo: lo sensible (data-sensible), toda
+       contraseña o código aunque el campo no lo declare, y lo que se calcula de algo que
+       no va (la fecha que sale de la CURP, la edad que sale de esa fecha). */
+    function fueraDelBorrador() {
+      const fuera = new Set();
+      for (const n of nombres()) {
+        const el = envoltura(n);
+        const c = controlPrincipal(n);
+        const ac = c ? c.getAttribute('autocomplete') || '' : '';
+        if (el.hasAttribute('data-sensible') || el.dataset.formato === 'contrasena' || (c && c.type === 'password') || AUTOCOMPLETE_SECRETO.test(ac)) fuera.add(n);
+      }
+      const pendientes = [...fuera];
+      while (pendientes.length) {
+        const el = envoltura(pendientes.pop());
+        const deriva = el && el.dataset.deriva ? el.dataset.deriva : '';
+        for (const par of deriva.split(/\s+/).filter(Boolean)) {
+          const destino = par.split('=')[1];
+          if (destino && !fuera.has(destino) && envoltura(destino)) { fuera.add(destino); pendientes.push(destino); }
+        }
+      }
+      return fuera;
+    }
+    /* «No guardar en este equipo» ([data-borrador="no-guardar"]): mientras la pestaña siga
+       abierta, nada se guarda en el dispositivo. */
+    const claveNoGuardar = `${claveBorrador}:no-guardar`;
+    let noGuardar = false;
+    try { noGuardar = !!claveBorrador && global.sessionStorage.getItem(claveNoGuardar) === '1'; } catch (e) { /* sin almacén de sesión */ }
 
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado || !personaActuo || franjaPendiente) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo || franjaPendiente || noGuardar) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
     function datosBorrador() {
       const datos = {};
+      const fuera = fueraDelBorrador();
       for (const n of nombres()) {
         const el = envoltura(n);
-        if (el.hasAttribute('data-sensible') || tipoDe(el) === 'auxiliar' || tipos.has(tipoDe(el)) && !tipos.get(tipoDe(el)).enBorrador) continue;
+        if (fuera.has(n) || tipoDe(el) === 'auxiliar' || tipos.has(tipoDe(el)) && !tipos.get(tipoDe(el)).enBorrador) continue;
         datos[n] = valorDe(n);
       }
       return datos;
@@ -724,14 +773,23 @@
     }
     /* Si la persona cierra o cambia de pestaña antes de que venza el retardo,
        el borrador pendiente se escribe en ese momento. */
-    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado && !franjaPendiente) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
+    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado && !franjaPendiente && !noGuardar) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
+    function dejaDeGuardar() {
+      noGuardar = true;
+      clearTimeout(temporizadorBorrador);
+      borraBorrador();
+      try { global.sessionStorage.setItem(claveNoGuardar, '1'); } catch (e) { /* sin almacén de sesión: dura hasta recargar */ }
+      if (franja) { franja.hidden = true; franjaPendiente = false; }
+      aviso(form, { tono: 'neutro', texto: M.borradorNoGuardar, foco: true });
+    }
+    document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-borrador="no-guardar"]'); if (b && claveBorrador && (form.contains(b) || (franja && franja.contains(b)))) dejaDeGuardar(); });
 
     function leeBorrador() {
       const crudo = almacen.lee(claveBorrador);
       if (!crudo) return null;
       try {
         const b = JSON.parse(crudo);
-        if (b.v !== versionBorrador || Date.now() - b.t > cfg.borrador.ttlDias * MS_POR_DIA) { borraBorrador(); return null; }
+        if (!esBorrador(b) || b.v !== versionBorrador || vencido(b.t, cfg.borrador.ttlDias)) { borraBorrador(); return null; }
         return b;
       } catch (e) { borraBorrador(); return null; }
     }
@@ -985,7 +1043,8 @@
     for (const [, def] of activos) if (def.iniciar) def.iniciar(form, ctx);
     for (const s of $$('select', form)) s.toggleAttribute('data-vacio', !s.value);
     aplicaCondicionales();
-    if (claveBorrador) {
+    purgaBorradoresVencidos(cfg.borrador.ttlDias);
+    if (claveBorrador && !noGuardar) {
       const previo = leeBorrador();
       if (previo) { if (franja) iniciaFranja(previo); else restauraBorrador(previo); }
     }
@@ -1000,7 +1059,20 @@
       enviar,
       marcaError,
       /* Inventario de datos personales: qué se pide, para qué y con qué finalidad (FRM-55). */
-      inventario: () => nombres().map((n) => { const d = envoltura(n).dataset; return { campo: n, etiqueta: etiquetaDe(n), obligatorio: esObligatorio(n), uso: d.uso || '', datoPersonal: d.finalidad !== undefined, finalidad: d.finalidad || '', sensible: d.sensible !== undefined, formato: d.formato || '', autocomplete: controlPrincipal(n) ? controlPrincipal(n).getAttribute('autocomplete') || '' : '' }; })
+      /* «sensible»: no va al borrador del dispositivo (también lo derivado de algo sensible).
+         Los campos de un grupo repetible se listan una vez, con su patrón (grupo.#.campo),
+         aunque todavía no haya filas. */
+      inventario: () => {
+        const fuera = fueraDelBorrador();
+        const lista = nombres().filter((n) => !/\.\d+\./.test(n)).map((n) => { const d = envoltura(n).dataset; return { campo: n, etiqueta: etiquetaDe(n), obligatorio: esObligatorio(n), uso: d.uso || '', datoPersonal: d.finalidad !== undefined, finalidad: d.finalidad || '', sensible: fuera.has(n), formato: d.formato || '', autocomplete: controlPrincipal(n) ? controlPrincipal(n).getAttribute('autocomplete') || '' : '' }; });
+        for (const tpl of $$('template[data-repetible-plantilla]', form)) {
+          for (const el of tpl.content.querySelectorAll('[data-campo]')) {
+            const d = el.dataset; const c = el.querySelector('input, select, textarea'); const et = el.querySelector('.etiqueta');
+            lista.push({ campo: d.campo, etiqueta: et ? et.textContent.trim() : d.campo, obligatorio: d.requerido !== undefined, uso: d.uso || '', datoPersonal: d.finalidad !== undefined, finalidad: d.finalidad || '', sensible: d.sensible !== undefined || d.formato === 'contrasena', formato: d.formato || '', autocomplete: c ? c.getAttribute('autocomplete') || '' : '' });
+          }
+        }
+        return lista;
+      }
     };
     instancias.push(instancia);
     iniciados.set(form, { instancia, extra });

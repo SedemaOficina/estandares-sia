@@ -55,7 +55,7 @@ test('mínimo según otra respuesta y paso decimal, en el navegador (P61, P40)',
 
 test('la cruzada CURP–fecha se repite al cambiar la fecha (P44)', async () => {
   const p = await abre();
-  await p.fill('#curp', 'PEGJ900515HDFRRN09'); await p.keyboard.press('Tab');
+  await p.fill('#curp', 'PUEF900515HDFRJL04'); await p.keyboard.press('Tab');
   await p.fill('#nacimiento', '1990-05-15'); await p.keyboard.press('Tab');
   assert.equal(await error(p, 'curp'), '', 'CURP y fecha coinciden');
   await p.fill('#nacimiento', '1991-01-01'); await p.keyboard.press('Tab');
@@ -106,7 +106,7 @@ test('lista con búsqueda con el catálogo {filas}, archivo obligatorio y textos
 
 test('los errores que devuelve el servidor se pintan junto a su campo y en el resumen (P41)', async () => {
   const p = await abre();
-  await p.fill('#curp', 'PEGJ900515HDFRRN09');
+  await p.fill('#curp', 'PUEF900515HDFRJL04');
   await p.fill('#nacimiento', '1990-05-15');
   await p.fill('#materno', 'Cual');
   await p.setInputFiles('[data-campo="retrato"] input[type="file"]:not([data-entrada-camara])', [{ name: 'retrato.png', mimeType: 'image/png', buffer: pngRuido(400, 300) }]);
@@ -124,14 +124,14 @@ test('los errores que devuelve el servidor se pintan junto a su campo y en el re
 
 test('la CURP se compara con el nombre y los apellidos, y se revisa de nuevo al cambiarlos (P43)', async () => {
   const p = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
-  await p.fill('#nombre', 'Juan'); await p.fill('#apellido_paterno', 'Pérez');
-  await p.fill('#curp', 'PEGJ900515HDFRRN09'); await p.keyboard.press('Tab');
-  assert.match(await error(p, 'curp'), /segundo apellido/, 'sin segundo apellido escrito, esta CURP (G en la posición 3) no corresponde');
-  await p.fill('#apellido_materno', 'García'); await p.keyboard.press('Tab');
+  await p.fill('#nombre', 'Fulano'); await p.fill('#apellido_paterno', 'Prueba');
+  await p.fill('#curp', 'PUEF900515HDFRJL04'); await p.keyboard.press('Tab');
+  assert.match(await error(p, 'curp'), /segundo apellido/, 'sin segundo apellido escrito, esta CURP (E en la posición 3) no corresponde');
+  await p.fill('#apellido_materno', 'Ejemplo'); await p.keyboard.press('Tab');
   assert.equal(await error(p, 'curp'), '', 'al escribir el segundo apellido, el error se va');
   await p.fill('#nombre', 'Pedro'); await p.keyboard.press('Tab');
   assert.match(await error(p, 'curp'), /no corresponde/, 'al cambiar el nombre, la CURP se vuelve a revisar');
-  await p.fill('#nombre', 'Juan'); await p.keyboard.press('Tab');
+  await p.fill('#nombre', 'Fulano'); await p.keyboard.press('Tab');
   assert.equal(await error(p, 'curp'), '', 'y al corregirlo, se libera');
   assert.deepEqual(p.registro, [], 'consola limpia');
   await p.context().close();
@@ -286,7 +286,7 @@ test('acuse con relleno lateral y una acción para seguir; en la revisión, «Ed
 
 test('tras un envío fallido, el aviso no se oculta con el foco (el botón no salta) y sí al cambiar un dato (P87)', async () => {
   const p = await abre();
-  await p.fill('#curp', 'PEGJ900515HDFRRN09');
+  await p.fill('#curp', 'PUEF900515HDFRJL04');
   await p.fill('#nacimiento', '1990-05-15');
   await p.fill('#materno', 'Cual');
   await p.setInputFiles('[data-campo="retrato"] input[type="file"]:not([data-entrada-camara])', [{ name: 'retrato.png', mimeType: 'image/png', buffer: pngRuido(400, 300) }]);
@@ -389,7 +389,7 @@ test('un formulario que ya arrancó solo no se inicia otra vez: la llamada de la
   });
   assert.ok(r.misma, 'la segunda llamada devuelve la misma instancia');
   assert.equal(r.botones, 2, 'no se duplican los botones «Mostrar»');
-  await p.fill('#curp', 'PEGJ900515HDFRRN09');
+  await p.fill('#curp', 'PUEF900515HDFRJL04');
   await p.fill('#nacimiento', '1990-05-15');
   await p.fill('#materno', 'Cual');
   await p.setInputFiles('[data-campo="retrato"] input[type="file"]:not([data-entrada-camara])', [{ name: 'retrato.png', mimeType: 'image/png', buffer: pngRuido(400, 300) }]);
@@ -584,14 +584,14 @@ test('el borrador no guarda la precarga de la página, empieza con la persona y 
   await p.fill('#nombre', 'Grupo de la persona');
   await p.setInputFiles('[data-campo="documento"] input[type="file"]', [{ name: 'comprobante.png', mimeType: 'image/png', buffer: pngRuido(400, 300) }]);
   await p.waitForSelector('[data-campo="documento"] .arch[data-estado="listo"]');
-  await p.waitForFunction(() => window.__proveedor.guarda.some(([c, a]) => c === 'documento' && a.includes('comprobante.png')));
+  await p.waitForFunction(() => window.__proveedor.guarda.some(([c, a]) => c === 'documento' && a.includes('comprobante.jpg')));
   await p.waitForFunction(() => sessionStorage.getItem('arch-documento') && JSON.parse(localStorage.getItem('prueba-borrador') || 'null'));
   assert.equal((await borrador()).datos.nombre, 'Grupo de la persona', 'con el primer gesto de la persona, sí');
   assert.equal((await borrador()).datos.documento, undefined, 'el archivo no va al borrador del dispositivo');
   await p.reload();
   await p.waitForSelector('[data-campo="documento"] .arch[data-estado="listo"]');
   assert.equal(await p.inputValue('#nombre'), 'Grupo de la persona', 'al volver, el borrador se recupera');
-  assert.equal((await p.locator('[data-campo="documento"] .arch-nombre').textContent()).trim(), 'comprobante.png', 'y el archivo vuelve del proveedor');
+  assert.equal((await p.locator('[data-campo="documento"] .arch-nombre').textContent()).trim(), 'comprobante.jpg', 'y el archivo vuelve del proveedor, ya como JPG: lo mismo que se envía');
   await p.click('[data-accion="enviar"]');
   await p.waitForFunction(() => window.__proveedor.borra.includes('documento'));
   assert.equal(await borrador(), null, 'al enviar se borra el borrador y se le avisa al proveedor');

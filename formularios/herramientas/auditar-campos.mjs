@@ -82,6 +82,9 @@ for (const ruta of archivos) {
     }
     const esIdentidad = IDENTIDAD.test(d['data-formato'] || '') || (principal && AUTOCOMPLETE_IDENTIDAD.test(principal.a.autocomplete || ''));
     if (personal && esIdentidad && d['data-sensible'] === undefined && !/<!--[^>]*no sensible:[^>]*-->/i.test(bloque) && !/<!--[^>]*no sensible:[^>]*-->/i.test(html.slice(Math.max(0, p.inicio - 300), p.inicio))) falla('D3', 'dato personal de identidad o contacto sin data-sensible (quedaría en el borrador local); si es deliberado, comentario «no sensible: motivo»');
+    /* Un dato de identidad es personal aunque el campo no lo declare: sin data-finalidad no entra en el inventario del aviso de privacidad. */
+    if (!personal && esIdentidad && !/<!--[^>]*no personal:[^>]*-->/i.test(bloque) && !/<!--[^>]*no personal:[^>]*-->/i.test(html.slice(Math.max(0, p.inicio - 300), p.inicio))) falla('D3', 'dato de identidad o contacto sin data-finalidad: no entraría en el inventario del aviso de privacidad; si no es de una persona, comentario «no personal: motivo»');
+    if ((d['data-formato'] === 'contrasena' || (principal && principal.a.type === 'password')) && d['data-sensible'] === undefined) falla('D3', 'contraseña sin data-sensible: el núcleo la deja fuera del borrador, pero el HTML debe declararlo');
     const esperado = INPUTMODE_POR_FORMATO[d['data-formato']];
     if (principal && principal.tag === 'input' && esperado && principal.a.inputmode === undefined && TYPES_CON_TECLADO[principal.a.type] !== esperado && !principal.a.readonly) falla('D4', `formato ${d['data-formato']} sin inputmode="${esperado}" (teclado adecuado en el teléfono)`);
     p.ayuda = textoDe(bloque, AYUDA);

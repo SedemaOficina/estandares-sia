@@ -147,7 +147,8 @@
       }
 
       /* Quita de un JPG sus metadatos (APP1: EXIF y XMP; APP13: IPTC) sin tocar
-         la imagen. null si el archivo no se puede leer como JPG. */
+         la imagen, y lo que venga pegado después de su fin (FFD9), como otra
+         imagen con su propia ubicación. null si el archivo no se puede leer como JPG. */
       function sinExif(buf) {
         const v = new DataView(buf);
         if (v.byteLength < 4 || v.getUint16(0) !== 0xFFD8) return null;
@@ -156,7 +157,13 @@
         while (o + 4 <= v.byteLength) {
           const m = v.getUint16(o);
           if ((m & 0xFF00) !== 0xFF00) return null;
-          if (m === 0xFFDA) { partes.push(buf.slice(o)); return new Blob(partes, { type: 'image/jpeg' }); }
+          if (m === 0xFFDA) {
+            const bytes = new Uint8Array(buf);
+            let fin = bytes.length;
+            for (let i = o + 2; i + 1 < bytes.length; i++) if (bytes[i] === 0xFF && bytes[i + 1] === 0xD9) { fin = i + 2; break; }
+            partes.push(buf.slice(o, fin));
+            return new Blob(partes, { type: 'image/jpeg' });
+          }
           const fin = o + 2 + v.getUint16(o + 2);
           if (fin > v.byteLength) return null;
           if (m !== 0xFFE1 && m !== 0xFFED) partes.push(buf.slice(o, fin));
@@ -192,9 +199,6 @@
           a.sha256_original = await huellaDe(buf);
           if (a.sha256_original && lista.some((x) => x !== a && x.sha256_original === a.sha256_original)) throw Object.assign(new Error('duplicado'), { motivo: M.archRechazoDuplicado });
           const esFoto = A.optimiza.tipos.includes(e);
-          /* Lo que recibe el proveedor del borrador tampoco lleva la ubicación sin conservarExif:
-             de un JPG se le da la copia sin metadatos, con el mismo nombre y formato. */
-          if (esFoto && !c.conservarExif && ['jpg', 'jpeg'].includes(e)) { const limpio = sinExif(buf); if (limpio) a.fuente = new File([limpio], f.name, { type: f.type || 'image/jpeg' }); }
           if (esFoto) {
             const meta = ['jpg', 'jpeg'].includes(e) ? leeExif(buf) : {};
             if (c.conservarExif) { if (meta.fecha) a.fecha_captura = meta.fecha; if (meta.lat !== undefined) { a.lat_captura = meta.lat; a.lon_captura = meta.lon; } }
@@ -204,7 +208,8 @@
                aunque así pese más que la original. Si no se pudo recodificar, al JPG se le quitan los
                metadatos; si tampoco se puede, la foto se agrega como está: la Secretaría decidió no
                rechazar una foto por sus metadatos (18 oct 2026). */
-            if (opt && (opt.blob.size < f.size || !c.conservarExif)) { a.blob = opt.blob; a.size = opt.blob.size; a.tipo = 'image/jpeg'; a.optimizada = opt.blob.size < f.size; a.dimensiones = `${opt.ancho}x${opt.alto}`; }
+            /* Recodificada, es un JPG: el nombre lo dice, para que la firma que revisa el servidor coincida. */
+            if (opt && (opt.blob.size < f.size || !c.conservarExif)) { a.blob = opt.blob; a.size = opt.blob.size; a.tipo = 'image/jpeg'; a.optimizada = opt.blob.size < f.size; a.dimensiones = `${opt.ancho}x${opt.alto}`; if (!['jpg', 'jpeg'].includes(e)) a.nombre = `${a.nombre.replace(/\.[^.]*$/, '')}.jpg`; }
             else if (!c.conservarExif) {
               const limpio = ['jpg', 'jpeg'].includes(e) ? sinExif(buf) : null;
               a.blob = limpio || f; a.size = a.blob.size; a.optimizada = false;
@@ -232,7 +237,9 @@
         for (const f of archivos) {
           const nombre = saneaNombre(f.name);
           if (lista.filter((x) => x.estado !== 'error').length >= c.max) { rechazos.push({ nombre, motivo: plantilla(c.max === 1 ? M.archRechazoMaxUno : M.archRechazoMax, { max: c.max }) }); continue; }
-          if (!c.extensiones.includes(ext(f.name))) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoTipo, { formatos: formatosTxt(c) }) }); continue; }
+          /* Un JPG también vale donde se admite una foto que se recodifica a JPG (png, webp): así vuelve del proveedor. */
+          const admite = c.extensiones.includes(ext(f.name)) || (['jpg', 'jpeg'].includes(ext(f.name)) && c.extensiones.some((x) => A.optimiza.tipos.includes(x)));
+          if (!admite) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoTipo, { formatos: formatosTxt(c) }) }); continue; }
           if (f.size < A.minBytes) { rechazos.push({ nombre, motivo: M.archRechazoVacio }); continue; }
           const esFoto = A.optimiza.tipos.includes(ext(f.name));
           if (!esFoto && f.size > c.mb * BYTES_POR_MB) { rechazos.push({ nombre, motivo: plantilla(M.archRechazoPeso, { peso: pesoTxt(f.size), mb: c.mb }) }); continue; }
@@ -354,13 +361,19 @@
       /* Archivos en el borrador. El estándar no los guarda en el dispositivo (FRM-43); si la
          página da un proveedor, FormKit.iniciar(form, { borradorArchivos: { guarda(campo, archivos),
          lee(campo), borra(campo) } }), al escribir el borrador se le pasan los archivos listos de
-         cada campo, como los eligió la persona (un JPG, sin metadatos si no se pide conservarExif);
-         al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
+         cada campo tal como se enviarían: sin conservarExif, la foto ya limpia (sin ubicación, de
+         cualquier formato) y derecha, y con nombre .jpg si se recodificó, para que al volver
+         coincida su firma. Al restaurarlo se le piden (File o promesa de File) y al borrarlo se le avisa.
          El proveedor decide dónde guardarlos (en el servidor, en el almacén del sistema). */
       const camposArchivo = () => $$('[data-archivos]', form).map((c) => c.closest('[data-campo]'));
       const conProveedor = (fn) => { const p = ctx.opciones.borradorArchivos; if (!p) return; for (const el of camposArchivo()) Promise.resolve().then(() => fn(p, el)).catch(() => { /* un proveedor que falla no detiene el formulario */ }); };
+      const paraProveedor = (a, c) => {
+        if (c.conservarExif || !a.blob || a.blob === a.fuente) return a.fuente;
+        const nombre = a.tipo === 'image/jpeg' && !/\.jpe?g$/i.test(a.nombre) ? `${a.nombre.replace(/\.[^.]*$/, '')}.jpg` : a.nombre;
+        return new File([a.blob], nombre, { type: a.tipo || a.blob.type });
+      };
       ctx.alBorrador({
-        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo' && a.fuente).map((a) => a.fuente))),
+        escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo' && a.fuente).map((a) => paraProveedor(a, configDe(el))))),
         restaura: () => conProveedor((p, el) => p.lee && Promise.resolve(p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); })),
         borra: () => conProveedor((p, el) => p.borra && p.borra(el.dataset.campo))
       });

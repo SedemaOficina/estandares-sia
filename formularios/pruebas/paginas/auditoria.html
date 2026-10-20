@@ -71,6 +71,12 @@
       <button type="button" class="btn btn-secundario" data-repetible-agregar><svg class="icono" aria-hidden="true"><use href="#i-mas"></use></svg>Agregar persona</button>
     </div>
 
+    <!-- Contraseña sin data-sensible: el núcleo la deja fuera del borrador de todos modos. -->
+    <div class="campo" data-campo="clave" data-uso="Prueba.">
+      <label class="etiqueta" for="clave">Contraseña</label>
+      <input class="control" id="clave" name="clave" type="password" autocomplete="new-password">
+    </div>
+
     <p class="aviso aviso-bloqueo estado-envio" data-estado-envio role="alert" tabindex="-1" hidden><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"></span></p>
     <div class="acciones"><button type="submit" class="btn btn-primario" data-accion="enviar">Enviar</button></div>
   </form>

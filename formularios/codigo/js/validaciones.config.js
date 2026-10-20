@@ -527,7 +527,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.5.2',
+    version: '1.5.3',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -758,7 +758,8 @@
       paginacionMas: 'Cargar más',
       paginacionActual: 'Página {n}, actual',
       compartido: 'Compartido.',
-      borradorRecuperado: 'Borrador recuperado en este dispositivo.'
+      borradorRecuperado: 'Borrador recuperado en este dispositivo.',
+      borradorNoGuardar: 'Nada se guarda en este equipo mientras esta pestaña siga abierta. Si la cierras antes de enviar, lo que capturaste se pierde.'
     }
   };
 

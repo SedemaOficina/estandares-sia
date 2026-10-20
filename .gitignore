@@ -7,3 +7,22 @@ formularios/pruebas/_humo/
 # Lo que se retira a mano va fuera de esta carpeta, pero por si acaso
 _to_delete/
 **/_to_delete/
+# El paquete y su huella se arman con «npm run zip» desde lo guardado: no se guardan
+/estandar-formularios-v*.zip
+/estandar-formularios-v*.zip.sha256
+# Llaves y secretos: nunca en el repositorio (herramientas/secretos.mjs lo revisa)
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+id_ecdsa*
+*.local.json
+# Respaldos y restos del sistema o de los editores
+*.orig
+*.bak
+~$*
+npm-debug.log*

@@ -43,6 +43,7 @@
     <p class="franja-texto">Hay un borrador guardado el <span data-borrador-fecha></span>. Guardar el avance no es presentar la solicitud.</p>
     <button type="button" class="btn btn-secundario" data-borrador="recuperar">Recuperar borrador</button>
     <button type="button" class="btn btn-secundario" data-borrador="descartar">Empezar de nuevo</button>
+    <button type="button" class="btn-enlace" data-borrador="no-guardar">No guardar en este equipo</button>
     <div class="aviso aviso-advertencia" data-borrador-confirma hidden>
       <svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg>
       <div class="aviso-texto"><p><strong class="aviso-titulo">¿Descartar el borrador?</strong> Se borra lo que capturaste en este dispositivo y no se puede deshacer.</p>
@@ -355,7 +356,7 @@
 <dialog class="dialogo" id="dialogo-privacidad" aria-labelledby="titulo-privacidad">
   <h2 class="titulo-bloque dialogo-titulo" id="titulo-privacidad">Aviso de privacidad simplificado</h2>
   <p class="priv-parrafo">La Secretaría del Medio Ambiente recaba los datos de este formulario para atender la solicitud y, si la persona lo pidió, informarle el resultado.</p>
-  <p class="priv-parrafo">No se transfieren a terceros salvo a la autoridad competente para atender la solicitud. El borrador y las sugerencias se guardan sólo en este dispositivo.</p>
+  <p class="priv-parrafo">No se transfieren a terceros salvo a la autoridad competente para atender la solicitud. El borrador y las sugerencias se guardan sólo en este dispositivo. El borrador no guarda tus datos de contacto ni los archivos, y se borra solo a los 14 días o al enviar.</p>
   <p class="priv-parrafo">Fundamento: <span class="pendiente">[Art. __, fracc. __]</span> de la ley aplicable. Pendiente de verificación por la Unidad de Transparencia.</p>
   <div class="dialogo-cierre"><button type="button" class="btn btn-primario" data-cierra-dialogo>Cerrar</button></div>
 </dialog>

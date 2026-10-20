@@ -55,10 +55,10 @@ Marcar cada punto con fecha, quién y resultado antes de liberar un formulario c
 1. `npm run verificar` en verde, con la salida guardada.
 2. `node herramientas/capturas.mjs` y revisión visual de las capturas nuevas frente a las anteriores.
 3. Lista de la sección 2 recorrida, con lo no comprobado escrito explícitamente.
-4. `node herramientas/construir.mjs --todo` para regenerar derivados, artefacto y ZIP.
+4. `node herramientas/construir.mjs --todo` para regenerar derivados, artefacto y ZIP. El ZIP se arma con Git desde el último commit (guarda antes los cambios): no entra nada que Git ignore o no tenga guardado, las fechas son las del commit (dos construcciones dan el mismo ZIP), lleva dentro `HUELLAS.sha256` y junto a él su `.sha256`.
 5. `CHANGELOG.md` actualizado: qué cambió, qué decisión lo motivó, qué queda pendiente.
 6. Casilla «Verificado en móvil y en escritorio» marcada por quien probó.
-7. Entrega: carpeta `estandares-sia/formularios/`, ZIP (`../estandar-formularios-vX.Y.Z.zip`), artefacto publicado, resumen de no más de diez líneas que diga qué se comprobó por emulación y qué exige dispositivos reales.
+7. Entrega: carpeta `estandares-sia/formularios/`, ZIP (`../estandar-formularios-vX.Y.Z.zip`) con su `.sha256`, artefacto publicado, resumen de no más de diez líneas que diga qué se comprobó por emulación y qué exige dispositivos reales.
 
 ## 5. Lo que esta versión no pudo comprobar
 

@@ -247,7 +247,9 @@ export function validaPayload(payload, esquema, opciones = {}) {
     (porCampo[a.campo] = porCampo[a.campo] || []).push(a);
     const ext = a.nombre.split('.').pop().toLowerCase();
     const extensiones = campos[a.campo].atributos?.extensiones?.split(',') || A.extensiones;
-    if (!extensiones.includes(ext)) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoTipo, { formatos: cfg.formatosArchivo(extensiones) })}` });
+    /* El navegador recodifica a JPG las fotos (png, webp): un JPG vale donde se admite una de ellas. */
+    const admite = extensiones.includes(ext) || (['jpg', 'jpeg'].includes(ext) && extensiones.some((x) => A.optimiza.tipos.includes(x)));
+    if (!admite) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoTipo, { formatos: cfg.formatosArchivo(extensiones) })}` });
     if (!(a.size > 0)) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${M.archRechazoVacio}` });
     const mb = Number(campos[a.campo].atributos?.mb || A.mb);
     if (a.size > mb * 1048576) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoPeso, { peso: `${(a.size / 1048576).toFixed(1)} MB`, mb })}` });

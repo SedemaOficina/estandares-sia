@@ -18,10 +18,12 @@
 
    Uso: node herramientas/construir.mjs [--artefacto] [--zip] [--todo]
    ========================================================= */
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { resolve, dirname, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import { execSync, execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -144,10 +146,35 @@ if (todo || args.includes('--artefacto')) {
   }
 }
 
-/* 5. ZIP */
+/* 5. ZIP: sólo lo guardado en Git, en el último commit (git archive, sin depender
+   de que el sistema tenga «zip»). Lo que Git ignora o no se ha guardado (llaves, notas
+   locales, respaldos) nunca entra. Las fechas son las del commit: dos construcciones del
+   mismo commit dan el mismo ZIP. Lleva dentro HUELLAS.sha256 (una huella por archivo) y
+   junto a él, <zip>.sha256 con la huella del ZIP. */
 if (todo || args.includes('--zip')) {
+  const git = (...a) => execFileSync('git', a, { cwd: resolve(RAIZ, '..'), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const carpeta = basename(RAIZ);
+  try { git('rev-parse', '--git-dir'); } catch (e) { throw new Error('El paquete se arma desde lo guardado en Git: esta carpeta no está en un repositorio.'); }
+  if (git('status', '--porcelain', '--', carpeta).trim()) console.log(`  Hay cambios sin guardar en ${carpeta}/: el paquete lleva lo del último commit.`);
+  const commit = git('rev-parse', 'HEAD').trim();
+  const lista = git('ls-tree', '-r', 'HEAD', '--', carpeta).trim().split('\n').map((l) => { const [meta, ruta] = l.split('\t'); return { blob: meta.split(' ')[2], ruta }; });
+  const contenido = execFileSync('git', ['cat-file', '--batch'], { cwd: resolve(RAIZ, '..'), input: lista.map((x) => x.blob).join('\n') + '\n', maxBuffer: 256 * 1024 * 1024 });
+  const huellas = [];
+  let p = 0;
+  for (const x of lista) {
+    const fin = contenido.indexOf(10, p);
+    const tam = Number(contenido.subarray(p, fin).toString('latin1').split(' ')[2]);
+    huellas.push(`${createHash('sha256').update(contenido.subarray(fin + 1, fin + 1 + tam)).digest('hex')}  ${x.ruta}`);
+    p = fin + 1 + tam + 1;
+  }
+  const textoHuellas = `# Estándar de formularios del SIA ${manifiesto.version} · commit ${commit}\n# sha256sum -c HUELLAS.sha256 (desde la carpeta que contiene ${carpeta}/)\n${huellas.join('\n')}\n`;
   const nombre = `estandar-formularios-v${manifiesto.version}.zip`;
   const destino = resolve(RAIZ, '..', nombre);
-  execSync(`cd "${resolve(RAIZ, '..')}" && rm -f "${nombre}" && zip -qr "${nombre}" "${basename(RAIZ)}" -x "${basename(RAIZ)}/node_modules/*" "${basename(RAIZ)}/pruebas/_humo/*" "${basename(RAIZ)}/.git/*"`);
-  console.log(`· ${relative(RAIZ, destino)} (${(statSync(destino).size / 1024 / 1024).toFixed(1)} MB)`);
+  const temporal = mkdtempSync(resolve(tmpdir(), 'formkit-zip-'));
+  writeFileSync(resolve(temporal, 'HUELLAS.sha256'), textoHuellas);
+  try { git('archive', '--format=zip', '-o', destino, `--mtime=${git('log', '-1', '--format=%cI').trim()}`, `--prefix=${carpeta}/`, `--add-file=${resolve(temporal, 'HUELLAS.sha256')}`, `HEAD:${carpeta}`); }
+  finally { rmSync(temporal, { recursive: true, force: true }); }
+  const huella = createHash('sha256').update(readFileSync(destino)).digest('hex');
+  writeFileSync(`${destino}.sha256`, `${huella}  ${nombre}\n`);
+  console.log(`· ${relative(RAIZ, destino)} (${(statSync(destino).size / 1024 / 1024).toFixed(1)} MB, ${lista.length} archivos) · sha256 ${huella.slice(0, 12)}…`);
 }

@@ -303,7 +303,7 @@
      y de los módulos, tomadas de proyectos que ya funcionan. */
   const FICHAS_BLOQUES = [
     { id: 'b-identificacion', titulo: 'Datos de identificación de una persona', nivel: 'OPCIONAL', demo: { nombre: 'bloque-identificacion' },
-      proposito: 'Nombre(s), apellido paterno, apellido materno (opcional), CURP, fecha de nacimiento y edad. Los apellidos van en campos separados. La fecha de nacimiento se toma de la CURP y la edad, de la fecha, en campos de solo lectura: nada se escribe dos veces ni puede contradecir a la CURP. Si no necesitas la edad, quita ese campo. La CURP se compara con el nombre y los apellidos: si no corresponden, lo dice. Para probar: Juan Pérez García con la CURP ficticia PEGJ900515HDFRRN09.',
+      proposito: 'Nombre(s), apellido paterno, apellido materno (opcional), CURP, fecha de nacimiento y edad. Los apellidos van en campos separados. La fecha de nacimiento se toma de la CURP y la edad, de la fecha, en campos de solo lectura: nada se escribe dos veces ni puede contradecir a la CURP. Si no necesitas la edad, quita ese campo. La CURP se compara con el nombre y los apellidos: si no corresponden, lo dice. Para probar: Juan Pérez García con la CURP ficticia PUEF900515HDFRJL04.',
       meta: [['Usa', 'núcleo + identificadores + fecha'], ['CURP y nombre', 'Las cruzadas curp-nombre y curp-segundo-apellido comparan las letras de la CURP con el nombre y los apellidos (sin segundo apellido, la CURP lleva X). Comprueban que los datos sean coherentes entre sí, no que la CURP exista ni que sea de quien la escribe.'], ['Sin CURP', 'Quita la CURP y su fecha, y usa el bloque «Fecha de nacimiento y edad». Si basta el grupo de edad, usa «Rango de edad».'], ['Datos personales', 'Cada campo declara data-uso, data-finalidad y data-sensible, así que nada queda en el borrador del dispositivo (FRM-55). Cambia los textos de uso y finalidad por los de tu formulario.'], ['Si los datos son de otra persona', 'autocomplete="off" en cada campo, con el motivo en un comentario (FRM-12).']],
       movil: 'Una columna; la CURP pasa a mayúsculas mientras se escribe y la fecha y la edad aparecen solas.', escritorio: 'La ayuda común va una sola vez, arriba; nombre y apellidos en tres columnas alineadas aunque sólo uno lleve ayuda; la CURP y la fecha que sale de ella, en otra fila.',
       errores: ['Pedir «Apellido(s)» en un solo campo (FRM-13).', 'Hacer obligatorio el apellido materno: hay personas con un solo apellido.', 'Repetir «como aparece en tu identificación» en cada campo: va una vez, como ayuda de bloque.', 'Pedir la fecha de nacimiento y la CURP por separado sin cruzarlas.', 'Guardar la CURP en el borrador del dispositivo.', 'Pedir la edad escrita: se calcula con la fecha.'] },
@@ -404,7 +404,7 @@
     correo: [['valido', 'nombre@ejemplo.local'], ['invalido', 'nombre@'], ['invalido', 'sin arroba.mx'], ['limite', 'nombre@gmial.com']],
     telefono: [['valido', '55 1234 5678'], ['valido', '+52 5512345678'], ['invalido', '123'], ['limite', '(55) 1234-5678']],
     cp: [['valido', '01000'], ['valido', '16999'], ['invalido', '1234'], ['limite', '17000']],
-    curp: [['valido', 'PEGJ900515HDFRRN09'], ['invalido', 'PEGJ900515HDFRRN0'], ['invalido', 'PEGJ901345HDFRRN09'], ['limite', 'pegj900515hdfrrn09']],
+    curp: [['valido', 'PUEF900515HDFRJL04'], ['invalido', 'PUEF900515HDFRJL0'], ['invalido', 'PUEF901345HDFRJL04'], ['limite', 'puef900515hdfrjl04']],
     rfc: [['valido', 'XAXX010101000'], ['valido', 'ABC010101AB1'], ['invalido', 'XAXX0101'], ['limite', 'xaxx-010101-000'], ['limite', 'muño-800101-ab1']],
     numero: [['valido', '12.5'], ['valido', '12,5'], ['invalido', 'doce'], ['limite', '-0']],
     fecha: [['valido', '2026-03-15'], ['invalido', '2026-02-30'], ['invalido', '15/03/2026'], ['limite', '2000-02-29']],
@@ -449,7 +449,7 @@
   /* Casos de CURP + fecha para la muestra cruzada. */
   const casosCurp = $('[data-casos-curp]');
   if (casosCurp) {
-    const CC = [['valido', 'PEGJ900515HDFRRN09', '1990-05-15', 'CURP y fecha coinciden'], ['invalido', 'PEGJ900515HDFRRN09', '1990-05-16', 'La fecha escrita no coincide con la CURP'], ['limite', 'PEGJ900515HDFRRN09', '', 'Sólo CURP: la fecha se deriva y se muestra en solo lectura']];
+    const CC = [['valido', 'PUEF900515HDFRJL04', '1990-05-15', 'CURP y fecha coinciden'], ['invalido', 'PUEF900515HDFRJL04', '1990-05-16', 'La fecha escrita no coincide con la CURP'], ['limite', 'PUEF900515HDFRJL04', '', 'Sólo CURP: la fecha se deriva y se muestra en solo lectura']];
     for (const [estado, curp, fecha, desc] of CC) casosCurp.append(el('button', { type: 'button', clase: 'guia-caso', 'data-estado': estado, 'data-curp': curp, 'data-fecha': fecha }, [el('span', { clase: 'guia-caso-estado', texto: estado === 'valido' ? 'Válido' : estado === 'invalido' ? 'Inválido' : 'Límite' }), texto(desc)]));
     casosCurp.addEventListener('click', (e) => {
       const b = e.target.closest('[data-curp]'); if (!b) return;

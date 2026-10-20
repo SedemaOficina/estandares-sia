@@ -196,6 +196,7 @@
       <p class="texto-gris">Datos exclusivamente ficticios. La fecha se deriva de la CURP; si además se escribe, debe coincidir (validación cruzada, bloqueante por omisión).</p>
       <form class="tarjeta guia-demo-form" data-formkit data-demo-form>
         <div class="fila">
+          <!-- no personal: probador de formatos de la guía; nada se envía ni se guarda. -->
           <div class="campo" data-campo="pr_curp" data-formato="curp" data-uso="Muestra del probador." data-deriva="fechaNacimiento=pr_nac_derivada sexo=pr_sexo"><label class="etiqueta" for="pr_curp">CURP</label><input class="control" id="pr_curp" name="pr_curp" type="text" maxlength="18" autocomplete="off"></div>
           <div class="campo" data-campo="pr_nac_derivada" data-formato="fecha" data-uso="Derivado de la CURP."><label class="etiqueta" for="pr_nac_derivada">Fecha derivada</label><input class="control" id="pr_nac_derivada" name="pr_nac_derivada" type="date" readonly></div>
         </div>
@@ -298,7 +299,8 @@
     <label class="etiqueta" for="n_correo">Correo electrónico</label>
     <input class="control" id="n_correo" name="n_correo" type="email" maxlength="120" autocomplete="email">
   </div>
-  <div class="campo" data-campo="n_correo2" data-formato="correo" data-requerido data-sensible data-uso="Evitar errores de captura en el correo." data-cruzada="igual" data-cruzada-campos="original=n_correo confirmacion=n_correo2">
+  <!-- autocomplete off: la confirmación se escribe a mano, para notar un error de dedo. -->
+  <div class="campo" data-campo="n_correo2" data-formato="correo" data-requerido data-sensible data-finalidad="Muestra." data-uso="Evitar errores de captura en el correo." data-cruzada="igual" data-cruzada-campos="original=n_correo confirmacion=n_correo2">
     <label class="etiqueta" for="n_correo2">Confirma tu correo</label>
     <input class="control" id="n_correo2" name="n_correo2" type="email" maxlength="120" autocomplete="off">
   </div>
@@ -326,6 +328,7 @@
   <div class="control-grupo"><input class="control control-corto" id="n_cant" name="n_cant" type="text" inputmode="decimal" min="0" max="10000" step="any" autocomplete="off"><span class="control-unidad" aria-hidden="true">m²</span></div>
 </div>
 <div class="fila-2-1">
+  <!-- no personal: la dirección del sitio, no la de la persona. -->
   <div class="campo" data-campo="n_calle" data-uso="Localizar el sitio."><label class="etiqueta" for="n_calle">Calle (fila 2-1: el primero ocupa el doble)</label><input class="control" id="n_calle" name="n_calle" type="text" maxlength="120" autocomplete="address-line1"></div>
   <div class="campo" data-campo="n_num" data-uso="Localizar el sitio."><label class="etiqueta" for="n_num">Número</label><input class="control" id="n_num" name="n_num" type="text" maxlength="10" autocomplete="off"></div>
 </div>
@@ -421,6 +424,7 @@
 </template>
 
 <template data-demo="resumen">
+<!-- no personal: el código postal del predio, no el de la persona. -->
 <div class="campo" data-campo="n_r1" data-formato="cp" data-requerido data-uso="Muestra." data-contexto="Domicilio del predio"><label class="etiqueta" for="n_r1">Código postal</label><input class="control" id="n_r1" name="n_r1" type="text" inputmode="numeric" autocomplete="postal-code"></div>
 <div class="campo" data-campo="n_r2" data-formato="fecha" data-no-futura data-requerido data-uso="Muestra."><label class="etiqueta" for="n_r2">Fecha de los hechos</label><input class="control" id="n_r2" name="n_r2" type="date" autocomplete="off"></div>
 <p class="aviso aviso-bloqueo estado-envio" data-estado-envio role="alert" tabindex="-1" hidden><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span class="aviso-texto"></span></p>
@@ -530,8 +534,10 @@
 
 <template data-demo="identificadores">
 <div class="fila">
-  <div class="campo" data-campo="m_curp" data-formato="curp" data-uso="Muestra." data-deriva="fechaNacimiento=m_curp_nac sexo=m_curp_sexo"><label class="etiqueta" for="m_curp">CURP</label><p class="ayuda">Mayúsculas al escribir; 18 caracteres. Ficticia: PEGJ900515HDFRRN09</p><input class="control" id="m_curp" name="m_curp" type="text" maxlength="18" autocomplete="off"></div>
-  <div class="campo" data-campo="m_rfc" data-formato="rfc" data-uso="Muestra."><label class="etiqueta" for="m_rfc">RFC</label><input class="control" id="m_rfc" name="m_rfc" type="text" maxlength="13" autocomplete="off"></div>
+  <!-- autocomplete off: el navegador no tiene un valor de autocompletado para la CURP ni para el RFC. -->
+  <div class="campo" data-campo="m_curp" data-formato="curp" data-sensible data-uso="Muestra." data-finalidad="Muestra." data-deriva="fechaNacimiento=m_curp_nac sexo=m_curp_sexo"><label class="etiqueta" for="m_curp">CURP</label><p class="ayuda">Mayúsculas al escribir; 18 caracteres. Ficticia: PUEF900515HDFRJL04</p><input class="control" id="m_curp" name="m_curp" type="text" maxlength="18" autocomplete="off"></div>
+  <!-- autocomplete off: tampoco hay valor de autocompletado para el RFC. -->
+  <div class="campo" data-campo="m_rfc" data-formato="rfc" data-sensible data-uso="Muestra." data-finalidad="Muestra."><label class="etiqueta" for="m_rfc">RFC</label><input class="control" id="m_rfc" name="m_rfc" type="text" maxlength="13" autocomplete="off"></div>
 </div>
 <div class="fila">
   <div class="campo" data-campo="m_curp_nac" data-formato="fecha" data-uso="Derivado."><label class="etiqueta" for="m_curp_nac">Fecha de nacimiento (derivada)</label><input class="control" id="m_curp_nac" name="m_curp_nac" type="date" readonly></div>
@@ -543,7 +549,7 @@
 <div class="repetible" data-repetible="m_personas" data-min="1" data-max="3" data-etiqueta="Persona">
   <p class="etiqueta">Personas (1 a 3)</p>
   <ol class="repetible-lista" data-repetible-lista></ol>
-  <template data-repetible-plantilla><li><div class="fila"><div class="campo" data-campo="m_personas.#.nombre" data-formato="nombre" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_p-#-n">Nombre</label><input class="control" id="m_p-#-n" name="m_personas[#][nombre]" type="text" autocomplete="off"></div><div class="campo" data-campo="m_personas.#.edad" data-formato="numero" data-uso="Muestra."><label class="etiqueta" for="m_p-#-e">Edad</label><input class="control control-corto" id="m_p-#-e" name="m_personas[#][edad]" type="text" inputmode="numeric" min="0" max="120" step="1" autocomplete="off"></div></div></li></template>
+  <template data-repetible-plantilla><li><!-- autocomplete off: son datos de terceros. --><div class="fila"><div class="campo" data-campo="m_personas.#.nombre" data-formato="nombre" data-requerido data-sensible data-uso="Muestra." data-finalidad="Muestra."><label class="etiqueta" for="m_p-#-n">Nombre</label><input class="control" id="m_p-#-n" name="m_personas[#][nombre]" type="text" autocomplete="off"></div><div class="campo" data-campo="m_personas.#.edad" data-formato="numero" data-uso="Muestra."><label class="etiqueta" for="m_p-#-e">Edad</label><input class="control control-corto" id="m_p-#-e" name="m_personas[#][edad]" type="text" inputmode="numeric" min="0" max="120" step="1" autocomplete="off"></div></div></li></template>
   <button type="button" class="btn btn-secundario" data-repetible-agregar><svg class="icono" aria-hidden="true"><use href="#i-mas"></use></svg>Agregar persona</button>
 </div>
 </template>
@@ -786,7 +792,7 @@
       <p class="ayuda">Son 18 caracteres. Tu fecha de nacimiento se toma de ella.</p>
       <input class="control" id="b_curp" name="b_curp" type="text" maxlength="18" autocomplete="off" spellcheck="false">
     </div>
-    <div class="campo" data-campo="b_nacimiento" data-formato="fecha" data-deriva="edad=b_edad" data-uso="Derivada de la CURP; no se pide por separado.">
+    <div class="campo" data-campo="b_nacimiento" data-formato="fecha" data-deriva="edad=b_edad" data-sensible data-uso="Derivada de la CURP; no se pide por separado." data-finalidad="Identificar a la persona.">
       <label class="etiqueta" for="b_nacimiento">Fecha de nacimiento</label>
       <p class="ayuda">Si no es correcta, corrige la CURP.</p>
       <input class="control control-corto" id="b_nacimiento" name="b_nacimiento" type="date" readonly autocomplete="bday">

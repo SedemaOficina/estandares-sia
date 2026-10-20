@@ -76,18 +76,18 @@ test('servidor · un campo condicional cuya condición no se cumple se descarta 
 test('servidor · esquema de una página: CURP y su cruzada con la fecha de nacimiento', () => {
   const e = esquema('una-pagina');
   assert.equal(e.campos.curp.formato, 'curp');
-  const base = { datos: { nombre: 'Juan', apellido_paterno: 'Pérez', apellido_materno: 'García', curp: 'pegj900515hdfrrn09', correo: 'a@ejemplo.local', correo2: 'a@ejemplo.local', aviso: 'si' }, archivos: [], meta: {} };
+  const base = { datos: { nombre: 'Fulano', apellido_paterno: 'Prueba', apellido_materno: 'Ejemplo', curp: 'puef900515hdfrjl04', correo: 'a@ejemplo.local', correo2: 'a@ejemplo.local', aviso: 'si' }, archivos: [], meta: {} };
   const r1 = validaPayload(structuredClone(base), e, { catalogos: CAT });
-  assert.equal(r1.datos.curp, 'PEGJ900515HDFRRN09');
+  assert.equal(r1.datos.curp, 'PUEF900515HDFRJL04');
   assert.ok(!r1.errores.some((x) => x.campo === 'curp'), JSON.stringify(r1.errores));
-  const r2 = validaPayload({ ...structuredClone(base), datos: { ...base.datos, curp: 'PEGJ900515HDFRRN0' } }, e, { catalogos: CAT });
+  const r2 = validaPayload({ ...structuredClone(base), datos: { ...base.datos, curp: 'PUEF900515HDFRJL0' } }, e, { catalogos: CAT });
   assert.ok(r2.errores.some((x) => x.campo === 'curp' && /18/.test(x.mensaje)), 'la CURP corta se rechaza en el servidor');
   const r3 = validaPayload({ ...structuredClone(base), datos: { ...base.datos, correo2: 'otro@ejemplo.local' } }, e, { catalogos: CAT });
   assert.ok(r3.errores.some((x) => x.campo === 'correo2'), 'la confirmación distinta se rechaza');
 });
 
 /* Un registro de una página completo y correcto, tal como lo manda el navegador. */
-const REGISTRO = { datos: { nombre: 'Juan', apellido_paterno: 'Pérez', apellido_materno: 'García', curp: 'PEGJ900515HDFRRN09', nacimiento: '1990-05-15', edad: '36', correo: 'a@ejemplo.local', correo2: 'a@ejemplo.local', personas: '3', alcaldia: 'Coyoacán', intereses: ['reforestacion'], desde: '2026-10-20', hasta: '2026-10-27', interes: '4', aviso: 'si' }, archivos: [], meta: { idempotencia: 'abc' } };
+const REGISTRO = { datos: { nombre: 'Fulano', apellido_paterno: 'Prueba', apellido_materno: 'Ejemplo', curp: 'PUEF900515HDFRJL04', nacimiento: '1990-05-15', edad: '36', correo: 'a@ejemplo.local', correo2: 'a@ejemplo.local', personas: '3', alcaldia: 'Coyoacán', intereses: ['reforestacion'], desde: '2026-10-20', hasta: '2026-10-27', interes: '4', aviso: 'si' }, archivos: [], meta: { idempotencia: 'abc' } };
 
 test('servidor · grupos repetibles: cada fila se valida con su patrón, con mínimo y máximo de filas', () => {
   const e = esquema('una-pagina');
@@ -224,11 +224,11 @@ test('CURP contra nombre y apellidos: letras, partículas, MARÍA y JOSÉ, Ñ, p
   const segundo = (curp, s) => V.cruzadas['curp-segundo-apellido'].valida({ curp, segundo: s });
   /* CURP ficticia completa, con su dígito verificador, para unos datos dados. */
   const curpDe = (datos, fecha = '1985-02-03', sexo = 'M') => { const c = `${V.prefijoCurp(datos, fecha, sexo, 'DF')}0`; return c + V.digitoCurp(`${c}0`); };
-  assert.equal(nombre('PEGJ900515HDFRRN09', 'Juan', 'Pérez'), '', 'la CURP de prueba corresponde a Juan Pérez');
-  assert.equal(segundo('PEGJ900515HDFRRN09', 'García'), '', 'y a García como segundo apellido');
-  assert.match(nombre('PEGJ900515HDFRRN09', 'Pedro', 'Pérez'), /no corresponde/, 'otro nombre no corresponde');
-  assert.match(segundo('PEGJ900515HDFRRN09', 'López'), /no corresponde/, 'otro segundo apellido no corresponde');
-  assert.match(segundo('PEGJ900515HDFRRN09', ''), /segundo apellido/, 'sin segundo apellido, la CURP debe llevar X en 3 y 15');
+  assert.equal(nombre('PUEF900515HDFRJL04', 'Fulano', 'Prueba'), '', 'la CURP de prueba corresponde a Fulano Prueba');
+  assert.equal(segundo('PUEF900515HDFRJL04', 'Ejemplo'), '', 'y a Ejemplo como segundo apellido');
+  assert.match(nombre('PUEF900515HDFRJL04', 'Pedro', 'Prueba'), /no corresponde/, 'otro nombre no corresponde');
+  assert.match(segundo('PUEF900515HDFRJL04', 'López'), /no corresponde/, 'otro segundo apellido no corresponde');
+  assert.match(segundo('PUEF900515HDFRJL04', ''), /segundo apellido/, 'sin segundo apellido, la CURP debe llevar X en 3 y 15');
   const maria = { nombre: 'María de los Ángeles', primer: 'de la Peña', segundo: '' };
   const c1 = curpDe(maria);
   assert.equal(c1.slice(0, 4) + c1.slice(13, 16), 'PEXAXXN', `partículas fuera, MARÍA se salta, la Ñ cuenta como X: ${c1}`);
@@ -254,11 +254,11 @@ test('servidor · fecha día/mes/año: variantes, fecha real, no futura y cruce 
   assert.match(f.valida('01/01/1850', {}), /1900/);
   assert.equal(V.guiaFechaDma('2371985'), '23/07/1985', 'escritura guiada');
   assert.equal(V.guiaFechaDma('4'), '04/', 'un 4 sólo puede ser 04');
-  assert.equal(V.cruzadas['curp-fecha-dma'].valida({ curp: 'PEGJ900515HDFRRN09', fecha: '15/05/1990' }), '', 'la cruzada acepta día/mes/año');
-  assert.equal(V.cruzadas['curp-fecha'].valida({ curp: 'PEGJ900515HDFRRN09', fecha: '15/05/1990' }), '', 'y la de siempre también');
+  assert.equal(V.cruzadas['curp-fecha-dma'].valida({ curp: 'PUEF900515HDFRJL04', fecha: '15/05/1990' }), '', 'la cruzada acepta día/mes/año');
+  assert.equal(V.cruzadas['curp-fecha'].valida({ curp: 'PUEF900515HDFRJL04', fecha: '15/05/1990' }), '', 'y la de siempre también');
   const e = esquemaDe(`<div class="campo" data-campo="curp" data-formato="curp" data-requerido data-uso="x."><label class="etiqueta" for="curp">CURP</label><input class="control" id="curp" name="curp"></div>
 <div class="campo" data-campo="nac" data-formato="fecha-dma" data-no-futura data-requerido data-uso="x." data-cruzada="curp-fecha-dma" data-cruzada-campos="curp=curp fecha=nac"><label class="etiqueta" for="nac">Fecha</label><input class="control" id="nac" name="nac" type="text" inputmode="numeric"></div>`);
-  const v = (nac) => validaPayload({ datos: { curp: 'PEGJ900515HDFRRN09', nac }, meta: META }, e);
+  const v = (nac) => validaPayload({ datos: { curp: 'PUEF900515HDFRJL04', nac }, meta: META }, e);
   const bueno = v('15051990');
   assert.deepEqual(bueno.errores, [], JSON.stringify(bueno.errores));
   assert.equal(bueno.datos.nac, '15/05/1990', 'el servidor la guarda como DD/MM/AAAA');
