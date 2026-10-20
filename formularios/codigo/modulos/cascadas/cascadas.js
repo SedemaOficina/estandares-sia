@@ -12,19 +12,25 @@
      · relación inversa: si se captura primero el código postal, se rellenan
        la alcaldía y la colonia que dependan de él, y la persona puede
        corregirlos; si un cp abarca varias colonias, se acota la lista;
-     · si el catálogo no carga, se muestra la captura manual (bloque
-       data-cascada-manual) y la cascada se oculta.
+     · si el catálogo no carga, la lista se oculta entera (data-cascada-lista)
+       y se muestra la captura manual (data-cascada-manual); el código postal
+       sigue en los dos casos. Una fila incompleta del catálogo se omite con
+       un aviso en la consola.
 
    Contrato HTML:
      <div data-cascada data-catalogo="cdmx">
-       <div class="campo" data-campo="alcaldia" data-requerido>
-         <label class="etiqueta" for="alcaldia">Alcaldía</label>
-         <div class="select"><select class="control control-select" id="alcaldia" name="alcaldia" data-nivel="alcaldia" autocomplete="address-level2"><option value="">Elige una opción</option></select></div>
+       <div data-cascada-lista>
+         <div class="campo" data-campo="alcaldia" data-requerido>
+           <label class="etiqueta" for="alcaldia">Alcaldía</label>
+           <div class="select"><select class="control control-select" id="alcaldia" name="alcaldia" data-nivel="alcaldia" autocomplete="address-level2"><option value="">Elige una opción</option></select></div>
+         </div>
+         <div class="campo" data-campo="colonia" data-requerido>…<select data-nivel="colonia" autocomplete="address-level3">…</div>
        </div>
-       <div class="campo" data-campo="colonia" data-requerido>…<select data-nivel="colonia" autocomplete="address-level3">…</div>
+       <div data-cascada-manual hidden>…alcaldía y colonia de texto, data-requerido…</div>
        <div class="campo" data-campo="cp" data-formato="cp" data-requerido>…<input data-nivel="cp" autocomplete="postal-code">…</div>
-       <div data-cascada-manual hidden>…campos de texto equivalentes…</div>
      </div>
+   El esquema del servidor marca qué campos son de la lista y cuáles de la
+   captura manual: si llega la manual, exige ésa y no la lista.
    ========================================================= */
 (function () {
   'use strict';
@@ -38,15 +44,20 @@
         const por = Object.fromEntries(niveles.map((c) => [c.dataset.nivel, c]));
         const campoDe = (c) => c.closest('[data-campo]');
         const manual = $('[data-cascada-manual]', cont);
+        const lista = $('[data-cascada-lista]', cont);
+        /* Filas completas, como texto: una fila rara (un CP numérico, una fila vacía) no detiene la página. */
+        const crudas = cat && (Array.isArray(cat) ? cat : cat.filas);
+        const filas = Array.isArray(crudas) ? crudas.filter((f) => f && typeof f === 'object').map((f) => Object.fromEntries(Object.entries(f).map(([k, v]) => [k, v === null || v === undefined ? '' : String(v)]))).filter((f) => (!por.alcaldia || f.alcaldia) && (!por.colonia || f.colonia)) : [];
+        if (Array.isArray(crudas) && filas.length < crudas.length) console.warn(`FormKit: el catálogo «${cont.dataset.catalogo}» tiene ${crudas.length - filas.length} fila(s) incompletas; se omitieron.`);
 
-        if (!cat || !Array.isArray(cat.filas) || !cat.filas.length) {
-          /* Sin catálogo: captura manual y la cascada fuera del camino. */
-          for (const c of niveles) campoDe(c).hidden = true;
+        if (!filas.length) {
+          /* Sin catálogo: la lista se oculta entera ([data-cascada-lista]) y queda la captura
+             manual; el código postal sigue. Sin el envoltorio, se ocultan los niveles de la lista. */
+          if (lista) lista.hidden = true; else for (const c of niveles) if (c.dataset.nivel !== 'cp') campoDe(c).hidden = true;
           if (manual) manual.hidden = false;
           anuncia(M.cascadaSinCatalogo);
           continue;
         }
-        const filas = cat.filas;
         const orden = ['alcaldia', 'colonia', 'cp'].filter((n) => por[n]);
         const sel = (c, valores, placeholder) => {
           if (c.tagName !== 'SELECT') return;

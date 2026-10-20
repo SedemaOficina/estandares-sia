@@ -1,6 +1,6 @@
 {
   "formulario": "por-pasos.html",
-  "generado": "2026-10-16T13:56:33.959Z",
+  "generado": "2026-10-20T21:45:31.514Z",
   "campos": {
     "tipo": {
       "etiqueta": "Tipo de solicitud",
@@ -194,7 +194,10 @@
       "uso": "Turnar a la autoridad competente en el territorio.",
       "atributos": {},
       "opciones": null,
-      "autocomplete": "off"
+      "catalogo": "cdmx",
+      "autocomplete": "off",
+      "nivel": "alcaldia",
+      "cascadaLista": 0
     },
     "colonia": {
       "etiqueta": "Colonia",
@@ -204,6 +207,7 @@
       "uso": "Localizar el sitio.",
       "atributos": {},
       "opciones": null,
+      "catalogo": "cdmx",
       "autocomplete": "off",
       "si": {
         "campo": "colonia_libre",
@@ -218,7 +222,11 @@
             ""
           ]
         }
-      ]
+      ],
+      "nivel": "colonia",
+      "padre": "alcaldia",
+      "nivelPadre": "alcaldia",
+      "cascadaLista": 0
     },
     "colonia_libre": {
       "etiqueta": "colonia_libre",
@@ -226,7 +234,8 @@
       "requerido": false,
       "sensible": false,
       "uso": "Escribir la colonia cuando no está en la lista.",
-      "atributos": {}
+      "atributos": {},
+      "cascadaLista": 0
     },
     "colonia_escrita": {
       "etiqueta": "Colonia",
@@ -251,7 +260,32 @@
             "si"
           ]
         }
-      ]
+      ],
+      "cascadaLista": 0
+    },
+    "alcaldia_manual": {
+      "etiqueta": "Alcaldía",
+      "tipo": "texto",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Localizar el sitio sin catálogo.",
+      "atributos": {
+        "maxlength": "60"
+      },
+      "autocomplete": "off",
+      "cascadaManual": 0
+    },
+    "colonia_manual": {
+      "etiqueta": "Colonia",
+      "tipo": "texto",
+      "requerido": true,
+      "sensible": false,
+      "uso": "Localizar el sitio sin catálogo.",
+      "atributos": {
+        "maxlength": "80"
+      },
+      "autocomplete": "off",
+      "cascadaManual": 0
     },
     "cp": {
       "etiqueta": "Código postal",
@@ -275,28 +309,6 @@
           "catalogo": "cdmx"
         }
       ]
-    },
-    "alcaldia_manual": {
-      "etiqueta": "Alcaldía",
-      "tipo": "texto",
-      "requerido": false,
-      "sensible": false,
-      "uso": "Localizar el sitio sin catálogo.",
-      "atributos": {
-        "maxlength": "60"
-      },
-      "autocomplete": "off"
-    },
-    "colonia_manual": {
-      "etiqueta": "Colonia",
-      "tipo": "texto",
-      "requerido": false,
-      "sensible": false,
-      "uso": "Localizar el sitio sin catálogo.",
-      "atributos": {
-        "maxlength": "80"
-      },
-      "autocomplete": "off"
     },
     "coordenadas": {
       "etiqueta": "Coordenadas (latitud, longitud)",
@@ -323,7 +335,8 @@
       "sensible": false,
       "uso": "Documentar la solicitud.",
       "atributos": {
-        "conservarExif": "false"
+        "conservarExif": "false",
+        "max": "3"
       }
     },
     "contacto": {

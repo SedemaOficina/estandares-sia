@@ -1,4 +1,4 @@
-# Estándar de formularios web del SIA · versión 1.5.3
+# Estándar de formularios web del SIA · versión 1.6.0
 
 Paquete genérico de estilos, componentes, validaciones y reglas para construir formularios web del Sistema de Información Ambiental de la Secretaría del Medio Ambiente de la Ciudad de México. Es un **manual para quien programa**: se copia lo que el formulario necesita, se declara cada campo con atributos y se verifica con las herramientas incluidas. Funciona en teléfono y en escritorio, sin dependencias y sin pedir nada a terceros.
 

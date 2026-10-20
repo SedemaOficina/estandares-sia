@@ -373,3 +373,121 @@ test('el paquete sólo lleva lo guardado en Git, se arma en Windows, sale igual 
   arma();
   assert.equal(createHash('sha256').update(readFileSync(zip)).digest('hex'), huella1, 'dos construcciones del mismo commit dan el mismo ZIP');
 });
+
+/* ----- Bloque 3 (1.6.0): el servidor valida igual que la pantalla ----- */
+
+/* El servidor con el esquema de una plantilla o de un HTML de prueba, y los catálogos de ejemplo. */
+async function servidorCon(origen) {
+  await import(pathToFileURL(resolve(RAIZ, 'codigo/js/validaciones.config.js')).href);
+  await import(pathToFileURL(resolve(RAIZ, 'codigo/catalogos/cdmx-ejemplo.js')).href);
+  const { validaPayload } = await import(pathToFileURL(resolve(RAIZ, 'codigo/servidor/validar.mjs')).href);
+  let ruta = resolve(RAIZ, 'codigo/plantillas', `${origen}.html`);
+  if (origen.startsWith('<')) { const dir = mkdtempSync(resolve(tmpdir(), 'esquema-')); ruta = resolve(dir, 'f.html'); writeFileSync(ruta, `<form>${origen}</form>`); }
+  const esquema = JSON.parse(execFileSync(process.execPath, [resolve(RAIZ, 'herramientas/esquema-desde-html.mjs'), ruta], { encoding: 'utf8' }));
+  return { valida: (datos, opciones = {}, archivos = []) => validaPayload({ datos, archivos, meta: {} }, esquema, opciones), C: globalThis.FORMKIT_CATALOGOS, esquema };
+}
+const de = (r, campo) => r.errores.filter((e) => e.campo === campo).map((e) => e.mensaje);
+
+test('servidor: la cascada se contrasta con su catálogo, sea arreglo u objeto, aunque haya otro, y la colonia con su alcaldía (A1-02)', async () => {
+  const { valida, C } = await servidorCon('por-pasos');
+  const fila = C.cdmx.filas[0];
+  const otraAlcaldia = C.cdmx.filas.find((f) => f.alcaldia !== fila.alcaldia);
+  assert.ok(de(valida({ alcaldia: 'Alcaldía Inventada' }, { catalogos: { cdmx: C.cdmx.filas } }), 'alcaldia').length, 'con el catálogo como arreglo, una alcaldía inventada no pasa');
+  assert.ok(de(valida({ alcaldia: 'Alcaldía Inventada' }, { catalogos: { cdmx: C.cdmx } }), 'alcaldia').length, 'tampoco con el objeto {filas}');
+  const dos = valida({ alcaldia: fila.alcaldia, colonia: fila.colonia }, { catalogos: { otro: { filas: [{ alcaldia: 'Otra', colonia: 'Otra', cp: '00000' }] }, cdmx: C.cdmx } });
+  assert.deepEqual([...de(dos, 'alcaldia'), ...de(dos, 'colonia')], [], 'con dos catálogos, se usa el que la cascada nombra');
+  assert.ok(de(valida({ alcaldia: otraAlcaldia.alcaldia, colonia: fila.colonia }, { catalogos: { cdmx: C.cdmx } }), 'colonia').length, 'una colonia de otra alcaldía no pasa');
+  const sin = valida({ alcaldia: 'Lo que sea' }, {});
+  assert.deepEqual(de(sin, 'alcaldia'), [], 'sin catálogo no se rechaza en silencio…');
+  assert.ok(sin.senales.some((s) => /alcaldia.*catálogo/.test(s)), '…ni se acepta en silencio: queda una señal');
+});
+
+test('servidor: una cruzada que en pantalla sólo advierte no rechaza el envío (A1-03)', async () => {
+  const { valida } = await servidorCon('<div class="campo" data-campo="curp" data-formato="curp" data-cruzada="curp-sexo" data-cruzada-campos="curp=curp sexo=sexo" data-uso="x."><label class="etiqueta" for="curp">CURP</label><input class="control" id="curp" name="curp"></div><fieldset class="grupo" data-campo="sexo" data-uso="x."><legend class="etiqueta">Sexo</legend><input type="radio" name="sexo" value="H"><input type="radio" name="sexo" value="M"></fieldset>');
+  const r = valida({ curp: 'PUEF900515HDFRJL04', sexo: 'M' });
+  assert.equal(r.ok, true, 'una CURP de hombre con «Mujer» se acepta, como en pantalla');
+  assert.ok(r.senales.some((s) => /Advertencia/.test(s)), 'y deja una señal');
+});
+
+test('servidor: mínimo y máximo de opciones, periodo y CURP contra nacimiento y edad (A1-04, A1-05, A1-08)', async () => {
+  const { valida } = await servidorCon('una-pagina');
+  assert.ok(de(valida({ intereses: ['reforestacion', 'monitoreo', 'talleres', 'otro'], intereses_otro: 'x' }), 'intereses').length, '4 intereses con máximo 3 no pasan');
+  assert.ok(de(valida({ desde: '2026-10-10', hasta: '2026-10-01' }), 'hasta').length, 'un periodo invertido no pasa');
+  const r = valida({ nombre: 'Fulano', apellido_paterno: 'Prueba', apellido_materno: 'Ejemplo', curp: 'PUEF900515HDFRJL04', nacimiento: '2010-05-05', edad: '3' });
+  assert.ok(de(r, 'nacimiento').length, 'una fecha que no sale de la CURP no pasa');
+  const r2 = valida({ nombre: 'Fulano', apellido_paterno: 'Prueba', apellido_materno: 'Ejemplo', curp: 'PUEF900515HDFRJL04', nacimiento: '1990-05-15', edad: '3' });
+  assert.deepEqual(de(r2, 'nacimiento'), [], 'con la fecha de la CURP, la fecha pasa…');
+  assert.ok(de(r2, 'edad').length, '…pero no una edad que no sale de ella');
+});
+
+test('servidor: las cruzadas se aplican en cada fila de un grupo repetible (A1-09)', async () => {
+  const { valida } = await servidorCon('<div class="repetible" data-repetible="personas" data-max="3"><ol data-repetible-lista></ol><template data-repetible-plantilla><li><div class="campo" data-campo="personas.#.curp" data-formato="curp" data-uso="x."><label class="etiqueta" for="p-#-c">CURP</label><input class="control" id="p-#-c" name="personas[#][curp]"></div><div class="campo" data-campo="personas.#.nac" data-formato="fecha" data-cruzada="curp-fecha" data-cruzada-campos="curp=personas.#.curp fecha=personas.#.nac" data-uso="x."><label class="etiqueta" for="p-#-f">Nacimiento</label><input class="control" id="p-#-f" name="personas[#][nac]" type="date"></div></li></template></div>');
+  const r = valida({ 'personas.0.curp': 'PUEF900515HDFRJL04', 'personas.0.nac': '1990-05-15', 'personas.2.curp': 'PUEF900515HDFRJL04', 'personas.2.nac': '1991-01-01' });
+  assert.deepEqual(de(r, 'personas.0.nac'), [], 'la fila que coincide pasa');
+  assert.ok(de(r, 'personas.2.nac').length, 'la que no coincide, no');
+});
+
+test('servidor: límites de archivos del campo y de la configuración del formulario, extensiones, nombres y datos de captura (A1-06, A1-07, E1-06, A1-16)', async () => {
+  const pdf = (nombre, mb = 0.1) => ({ campo: 'docs', nombre, size: Math.round(mb * 1048576), tipo: 'application/pdf' });
+  const { valida } = await servidorCon('<div class="campo" data-campo="docs" data-max="3" data-total-mb="2" data-extensiones="PDF, JPG" data-conservar-exif="false" data-uso="x."><label class="etiqueta">Documentos</label><div data-archivos><input type="file" multiple></div></div>');
+  assert.ok(de(valida({}, {}, [pdf('a.pdf'), pdf('b.pdf'), pdf('c.pdf'), pdf('d.pdf')]), 'docs').length, '4 con data-max 3 no pasan');
+  assert.ok(de(valida({}, {}, [pdf('a.pdf', 1.5), pdf('b.pdf', 1.5)]), 'docs').some((m) => /2 MB/.test(m)), 'el total del campo (data-total-mb) se respeta');
+  assert.deepEqual(de(valida({}, {}, [pdf('oficio.pdf'), { ...pdf('foto.jpg'), tipo: 'image/jpeg' }]), 'docs'), [], 'con «PDF, JPG», pdf y jpg pasan');
+  assert.ok(de(valida({}, {}, [pdf('recibo‮fdp.pdf')]), 'docs').length, 'un nombre con un carácter que invierte el texto no pasa');
+  const r = valida({}, {}, [{ ...pdf('foto.jpg'), lat_captura: 19.4, lon_captura: -99.1, fecha_captura: '2026-10-01T10:00:00' }]);
+  assert.ok(r.senales.some((s) => /ubicación de captura/.test(s)), 'la ubicación que el campo no pide deja una señal');
+  assert.equal(r.archivos[0].lat_captura, undefined, 'y se quita de la copia que recibe el sistema');
+  const { valida: v2 } = await servidorCon('<div class="campo" data-campo="docs" data-uso="x."><label class="etiqueta">Documentos</label><div data-archivos><input type="file" multiple></div></div>');
+  let r2;
+  assert.doesNotThrow(() => { r2 = v2({}, { config: { archivos: { mb: 1 } } }, [pdf('a.pdf', 1.5)]); }, 'una configuración parcial no lanza excepción');
+  assert.ok(de(r2, 'docs').some((m) => /1 MB/.test(m)), 'y su límite se aplica');
+});
+
+test('lista cerrada: queda el nombre del catálogo y viaja su clave, en pantalla y en el servidor (A1-10)', async () => {
+  const p = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
+  await p.fill('#alcaldia', 'coyoacan'); await p.keyboard.press('Tab');
+  assert.equal(await p.inputValue('#alcaldia'), 'Coyoacán', 'al salir, lo escrito queda como en el catálogo');
+  await p.context().close();
+  const { valida } = await servidorCon('<div class="campo" data-campo="ocupacion" data-uso="x."><label class="etiqueta" for="o">Ocupación</label><div class="combo" data-combo data-catalogo="ocupaciones"><input class="control" id="o" name="ocupacion"></div></div>');
+  const r = valida({ ocupacion: 'DOCENCIA' }, { catalogos: { ocupaciones: [{ nombre: 'Docencia', valor: 'OC-07' }, { nombre: 'Jardinería', valor: 'OC-11' }] } });
+  assert.equal(r.datos.ocupacion, 'Docencia', 'el servidor guarda el nombre oficial');
+  assert.equal(r.claves.ocupacion, 'OC-07', 'y devuelve la clave del catálogo');
+});
+
+test('cascada sin catálogo: la captura manual llega al paso siguiente y el servidor la acepta; una fila rara no deja la página en blanco (B5-01, B5-03)', async () => {
+  const ctx0 = await navegador.newContext(PERFILES.escritorio.contexto);
+  await ctx0.route('**/cdmx-ejemplo.js', (r) => r.abort());
+  const p = await ctx0.newPage();
+  await p.goto(`${servidor.url}/${PAGINAS['por-pasos']}`);
+  await llenaSolicitud(p); await continuar(p);
+  assert.ok(await p.locator('[data-cascada-lista]').isHidden(), 'la lista se oculta entera');
+  assert.ok(await p.locator('#cp').isVisible(), 'el código postal se queda');
+  await p.fill('#alcaldia_manual', 'Coyoacán'); await p.fill('#colonia_manual', 'Del Carmen'); await p.fill('#cp', '04100');
+  await p.fill('#calle', 'Calle de Prueba'); await p.fill('#num_ext', '1');
+  await continuar(p);
+  assert.match(await p.locator('[data-paso]:not([hidden]) .titulo-paso').first().textContent(), /contacto|evidencia/i, 'avanza al paso siguiente');
+  const datos = await p.evaluate(() => FormKit.iniciar(document.querySelector('form')).payload().datos);
+  await ctx0.close();
+  const { valida } = await servidorCon('por-pasos');
+  const r = valida(datos, {});
+  assert.deepEqual(['alcaldia', 'colonia', 'cp', 'alcaldia_manual', 'colonia_manual'].flatMap((c) => de(r, c)), [], 'el servidor acepta la captura manual sin pedir la lista');
+
+  const ctx1 = await navegador.newContext(PERFILES.escritorio.contexto);
+  await ctx1.route('**/cdmx-ejemplo.js', async (r) => { const resp = await r.fetch(); r.fulfill({ response: resp, body: `${await resp.text()}\n;window.FORMKIT_CATALOGOS.cdmx.filas.push({ alcaldia: 'Coyoacán', colonia: 'Fila rara', cp: 4100 }, null, { alcaldia: null });` }); });
+  const q = await ctx1.newPage();
+  const errores = []; q.on('pageerror', (e) => errores.push(e.message));
+  await q.goto(`${servidor.url}/${PAGINAS['por-pasos']}`);
+  await q.waitForSelector('form[data-formkit="listo"]');
+  assert.deepEqual(errores, [], 'sin errores de página');
+  assert.ok(await q.locator('[data-paso]:not([hidden])').count(), 'el formulario se ve');
+  await ctx1.close();
+});
+
+test('el nombre de un archivo largo se recorta conservando su extensión (A1-07)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  await p.setInputFiles('[data-campo="fotos"] input[type="file"]:not([data-entrada-camara])', [{ name: `${'informe de la visita '.repeat(10)}.pdf`, mimeType: 'application/pdf', buffer: Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(2000, 65)]) }]);
+  await p.waitForSelector('[data-campo="fotos"] .arch[data-estado="listo"]', { state: 'attached' });
+  const nombre = (await p.locator('[data-campo="fotos"] .arch-nombre').textContent()).trim();
+  assert.ok(nombre.length <= 120 && nombre.endsWith('.pdf'), `«${nombre}»`);
+  await p.context().close();
+});

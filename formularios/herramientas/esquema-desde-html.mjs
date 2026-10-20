@@ -17,6 +17,9 @@
    expone para detectarlo.
    ========================================================= */
 import { readFileSync, writeFileSync } from 'node:fs';
+/* La configuración única: dice qué cruzadas no bloquean (son advertencia), como en el navegador. */
+await import('../codigo/js/validaciones.config.js');
+const CRUZADAS = globalThis.FORMKIT_VALIDACIONES.cruzadas;
 
 const [, , entrada, salida] = process.argv;
 if (!entrada) { console.error('Uso: node herramientas/esquema-desde-html.mjs <formulario.html> [salida.json]'); process.exit(2); }
@@ -102,7 +105,7 @@ posiciones.forEach((p, i) => {
   if (d['data-cruzada']) {
     campo.cruzadas = d['data-cruzada'].split(/\s+/).filter(Boolean).map((clave) => {
       const mapa = {}; for (const par of (d['data-cruzada-campos'] || '').split(/\s+/).filter(Boolean)) { const [rol, c] = par.split('='); mapa[rol] = c || rol; }
-      return { clave, mapa, nivel: d['data-cruzada-nivel'] || 'error', catalogo: d['data-catalogo'] };
+      return { clave, mapa, nivel: d['data-cruzada-nivel'] || (CRUZADAS[clave] && CRUZADAS[clave].bloquea === false ? 'advertencia' : 'error'), catalogo: d['data-catalogo'] };
     });
   }
   if (tipo === 'select' && /data-nivel="(colonia)"/.test(bloque)) campo.opciones = null; /* las opciones vienen del catálogo en tiempo de ejecución */
@@ -124,21 +127,49 @@ function ancestrosSi(texto, pos) {
   return pila.filter((x) => x.si !== undefined).map((x) => x.si);
 }
 
+/* Periodos: el módulo «fecha» declara al correr la cruzada rango-fechas en el
+   campo final de un [data-rango="inicio,fin"] que no tenga otra; el esquema la
+   reproduce para que el servidor también la revise. */
+for (const m of html.matchAll(/\sdata-rango="([^"]+)"/g)) {
+  const [ini, fin] = m[1].split(',').map((s) => s.trim());
+  if (ini && fin && campos[fin] && !campos[fin].cruzadas) campos[fin].cruzadas = [{ clave: 'rango-fechas', mapa: { inicio: ini, fin }, nivel: 'error' }];
+}
+
+/* El <div> que abre en «desde» y dónde cierra. */
+const finDelDiv = (desde, largo) => {
+  let prof = 1;
+  for (const t of html.slice(desde + largo).matchAll(/<div\b|<\/div>/g)) { prof += t[0] === '</div>' ? -1 : 1; if (prof === 0) return desde + largo + t.index; }
+  return html.length;
+};
+
 /* Cascadas: el módulo declara en tiempo de ejecución la cruzada cp ↔ colonia
    (advertencia). El esquema la reproduce para que el servidor también la
-   evalúe, leyendo el contenedor [data-cascada] y sus niveles. */
-for (const m of html.matchAll(/<div[^>]*\sdata-cascada\b[^>]*>/g)) {
+   evalúe, leyendo el contenedor [data-cascada] y sus niveles. Cada select de la
+   cascada guarda su nivel, su catálogo y, la colonia, la alcaldía de la que
+   depende. Los campos de la lista ([data-cascada-lista]) y los de la captura
+   manual ([data-cascada-manual]) quedan marcados con el número de su cascada:
+   el servidor exige unos u otros según lo que llegue. */
+let numeroCascada = 0;
+for (const m of html.matchAll(/<div[^>]*\sdata-cascada(?![-\w])[^>]*>/g)) {
   const cat = (m[0].match(/data-catalogo="([^"]+)"/) || [])[1];
   const desde = m.index;
-  let prof = 1, fin = html.length;
-  for (const t of html.slice(desde + m[0].length).matchAll(/<div\b|<\/div>/g)) { prof += t[0] === '</div>' ? -1 : 1; if (prof === 0) { fin = desde + m[0].length + t.index; break; } }
+  const fin = finDelDiv(desde, m[0].length);
   const bloque = html.slice(desde, fin);
   /* El campo de cada nivel es el último data-campo abierto antes de su data-nivel. */
   const nivel = (n) => { const i = bloque.indexOf(`data-nivel="${n}"`); if (i < 0) return null; const antes = [...bloque.slice(0, i).matchAll(/data-campo="([^"]+)"/g)]; return antes.length ? antes.at(-1)[1] : null; };
-  const cp = nivel('cp'), colonia = nivel('colonia');
+  const alcaldia = nivel('alcaldia'), cp = nivel('cp'), colonia = nivel('colonia');
+  for (const [n, campo] of [['alcaldia', alcaldia], ['colonia', colonia]]) if (campo && campos[campo] && campos[campo].tipo === 'select') Object.assign(campos[campo], { nivel: n, catalogo: cat });
+  if (colonia && alcaldia && campos[colonia]) Object.assign(campos[colonia], { padre: alcaldia, nivelPadre: 'alcaldia' });
   if (cp && colonia && campos[cp] && !(campos[cp].cruzadas || []).some((c) => c.clave === 'cp-colonia')) {
     campos[cp].cruzadas = [...(campos[cp].cruzadas || []), { clave: 'cp-colonia', mapa: { cp, colonia }, nivel: 'advertencia', catalogo: cat }];
   }
+  for (const [atributo, marca] of [['data-cascada-lista', 'cascadaLista'], ['data-cascada-manual', 'cascadaManual']]) {
+    for (const z of bloque.matchAll(new RegExp(`<div[^>]*\\s${atributo}\\b[^>]*>`, 'g'))) {
+      const ini = desde + z.index, hasta = finDelDiv(ini, z[0].length);
+      for (const p of posiciones) if (p.inicio > ini && p.inicio < hasta && campos[p.nombre]) campos[p.nombre][marca] = numeroCascada;
+    }
+  }
+  numeroCascada++;
 }
 
 const esquema = { formulario: entrada.replace(/\\/g, '/').split('/').pop(), generado: new Date().toISOString(), campos, repetibles, limitesRepetibles };

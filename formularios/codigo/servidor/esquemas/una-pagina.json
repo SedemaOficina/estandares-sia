@@ -1,6 +1,6 @@
 {
   "formulario": "una-pagina.html",
-  "generado": "2026-10-20T21:19:53.395Z",
+  "generado": "2026-10-20T21:45:31.612Z",
   "campos": {
     "nombre": {
       "etiqueta": "Nombre(s)",
@@ -89,7 +89,17 @@
       "atributos": {
         "deriva": "edad=edad"
       },
-      "autocomplete": "bday"
+      "autocomplete": "bday",
+      "cruzadas": [
+        {
+          "clave": "curp-fecha",
+          "mapa": {
+            "curp": "curp",
+            "fecha": "nacimiento"
+          },
+          "nivel": "error"
+        }
+      ]
     },
     "edad": {
       "etiqueta": "Edad",
@@ -104,7 +114,17 @@
         "max": "130",
         "step": "1"
       },
-      "autocomplete": "off"
+      "autocomplete": "off",
+      "cruzadas": [
+        {
+          "clave": "edad-calculada",
+          "mapa": {
+            "fecha": "nacimiento",
+            "edad": "edad"
+          },
+          "nivel": "error"
+        }
+      ]
     },
     "correo": {
       "etiqueta": "Correo electrónico",
@@ -241,7 +261,17 @@
       "sensible": false,
       "uso": "Periodo de participación.",
       "atributos": {},
-      "autocomplete": "off"
+      "autocomplete": "off",
+      "cruzadas": [
+        {
+          "clave": "rango-fechas",
+          "mapa": {
+            "inicio": "desde",
+            "fin": "hasta"
+          },
+          "nivel": "error"
+        }
+      ]
     },
     "interes": {
       "etiqueta": "¿Qué tanto te interesa participar?",

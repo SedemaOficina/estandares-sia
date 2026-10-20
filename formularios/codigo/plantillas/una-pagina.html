@@ -88,14 +88,14 @@
           <p class="ayuda">Son 18 caracteres. Tu fecha de nacimiento se toma de ella.</p>
           <input class="control" id="curp" name="curp" type="text" maxlength="18" autocomplete="off" spellcheck="false">
         </div>
-        <div class="campo" data-campo="nacimiento" data-formato="fecha" data-deriva="edad=edad" data-sensible data-uso="Derivada de la CURP; no se pide por separado." data-finalidad="Identificar a la persona registrada.">
+        <div class="campo" data-campo="nacimiento" data-formato="fecha" data-deriva="edad=edad" data-cruzada="curp-fecha" data-cruzada-campos="curp=curp fecha=nacimiento" data-sensible data-uso="Derivada de la CURP; no se pide por separado." data-finalidad="Identificar a la persona registrada.">
           <label class="etiqueta" for="nacimiento">Fecha de nacimiento</label>
           <p class="ayuda">Si no es correcta, corrige la CURP.</p>
           <input class="control control-corto" id="nacimiento" name="nacimiento" type="date" readonly autocomplete="bday">
         </div>
       </div>
       <!-- autocomplete off: la edad no se escribe; se calcula con la fecha de nacimiento. -->
-      <div class="campo" data-campo="edad" data-formato="numero" data-sensible data-uso="Derivada de la fecha de nacimiento; no se pide por separado." data-finalidad="Identificar a la persona registrada.">
+      <div class="campo" data-campo="edad" data-formato="numero" data-cruzada="edad-calculada" data-cruzada-campos="fecha=nacimiento edad=edad" data-sensible data-uso="Derivada de la fecha de nacimiento; no se pide por separado." data-finalidad="Identificar a la persona registrada.">
         <label class="etiqueta" for="edad">Edad</label>
         <p class="ayuda">Se calcula con la fecha de nacimiento.</p>
         <div class="control-grupo"><input class="control control-corto" id="edad" name="edad" type="text" inputmode="numeric" min="0" max="130" step="1" readonly autocomplete="off"><span class="control-unidad" aria-hidden="true">años</span></div>

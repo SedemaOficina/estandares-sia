@@ -89,8 +89,15 @@
       }
       const ext = (nombre) => String(nombre || '').split('.').pop().toLowerCase();
       const formatosTxt = (c) => cfg.formatosArchivo(c.extensiones);
-      /* Nombre saneado: sin rutas, sin caracteres de control, acotado. */
-      const saneaNombre = (n) => String(n || 'archivo').split(/[\\/]/).pop().replace(/[\u0000-\u001F\u007F]/g, '').replace(/\s+/g, ' ').trim().slice(0, A.nombreMax) || 'archivo';
+      /* Nombre saneado: sin rutas ni caracteres que no se ven o que invierten el texto
+         («recibo‮fdp.png» se leería «recibognp.pdf»), acotado y, si se recorta, con su
+         extensión (el servidor la necesita para saber qué es). */
+      const saneaNombre = (n) => {
+        const limpio = String(n || 'archivo').split(/[\\/]/).pop().replace(/[\u0000-\u001F\u007F-\u009F​-‏‪-‮⁠-⁤⁦-⁩﻿]/g, '').replace(/\s+/g, ' ').trim() || 'archivo';
+        if (limpio.length <= A.nombreMax) return limpio;
+        const e = limpio.match(/\.[A-Za-z0-9]{1,10}$/);
+        return e ? `${limpio.slice(0, A.nombreMax - e[0].length)}${e[0]}` : limpio.slice(0, A.nombreMax);
+      };
       const hexDe = (buf) => Array.from(new Uint8Array(buf), (x) => x.toString(16).padStart(2, '0')).join('');
       const huellaDe = (buf) => ((window.crypto && crypto.subtle && crypto.subtle.digest) ? crypto.subtle.digest('SHA-256', buf).then(hexDe, () => '') : Promise.resolve(''));
 

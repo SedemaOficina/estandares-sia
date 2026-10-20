@@ -28,14 +28,23 @@
        definición «grupo.#.campo», con el mínimo y el máximo de filas;
      · validaciones cruzadas declaradas;
      · señales anti-abuso: campo trampa lleno, tiempo mínimo de llenado;
-     · archivos: campo que los recibe, extensión, tamaño, número y total
-       (la firma se verifica sobre los bytes recibidos, fuera de este módulo).
-   Devuelve {ok, datos (normalizados), errores:[{campo, mensaje}], senales:[]}.
+     · archivos: campo que los recibe, extensión, tamaño, nombre, número y
+       total, con los límites del campo (data-max, data-mb, data-total-mb) o
+       los de la configuración (la firma se verifica sobre los bytes
+       recibidos, fuera de este módulo);
+     · una cascada sin catálogo: si llega su captura manual, se exige ésa y
+       no la lista (el esquema sabe qué campos son de cada una).
+   Devuelve {ok, datos (normalizados), claves (la clave de catálogo de cada
+   lista cerrada que la tenga), archivos (copias, sin fecha ni ubicación de
+   captura si el campo no las pide), errores:[{campo, mensaje}], senales:[]}.
 
    Uso:
      import { validaPayload } from './validar.mjs';
      const esquema = JSON.parse(fs.readFileSync('esquema.json'));
-     const r = validaPayload(payload, esquema, { catalogos, auxiliares, limitesSegun });
+     const r = validaPayload(payload, esquema, { catalogos, auxiliares, limitesSegun, config: FORMKIT_CONFIG });
+   config es la misma configuración que la página da a FORMKIT_CONFIG (basta lo que
+   cambia); sin ella se usa la base. Sin un catálogo que el esquema pide, lo que
+   depende de él no se acepta ni se rechaza en silencio: queda una señal.
    El esquema de cada plantilla se genera con:
      node herramientas/esquema-desde-html.mjs codigo/plantillas/por-pasos.html > esquema.json
    ========================================================= */
@@ -49,10 +58,22 @@ const CLAVES_PROHIBIDAS = new Set(['__proto__', 'constructor', 'prototype']);
 
 const esObjetoPlano = (x) => x !== null && typeof x === 'object' && !Array.isArray(x) && [Object.prototype, null].includes(Object.getPrototypeOf(x));
 const esTexto = (v) => typeof v === 'string' || (typeof v === 'number' && Number.isFinite(v));
+/* Caracteres que no se ven o que invierten el texto: un nombre de archivo no los lleva. */
+const INVISIBLES = /[\u0000-\u001F\u007F-\u009F​-‏‪-‮⁠-⁤⁦-⁩﻿]/;
+/* Filas de un catálogo: un arreglo o el objeto documentado {filas, fuente, corte}. */
+const filasDe = (cat) => (Array.isArray(cat) ? cat : cat && Array.isArray(cat.filas) ? cat.filas : null);
+/* Una configuración parcial (sólo lo que cambia, como FORMKIT_CONFIG en el navegador) se fusiona con la base. */
+function fusiona(base, extra) {
+  if (!esObjetoPlano(extra) || !esObjetoPlano(base)) return extra === undefined ? base : extra;
+  const out = { ...base };
+  for (const k of Object.keys(extra)) if (!CLAVES_PROHIBIDAS.has(k)) out[k] = fusiona(base[k], extra[k]);
+  return out;
+}
 
 export function validaPayload(payload, esquema, opciones = {}) {
-  /* opciones.mensajes cambia textos sin pasar toda la configuración (por ejemplo, a «usted»). */
-  const base = opciones.config || CFG;
+  /* opciones.config: la configuración del formulario (FORMKIT_CONFIG), completa o sólo lo que cambia.
+     opciones.mensajes cambia textos sin pasar toda la configuración (por ejemplo, a «usted»). */
+  const base = opciones.config ? fusiona(CFG, opciones.config) : CFG;
   const cfg = opciones.mensajes ? { ...base, mensajes: { ...base.mensajes, ...opciones.mensajes } } : base;
   const errores = [];
   const senales = [];
@@ -70,6 +91,13 @@ export function validaPayload(payload, esquema, opciones = {}) {
   for (const [k, v] of Object.entries(payload.datos || {})) datos[k] = v;
   const campos = esquema.campos;
   const declarado = (n) => !CLAVES_PROHIBIDAS.has(n) && Object.hasOwn(campos, n);
+  /* La clave de catálogo de cada lista cerrada (combo), si el catálogo la trae. */
+  const claves = Object.create(null);
+  /* Cascada sin catálogo: si llegó algo en su captura manual, la persona la usó; los
+     campos de la lista no se exigen y los manuales sí (y al revés). */
+  const manualUsada = Object.create(null);
+  for (const [n, c] of Object.entries(campos)) if (c.cascadaManual !== undefined && datos[n] !== undefined && datos[n] !== null && datos[n] !== '') manualUsada[c.cascadaManual] = true;
+  const modoCascada = (c) => !(c.cascadaLista !== undefined && manualUsada[c.cascadaLista]) && !(c.cascadaManual !== undefined && !manualUsada[c.cascadaManual]);
 
   /* Grupos repetibles: «grupo.#.campo» es un patrón y cada fila llega como
      «grupo.N.campo». */
@@ -91,7 +119,7 @@ export function validaPayload(payload, esquema, opciones = {}) {
   };
   /* Un campo exige todas sus condiciones: la propia y las de sus ancestros,
      como en pantalla. (siPadre: esquemas anteriores a «condiciones».) */
-  const activoDef = (c) => (c.condiciones || [c.si, c.siPadre].filter(Boolean)).every(cumple);
+  const activoDef = (c) => (c.condiciones || [c.si, c.siPadre].filter(Boolean)).every(cumple) && modoCascada(c);
   const activo = (n) => declarado(n) && activoDef(campos[n]);
   const vacio = (v) => v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length);
   const noAdmitido = (n, c) => errores.push({ campo: n, mensaje: `Formato de dato no admitido en «${c.etiqueta}».` });
@@ -140,8 +168,10 @@ export function validaPayload(payload, esquema, opciones = {}) {
       if (!lista.every(esTexto)) { noAdmitido(n, c); return; }
       const unicas = [...new Set(lista.map(String))];
       if (unicas.some((x) => !c.opciones.includes(x))) errores.push({ campo: n, mensaje: plantilla(M.soloLista, { etiqueta: c.etiqueta }) });
-      if (c.minOpciones && unicas.length < c.minOpciones) errores.push({ campo: n, mensaje: plantilla(M.minimoOpciones, { etiqueta: c.etiqueta, min: c.minOpciones }) });
-      if (c.maxOpciones && unicas.length > c.maxOpciones) errores.push({ campo: n, mensaje: plantilla(M.maximoOpciones, { etiqueta: c.etiqueta, max: c.maxOpciones }) });
+      /* data-min-opciones y data-max-opciones llegan en los atributos del esquema. */
+      const minO = Number(c.minOpciones ?? c.atributos?.minOpciones ?? 0), maxO = Number(c.maxOpciones ?? c.atributos?.maxOpciones ?? 0);
+      if (minO && unicas.length < minO) errores.push({ campo: n, mensaje: plantilla(M.minimoOpciones, { etiqueta: c.etiqueta, min: minO }) });
+      if (maxO && unicas.length > maxO) errores.push({ campo: n, mensaje: plantilla(M.maximoOpciones, { etiqueta: c.etiqueta, max: maxO }) });
       datos[n] = unicas;
       return;
     }
@@ -152,17 +182,23 @@ export function validaPayload(payload, esquema, opciones = {}) {
     datos[n] = v;
     if (c.tipo === 'casilla' || c.tipo === 'toggle') { if (v !== 'si') errores.push({ campo: n, mensaje: 'Valor de casilla no admitido.' }); return; }
     if (c.tipo === 'opcion' || c.tipo === 'select') {
-      /* opciones === null: la lista viene de un catálogo en tiempo de ejecución (cascadas); se contrasta con él si se pasó. */
-      const admitidas = c.opciones || opcionesDeCatalogo(c, n, opciones.catalogos);
-      if (admitidas && !admitidas.includes(v)) errores.push({ campo: n, mensaje: plantilla(M.soloLista, { etiqueta: c.etiqueta }) });
+      /* opciones === null: la lista viene de un catálogo en tiempo de ejecución (cascadas); se contrasta con él.
+         Sin el catálogo no se acepta ni se rechaza en silencio: queda una señal. */
+      const admitidas = c.opciones || opcionesDeCatalogo(c, n, opciones.catalogos, datos);
+      if (!admitidas) senales.push(`«${n}» se elige de un catálogo que el servidor no recibió en opciones.catalogos: no se pudo comprobar.`);
+      else if (!admitidas.includes(v)) errores.push({ campo: n, mensaje: plantilla(M.soloLista, { etiqueta: c.etiqueta }) });
       return;
     }
     if (c.tipo === 'combo' && c.cerrado && c.catalogo) {
-      /* El catálogo es un arreglo o el objeto documentado {filas, fuente, corte}; una fila de cascada aporta su alcaldía. */
-      const cat = (opciones.catalogos || {})[c.catalogo];
-      const lista = Array.isArray(cat) ? cat : (cat && Array.isArray(cat.filas) ? cat.filas : []);
-      const nombres = lista.map((o) => (typeof o === 'string' ? o : o && (o.nombre ?? o.alcaldia))).filter(Boolean);
-      if (!nombres.some((o) => normaliza(o) === normaliza(v))) errores.push({ campo: n, mensaje: plantilla(M.soloLista, { etiqueta: c.etiqueta }) });
+      /* Se guarda el nombre como está en el catálogo («coyoacan» → «Coyoacán») y, si el
+         catálogo trae una clave propia ({nombre, valor}), también la clave. */
+      const lista = filasDe((opciones.catalogos || {})[c.catalogo]);
+      if (!lista) senales.push(`«${n}» es una lista cerrada del catálogo «${c.catalogo}», que el servidor no recibió en opciones.catalogos: no se pudo comprobar.`);
+      else {
+        const hallada = lista.map((o) => (typeof o === 'string' ? { nombre: o } : o && { nombre: o.nombre ?? o.alcaldia, valor: o.valor })).find((o) => o && o.nombre && normaliza(o.nombre) === normaliza(v));
+        if (!hallada) errores.push({ campo: n, mensaje: plantilla(M.soloLista, { etiqueta: c.etiqueta }) });
+        else { v = hallada.nombre; datos[n] = v; if (hallada.valor !== undefined) claves[n] = hallada.valor; }
+      }
     }
     /* Texto con formato: normalizar, validar y conservar lo normalizado. */
     const f = cfg.formatos[c.formato || (c.tipo === 'textarea' ? 'texto' : '')];
@@ -205,29 +241,40 @@ export function validaPayload(payload, esquema, opciones = {}) {
 
   /* 3. «Otro»: texto sólo si «Otro» fue elegida (ya lo cubre la condición) y exigido si lo fue (ya lo cubre requerido). Se registra como señal si llegó texto sin elección. */
 
-  /* 4. Cruzadas. */
+  /* 4. Cruzadas. En un grupo repetible, la cruzada del patrón (grupo.#.campo) se
+     aplica a cada fila, con los campos de esa fila. Sin nivel en el esquema, el de
+     la cruzada: la que no bloquea en el navegador (bloquea: false) es advertencia. */
+  const defDe = (n) => (declarado(n) ? campos[n] : filaDe(n) ? campos[filaDe(n).patron] : null);
+  const activoN = (n) => (declarado(n) ? activo(n) : !!defDe(n) && activoDef(defDe(n)));
   for (const [n, c] of Object.entries(campos)) {
-    if (!c.cruzadas || esPatron(n) || !activo(n)) continue;
-    for (const cz of c.cruzadas) {
-      const def = cfg.cruzadas[cz.clave];
-      if (!def) continue;
-      const valores = {};
-      let listo = true;
-      /* Un rol de def.opcionales corre vacío, como en el navegador. */
-      const opcionalesCz = def.opcionales || [];
-      for (const rol of def.campos) {
-        const campo = cz.mapa[rol] || rol;
-        const v = activo(campo) ? datos[campo] : undefined;
-        if (vacio(v) && opcionalesCz.includes(rol)) { valores[rol] = ''; continue; }
-        if (vacio(v) || errores.some((e) => e.campo === campo)) { listo = false; break; }
-        const ff = cfg.formatos[campos[campo].formato]; valores[rol] = ff ? ff.normaliza(String(v)) : v;
+    if (!c.cruzadas) continue;
+    const grupo = esPatron(n) ? n.split('.#.')[0] : null;
+    const instancias = grupo ? [...(filasPorGrupo[grupo] || [])].map((fila) => ({ nombre: n.replace('.#.', `.${fila}.`), fila })) : [{ nombre: n, fila: null }];
+    for (const { nombre, fila } of instancias) {
+      if (!activoN(nombre)) continue;
+      const enFila = (x) => (fila !== null && x.includes('.#.') ? x.replace('.#.', `.${fila}.`) : x);
+      for (const cz of c.cruzadas) {
+        const def = cfg.cruzadas[cz.clave];
+        if (!def) continue;
+        const valores = {};
+        let listo = true;
+        /* Un rol de def.opcionales corre vacío, como en el navegador. */
+        const opcionalesCz = def.opcionales || [];
+        for (const rol of def.campos) {
+          const campo = enFila(cz.mapa[rol] || rol);
+          const v = activoN(campo) ? datos[campo] : undefined;
+          if (vacio(v) && opcionalesCz.includes(rol)) { valores[rol] = ''; continue; }
+          if (vacio(v) || errores.some((e) => e.campo === campo)) { listo = false; break; }
+          const ff = cfg.formatos[(defDe(campo) || {}).formato]; valores[rol] = ff ? ff.normaliza(String(v)) : v;
+        }
+        if (!listo) continue;
+        const extra = { ...(c.atributos || {}) };
+        if (cz.catalogo) extra.catalogo = filasDe((opciones.catalogos || {})[cz.catalogo]) || [];
+        const msg = def.valida(valores, extra, cfg);
+        const nivel = cz.nivel || (def.bloquea === false ? 'advertencia' : 'error');
+        if (msg && nivel === 'error') errores.push({ campo: nombre, mensaje: msg });
+        else if (msg) senales.push(`Advertencia en «${nombre}»: ${msg}`);
       }
-      if (!listo) continue;
-      const extra = { ...(c.atributos || {}) };
-      if (cz.catalogo) { const cat = (opciones.catalogos || {})[cz.catalogo]; extra.catalogo = Array.isArray(cat) ? cat : (cat && cat.filas) || []; }
-      const msg = def.valida(valores, extra, cfg);
-      if (msg && cz.nivel === 'error') errores.push({ campo: n, mensaje: msg });
-      else if (msg) senales.push(`Advertencia en «${n}»: ${msg}`);
     }
   }
 
@@ -241,25 +288,35 @@ export function validaPayload(payload, esquema, opciones = {}) {
      Sólo se aceptan en un campo de archivos declarado y activo. */
   const A = cfg.archivos;
   const porCampo = Object.create(null);
+  /* Copia de cada archivo para el sistema: sin la fecha ni la ubicación de captura si el campo no las pide. */
+  const archivos = [];
   for (const a of payload.archivos || []) {
     if (!esObjetoPlano(a) || typeof a.campo !== 'string' || typeof a.nombre !== 'string' || typeof a.size !== 'number' || !Number.isFinite(a.size)) { errores.push({ campo: esObjetoPlano(a) && typeof a.campo === 'string' ? a.campo : '', mensaje: 'Archivo mal formado.' }); continue; }
     if (!declarado(a.campo) || campos[a.campo].tipo !== 'archivos' || !activo(a.campo)) { errores.push({ campo: a.campo, mensaje: 'Archivo en un campo que no recibe archivos.' }); continue; }
     (porCampo[a.campo] = porCampo[a.campo] || []).push(a);
+    const atrA = campos[a.campo].atributos || {};
+    const copia = { ...a };
+    const conservaExif = atrA.conservarExif !== undefined ? atrA.conservarExif !== 'false' : A.conservarExif;
+    if (!conservaExif && ['lat_captura', 'lon_captura', 'fecha_captura'].some((k) => k in copia)) { for (const k of ['lat_captura', 'lon_captura', 'fecha_captura']) delete copia[k]; senales.push(`Archivo «${a.nombre}»: llegó con fecha o ubicación de captura, que «${a.campo}» no pide; se descartaron.`); }
+    archivos.push(copia);
     const ext = a.nombre.split('.').pop().toLowerCase();
-    const extensiones = campos[a.campo].atributos?.extensiones?.split(',') || A.extensiones;
+    /* Las extensiones, como las lee el navegador: sin espacios y en minúsculas. */
+    const extensiones = atrA.extensiones ? atrA.extensiones.split(',').map((s) => s.trim().toLowerCase()).filter(Boolean) : A.extensiones;
     /* El navegador recodifica a JPG las fotos (png, webp): un JPG vale donde se admite una de ellas. */
     const admite = extensiones.includes(ext) || (['jpg', 'jpeg'].includes(ext) && extensiones.some((x) => A.optimiza.tipos.includes(x)));
     if (!admite) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoTipo, { formatos: cfg.formatosArchivo(extensiones) })}` });
     if (!(a.size > 0)) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${M.archRechazoVacio}` });
     const mb = Number(campos[a.campo].atributos?.mb || A.mb);
     if (a.size > mb * 1048576) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: ${plantilla(M.archRechazoPeso, { peso: `${(a.size / 1048576).toFixed(1)} MB`, mb })}` });
-    if (/[\\/\u0000-\u001F]/.test(a.nombre)) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre}»: nombre no saneado.` });
+    if (/[\\/]/.test(a.nombre) || INVISIBLES.test(a.nombre) || a.nombre.length > (A.nombreMax || 120)) errores.push({ campo: a.campo, mensaje: `Archivo «${a.nombre.slice(0, 60)}»: nombre no saneado.` });
   }
   for (const [campo, lista] of Object.entries(porCampo)) {
+    /* El máximo y el total del campo (data-max, data-total-mb) o, si no los declara, los de la configuración. */
     const max = Number(campos[campo].atributos?.max || A.max);
     if (lista.length > max) errores.push({ campo, mensaje: plantilla(max === 1 ? M.archRechazoMaxUno : M.archRechazoMax, { max }) });
     const total = lista.reduce((s, a) => s + a.size, 0);
-    if (total > A.mbTotal * 1048576) errores.push({ campo, mensaje: plantilla(M.archRechazoTotal, { mb: A.mbTotal }) });
+    const mbTotal = Number(campos[campo].atributos?.totalMb || A.mbTotal);
+    if (total > mbTotal * 1048576) errores.push({ campo, mensaje: plantilla(M.archRechazoTotal, { mb: mbTotal }) });
     const huellas = lista.map((a) => a.sha256_original).filter(Boolean);
     if (new Set(huellas).size !== huellas.length) errores.push({ campo, mensaje: M.archRechazoDuplicado });
   }
@@ -267,15 +324,21 @@ export function validaPayload(payload, esquema, opciones = {}) {
 
   /* Se devuelve un objeto común, sin las claves prohibidas ni los datos calculados. */
   for (const k of [...CLAVES_PROHIBIDAS, ...auxiliares]) delete datos[k];
-  return { ok: errores.length === 0, datos: Object.fromEntries(Object.entries(datos)), errores, senales };
+  return { ok: errores.length === 0, datos: Object.fromEntries(Object.entries(datos)), claves: Object.fromEntries(Object.entries(claves)), archivos, errores, senales };
 }
 
-/* Para selects de cascada, las opciones admitidas salen del catálogo declarado en el esquema (atributos.catalogo / nivel). */
-function opcionesDeCatalogo(c, n, catalogos = {}) {
-  const nivel = c.atributos?.nivel || (/alcaldia/.test(n) ? 'alcaldia' : /colonia/.test(n) ? 'colonia' : null);
-  const cat = Object.values(catalogos).find((x) => x && x.filas);
-  if (!cat || !nivel) return null;
-  return [...new Set(cat.filas.map((f) => f[nivel]).filter(Boolean))];
+/* Para selects de cascada, las opciones admitidas salen del catálogo que el esquema
+   nombra (catalogo, nivel; la colonia, de la alcaldía elegida con padre y nivelPadre).
+   El catálogo puede ser un arreglo de filas o {filas, fuente, corte}. null si no se recibió. */
+function opcionesDeCatalogo(c, n, catalogos = {}, datos = {}) {
+  const nivel = c.nivel || c.atributos?.nivel || (/alcaldia/.test(n) ? 'alcaldia' : /colonia/.test(n) ? 'colonia' : null);
+  if (!nivel) return null;
+  const tieneNivel = (x) => (filasDe(x) || []).some((f) => f && typeof f === 'object' && nivel in f);
+  const filas = filasDe(c.catalogo ? catalogos[c.catalogo] : Object.values(catalogos).find(tieneNivel));
+  if (!filas) return null;
+  const padre = c.padre && c.nivelPadre && typeof datos[c.padre] === 'string' && datos[c.padre] ? datos[c.padre] : null;
+  const delPadre = padre ? filas.filter((f) => f && f[c.nivelPadre] === padre) : filas;
+  return [...new Set(delPadre.map((f) => f && f[nivel]).filter(Boolean))];
 }
 
 function normaliza(s) { return String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }

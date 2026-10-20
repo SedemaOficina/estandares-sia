@@ -179,13 +179,25 @@ Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({
 }
 ```
 
-Sólo viajan los campos activos (visibles por condición) con valor, ya normalizados. Los repetibles van como `grupo.índice.campo`. El mapa aporta `{type: "Point", coordinates: [lon, lat]}`. La cabecera `Idempotency-Key` lleva la misma clave mientras no se logre enviar. El servidor valida con `codigo/servidor/validar.mjs` y el esquema que se deriva del HTML:
+Sólo viajan los campos activos (visibles por condición) con valor, ya normalizados. Los repetibles van como `grupo.índice.campo`. Una lista cerrada (combo) envía el nombre como está en el catálogo y, si el catálogo trae una clave propia, ésta en `payload.claves[campo]`. El mapa aporta `{type: "Point", coordinates: [lon, lat]}`. La cabecera `Idempotency-Key` lleva la misma clave mientras no se logre enviar. El servidor valida con `codigo/servidor/validar.mjs` y el esquema que se deriva del HTML:
 
 ```sh
 node herramientas/esquema-desde-html.mjs tu-formulario.html esquema.json
 ```
 
 y debe además verificar la firma de los archivos, aplicar el límite por origen y reconocer la clave de idempotencia.
+
+```js
+const r = validaPayload(payload, esquema, { catalogos: FORMKIT_CATALOGOS, config: FORMKIT_CONFIG });
+// r = { ok, datos, claves, archivos, errores: [{campo, mensaje}], senales: [] }
+```
+
+- `config` es la misma configuración que la página da a `FORMKIT_CONFIG` (basta lo que cambia). Los límites de un campo de archivos van mejor en su HTML (`data-max`, `data-mb`, `data-total-mb`): así los lee el esquema.
+- `catalogos` son los mismos que en la página, como arreglo o como `{filas, fuente, corte}`. Cada select de una cascada se contrasta con el catálogo que nombra su `data-catalogo`, y la colonia con la alcaldía elegida. Si falta un catálogo que el esquema pide, lo que depende de él no se acepta ni se rechaza en silencio: queda una señal.
+- `datos` son los datos ya normalizados: el nombre oficial de cada lista cerrada, aunque se haya escrito distinto.
+- `claves` trae la clave de catálogo de cada lista cerrada que la tenga.
+- `archivos` son copias de los archivos sin la fecha ni la ubicación de captura cuando el campo no pide `conservarExif`.
+- **Cascada sin catálogo.** La parte de lista va en `<div data-cascada-lista>` y la captura manual en `<div data-cascada-manual hidden>`, dentro de `[data-cascada]`; el código postal, fuera de las dos. Sin catálogo, el módulo oculta la lista entera (ninguna condición la vuelve a mostrar) y muestra la manual. El esquema marca qué campos son de cada parte: si llega la manual, el servidor exige ésa y no la lista.
 
 ## 6. Cómo se escribe un módulo
 

@@ -21,6 +21,9 @@
    vía de escape es la opción «Otro»). Con data-libre acepta lo escrito y lo
    dice con un renglón «No está en la lista: se guarda como lo escribiste».
    El servidor debe conocer el modo para rechazar valores fuera de catálogo.
+   Cerrado, al salir del campo lo escrito queda como en el catálogo
+   («coyoacan» → «Coyoacán»), y viaja ese nombre y, si la opción trae valor,
+   su clave en payload.claves[campo].
    ========================================================= */
 (function () {
   'use strict';
@@ -40,6 +43,19 @@
           const lista = catalogo(wrap);
           const n = FormKit.utilidades.normalizaBusqueda(v);
           return lista.some((o) => FormKit.utilidades.normalizaBusqueda(o.nombre) === n) ? '' : FormKit.config.plantilla(FormKit.config.mensajes.soloLista, { etiqueta: el.querySelector('.etiqueta') ? el.querySelector('.etiqueta').textContent.replace(/\*|\(obligatorio\)/g, '').trim() : el.dataset.campo });
+        },
+        /* En una lista cerrada viaja el nombre como está en el catálogo («Coyoacán», aunque se
+           escriba «coyoacan») y, si el catálogo trae una clave propia ({nombre, valor}), también
+           ésta, en payload.claves[campo]. */
+        alArmar: (form, payload) => {
+          for (const wrap of form.querySelectorAll('[data-combo]:not([data-libre])')) {
+            const campo = wrap.closest('[data-campo]').dataset.campo;
+            if (!(campo in payload.datos)) continue;
+            const o = opcionDe(wrap, payload.datos[campo]);
+            if (!o) continue;
+            payload.datos[campo] = o.nombre;
+            if (o.valor !== undefined) (payload.claves = payload.claves || {})[campo] = o.valor;
+          }
         }
       }
     },
@@ -122,10 +138,21 @@
         });
         /* mousedown (no click) para que la entrada no pierda el foco antes de elegir. */
         lista.addEventListener('mousedown', (e) => { e.preventDefault(); const li = e.target.closest('[role="option"]'); if (li) elige(Number(li.id.split('-').pop())); });
-        entrada.addEventListener('blur', cierra);
+        /* Al salir, lo escrito queda como en el catálogo: «coyoacan» → «Coyoacán». */
+        entrada.addEventListener('blur', () => {
+          cierra();
+          const o = libre ? null : opcionDe(wrap, entrada.value);
+          if (o && entrada.value !== o.nombre) { entrada.value = o.nombre; entrada.dispatchEvent(new Event('change', { bubbles: true })); }
+        });
       }
     }
   });
+
+  /* La opción del catálogo que corresponde a un texto, sin acentos ni mayúsculas. */
+  function opcionDe(wrap, texto) {
+    const n = FormKit.utilidades.normalizaBusqueda(String(texto || '').trim());
+    return n ? catalogo(wrap).find((o) => FormKit.utilidades.normalizaBusqueda(o.nombre) === n) || null : null;
+  }
 
   function catalogo(wrap) {
     const cat = (window.FORMKIT_CATALOGOS || {})[wrap.dataset.catalogo];

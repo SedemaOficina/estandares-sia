@@ -157,6 +157,8 @@
       </div>
 
       <div data-cascada data-catalogo="cdmx">
+        <!-- La lista (alcaldía, colonia): sin catálogo se oculta entera y queda la captura manual de abajo; el código postal sigue en los dos casos. -->
+        <div data-cascada-lista>
         <div class="fila">
           <div class="campo" data-campo="alcaldia" data-requerido data-uso="Turnar a la autoridad competente en el territorio.">
             <label class="etiqueta" for="alcaldia">Alcaldía</label>
@@ -177,17 +179,18 @@
           <p class="ayuda">Escríbela como la conoces.</p>
           <input class="control" id="colonia_escrita" name="colonia_escrita" type="text" maxlength="80" autocomplete="off">
         </div>
-        <div class="campo" data-campo="cp" data-formato="cp" data-requerido data-uso="Verificar que el sitio está en la Ciudad de México.">
-          <label class="etiqueta" for="cp">Código postal</label>
-          <p class="ayuda">Cinco dígitos. Si lo escribes primero, propone alcaldía y colonia.</p>
-          <input class="control control-corto" id="cp" name="cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="off">
         </div>
         <div class="cascada-manual" data-cascada-manual hidden>
           <p class="texto-gris">La lista de colonias no está disponible. Escribe la alcaldía y la colonia.</p>
           <div class="fila">
-            <div class="campo" data-campo="alcaldia_manual" data-uso="Localizar el sitio sin catálogo."><label class="etiqueta" for="alcaldia_manual">Alcaldía</label><input class="control" id="alcaldia_manual" name="alcaldia_manual" type="text" maxlength="60" autocomplete="off"></div>
-            <div class="campo" data-campo="colonia_manual" data-uso="Localizar el sitio sin catálogo."><label class="etiqueta" for="colonia_manual">Colonia</label><input class="control" id="colonia_manual" name="colonia_manual" type="text" maxlength="80" autocomplete="off"></div>
+            <div class="campo" data-campo="alcaldia_manual" data-requerido data-uso="Localizar el sitio sin catálogo."><label class="etiqueta" for="alcaldia_manual">Alcaldía</label><input class="control" id="alcaldia_manual" name="alcaldia_manual" type="text" maxlength="60" autocomplete="off"></div>
+            <div class="campo" data-campo="colonia_manual" data-requerido data-uso="Localizar el sitio sin catálogo."><label class="etiqueta" for="colonia_manual">Colonia</label><input class="control" id="colonia_manual" name="colonia_manual" type="text" maxlength="80" autocomplete="off"></div>
           </div>
+        </div>
+        <div class="campo" data-campo="cp" data-formato="cp" data-requerido data-uso="Verificar que el sitio está en la Ciudad de México.">
+          <label class="etiqueta" for="cp">Código postal</label>
+          <p class="ayuda">Cinco dígitos. Si lo escribes primero, propone alcaldía y colonia.</p>
+          <input class="control control-corto" id="cp" name="cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="off">
         </div>
       </div>
 
@@ -228,7 +231,7 @@
       <p class="bajada">Las fotografías ayudan; el contacto es opcional.</p>
       <p class="leyenda-oblig">Los campos con <span aria-hidden="true">*</span> son obligatorios.</p>
 
-      <div class="campo" data-campo="fotos" data-uso="Documentar la solicitud." data-conservar-exif="false">
+      <div class="campo" data-campo="fotos" data-uso="Documentar la solicitud." data-conservar-exif="false" data-max="3">
         <span class="etiqueta" id="et-fotos">Fotografías o documentos</span>
         <p class="ayuda" id="ay-fotos">Ayudan a valorar el caso. Puedes continuar sin adjuntar.</p>
         <div data-archivos>

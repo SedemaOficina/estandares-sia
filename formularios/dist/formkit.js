@@ -489,6 +489,15 @@
         return '';
       }
     },
+    'edad-calculada': {
+      descripcion: 'La edad es la que sale de la fecha de nacimiento (para un campo de edad que se calcula; el servidor no la acepta de otra)',
+      campos: ['fecha', 'edad'], bloquea: true,
+      valida: ({ fecha, edad }, a = {}, cfg = CONFIG) => {
+        const iso = isoDeDma(fecha);
+        if (!iso) return '';
+        return String(edadEn(iso, hoyISO())) === String(Number(edad)) ? '' : cfg.mensajes.czEdadCalculada;
+      }
+    },
     'cp-colonia': {
       descripcion: 'El código postal pertenece a la alcaldía y colonia elegidas (advertencia, no bloqueo)',
       campos: ['cp', 'colonia'], bloquea: false,
@@ -529,7 +538,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.5.3',
+    version: '1.6.0',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -614,6 +623,7 @@
       czCurpSexo: 'El sexo indicado no coincide con el de la CURP. Revisa ambos datos.',
       czCurpEntidad: 'La entidad de nacimiento no coincide con la de la CURP. Revisa ambos datos.',
       czRangoFechas: 'La fecha final no puede ser anterior a la fecha inicial.',
+      czEdadCalculada: 'La edad no corresponde a la fecha de nacimiento.',
       czRangoHoras: 'La hora final debe ser posterior a la hora inicial.',
       czIgual: 'Los dos valores no coinciden. Escríbelos igual en ambos campos.',
       czCpColonia: 'El código postal no corresponde a la colonia elegida según el catálogo. Revisa ambos datos; puedes continuar si estás seguro.',
@@ -778,7 +788,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.5.3
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.6.0
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -1996,6 +2006,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    vía de escape es la opción «Otro»). Con data-libre acepta lo escrito y lo
    dice con un renglón «No está en la lista: se guarda como lo escribiste».
    El servidor debe conocer el modo para rechazar valores fuera de catálogo.
+   Cerrado, al salir del campo lo escrito queda como en el catálogo
+   («coyoacan» → «Coyoacán»), y viaja ese nombre y, si la opción trae valor,
+   su clave en payload.claves[campo].
    ========================================================= */
 (function () {
   'use strict';
@@ -2015,6 +2028,19 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           const lista = catalogo(wrap);
           const n = FormKit.utilidades.normalizaBusqueda(v);
           return lista.some((o) => FormKit.utilidades.normalizaBusqueda(o.nombre) === n) ? '' : FormKit.config.plantilla(FormKit.config.mensajes.soloLista, { etiqueta: el.querySelector('.etiqueta') ? el.querySelector('.etiqueta').textContent.replace(/\*|\(obligatorio\)/g, '').trim() : el.dataset.campo });
+        },
+        /* En una lista cerrada viaja el nombre como está en el catálogo («Coyoacán», aunque se
+           escriba «coyoacan») y, si el catálogo trae una clave propia ({nombre, valor}), también
+           ésta, en payload.claves[campo]. */
+        alArmar: (form, payload) => {
+          for (const wrap of form.querySelectorAll('[data-combo]:not([data-libre])')) {
+            const campo = wrap.closest('[data-campo]').dataset.campo;
+            if (!(campo in payload.datos)) continue;
+            const o = opcionDe(wrap, payload.datos[campo]);
+            if (!o) continue;
+            payload.datos[campo] = o.nombre;
+            if (o.valor !== undefined) (payload.claves = payload.claves || {})[campo] = o.valor;
+          }
         }
       }
     },
@@ -2097,10 +2123,21 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         });
         /* mousedown (no click) para que la entrada no pierda el foco antes de elegir. */
         lista.addEventListener('mousedown', (e) => { e.preventDefault(); const li = e.target.closest('[role="option"]'); if (li) elige(Number(li.id.split('-').pop())); });
-        entrada.addEventListener('blur', cierra);
+        /* Al salir, lo escrito queda como en el catálogo: «coyoacan» → «Coyoacán». */
+        entrada.addEventListener('blur', () => {
+          cierra();
+          const o = libre ? null : opcionDe(wrap, entrada.value);
+          if (o && entrada.value !== o.nombre) { entrada.value = o.nombre; entrada.dispatchEvent(new Event('change', { bubbles: true })); }
+        });
       }
     }
   });
+
+  /* La opción del catálogo que corresponde a un texto, sin acentos ni mayúsculas. */
+  function opcionDe(wrap, texto) {
+    const n = FormKit.utilidades.normalizaBusqueda(String(texto || '').trim());
+    return n ? catalogo(wrap).find((o) => FormKit.utilidades.normalizaBusqueda(o.nombre) === n) || null : null;
+  }
 
   function catalogo(wrap) {
     const cat = (window.FORMKIT_CATALOGOS || {})[wrap.dataset.catalogo];
@@ -3806,8 +3843,15 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       }
       const ext = (nombre) => String(nombre || '').split('.').pop().toLowerCase();
       const formatosTxt = (c) => cfg.formatosArchivo(c.extensiones);
-      /* Nombre saneado: sin rutas, sin caracteres de control, acotado. */
-      const saneaNombre = (n) => String(n || 'archivo').split(/[\\/]/).pop().replace(/[\u0000-\u001F\u007F]/g, '').replace(/\s+/g, ' ').trim().slice(0, A.nombreMax) || 'archivo';
+      /* Nombre saneado: sin rutas ni caracteres que no se ven o que invierten el texto
+         («recibo‮fdp.png» se leería «recibognp.pdf»), acotado y, si se recorta, con su
+         extensión (el servidor la necesita para saber qué es). */
+      const saneaNombre = (n) => {
+        const limpio = String(n || 'archivo').split(/[\\/]/).pop().replace(/[\u0000-\u001F\u007F-\u009F​-‏‪-‮⁠-⁤⁦-⁩﻿]/g, '').replace(/\s+/g, ' ').trim() || 'archivo';
+        if (limpio.length <= A.nombreMax) return limpio;
+        const e = limpio.match(/\.[A-Za-z0-9]{1,10}$/);
+        return e ? `${limpio.slice(0, A.nombreMax - e[0].length)}${e[0]}` : limpio.slice(0, A.nombreMax);
+      };
       const hexDe = (buf) => Array.from(new Uint8Array(buf), (x) => x.toString(16).padStart(2, '0')).join('');
       const huellaDe = (buf) => ((window.crypto && crypto.subtle && crypto.subtle.digest) ? crypto.subtle.digest('SHA-256', buf).then(hexDe, () => '') : Promise.resolve(''));
 
@@ -4645,19 +4689,25 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
      · relación inversa: si se captura primero el código postal, se rellenan
        la alcaldía y la colonia que dependan de él, y la persona puede
        corregirlos; si un cp abarca varias colonias, se acota la lista;
-     · si el catálogo no carga, se muestra la captura manual (bloque
-       data-cascada-manual) y la cascada se oculta.
+     · si el catálogo no carga, la lista se oculta entera (data-cascada-lista)
+       y se muestra la captura manual (data-cascada-manual); el código postal
+       sigue en los dos casos. Una fila incompleta del catálogo se omite con
+       un aviso en la consola.
 
    Contrato HTML:
      <div data-cascada data-catalogo="cdmx">
-       <div class="campo" data-campo="alcaldia" data-requerido>
-         <label class="etiqueta" for="alcaldia">Alcaldía</label>
-         <div class="select"><select class="control control-select" id="alcaldia" name="alcaldia" data-nivel="alcaldia" autocomplete="address-level2"><option value="">Elige una opción</option></select></div>
+       <div data-cascada-lista>
+         <div class="campo" data-campo="alcaldia" data-requerido>
+           <label class="etiqueta" for="alcaldia">Alcaldía</label>
+           <div class="select"><select class="control control-select" id="alcaldia" name="alcaldia" data-nivel="alcaldia" autocomplete="address-level2"><option value="">Elige una opción</option></select></div>
+         </div>
+         <div class="campo" data-campo="colonia" data-requerido>…<select data-nivel="colonia" autocomplete="address-level3">…</div>
        </div>
-       <div class="campo" data-campo="colonia" data-requerido>…<select data-nivel="colonia" autocomplete="address-level3">…</div>
+       <div data-cascada-manual hidden>…alcaldía y colonia de texto, data-requerido…</div>
        <div class="campo" data-campo="cp" data-formato="cp" data-requerido>…<input data-nivel="cp" autocomplete="postal-code">…</div>
-       <div data-cascada-manual hidden>…campos de texto equivalentes…</div>
      </div>
+   El esquema del servidor marca qué campos son de la lista y cuáles de la
+   captura manual: si llega la manual, exige ésa y no la lista.
    ========================================================= */
 (function () {
   'use strict';
@@ -4671,15 +4721,20 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const por = Object.fromEntries(niveles.map((c) => [c.dataset.nivel, c]));
         const campoDe = (c) => c.closest('[data-campo]');
         const manual = $('[data-cascada-manual]', cont);
+        const lista = $('[data-cascada-lista]', cont);
+        /* Filas completas, como texto: una fila rara (un CP numérico, una fila vacía) no detiene la página. */
+        const crudas = cat && (Array.isArray(cat) ? cat : cat.filas);
+        const filas = Array.isArray(crudas) ? crudas.filter((f) => f && typeof f === 'object').map((f) => Object.fromEntries(Object.entries(f).map(([k, v]) => [k, v === null || v === undefined ? '' : String(v)]))).filter((f) => (!por.alcaldia || f.alcaldia) && (!por.colonia || f.colonia)) : [];
+        if (Array.isArray(crudas) && filas.length < crudas.length) console.warn(`FormKit: el catálogo «${cont.dataset.catalogo}» tiene ${crudas.length - filas.length} fila(s) incompletas; se omitieron.`);
 
-        if (!cat || !Array.isArray(cat.filas) || !cat.filas.length) {
-          /* Sin catálogo: captura manual y la cascada fuera del camino. */
-          for (const c of niveles) campoDe(c).hidden = true;
+        if (!filas.length) {
+          /* Sin catálogo: la lista se oculta entera ([data-cascada-lista]) y queda la captura
+             manual; el código postal sigue. Sin el envoltorio, se ocultan los niveles de la lista. */
+          if (lista) lista.hidden = true; else for (const c of niveles) if (c.dataset.nivel !== 'cp') campoDe(c).hidden = true;
           if (manual) manual.hidden = false;
           anuncia(M.cascadaSinCatalogo);
           continue;
         }
-        const filas = cat.filas;
         const orden = ['alcaldia', 'colonia', 'cp'].filter((n) => por[n]);
         const sel = (c, valores, placeholder) => {
           if (c.tagName !== 'SELECT') return;

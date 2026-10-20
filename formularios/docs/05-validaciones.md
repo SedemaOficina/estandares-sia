@@ -48,6 +48,7 @@ Se evalúan cuando todos sus campos tienen valor; marcan el campo que las lleva 
 | `rango-horas` | `inicio`, `fin` | sí | La hora final es posterior a la inicial el mismo día. |
 | `igual` | `original`, `confirmacion` | sí | Confirmación idéntica (correo, contraseña). |
 | `edad` | `fecha` (+ `data-edad-min`/`data-edad-max`) | sí | Edad calculada dentro del rango que exige el formulario; la fecha puede ser AAAA-MM-DD o día/mes/año. |
+| `edad-calculada` | `fecha`, `edad` | sí | La edad es la que sale de la fecha. Va en el campo de edad que se calcula (`data-deriva`), para que el servidor no acepte otra; la fecha que sale de la CURP lleva, a su vez, `curp-fecha`. |
 | `cp-colonia` | `cp`, `colonia` (+ `data-catalogo`) | **no** | El CP pertenece a la colonia según el catálogo. El módulo `cascadas` la declara sola. |
 
 Ejemplo: `<div class="campo" data-campo="nac" data-formato="fecha" data-cruzada="curp-fecha" data-cruzada-campos="curp=curp fecha=nac">`.
@@ -56,7 +57,7 @@ La CURP contra el nombre se declara en el campo de la CURP: `data-cruzada="curp-
 
 Al cambiar cualquiera de sus campos (al salir de él o al elegir una opción), la cruzada se vuelve a revisar en los dos: corregir la fecha quita o pone el error de la CURP sin volver a tocarla.
 
-Un formulario agrega cruzadas propias en `FORMKIT_CONFIG.cruzadas.<clave> = { campos: ['rol1', 'rol2'], valida(valores, atributos) { return '' /* o el mensaje */; } }`. Un rol listado en `opcionales: ['rol2']` corre aunque esté vacío (llega como `''`): sirve para exigir algo justo cuando ese dato falta, por ejemplo un motivo cuando no hay apellido materno. El servidor recibe la misma configuración.
+Un formulario agrega cruzadas propias en `FORMKIT_CONFIG.cruzadas.<clave> = { campos: ['rol1', 'rol2'], valida(valores, atributos) { return '' /* o el mensaje */; } }`. Un rol listado en `opcionales: ['rol2']` corre aunque esté vacío (llega como `''`): sirve para exigir algo justo cuando ese dato falta, por ejemplo un motivo cuando no hay apellido materno. El servidor recibe la misma configuración: `validaPayload(payload, esquema, { config: FORMKIT_CONFIG })` (basta lo que cambia; se fusiona con la base). Aplica también el nivel de cada cruzada como el navegador (una que no bloquea, como `curp-sexo`, deja una señal y no rechaza) y las cruzadas dentro de cada fila de un grupo repetible (`personas.#.nac` con `curp=personas.#.curp`).
 
 ## 4. Archivos (`ARCHIVOS` en la configuración)
 
@@ -77,7 +78,7 @@ Lo que se sabe sin leer el archivo se rechaza en el acto (`.arch-rechazo`); lo q
 
 ## 5. Mensajes
 
-Los 203 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc., también los de cada formato (`fmt…`) y de cada cruzada (`cz…`). Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo, y el servidor recibe los mismos en `validaPayload(…, { mensajes })`. Registro: tuteo, frase corta, qué hacer primero. Un sistema que habla de usted cambia ahí los que se vean; por ejemplo, `FORMKIT_CONFIG.mensajes = { fmtTelefono: 'Escriba 10 dígitos, sin lada internacional.' }`. Formatos y cruzadas leen también de la configuración del formulario el ámbito (`ambito.cp`, `ambito.coordenadas`) y la CURP (`curp.verificarDigito`). También van ahí los títulos del resumen de errores (`resumenUno`, `resumenServidorVarios`…), los de la confirmación (`confirmaNo`, `confirmaIrreversible`…) y los del resultado (`resultadoHora`, `resultadoMotivo`, `resultadoQueSigue`).
+Los 204 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.js`, con marcadores `{etiqueta}`, `{min}`, `{max}`, `{peso}`, etc., también los de cada formato (`fmt…`) y de cada cruzada (`cz…`). Un formulario los ajusta en `FORMKIT_CONFIG.mensajes` sin tocar el archivo, y el servidor recibe los mismos en `validaPayload(…, { mensajes })`. Registro: tuteo, frase corta, qué hacer primero. Un sistema que habla de usted cambia ahí los que se vean; por ejemplo, `FORMKIT_CONFIG.mensajes = { fmtTelefono: 'Escriba 10 dígitos, sin lada internacional.' }`. Formatos y cruzadas leen también de la configuración del formulario el ámbito (`ambito.cp`, `ambito.coordenadas`) y la CURP (`curp.verificarDigito`). También van ahí los títulos del resumen de errores (`resumenUno`, `resumenServidorVarios`…), los de la confirmación (`confirmaNo`, `confirmaIrreversible`…) y los del resultado (`resultadoHora`, `resultadoMotivo`, `resultadoQueSigue`).
 
 ## 6. Configuración por formulario (`FORMKIT_CONFIG`)
 
@@ -98,7 +99,7 @@ Los 203 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.
 | `chips` | 5, `sia-chips` | Máximo de chips del historial y clave del almacén local (la lista fija no guarda nada). |
 | `visor` | pdf.js junto al paquete; fijo desde 1024 px | Dónde está pdf.js (`pdfjs`), desde qué ancho el visor queda fijo junto a la revisión (`fijoDesde`) y la espera para repintar (`retardoMs`). |
 | `mapa` | sin teselas | Proveedor, atribución, centro, zoom. |
-| `mensajes` | 203 textos | Cualquier mensaje, también los de formatos y cruzadas. |
+| `mensajes` | 204 textos | Cualquier mensaje, también los de formatos y cruzadas. |
 
 ## 7. En el servidor
 

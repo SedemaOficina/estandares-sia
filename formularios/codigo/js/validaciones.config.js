@@ -487,6 +487,15 @@
         return '';
       }
     },
+    'edad-calculada': {
+      descripcion: 'La edad es la que sale de la fecha de nacimiento (para un campo de edad que se calcula; el servidor no la acepta de otra)',
+      campos: ['fecha', 'edad'], bloquea: true,
+      valida: ({ fecha, edad }, a = {}, cfg = CONFIG) => {
+        const iso = isoDeDma(fecha);
+        if (!iso) return '';
+        return String(edadEn(iso, hoyISO())) === String(Number(edad)) ? '' : cfg.mensajes.czEdadCalculada;
+      }
+    },
     'cp-colonia': {
       descripcion: 'El código postal pertenece a la alcaldía y colonia elegidas (advertencia, no bloqueo)',
       campos: ['cp', 'colonia'], bloquea: false,
@@ -527,7 +536,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.5.3',
+    version: '1.6.0',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -612,6 +621,7 @@
       czCurpSexo: 'El sexo indicado no coincide con el de la CURP. Revisa ambos datos.',
       czCurpEntidad: 'La entidad de nacimiento no coincide con la de la CURP. Revisa ambos datos.',
       czRangoFechas: 'La fecha final no puede ser anterior a la fecha inicial.',
+      czEdadCalculada: 'La edad no corresponde a la fecha de nacimiento.',
       czRangoHoras: 'La hora final debe ser posterior a la hora inicial.',
       czIgual: 'Los dos valores no coinciden. Escríbelos igual en ambos campos.',
       czCpColonia: 'El código postal no corresponde a la colonia elegida según el catálogo. Revisa ambos datos; puedes continuar si estás seguro.',

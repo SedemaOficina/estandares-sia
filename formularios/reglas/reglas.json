@@ -332,7 +332,7 @@
    "id": "FRM-19",
    "seccion": 3,
    "titulo": "La lista desplegable con búsqueda es cerrada por omisión",
-   "regla": "El combo (módulo «combo») filtra desde la primera letra, se opera con flechas, Enter y Escape, y sólo acepta valores del catálogo. Con data-libre acepta lo escrito. Se usa a partir de 8 opciones; con menos, radios o select nativo. La lista se abre sólo cuando la persona escribe en el campo: si la página lo llena (al retomar un borrador), no se abre ni anuncia.",
+   "regla": "El combo (módulo «combo») filtra desde la primera letra, se opera con flechas, Enter y Escape, y sólo acepta valores del catálogo. Con data-libre acepta lo escrito. Se usa a partir de 8 opciones; con menos, radios o select nativo. La lista se abre sólo cuando la persona escribe en el campo: si la página lo llena (al retomar un borrador), no se abre ni anuncia. En una lista cerrada viaja el nombre como está en el catálogo («Coyoacán», aunque se escriba «coyoacan»; al salir del campo ya se ve así) y, si el catálogo trae una clave propia ({nombre, valor}), también ésta en payload.claves; el servidor hace lo mismo y la devuelve en claves.",
    "porque": "Un valor libre en un campo de catálogo rompe la consulta; un select de 40 opciones es intransitable en el teléfono.",
    "nivel": "RECOMENDADO",
    "origen": [
@@ -340,10 +340,11 @@
     "A FRM-25",
     "B FRM-CMP-03",
     "C4",
-    "P99 (proyecto de acreditaciones, 17 oct 2026)"
+    "P99 (proyecto de acreditaciones, 17 oct 2026)",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "04-modulos.prueba.mjs: combo"
+   "verificacion": "04-modulos.prueba.mjs: combo; 08: nombre oficial y clave del catálogo (A1-10)"
   },
   {
    "id": "FRM-20",
@@ -366,15 +367,16 @@
    "id": "FRM-21",
    "seccion": 3,
    "titulo": "CURP de 18 caracteres con derivados en solo lectura y cruzada con la fecha de nacimiento y con el nombre",
-   "regla": "La CURP se normaliza a mayúsculas, exige 18 caracteres, estructura, fecha real, entidad y dígito verificador (estructura a confirmar con RENAPO: [Fuente: __]). De ella se derivan fecha de nacimiento y sexo a campos de solo lectura (data-deriva). Si además se pide la fecha, debe coincidir (cruzada curp-fecha, bloqueante por omisión). Si se piden nombre y apellidos, las letras de la CURP deben corresponderles (cruzadas curp-nombre y curp-segundo-apellido; sin segundo apellido, la CURP lleva X en las posiciones 3 y 15). Estas cruzadas comprueban que los datos sean coherentes entre sí, no que la CURP exista ni que sea de quien la escribe.",
+   "regla": "La CURP se normaliza a mayúsculas, exige 18 caracteres, estructura, fecha real, entidad y dígito verificador (estructura a confirmar con RENAPO: [Fuente: __]). De ella se derivan fecha de nacimiento y sexo a campos de solo lectura (data-deriva). Si además se pide la fecha, debe coincidir (cruzada curp-fecha, bloqueante por omisión). Si se piden nombre y apellidos, las letras de la CURP deben corresponderles (cruzadas curp-nombre y curp-segundo-apellido; sin segundo apellido, la CURP lleva X en las posiciones 3 y 15). Estas cruzadas comprueban que los datos sean coherentes entre sí, no que la CURP exista ni que sea de quien la escribe. La fecha de nacimiento que sale de la CURP declara la cruzada curp-fecha y la edad que sale de esa fecha, edad-calculada: el servidor no acepta una fecha ni una edad que no correspondan.",
    "porque": "Pedir lo que la CURP ya contiene es doble captura y doble error; una CURP de 17 caracteres pasa desapercibida sin regla; sin la cruzada con el nombre se acepta la CURP de otra persona nacida el mismo día.",
    "nivel": "OPCIONAL",
    "origen": [
     "encargo 5.5",
-    "P43 (proyecto de acreditaciones, 15 oct 2026)"
+    "P43 (proyecto de acreditaciones, 15 oct 2026)",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "04-modulos.prueba.mjs: CURP (18, estructura, fecha, entidad, dígito) y cruzada; 06 y 07: CURP contra nombre y apellidos"
+   "verificacion": "04-modulos.prueba.mjs: CURP (18, estructura, fecha, entidad, dígito) y cruzada; 06 y 07: CURP contra nombre y apellidos; 08: nacimiento y edad incoherentes con la CURP (A1-08)"
   },
   {
    "id": "FRM-22",
@@ -559,7 +561,7 @@
    "id": "FRM-33",
    "seccion": 4,
    "titulo": "El navegador ayuda; el servidor defiende con las mismas reglas",
-   "regla": "Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor del sistema además revisa la firma de los archivos, el límite por origen y la idempotencia (fuera de validar.mjs, que valida los datos). El esquema del servidor se toma sólo de lo que está dentro del <form>: un control de la página fuera de él no es parte de ningún campo. El servidor revisa el largo máximo (maxlength) antes de normalizar, como lo limita el navegador.",
+   "regla": "Todo lo que valida el navegador lo vuelve a validar el servidor con el mismo validaciones.config.js y el esquema que se deriva del HTML (herramientas/esquema-desde-html.mjs). El servidor del sistema además revisa la firma de los archivos, el límite por origen y la idempotencia (fuera de validar.mjs, que valida los datos). El esquema del servidor se toma sólo de lo que está dentro del <form>: un control de la página fuera de él no es parte de ningún campo. El servidor revisa el largo máximo (maxlength) antes de normalizar, como lo limita el navegador. El servidor aplica también: el nivel de cada cruzada como en el navegador (una que no bloquea, como curp-sexo, es advertencia y deja una señal), el mínimo y el máximo de opciones, el periodo de un data-rango, las cruzadas dentro de cada fila de un grupo repetible, los límites de archivos del campo (data-max, data-mb, data-total-mb) y la configuración del formulario (validaPayload(…, { config: FORMKIT_CONFIG }), basta lo que cambia). Sin un catálogo que el esquema pide, lo que depende de él no se acepta ni se rechaza en silencio: queda una señal.",
    "porque": "La validación del navegador se salta con una petición directa; una segunda lista de reglas se desactualiza.",
    "nivel": "BASE",
    "origen": [
@@ -570,7 +572,7 @@
     "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "06-servidor-y-herramientas.prueba.mjs; 04-modulos: esquema vs navegador; 08: validaPayload con 1 MB en una fecha (E3-03)"
+   "verificacion": "06-servidor-y-herramientas.prueba.mjs; 04-modulos: esquema vs navegador; 08: validaPayload con 1 MB en una fecha (E3-03); 08: paridad del servidor (A1-02 a A1-09)"
   },
   {
    "id": "FRM-34",
@@ -778,14 +780,15 @@
    "id": "FRM-47",
    "seccion": 7,
    "titulo": "Cascada alcaldía → colonia → código postal con catálogo versionado y camino inverso",
-   "regla": "La cascada (módulo «cascadas») toma sus filas de FORMKIT_CATALOGOS.<nombre> con fuente y fecha de corte declaradas; cambiar un padre reinicia a los hijos y lo anuncia; escribir el código postal propone alcaldía y colonia; la colonia propone el CP. Sin catálogo se muestra la captura manual. El catálogo que viaja con el paquete es ficticio y se sustituye por el oficial.",
+   "regla": "La cascada (módulo «cascadas») toma sus filas de FORMKIT_CATALOGOS.<nombre> con fuente y fecha de corte declaradas; cambiar un padre reinicia a los hijos y lo anuncia; escribir el código postal propone alcaldía y colonia; la colonia propone el CP. Sin catálogo se muestra la captura manual. El catálogo que viaja con el paquete es ficticio y se sustituye por el oficial. Sin catálogo se oculta la lista entera ([data-cascada-lista]) y no cada campo, de modo que ninguna condición la vuelva a mostrar; la captura manual ([data-cascada-manual]) pide alcaldía y colonia, y el código postal se queda. El esquema marca qué campos son de la lista y cuáles de la captura manual: si llega la manual, el servidor exige ésa y no la lista. Cada select de la cascada se contrasta con su catálogo (por su nombre en data-catalogo, sea un arreglo o {filas}) y la colonia, con la alcaldía elegida. Una fila incompleta del catálogo se omite con un aviso en la consola y no detiene la página.",
    "porque": "Una lista de colonias escrita en el HTML se desactualiza y pesa; obligar a elegir alcaldía cuando la persona sabe su CP es un paso de más.",
    "nivel": "OPCIONAL",
    "origen": [
-    "encargo 5.2"
+    "encargo 5.2",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "04-modulos: cascadas; 01-por-pasos: cascada por CP y regreso"
+   "verificacion": "04-modulos: cascadas; 01-por-pasos: cascada por CP y regreso; 08: cascada sin catálogo de punta a punta; catálogo como arreglo, dos catálogos y fila rara (B5-01, A1-02, B5-03)"
   },
   {
    "id": "FRM-48",
@@ -890,17 +893,18 @@
    "id": "FRM-54",
    "seccion": 8,
    "titulo": "El servidor revalida los archivos",
-   "regla": "El servidor comprueba de nuevo tipo real, peso, número y total, y conserva el archivo tal como lo recibió, antes de cualquier transformación propia. La firma real y el límite de peticiones se comprueban en el servidor del sistema, fuera de validar.mjs.",
+   "regla": "El servidor comprueba de nuevo tipo real, peso, número y total, y conserva el archivo tal como lo recibió, antes de cualquier transformación propia. La firma real y el límite de peticiones se comprueban en el servidor del sistema, fuera de validar.mjs. Las extensiones del campo se leen sin espacios y en minúsculas, como en el navegador; un nombre con caracteres invisibles o de dirección, o de más de 120 caracteres, no se acepta (el navegador lo sanea y, si lo recorta, conserva la extensión). Si el campo no pide conservarExif, la fecha y la ubicación de captura que lleguen se descartan con una señal; validaPayload devuelve en archivos las copias limpias.",
    "porque": "La validación del navegador se salta; un archivo que entró sin revisar es un riesgo permanente.",
    "nivel": "BASE",
    "origen": [
     "A FRM-65",
     "A FRM-66",
     "B FRM-ARC-03",
-    "auditoría del estándar, 18 oct 2026"
+    "auditoría del estándar, 18 oct 2026",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "codigo/servidor/validar.mjs; 06-servidor: número, obligatorios y total (el tipo real y la firma, en el servidor del sistema)"
+   "verificacion": "codigo/servidor/validar.mjs; 06-servidor: número, obligatorios y total (el tipo real y la firma, en el servidor del sistema); 08: extensiones, nombres y datos de captura (A1-07, E1-06, A1-16)"
   },
   {
    "id": "FRM-55",

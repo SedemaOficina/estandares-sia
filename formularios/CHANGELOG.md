@@ -1,5 +1,49 @@
 # Historial de cambios
 
+## 1.6.0 · 2026-10-20
+
+Tercer bloque de la auditoría del 19 oct 2026: el servidor valida igual que la pantalla (FRM-33). Es versión menor porque el esquema lleva datos nuevos y `validaPayload` devuelve dos cosas más (`claves` y `archivos`). Cada hallazgo lleva su clave del informe y una prueba en `08-auditoria`.
+
+**Lo que el servidor aceptaba y la pantalla no.**
+- **A1-02 · Catálogo de la cascada**: con el catálogo como arreglo no se revisaba nada («Alcaldía Inventada» pasaba). Con dos catálogos se tomaba el primero y se rechazaban alcaldía y colonia válidas. Ahora cada select de la cascada se contrasta con el catálogo que nombra su `data-catalogo`, sea arreglo o `{filas}`, y la colonia con la alcaldía elegida. Si el servidor no recibe el catálogo, ya no acepta ni rechaza en silencio: deja una señal. La lista cerrada (combo) sin catálogo, igual.
+- **A1-04 · Mínimo y máximo de opciones**: el servidor no los leía (4 intereses con máximo 3 pasaban). Ahora sí.
+- **A1-05 · Periodo**: el `data-rango` que el módulo `fecha` declara al correr ya está en el esquema, y el servidor rechaza un «Hasta» anterior a «Desde».
+- **A1-06 · Límites de archivos**:
+  - el servidor usaba el máximo de la configuración base y no el del campo, ni su `data-total-mb`;
+  - con una configuración parcial, `validaPayload` lanzaba un error.
+  
+  Ahora el servidor lee `data-max`, `data-mb` y `data-total-mb` del campo, y `validaPayload(…, { config: FORMKIT_CONFIG })` fusiona lo que cambia. La plantilla por pasos lleva su máximo de tres fotos en el HTML (`data-max="3"`), donde el servidor lo ve, en lugar de su configuración.
+- **A1-08 · Fecha de nacimiento y edad que salen de la CURP**: el servidor aceptaba otras. Ahora la fecha declara `curp-fecha` y la edad la cruzada nueva `edad-calculada`, en la plantilla de una página y en los bloques de la guía.
+- **A1-09 · Cruzadas en filas repetibles**: el servidor se las saltaba. Ahora la cruzada del patrón (`personas.#.nac`) se aplica a cada fila.
+- **A1-16 · Datos de captura de una foto**: si el campo no pide `conservarExif`, la fecha y la ubicación de captura que lleguen se descartan con una señal. `validaPayload` devuelve en `archivos` las copias limpias.
+- **E1-06 · Nombres de archivo**: con caracteres invisibles o que invierten el texto («recibo‮fdp.png» se lee «recibognp.pdf»), o muy largos, pasaban en los dos lados. Ahora el navegador los quita y el servidor los rechaza.
+
+**Lo que el servidor rechazaba y la pantalla no.**
+- **A1-03 · Advertencias**: una cruzada que en pantalla sólo advierte (`curp-sexo`, `curp-entidad`, `cp-colonia`) se rechazaba siempre en el servidor. Una persona trans podía llenar todo y no enviarlo nunca. Ahora el esquema toma el nivel de la configuración, como el navegador: es advertencia y deja una señal.
+- **A1-07 · Extensiones y nombres largos**: el servidor no leía `data-extensiones="PDF, JPG"` con espacios ni mayúsculas. Además, un nombre de más de 120 caracteres perdía su «.pdf» al recortarse. Ahora las extensiones se leen como en el navegador y el nombre se recorta conservando la extensión.
+- **B5-01 · Cascada sin catálogo**: si la lista de colonias no cargaba, el paso se bloqueaba y el servidor rechazaba la captura manual. Ahora:
+  - la parte de lista va en `[data-cascada-lista]` y, sin catálogo, se oculta entera (ninguna condición la vuelve a mostrar);
+  - la captura manual pide alcaldía y colonia, y el código postal se queda;
+  - el esquema marca qué campos son de cada parte, y si llega la manual, el servidor exige ésa (decisión de la Secretaría).
+  
+  Va así en la plantilla por pasos y en los bloques de la guía.
+
+**Datos más limpios.**
+- **A1-10 · Lista cerrada** (`combo`): guardaba lo escrito («coyoacan»), que parte los conteos. Ahora, al salir del campo, queda el nombre como está en el catálogo, en pantalla y en el servidor. Si el catálogo trae una clave propia (`{nombre, valor}`), viaja en `payload.claves[campo]` y el servidor la devuelve en `claves` (decisión de la Secretaría).
+- **B5-03 · Una fila rara del catálogo** (`cascadas`): un CP numérico o una fila vacía dejaban la página en blanco. Ahora la fila se omite con un aviso en la consola.
+
+**Mensajes nuevos** (204 en total): `czEdadCalculada`.
+
+**Reglas**: FRM-19, 21, 33, 47 y 54 dicen lo nuevo.
+
+**Pruebas**: ocho casos nuevos en `08-auditoria` (25 en total, 161 en el paquete).
+
+**Qué puede cambiar un proyecto**:
+- pasar a `validaPayload` su configuración (`{ config: FORMKIT_CONFIG }`) y sus catálogos;
+- llevar al HTML los límites de sus campos de archivos;
+- envolver la parte de lista de su cascada en `[data-cascada-lista]`, poner `data-requerido` a su captura manual y dejar el código postal fuera de las dos;
+- leer `claves` si su catálogo trae valores.
+
 ## 1.5.3 · 2026-10-20
 
 Segundo bloque de la auditoría del 19 oct 2026: datos personales en el dispositivo y el paquete. Cada hallazgo lleva su clave del informe y una prueba en `08-auditoria` que falla con 1.5.2 y pasa ahora.

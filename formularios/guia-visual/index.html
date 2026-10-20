@@ -510,9 +510,11 @@
 
 <template data-demo="cascadas">
 <div data-cascada data-catalogo="cdmx">
+  <div data-cascada-lista>
   <div class="fila">
     <div class="campo" data-campo="m_alcaldia" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_alcaldia">Alcaldía</label><div class="select"><select class="control control-select" id="m_alcaldia" name="m_alcaldia" data-nivel="alcaldia"><option value="">Elige una opción</option></select></div></div>
     <div class="campo" data-campo="m_colonia" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_colonia">Colonia</label><p class="ayuda">Se habilita al elegir la alcaldía.</p><div class="select"><select class="control control-select" id="m_colonia" name="m_colonia" data-nivel="colonia" disabled><option value="">Elige una opción</option></select></div></div>
+  </div>
   </div>
   <div class="campo" data-campo="m_cp" data-formato="cp" data-requerido data-uso="Muestra."><label class="etiqueta" for="m_cp">Código postal</label><p class="ayuda">Escríbelo primero (por ejemplo 04010) y propone alcaldía y colonia; el catálogo es ficticio.</p><input class="control control-corto" id="m_cp" name="m_cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="off"></div>
   <div class="cascada-manual" data-cascada-manual hidden><p class="texto-gris">Sin catálogo: captura manual.</p></div>
@@ -792,14 +794,14 @@
       <p class="ayuda">Son 18 caracteres. Tu fecha de nacimiento se toma de ella.</p>
       <input class="control" id="b_curp" name="b_curp" type="text" maxlength="18" autocomplete="off" spellcheck="false">
     </div>
-    <div class="campo" data-campo="b_nacimiento" data-formato="fecha" data-deriva="edad=b_edad" data-sensible data-uso="Derivada de la CURP; no se pide por separado." data-finalidad="Identificar a la persona.">
+    <div class="campo" data-campo="b_nacimiento" data-formato="fecha" data-deriva="edad=b_edad" data-cruzada="curp-fecha" data-cruzada-campos="curp=b_curp fecha=b_nacimiento" data-sensible data-uso="Derivada de la CURP; no se pide por separado." data-finalidad="Identificar a la persona.">
       <label class="etiqueta" for="b_nacimiento">Fecha de nacimiento</label>
       <p class="ayuda">Si no es correcta, corrige la CURP.</p>
       <input class="control control-corto" id="b_nacimiento" name="b_nacimiento" type="date" readonly autocomplete="bday">
     </div>
   </div>
   <!-- autocomplete off: la edad no se escribe; se calcula con la fecha de nacimiento. -->
-  <div class="campo" data-campo="b_edad" data-formato="numero" data-sensible data-uso="Derivada de la fecha de nacimiento; no se pide por separado." data-finalidad="Identificar a la persona.">
+  <div class="campo" data-campo="b_edad" data-formato="numero" data-cruzada="edad-calculada" data-cruzada-campos="fecha=b_nacimiento edad=b_edad" data-sensible data-uso="Derivada de la fecha de nacimiento; no se pide por separado." data-finalidad="Identificar a la persona.">
     <label class="etiqueta" for="b_edad">Edad</label>
     <p class="ayuda">Se calcula con la fecha de nacimiento.</p>
     <div class="control-grupo"><input class="control control-corto" id="b_edad" name="b_edad" type="text" inputmode="numeric" min="0" max="130" step="1" readonly autocomplete="off"><span class="control-unidad" aria-hidden="true">años</span></div>
@@ -858,6 +860,7 @@
 <!-- En la Ciudad (casilla sin marcar): alcaldía, colonia y código postal del catálogo, y la ubicación. -->
 <div data-si="b_fuera_cdmx=">
   <div data-cascada data-catalogo="cdmx">
+    <div data-cascada-lista>
     <div class="fila">
       <div class="campo" data-campo="b_alcaldia" data-requerido data-uso="Notificar en el domicilio." data-finalidad="Notificar a la persona.">
         <label class="etiqueta" for="b_alcaldia">Alcaldía</label>
@@ -877,17 +880,18 @@
       <p class="ayuda">Escríbela como la conoces.</p>
       <input class="control" id="b_colonia_escrita" name="b_colonia_escrita" type="text" maxlength="80" autocomplete="address-level3">
     </div>
-    <div class="campo" data-campo="b_cp" data-formato="cp" data-requerido data-sensible data-uso="Notificar en el domicilio." data-finalidad="Notificar a la persona.">
-      <label class="etiqueta" for="b_cp">Código postal</label>
-      <p class="ayuda">Cinco dígitos. Si lo escribes primero, propone alcaldía y colonia.</p>
-      <input class="control control-corto" id="b_cp" name="b_cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="postal-code">
     </div>
     <div class="cascada-manual" data-cascada-manual hidden>
       <p class="texto-gris">La lista de colonias no está disponible. Escribe la alcaldía y la colonia.</p>
       <div class="fila">
-        <div class="campo" data-campo="b_alcaldia_manual" data-uso="Notificar en el domicilio sin catálogo." data-finalidad="Notificar a la persona."><label class="etiqueta" for="b_alcaldia_manual">Alcaldía</label><input class="control" id="b_alcaldia_manual" name="b_alcaldia_manual" type="text" maxlength="60" autocomplete="address-level2"></div>
-        <div class="campo" data-campo="b_colonia_manual" data-uso="Notificar en el domicilio sin catálogo." data-finalidad="Notificar a la persona."><label class="etiqueta" for="b_colonia_manual">Colonia</label><input class="control" id="b_colonia_manual" name="b_colonia_manual" type="text" maxlength="80" autocomplete="address-level3"></div>
+        <div class="campo" data-campo="b_alcaldia_manual" data-requerido data-uso="Notificar en el domicilio sin catálogo." data-finalidad="Notificar a la persona."><label class="etiqueta" for="b_alcaldia_manual">Alcaldía</label><input class="control" id="b_alcaldia_manual" name="b_alcaldia_manual" type="text" maxlength="60" autocomplete="address-level2"></div>
+        <div class="campo" data-campo="b_colonia_manual" data-requerido data-uso="Notificar en el domicilio sin catálogo." data-finalidad="Notificar a la persona."><label class="etiqueta" for="b_colonia_manual">Colonia</label><input class="control" id="b_colonia_manual" name="b_colonia_manual" type="text" maxlength="80" autocomplete="address-level3"></div>
       </div>
+    </div>
+    <div class="campo" data-campo="b_cp" data-formato="cp" data-requerido data-sensible data-uso="Notificar en el domicilio." data-finalidad="Notificar a la persona.">
+      <label class="etiqueta" for="b_cp">Código postal</label>
+      <p class="ayuda">Cinco dígitos. Si lo escribes primero, propone alcaldía y colonia.</p>
+      <input class="control control-corto" id="b_cp" name="b_cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="postal-code">
     </div>
   </div>
   <div class="campo" data-enlace-mapa="b_coords">
@@ -939,7 +943,7 @@
     <input class="control control-corto" id="b_fn_fecha" name="b_fn_fecha" type="text" inputmode="numeric" maxlength="10" autocomplete="bday">
   </div>
   <!-- autocomplete off: la edad no se escribe; se calcula con la fecha de nacimiento. -->
-  <div class="campo" data-campo="b_fn_edad" data-formato="numero" data-sensible data-uso="Derivada de la fecha de nacimiento; no se pide por separado." data-finalidad="Identificar a la persona.">
+  <div class="campo" data-campo="b_fn_edad" data-formato="numero" data-cruzada="edad-calculada" data-cruzada-campos="fecha=b_fn_fecha edad=b_fn_edad" data-sensible data-uso="Derivada de la fecha de nacimiento; no se pide por separado." data-finalidad="Identificar a la persona.">
     <label class="etiqueta" for="b_fn_edad">Edad</label>
     <p class="ayuda">Se calcula con la fecha de nacimiento.</p>
     <div class="control-grupo"><input class="control control-corto" id="b_fn_edad" name="b_fn_edad" type="text" inputmode="numeric" min="0" max="130" step="1" readonly autocomplete="off"><span class="control-unidad" aria-hidden="true">años</span></div>
