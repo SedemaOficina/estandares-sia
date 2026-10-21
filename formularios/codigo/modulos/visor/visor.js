@@ -30,11 +30,11 @@
            <button type="button" class="btn btn-secundario" data-visor-accion="acercar" aria-label="Acercar"><span class="visor-paso" aria-hidden="true">+</span></button>
            <button type="button" class="btn btn-secundario" data-visor-accion="ajustar">Ajustar al ancho</button>
            <button type="button" class="btn btn-secundario" data-visor-accion="girar">Girar</button>
-           <a class="btn-enlace visor-abrir" data-visor-abrir href="#" target="_blank" rel="noopener">Abrir en otra pestaña …</a>
+           <a class="btn-enlace visor-abrir" data-visor-abrir target="_blank" rel="noopener">Abrir en otra pestaña …</a>
          </div>
          <p class="visor-pagina" data-visor-pagina aria-live="polite"></p>
          <div class="aviso visor-aviso" data-visor-aviso hidden></div>
-         <div class="visor-hojas" data-visor-hojas tabindex="0" aria-label="Hojas del documento"></div>
+         <div class="visor-hojas" data-visor-hojas role="region" tabindex="0" aria-label="Hojas del documento"></div>
          <p class="visor-nota" data-visor-nota hidden></p>
        </dialog>
      </div>
@@ -148,8 +148,9 @@
     di(M.visorNavegador);
   }
 
-  async function abre({ url, titulo = 'Documento', archivo = '', tipo = '', nota = '' }, boton) {
+  async function abre({ url, titulo = '', archivo = '', tipo = '', nota = '' }, boton) {
     if (!prepara()) return;
+    titulo = titulo || M.visorDocumento;
     origen = boton || null;
     d.querySelector('[data-visor-titulo]').textContent = titulo;
     d.querySelector('[data-visor-archivo]').textContent = archivo;
@@ -206,6 +207,8 @@
     cfg = FormKit.config;
     M = cfg.mensajes;
     hojas = d.querySelector('[data-visor-hojas]');
+    /* La zona de hojas se enfoca para desplazarla con el teclado: como región, su nombre se lee. */
+    if (!hojas.hasAttribute('role')) hojas.setAttribute('role', 'region');
     aviso = d.querySelector('[data-visor-aviso]');
     contador = d.querySelector('[data-visor-pagina]');
     ancho = global.matchMedia(cfg.visor.fijoDesde);

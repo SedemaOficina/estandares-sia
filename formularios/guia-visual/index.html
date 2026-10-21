@@ -47,13 +47,13 @@
 <header class="cabecera">
   <div class="cabecera-int">
     <img class="cabecera-logo" src="../codigo/imagenes/logotipo-sedema.png" width="477" height="96" alt="Gobierno de la Ciudad de México · Secretaría del Medio Ambiente">
-    <div class="cabecera-titulo"><p class="guia-bajada"><a href="../../guia-visual/index.html">← Guía de los estándares del SIA</a></p><h1 class="titulo-pagina">Guía visual del estándar de formularios</h1><p class="bajada guia-bajada">Sistema de Información Ambiental · versión <span data-version></span>. Cada muestra usa el CSS y el JavaScript reales del paquete: así debe verse tu formulario.</p></div>
+    <div class="cabecera-titulo"><p class="guia-bajada"><a class="guia-volver" href="../../guia-visual/index.html">← Guía de los estándares del SIA</a></p><h1 class="titulo-pagina">Guía visual del estándar de formularios</h1><p class="bajada guia-bajada">Sistema de Información Ambiental · versión <span data-version></span>. Cada muestra usa el CSS y el JavaScript reales del paquete: así debe verse tu formulario.</p></div>
   </div>
 </header>
 
 <div class="guia-cuerpo">
   <nav class="guia-nav" aria-label="Secciones de la guía">
-    <label class="solo-lector" for="guia-salto">Ir a la sección</label>
+    <label class="etiqueta guia-nav-etq" for="guia-salto">Ir a la sección</label>
     <select class="control control-select guia-nav-select" id="guia-salto" data-nav-select>
       <option value="inicio">¿Qué necesito?</option>
       <option value="fundamentos">Fundamentos</option>
@@ -365,14 +365,14 @@
     <input class="control" id="n_err" name="n_err" type="text" inputmode="numeric" value="1234" aria-invalid="true" autocomplete="off">
   </div>
 </div>
-<div class="destacado" data-campo="n_acepta" data-requerido data-uso="Constancia de que se informó.">
+<div class="destacado" data-campo="n_acepta" data-requerido data-sin-borrador data-uso="Constancia de que se informó.">
   <label class="casilla"><input class="casilla-input" type="checkbox" name="n_acepta" value="si"><span class="casilla-texto"><span class="etiqueta destacado-nombre">Leí el aviso de privacidad</span><span class="destacado-ayuda">Casilla de declaración o consentimiento: nunca premarcada.</span></span></label>
 </div>
 </template>
 
 <template data-demo="condicional">
 <fieldset class="grupo" data-campo="n_contacto" data-requerido data-uso="Decidir si se piden datos de contacto.">
-  <legend class="etiqueta">¿Quieres que te contactemos?</legend>
+  <legend class="etiqueta">¿Quieres que la Secretaría te contacte?</legend>
   <div class="opciones-lista opciones-en-linea">
     <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="n_contacto" value="si"><span><span class="opcion-nombre">Sí</span></span></label>
     <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="n_contacto" value="no"><span><span class="opcion-nombre">No</span></span></label>
@@ -421,7 +421,7 @@
 <div class="guia-fila-demo"><button type="button" class="btn btn-secundario" data-demo-aviso>Guardar una nota (aviso que responde a una acción)</button><button type="button" class="btn btn-secundario" data-demo-aviso="pasos">Devolver para corregir (aviso con pasos y enlace)</button></div>
 <div data-demo-aviso-lugar></div>
 <div class="aviso aviso-advertencia"><svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg><div class="aviso-texto"><p><strong class="aviso-titulo">La página no terminó de cargar.</strong> Recárgala; si sigue igual, inténtalo más tarde o con otro navegador.</p></div></div>
-<p class="texto-gris">Este aviso va escrito en cada formulario y se oculta solo cuando la página carga completa. Si falta una pieza, la persona lo lee en lugar de una pantalla vacía, y el botón de enviar no manda nada a medias.</p>
+<p class="texto-gris">Este aviso va escrito en cada formulario y se oculta sólo cuando la página carga completa. Si falta una pieza, la persona lo lee en lugar de una pantalla vacía, y el botón de enviar no manda nada a medias.</p>
 <p class="texto-gris">Lo que el proyecto no resuelve se dice: <span class="pendiente">Pendiente: horario de atención</span>. El rótulo va en el HTML, no en CSS, para que el lector lo lea.</p>
 </template>
 
@@ -631,7 +631,7 @@
 </template>
 
 <template data-demo="migas">
-<nav class="migas" aria-label="Ubicación (muestra)"><ol class="migas-lista"><li class="migas-item"><a class="migas-enlace" href="#migas">Inicio</a></li><li class="migas-item"><a class="migas-enlace" href="#migas">Expedientes</a></li><li class="migas-item"><span class="migas-actual" aria-current="page">Expediente 123</span></li></ol></nav>
+<nav class="migas" aria-label="Ubicación (muestra)"><ol class="migas-lista"><li class="migas-item"><a class="migas-enlace" href="#m-migas">Inicio</a></li><li class="migas-item"><a class="migas-enlace" href="#m-migas">Expedientes</a></li><li class="migas-item"><span class="migas-actual" aria-current="page">Expediente 123</span></li></ol></nav>
 </template>
 
 <template data-demo="progreso">
@@ -665,11 +665,11 @@
       <button type="button" class="btn btn-secundario" data-visor-accion="acercar" aria-label="Acercar"><span class="visor-paso" aria-hidden="true">+</span></button>
       <button type="button" class="btn btn-secundario" data-visor-accion="ajustar">Ajustar al ancho</button>
       <button type="button" class="btn btn-secundario" data-visor-accion="girar">Girar</button>
-      <a class="btn-enlace visor-abrir" data-visor-abrir href="#" target="_blank" rel="noopener">Abrir en otra pestaña<svg class="icono icono-sm" aria-hidden="true"><use href="#i-externo"></use></svg><span class="solo-lector"> (se abre en otra pestaña)</span></a>
+      <a class="btn-enlace visor-abrir" data-visor-abrir target="_blank" rel="noopener">Abrir en otra pestaña<svg class="icono icono-sm" aria-hidden="true"><use href="#i-externo"></use></svg><span class="solo-lector"> (se abre en otra pestaña)</span></a>
     </div>
     <p class="visor-pagina" data-visor-pagina aria-live="polite"></p>
     <div class="aviso visor-aviso" data-visor-aviso hidden></div>
-    <div class="visor-hojas" data-visor-hojas tabindex="0" aria-label="Hojas del documento"></div>
+    <div class="visor-hojas" data-visor-hojas role="region" tabindex="0" aria-label="Hojas del documento"></div>
     <p class="visor-nota" data-visor-nota hidden></p>
   </dialog>
 </div>
@@ -717,11 +717,12 @@
   <table class="tabla"><caption class="tabla-titulo">Solicitudes (muestra)</caption>
     <thead><tr><th scope="col" data-ordenable>Folio</th><th scope="col" data-ordenable>Título</th><th scope="col" data-ordenable>Fecha</th><th scope="col"><span class="solo-lector">Acciones</span></th></tr></thead>
     <tbody>
-      <tr data-folio="EJ-001"><td>EJ-001</td><td>Fuga de agua de prueba</td><td>2026-03-01</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
+      <!-- Folios y fechas en .mono: no se parten. «Ver» lleva texto; sólo «Eliminar» puede ir con su icono solo (FRM-72). Las fechas, día/mes/año (FRM-30); el orden las lee como fechas y los títulos con tilde van en su lugar. -->
+      <tr data-folio="EJ-001"><td><span class="mono">EJ-001</span></td><td>Fuga de agua de prueba</td><td><span class="mono">01/03/2026</span></td><td><div class="tabla-acciones"><button type="button" class="btn-enlace" data-accion-fila="ver">Ver</button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
       <!-- Fila oculta por un filtro: el rayado alterno cuenta sólo las filas visibles. -->
-      <tr data-folio="EJ-004" hidden><td>EJ-004</td><td>Fila filtrada de prueba</td><td>2026-02-01</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
-      <tr data-folio="EJ-002"><td>EJ-002</td><td>Residuos de prueba</td><td>2026-02-10</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
-      <tr data-folio="EJ-003"><td>EJ-003</td><td>Registro con un título muy largo que no cabe en una línea</td><td>2026-01-20</td><td><div class="tabla-acciones"><button type="button" class="btn-icono" data-accion-fila="ver"><svg class="icono" aria-hidden="true"><use href="#i-buscar"></use></svg></button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
+      <tr data-folio="EJ-004" hidden><td><span class="mono">EJ-004</span></td><td>Fila filtrada de prueba</td><td><span class="mono">01/02/2026</span></td><td><div class="tabla-acciones"><button type="button" class="btn-enlace" data-accion-fila="ver">Ver</button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
+      <tr data-folio="EJ-002"><td><span class="mono">EJ-002</span></td><td>Árbol de prueba caído</td><td><span class="mono">10/02/2026</span></td><td><div class="tabla-acciones"><button type="button" class="btn-enlace" data-accion-fila="ver">Ver</button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
+      <tr data-folio="EJ-003"><td><span class="mono">EJ-003</span></td><td>Registro con un título muy largo que no cabe en una línea</td><td><span class="mono">20/01/2026</span></td><td><div class="tabla-acciones"><button type="button" class="btn-enlace" data-accion-fila="ver">Ver</button><button type="button" class="btn-icono" data-accion-fila="eliminar"><svg class="icono" aria-hidden="true"><use href="#i-eliminar"></use></svg></button></div></td></tr>
     </tbody>
   </table>
   <p class="tabla-vacia" data-tabla-vacia hidden>No hay resultados.</p>
@@ -869,6 +870,12 @@
 <!-- En la Ciudad (casilla sin marcar): alcaldía, colonia y código postal del catálogo, y la ubicación. -->
 <div data-si="b_fuera_cdmx=">
   <div data-cascada data-catalogo="cdmx">
+    <!-- El código postal va primero: al escribirlo se proponen alcaldía y colonia. -->
+    <div class="campo" data-campo="b_cp" data-formato="cp" data-requerido data-sensible data-uso="Notificar en el domicilio." data-finalidad="Notificar a la persona.">
+      <label class="etiqueta" for="b_cp">Código postal</label>
+      <p class="ayuda">Cinco dígitos. Al escribirlo se proponen la alcaldía y la colonia.</p>
+      <input class="control control-corto" id="b_cp" name="b_cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="postal-code">
+    </div>
     <div data-cascada-lista>
     <div class="fila">
       <div class="campo" data-campo="b_alcaldia" data-requerido data-uso="Notificar en el domicilio." data-finalidad="Notificar a la persona.">
@@ -897,15 +904,10 @@
         <div class="campo" data-campo="b_colonia_manual" data-requerido data-uso="Notificar en el domicilio sin catálogo." data-finalidad="Notificar a la persona."><label class="etiqueta" for="b_colonia_manual">Colonia</label><input class="control" id="b_colonia_manual" name="b_colonia_manual" type="text" maxlength="80" autocomplete="address-level3"></div>
       </div>
     </div>
-    <div class="campo" data-campo="b_cp" data-formato="cp" data-requerido data-sensible data-uso="Notificar en el domicilio." data-finalidad="Notificar a la persona.">
-      <label class="etiqueta" for="b_cp">Código postal</label>
-      <p class="ayuda">Cinco dígitos. Si lo escribes primero, propone alcaldía y colonia.</p>
-      <input class="control control-corto" id="b_cp" name="b_cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="postal-code">
-    </div>
   </div>
   <div class="campo" data-enlace-mapa="b_coords">
     <label class="etiqueta" for="b_enlace">Enlace de Google Maps</label>
-    <p class="ayuda" id="b_enlace_ayuda">Si tienes el lugar en Google Maps, pega aquí su enlace y tomamos de ahí las coordenadas.</p>
+    <p class="ayuda" id="b_enlace_ayuda">Si tienes el lugar en Google Maps, pega aquí su enlace: de ahí se toman las coordenadas.</p>
     <input class="control" id="b_enlace" type="text" inputmode="url" autocomplete="off" spellcheck="false" aria-describedby="b_enlace_ayuda">
     <div data-enlace-mapa-estado></div>
   </div>

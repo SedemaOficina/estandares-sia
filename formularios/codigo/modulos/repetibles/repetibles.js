@@ -127,9 +127,10 @@
           FormKit.confirma(q, { titulo: M.filaConfirma, si: plantilla(M.filaQuitar, { n: filas().indexOf(fila) + 1 }), peligro: true }).then((ok) => { if (ok) quita(fila); });
         });
 
-        /* Filas iniciales: las que exija el mínimo (al menos una si el grupo es obligatorio). */
+        /* Filas iniciales: las que exija el mínimo (al menos una si el grupo es obligatorio). Se
+           ponen en silencio: al cargar la página no se anuncia nada que la persona no hizo. */
         const iniciales = Math.max(min, rep.hasAttribute('data-requerido') ? 1 : 0);
-        while (filas().length < iniciales) agrega(false);
+        while (filas().length < iniciales) agrega(false, { silencio: true });
         renumera();
 
         grupos.set(rep.dataset.repetible, {

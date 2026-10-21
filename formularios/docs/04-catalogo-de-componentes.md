@@ -34,33 +34,33 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `opciones` | Opciones elegibles | BASE | pregunta | — | 5.1 KB | — |
 | `otro` | Opción «Otro» con especificación | RECOMENDADO | pregunta | opciones | — | 4.2 KB |
 | `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 11.2 KB |
-| `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.7 KB |
+| `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.8 KB |
 | `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 4.4 KB |
-| `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 1.1 KB | 9.4 KB |
-| `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.6 KB |
+| `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 1.1 KB | 9.5 KB |
+| `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.9 KB |
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
-| `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.8 KB | 9.0 KB |
-| `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 2.4 KB | 3.2 KB |
-| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.2 KB | 6.4 KB |
+| `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 5.0 KB | 13.5 KB |
+| `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 1.8 KB | 3.2 KB |
+| `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.2 KB | 7.2 KB |
 | `resultado` | Resultado de una decisión | RECOMENDADO | retroalimentacion | — | 2.5 KB | 6.3 KB |
 | `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 2.1 KB | 5.7 KB |
-| `copiar` | Copiar y compartir | RECOMENDADO | retroalimentacion | — | 542 B | 4.0 KB |
+| `copiar` | Copiar y compartir | RECOMENDADO | retroalimentacion | — | 542 B | 4.4 KB |
 | `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 4.1 KB |
 | `acordeon` | Acordeón y secciones plegables | OPCIONAL | navegacion | — | 2.0 KB | — |
-| `pestanas` | Pestañas | OPCIONAL | navegacion | — | 1.1 KB | 2.9 KB |
+| `pestanas` | Pestañas | OPCIONAL | navegacion | — | 1.6 KB | 4.6 KB |
 | `migas` | Migas de pan | OPCIONAL | navegacion | — | 2.5 KB | — |
 | `progreso` | Barra de progreso | OPCIONAL | navegacion | — | 1.1 KB | 2.0 KB |
-| `paginacion` | Paginación de resultados | OPCIONAL | navegacion | — | 2.1 KB | 6.0 KB |
+| `paginacion` | Paginación de resultados | OPCIONAL | consulta | — | 2.3 KB | 6.0 KB |
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
-| `tooltip` | Ayuda desplegable | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.9 KB |
-| `tabla` | Tabla de consulta y de captura | OPCIONAL | retroalimentacion | repetibles | 4.4 KB | 7.3 KB |
+| `tooltip` | Ayuda desplegable | OPCIONAL | pregunta | — | 1.5 KB | 2.9 KB |
+| `tabla` | Tabla de consulta y de captura | OPCIONAL | consulta | repetibles | 4.6 KB | 8.3 KB |
 | `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.9 KB |
-| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 27.2 KB |
-| `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 12.2 KB |
-| `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.7 KB | 10.6 KB |
+| `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 28.4 KB |
+| `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 12.4 KB |
+| `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 3.0 KB | 12.7 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
-| `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 8.6 KB |
-| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 2.0 KB | 8.6 KB |
+| `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 8.8 KB |
+| `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 2.0 KB | 9.8 KB |
 
 ### Opciones elegibles (`opciones`) · BASE
 
@@ -258,7 +258,7 @@ Pasos con barra fija navegable que valida igual que «Continuar»; estados compl
 
 ### Pantalla de revisión (`revision`) · RECOMENDADO
 
-Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el campo y enmascarado de identificadores.
+Resumen de todo lo capturado, un bloque abierto por paso con un solo «Editar» que aterriza en su primer campo, y enmascarado de identificadores.
 
 **Cuándo.** Siempre que haya más de un paso o datos personales.
 
@@ -266,7 +266,7 @@ Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el camp
 
 **Depende de.** pasos · **Archivos.** `codigo/modulos/revision/revision.css`, `codigo/modulos/revision/revision.js`
 
-**Accesibilidad.** details/summary nativos; «Editar» con el nombre del campo para el lector.
+**Accesibilidad.** Un encabezado por bloque; «Editar» dice de qué bloque es para el lector.
 
 **En teléfono.** Etiqueta y valor apilados.
 
@@ -275,12 +275,13 @@ Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el camp
 **Errores frecuentes que evita.**
 - «Editar» que lleva al inicio del paso.
 - Mostrar campos ocultos por condicional.
-- «Editar» que baja de renglón con un valor largo.
+- Un «Editar» por dato: en el teléfono la revisión se llena de botones iguales.
+- Bloques plegables con una bajada que dice «abre cada bloque» cuando ya están abiertos.
 - Rótulo con fondo gris y en negritas: el rótulo va gris y de peso normal, y el dato destaca.
 
 ### Acuse y «qué sigue» (`acuse`) · RECOMENDADO
 
-Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones). Sobrevive a una recarga: el folio y la fecha se vuelven a mostrar durante acuse.horasVisible, y [data-acuse-nuevo] abre el formulario vacío.
+Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones). «Compartir» lleva el folio y la fecha. Sobrevive a una recarga: el folio y la fecha se vuelven a mostrar durante acuse.horasVisible, y [data-acuse-nuevo] abre el formulario vacío.
 
 **Cuándo.** Todo envío que genere folio.
 
@@ -301,6 +302,7 @@ Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo,
 - Acuse sin una acción para seguir.
 - Quitarle el relleno lateral a la tarjeta del acuse: en teléfono los botones quedan pegados a la orilla.
 - Perder el folio al recargar la página.
+- Compartir un texto fijo sin el folio.
 
 ### Resultado de una decisión (`resultado`) · RECOMENDADO
 
@@ -363,11 +365,12 @@ Botones de copiar (folio, campo de solo lectura) y compartir, con confirmación 
 
 **En teléfono.** navigator.share cuando existe.
 
-**En escritorio.** Copia el enlace.
+**En escritorio.** Sin la hoja de compartir del equipo, copia lo mismo que compartiría.
 
 **Errores frecuentes que evita.**
 - Confirmar sólo con un color.
 - Icono solo sin texto.
+- Compartir la dirección del formulario en lugar del folio: abre vacío.
 
 ### Botón de descarga (`descarga`) · OPCIONAL
 
@@ -419,9 +422,9 @@ Vistas alternativas del mismo contenido con patrón ARIA tabs y teclado completo
 
 **Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/pestanas/pestanas.css`, `codigo/modulos/pestanas/pestanas.js`
 
-**Accesibilidad.** role=tab/tabpanel, aria-selected, tabindex rotatorio, flechas e Inicio/Fin.
+**Accesibilidad.** role=tab/tabpanel, aria-selected, tabindex rotatorio, flechas e Inicio/Fin; la pestaña abierta en azul (lo elegido), nunca en guinda.
 
-**En teléfono.** Lista con desplazamiento horizontal.
+**En teléfono.** Lista con desplazamiento horizontal; si no caben, el borde del lado que tiene más se desvanece.
 
 **En escritorio.** Igual.
 
@@ -479,7 +482,7 @@ Paginación numerada o «Cargar más» con rango visible, tamaño de página, an
 
 **Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/paginacion/paginacion.css`, `codigo/modulos/paginacion/paginacion.js`
 
-**Accesibilidad.** nav con etiqueta; aria-current=page; Anterior/Siguiente con aria-disabled; anuncio «Página N de M».
+**Accesibilidad.** nav con etiqueta; aria-current=page (en azul: lo elegido); Anterior/Siguiente con aria-disabled; anuncio «Página N de M».
 
 **En teléfono.** Anterior · «Página X de N» · Siguiente.
 
@@ -517,7 +520,7 @@ Botón «?» que muestra un texto corto, por clic y teclado, con Escape.
 
 **Cuándo.** Aclaración breve junto a una etiqueta.
 
-**Cuándo no.** Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay ícono).
+**Cuándo no.** Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay icono).
 
 **Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/tooltip/tooltip.css`, `codigo/modulos/tooltip/tooltip.js`
 
@@ -534,7 +537,7 @@ Botón «?» que muestra un texto corto, por clic y teclado, con Escape.
 
 ### Tabla de consulta y de captura (`tabla`) · OPCIONAL
 
-Tabla con caption, orden por columna accesible, estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.
+Tabla con caption, orden por columna accesible (palabras como en español, fechas día/mes/año como fechas), estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.
 
 **Cuándo.** Consulta interna de registros.
 
@@ -542,7 +545,7 @@ Tabla con caption, orden por columna accesible, estados vacío/carga/error, acci
 
 **Depende de.** repetibles · **Archivos.** `codigo/modulos/tabla/tabla.css`, `codigo/modulos/tabla/tabla.js`
 
-**Accesibilidad.** th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123».
+**Accesibilidad.** th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123»; sobre la cabecera guinda el anillo de foco va en blanco.
 
 **En teléfono.** Cada fila es una tarjeta: rótulo gris de peso normal y dato que destaca.
 
@@ -555,6 +558,8 @@ Tabla con caption, orden por columna accesible, estados vacío/carga/error, acci
 - Filtrar ocultando filas y que el rayado alterno se descuadre (cuenta sólo las filas visibles).
 - Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla.
 - Dejar que una columna se encoja hasta partir botones, folios o fechas («Revisa / r», «10/10/20 / 26»).
+- Ordenar con el código de los caracteres: «Álvarez» y «Ñúñez» al final y las fechas por día.
+- Un encabezado que dice «descendente» sobre filas que ya no lo están (otra página).
 
 ### Etiquetas de estado (`estado`) · OPCIONAL
 
@@ -628,7 +633,7 @@ Para quien revisa lo que se cargó: muestra todas las hojas de un PDF, una debaj
 
 ### Mapa con selección de punto (`mapa`) · OPCIONAL
 
-Leaflet autoalojado con gestos que no atrapan la página, marcador propio, ámbito acotado, confirmación del punto, alternativa manual y sin mapa base.
+Leaflet autoalojado con gestos que no atrapan la página (el complemento lo carga el módulo si Leaflet cargó), marcador propio, ámbito acotado, confirmación del punto, alternativa manual, sin mapa base, acercar y alejar en español y ubicación aproximada dicha como tal.
 
 **Cuándo.** Se necesita un punto además de la dirección.
 
@@ -646,6 +651,8 @@ Leaflet autoalojado con gestos que no atrapan la página, marcador propio, ámbi
 - Mapa como único camino.
 - Teselas con clave escrita en el código.
 - Punto fuera del ámbito aceptado hasta el envío.
+- Controles de Leaflet en inglés («Zoom in») en una página en español.
+- El complemento de gestos escrito en la página después de Leaflet: sin Leaflet da «L is not defined».
 
 ### Coordenadas desde un enlace de Google Maps (`enlace-mapa`) · OPCIONAL
 
@@ -709,3 +716,4 @@ Sugerencias de un toque desde el historial del dispositivo (nunca al servidor; q
 **Errores frecuentes que evita.**
 - Guardar historial de nombre o correo.
 - Chips sin forma de borrarlos.
+- Rehacer la fila de sugerencias al salir del campo: crece arriba del control, mueve lo de abajo y el toque siguiente cae en otro lugar; con teclado, el foco se pierde.

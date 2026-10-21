@@ -14,7 +14,9 @@
 
 /* Con una barra fija arriba, todo desplazamiento automático (el foco al
    abrir un paso, el salto al resumen de errores) debe detenerse por debajo
-   de ella. Se declara una vez aquí y cubre cualquier elemento. */
+   de ella. Se declara una vez aquí y cubre cualquier elemento. El módulo de pasos
+   mide la barra y pone su alto real en --alto-barra-fija y --alto-barra-fija-movil
+   (0 cuando deja de ser fija). */
 html{scroll-padding-top:var(--alto-barra-fija-movil);-webkit-text-size-adjust:100%}
 
 body{

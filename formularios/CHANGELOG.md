@@ -1,5 +1,82 @@
 # Historial de cambios
 
+## 1.6.2 · 2026-10-20
+
+Quinto bloque de la auditoría del 19 oct 2026: uso y textos. Cada hallazgo lleva su clave del informe y una prueba en `08-auditoria` que falla con 1.6.1 y pasa ahora. Las decisiones de la Secretaría que aplica: «Atrás» regresa un paso (12), el consentimiento vuelve sin marcar (6c), nada en «nosotros» (13), guía en teléfono con índice fijo (14), barra fija en pantallas bajas (23), fecha igual en todo navegador (24), ubicación aproximada (25), muestras rotuladas (26) y ayudas de 14 px en el teléfono (27).
+
+**Recorrido.**
+- **C4-05 · «Atrás» del navegador** (`pasos`, FRM-02): sacaba del formulario y, al volver con «Adelante», se veía un estado mezclado. Ahora cada paso que se abre deja una entrada en el historial, con la misma dirección: «Atrás» regresa un paso y «Adelante» avanza con las reglas de «Continuar»; el «Atrás» del formulario hace lo mismo. Con el acuse a la vista, «Atrás» sale de la página. Si el navegador repone lo escrito al volver, las condiciones se ponen al día, y «Empezar de nuevo» vacía también lo que repuso (los interruptores vuelven a como venían).
+- **C4-11 · Envío lento** (`pasos`, núcleo): «Atrás» seguía activo mientras se enviaba y el aviso de un envío fallido quedaba en un paso oculto. Ahora, mientras se envía, «Atrás» y la barra quedan con aria-disabled; si el aviso queda en un paso que no se ve, ese paso se abre (eventos `formkit:enviando` y `formkit:muestra`). Un segundo clic o Enter mientras se envía no repite el envío.
+- **B4-04 · «Enviando…»** (núcleo, FRM-37): sólo cambiaba el texto de un botón apagado (~2.4:1). Ahora se anuncia y el botón ocupado se ve con todo su contraste.
+- **C4-13 · Una página sin pantalla de límite** (plantilla, FRM-44): ahora la tiene, con «Volver al formulario».
+- **C3-01 · Revisión** (`revision`, FRM-05): 17 «Editar» en el teléfono, bloques plegables abiertos y un resumen de una línea que no se entendía («Información · No»). Ahora cada bloque va abierto, con su título y un solo «Editar» que lleva a su primer campo; la bajada dice lo que se ve.
+- **C2-01 · Compartir el acuse** (`acuse`, `copiar`, FRM-06 y FRM-41): compartía «Folio de mi solicitud» y la dirección del formulario, sin el folio. Ahora comparte el folio y la fecha (`data-compartir-texto` con `{folio}` y `{fecha}`); sin la hoja de compartir del equipo, copia lo mismo; sin folio, el botón no aparece.
+
+**El borrador.**
+- **C4-10 y C4-04 · Al recuperarlo** (núcleo, FRM-42): nada decía en qué paso quedó la persona ni qué no se guardó, y el foco caía en el cuerpo. Ahora un aviso a la vista recibe el foco y dice el paso («Sigues en el paso 2 de 4: «Lugar».»), lo que hay que volver a llenar (lo sensible, como el nombre y el correo) y dónde volver a agregar los archivos. «Empezar de nuevo» lleva el foco a un aviso que lo dice.
+- **C4-12 · El consentimiento** (núcleo, FRM-42, decisión 6c): «Leí el aviso de privacidad» y «No soy un programa automático» volvían marcados. Ahora llevan `data-sin-borrador` y no se guardan; `auditar-campos` lo exige (regla D7).
+- **C4-02 · Dos pestañas** (núcleo): la última reemplazaba el borrador de la otra sin aviso y, tras enviar en una, la otra lo volvía a crear. Ahora cada pestaña dice a la vista que la otra guardó; si la otra envía, ésta deja de guardar y avisa que enviarlo también desde ahí llegaría dos veces.
+- **C2-11 · «Borrador guardado»**: aparecer movía el formulario (28 px en WebKit) y el clic al centro de «Continuar» se perdía. Ahora su renglón está reservado y sólo cambia la opacidad.
+
+**Las sugerencias de uso frecuente** (`chips`, FRM-25).
+- **C2-02 y B4-01**: al salir del campo, la fila de sugerencias crecía arriba del control y el toque siguiente caía en otro lugar (16 de 20 escenarios); con teclado, el foco se perdía al pasar por ellas o al elegir una. Ahora la fila no se rehace mientras la persona llena: la sugerencia nueva se guarda y aparece al empezar otro registro (el formulario se envió o se vació) o al volver a abrir la página; elegir una la marca en su lugar y el foco se queda en ella.
+
+**Textos** (FRM-73, FRM-30).
+- **C5-03 y C5-07 · «Nosotros» y género fijo**: «Recibimos», «no podemos», «Cuéntanos», «tomamos», «contactemos», «no pedimos», «incluida tú», «si estás seguro», «tomado de la CURP», «agregado». Ahora las acciones son de «la Secretaría» o se dicen de forma impersonal y los mensajes con dato variable no fijan el género («según la CURP»).
+- **C5-05 y C5-06 · Una palabra para cada cosa**: «fuera del ámbito» pasa a «fuera de la Ciudad de México»; los archivos se «agregan» (no se «adjuntan»); «icono» sin tilde; «sólo» como adverbio. La guía de estilo (`docs/02`, sección 9) lleva la lista.
+- **C5-04 · Textos escritos en el código**: «Elige una opción», «Por página», «Avance del formulario», «Copiar», «Documento» y «… por ciento» pasan a los mensajes (`cascadaElige`, `paginacionPorPagina`, `pasosBarra`, `copiarTexto`, `visorDocumento`, `progresoPorCiento`); la lista conserva el texto de la primera opción del HTML. Una prueba revisa que no quede ninguno.
+- **C5-01 · Fechas a la vista**: la revisión, el anuncio de «Hoy», la ayuda de la plantilla y el mensaje de error decían AAAA-MM-DD. Ahora la persona ve día/mes/año; un campo de fecha acepta también «15/03/2026» y lo guarda como AAAA-MM-DD.
+- **C5-02 · La ayuda «?» en la etiqueta**: el texto de la ayuda desplegable entraba en el error y en el resumen. Ya no.
+- **C5-08 · Formatos que no orientaban**: un correo con un espacio se guardaba sin él; «ana@b..com», «ana..x@dominio.mx» y «a,b@dominio.mx» pasaban; «+52 1 55…» se rechazaba; «23/07/85» recibía un mensaje genérico. Ahora el espacio se pide quitar, lo demás se rechaza con un mensaje que dice qué revisar, el 1 de los celulares (y el 044, 045 o 01 de antes) se quita, y el año de dos cifras se pide completo. «1,234.50» ya pedía escribirse sin comas desde 1.5.2.
+- **F2-11 · Apóstrofo tipográfico**: «D’Angelo», del teclado del iPhone, se rechazaba. Ahora se acepta y se guarda con apóstrofe simple.
+- **C5-09 · Contador**: decía «40 / 600» y el error «van 35» con espacios repetidos. Ahora cuentan lo mismo.
+
+**Módulos.**
+- **F2-10 · Tabla**: ponía «Álvarez» y «Ñúñez» al final y ordenaba las fechas día/mes/año por día; tras cambiar de página, el encabezado decía un orden que las filas no tenían. Ahora ordena como en español, las fechas como fechas, y las filas nuevas toman el orden elegido.
+- **A6-01 · Foco sobre la cabecera guinda** (`tabla`): el anillo azul daba 1.57:1. Ahí va en blanco (par N25, 7.65:1).
+- **C6-01 · Lo elegido en azul** (`paginacion`, `pestanas`, guía): la página actual, la pestaña abierta y lo elegido en la guía iban en guinda, que es de la acción principal.
+- **C2-06 · Pestañas que no caben**: si la lista se desliza, el borde del lado que tiene más se desvanece, y la pestaña elegida se ve completa. Las pestañas ya no anuncian nada al cargar la página (`FormKit.pestanas.elige` abre una sin anuncio).
+- **G2-02, B1-03, B6-03 y B6-04 · Mapa** (FRM-49, FRM-62): «Zoom in» y «Zoom out» en inglés y de 30 px; una ubicación de 3 000 m sin decir que es aproximada; sin Leaflet, «L is not defined» en la consola y el punto del borrador perdido. Ahora «Acercar» y «Alejar» miden 44 px; una ubicación con más de 100 m de imprecisión se dice aproximada (`FORMKIT_CONFIG.mapa.aproximadaM`); el complemento de gestos ya no lleva `<script>`: su dirección va en `FORMKIT_CONFIG.mapa.gestos` y el módulo lo carga sólo si Leaflet cargó; sin Leaflet, el punto del borrador se conserva.
+- **B4-06 · Visor**: la zona de hojas, enfocable, no tenía rol; ahora es una región con nombre. «Abrir en otra pestaña» ya no lleva `href="#"` antes de abrir un documento.
+- **B8-02 · Fecha del acuse**: ya se armaba igual en todo navegador desde 1.6.1 («… a las 10:00»); queda dicho aquí.
+- **E1-08 · Firma de WebP** (`archivos`): sólo se revisaba «RIFF» (un AVI con extensión .webp pasaba). Ahora también «WEBP».
+- **Filas iniciales** (`repetibles`): las que exige el mínimo ya no se anuncian al cargar la página.
+
+**Pantalla** (decisiones 23 y 27).
+- **B4-03 · Barra fija**: en pantallas bajas tapaba más de la mitad y el margen de desplazamiento era menor que ella. Ahora el módulo de pasos mide la barra y el margen es su alto real; con menos de 500 px de alto la barra deja de ser fija.
+- **Ayudas y contador a 14 px en el teléfono** (13 y 12 px desde tableta).
+
+**Plantillas y ejemplos.**
+- **C2-07 · Salidas sin destino**: «Volver al inicio» daba 404 y las migas llevaban a «#». Ahora llevan al sitio de la Secretaría (se cambia por el del proyecto).
+- **C2-08 · Código postal**: iba después de alcaldía y colonia aunque su ayuda decía «Si lo escribes primero». Ahora va primero, en la plantilla y en el bloque de domicilio de la guía.
+- **C2-03 y C2-10 · Captura interna**: tras guardar, el folio sólo se anunciaba y el registro no aparecía en la consulta; «Ver» y «Editar» no hacían nada. Ahora el folio queda a la vista, el registro aparece, «Ver» lo abre y «Editar» lo lleva a la captura. De paso, el buscador volvía a pintar las filas al salir de él y el clic en «Ver» se perdía (la misma falla que C2-02).
+- **C6-03 · Ejemplos que contradecían las reglas**: folios y fechas sin `.mono`, estado en texto plano, «Ver» con lupa sola, asteriscos sin leyenda, «(opcional)» escrito. Corregido en la captura interna, la encuesta, las plantillas y la tabla de la guía.
+- **C2-05 · Encuesta**: la barra de avance contaba la pregunta opcional. Ahora cuenta sólo las obligatorias.
+
+**Guía visual** (decisiones 14 y 26).
+- **C3-02**: en el teléfono el índice queda fijo arriba, con su letrero, y cada ficha con muestra lleva «Copiar HTML» también junto a su título.
+- **C2-12**: ya no anuncia «Vista a 390 píxeles» al cargar.
+- **C4-06**: recuerda el árbol de decisión, el ancho y la pestaña de los ejemplos al recargar, y el índice del teléfono cambia la dirección (#…).
+- **C2-09**: «Tabla» y «Paginación» quedan en «Consulta de registros» y la ayuda desplegable con las preguntas; la ficha del select se llama «Selector de una lista corta…».
+- **C2-04 y B1-05 (portada)**: el camino «Un formulario con un punto en el mapa» lleva a la ficha del mapa, y las muestras de la portada dicen que no hacen nada al tocarlas.
+- **B1-04 · La guía en un solo archivo**: no encontraba pdf.js ni sus documentos de muestra. Ahora los documentos van dentro y la guía dice dónde está pdf.js (`guia-config.js`).
+- El enlace «← Guía de los estándares del SIA» mide 44 px con el dedo.
+
+**Quedan para otros bloques**: las muestras y tablas de la guía de geovisores (B1-05, B4-05 y «Fuentes» de B1-03) van con geovisores 0.1.3 (bloque 7); C6-02 y C6-04 (contradicciones de estilo entre documentos y muestras) van con los documentos (bloque 6). C3-03 (plantillas más cortas) espera una decisión y quedó en pendientes.
+
+**Mensajes nuevos** (233 en total): `fmtCorreoUsuario`, `fmtCorreoEspacios`, `borradorRecuperadoPaso`, `borradorRecuperadoFalta`, `borradorArchivosFalta`, `borradorDescartado`, `borradorOtraPestana`, `borradorEnviadoOtraPestana`, `acuseCompartir`, `cascadaElige`, `copiarTexto`, `paginacionPorPagina`, `pasosBarra`, `progresoPorCiento`, `visorDocumento`, `mapaAcercar`, `mapaAlejar` y `mapaAproximada`. Cambian `fmtFecha`, `fmtCorreoDominio`, `envioLimite`, `enlaceMapaSin`, `enlaceMapaCentro`, `mapaFuera`, `czCpColonia`, `curpDerivado`, `cascadaCpTomado`, `cascadaTomadaCp`, `repetibleAgregado`, `chipsAgregado`, `fechaEdadCalculada`, `compartirFallo`, `obligatorioArchivos`, `archRechazoDuplicado`, `archLleno` y `archLlenoUno`.
+
+**Reglas**: FRM-02, 04, 05, 06, 10, 15, 24, 25, 30, 34, 37, 41, 42, 44, 45, 47, 49, 62 y 73 dicen lo nuevo. `auditar-campos` agrega D7.
+
+**Pruebas**: veinte casos nuevos en `08-auditoria` (63 en total). La prueba de anchos ya no exime enlaces ni pestañas (sólo los enlaces dentro de texto corrido).
+
+**Qué puede cambiar un proyecto**:
+- quitar el `<script>` del complemento de gestos y declarar su dirección en `FORMKIT_CONFIG.mapa.gestos`;
+- poner `data-sin-borrador` en su casilla de consentimiento y en «No soy un programa automático»;
+- en su acuse, `data-compartir-texto` con `{folio}` y `{fecha}`; en su plantilla de una página, la pantalla `[data-limite]`;
+- cambiar sus textos en «nosotros» y sus «Volver al inicio» con `./` o `#`;
+- quitar los rodeos propios para «Atrás» del navegador, el contador o el orden de la tabla.
+
 ## 1.6.1 · 2026-10-20
 
 Cuarto bloque de la auditoría del 19 oct 2026: robustez de carga y envío. Cada hallazgo lleva su clave del informe y una prueba en `08-auditoria` que falla con 1.6.0 y pasa ahora.

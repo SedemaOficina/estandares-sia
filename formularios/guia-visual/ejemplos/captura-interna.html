@@ -17,13 +17,15 @@
 <link rel="stylesheet" href="../../codigo/modulos/descarga/descarga.css">
 <link rel="stylesheet" href="../../codigo/modulos/modal/modal.css">
 <link rel="stylesheet" href="../../codigo/modulos/migas/migas.css">
+<link rel="stylesheet" href="../../codigo/modulos/estado/estado.css">
 </head>
 <body>
 <a class="salto" href="#contenido">Ir al contenido</a>
 <aside class="entorno-pruebas" aria-label="Aviso de entorno">Captura interna de ejemplo · datos ficticios · nada se envía</aside>
 <header class="cabecera"><div class="cabecera-int"><img class="cabecera-logo" src="../../codigo/imagenes/logotipo-sedema.png" width="477" height="96" alt="Gobierno de la Ciudad de México · Secretaría del Medio Ambiente"><div class="cabecera-titulo"><h1 class="titulo-pagina">Registros de ejemplo · consulta y captura</h1></div></div></header>
 <main class="pagina" id="contenido">
-  <nav class="migas" aria-label="Ubicación"><ol class="migas-lista"><li class="migas-item"><a class="migas-enlace" href="#">Inicio</a></li><li class="migas-item"><a class="migas-enlace" href="#">Registros</a></li><li class="migas-item"><span class="migas-actual" aria-current="page">Ejemplo</span></li></ol></nav>
+  <!-- Migas: cada enlace lleva a una página que existe; cambia las direcciones por las de tu sistema. -->
+  <nav class="migas" aria-label="Ubicación"><ol class="migas-lista"><li class="migas-item"><a class="migas-enlace" href="https://www.sedema.cdmx.gob.mx/">Inicio</a></li><li class="migas-item"><span class="migas-actual" aria-current="page">Registros de ejemplo</span></li></ol></nav>
 
   <div class="pestanas" data-pestanas>
     <div class="pestanas-lista" role="tablist" aria-label="Vistas">
@@ -54,7 +56,8 @@
 
     <div class="pestanas-panel tarjeta" role="tabpanel" id="p-captura" aria-labelledby="t-captura" tabindex="0" hidden>
       <form id="captura" data-formkit data-borrador="sia-ejemplo-captura" action="#" method="post">
-        <p class="bajada">Captura por personal: sugerencias de uso frecuente y fecha con «Hoy».</p>
+        <p class="bajada">Captura por personal: sugerencias de uso frecuente y fecha con «Hoy». Al guardar, el folio queda a la vista y el registro aparece en «Consulta».</p>
+        <p class="leyenda-oblig">Los campos con <span aria-hidden="true">*</span> son obligatorios.</p>
         <div class="fila">
           <div class="campo" data-campo="categoria" data-requerido data-uso="Clasificar el registro." data-chips>
             <label class="etiqueta" for="categoria">Categoría</label>
@@ -80,6 +83,11 @@
     </div>
   </div>
 </main>
+<dialog class="dialogo" id="dialogo-registro" aria-labelledby="titulo-registro">
+  <h2 class="titulo-bloque dialogo-titulo" id="titulo-registro" data-registro-titulo>Registro</h2>
+  <dl data-registro-datos></dl>
+  <div class="dialogo-cierre"><button type="button" class="btn btn-primario" data-cierra-dialogo>Cerrar</button></div>
+</dialog>
 <footer class="pie"><div class="pie-int"><p>Secretaría del Medio Ambiente de la Ciudad de México · Sistema de Información Ambiental.</p></div></footer>
 <script>
 window.FORMKIT_CONFIG = {};
@@ -99,6 +107,7 @@ window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => o
 <script src="../../codigo/modulos/copiar/copiar.js"></script>
 <script src="../../codigo/modulos/descarga/descarga.js"></script>
 <script src="../../codigo/modulos/modal/modal.js"></script>
+<script src="../../codigo/modulos/estado/estado.js"></script>
 <script src="captura-interna.js"></script>
 </body>
 </html>

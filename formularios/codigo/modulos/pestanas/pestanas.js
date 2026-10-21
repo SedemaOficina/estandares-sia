@@ -21,6 +21,8 @@
    ========================================================= */
 (function () {
   'use strict';
+  /* La función que activa cada grupo de pestañas, para elegir una desde la página (FormKit.pestanas.elige). */
+  const activas = new WeakMap();
   FormKit.registra('pestanas', {
     selector: '[data-pestanas]',
     fueraDelFormulario: true,
@@ -30,7 +32,13 @@
         if (cont.dataset.listo !== undefined) continue; /* ya iniciado por otro formulario de la página */
         cont.dataset.listo = '';
         const tabs = $$('[role="tab"]', cont);
-        const activa = (tab, foco = true) => {
+        /* Si las pestañas no caben, el borde del lado que tiene más se desvanece: se nota que hay
+           más y que la lista se desliza. */
+        const lista = cont.querySelector('[role="tablist"]');
+        const desborde = () => { const max = lista.scrollWidth - lista.clientWidth; lista.toggleAttribute('data-mas-antes', lista.scrollLeft > 1); lista.toggleAttribute('data-mas-despues', lista.scrollLeft < max - 1); };
+        if (lista) { lista.addEventListener('scroll', desborde, { passive: true }); window.addEventListener('resize', desborde); setTimeout(desborde, 0); }
+        /* anunciar: sólo cuando la persona cambia de pestaña; al cargar la página no se dice nada. */
+        const activa = (tab, foco = true, anunciar = true) => {
           for (const t of tabs) {
             const es = t === tab;
             t.setAttribute('aria-selected', String(es));
@@ -39,7 +47,12 @@
             if (panel) panel.hidden = !es;
           }
           if (foco) tab.focus();
-          anuncia(FormKit.utilidades.plantilla(FormKit.config.mensajes.pestanaAnuncio, { nombre: tab.textContent.trim() }));
+          /* La pestaña elegida se ve completa aunque la lista se deslice (sólo de lado: la página no se mueve). */
+          if (lista) {
+            const dx = tab.getBoundingClientRect().left - lista.getBoundingClientRect().left;
+            if (dx < 0) lista.scrollLeft += dx; else if (dx + tab.offsetWidth > lista.clientWidth) lista.scrollLeft += dx + tab.offsetWidth - lista.clientWidth;
+          }
+          if (anunciar) anuncia(FormKit.utilidades.plantilla(FormKit.config.mensajes.pestanaAnuncio, { nombre: tab.textContent.trim() }));
         };
         cont.addEventListener('click', (e) => { const t = e.target.closest('[role="tab"]'); if (t && tabs.includes(t)) activa(t, false); });
         cont.addEventListener('keydown', (e) => {
@@ -52,8 +65,12 @@
           activa(tabs[(mapa[e.key] + tabs.length) % tabs.length]);
         });
         const inicial = tabs.find((t) => t.getAttribute('aria-selected') === 'true') || tabs[0];
-        if (inicial) activa(inicial, false);
+        if (inicial) activa(inicial, false, false);
+        activas.set(cont, activa);
       }
     }
   });
+  /* FormKit.pestanas.elige(pestaña, { foco, anuncia }): la página abre una pestaña (por ejemplo, la que la
+     persona dejó abierta antes de recargar), sin foco ni anuncio salvo que lo pida. */
+  FormKit.pestanas = { elige(tab, { foco = false, anuncia = false } = {}) { const c = tab && tab.closest('[data-pestanas]'); const fn = c && activas.get(c); if (fn) fn(tab, foco, anuncia); } };
 }());

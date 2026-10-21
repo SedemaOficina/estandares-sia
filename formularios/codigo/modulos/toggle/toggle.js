@@ -34,6 +34,9 @@
     },
     iniciar(form, ctx) {
       const { $$ } = ctx;
+      /* Al vaciar el formulario («Empezar de nuevo», otro registro), cada interruptor vuelve a como venía en el HTML. */
+      const inicial = new Map($$('[data-toggle]', form).map((b) => [b, b.getAttribute('aria-checked') === 'true']));
+      form.addEventListener('reset', () => { for (const [b, on] of inicial) pon(b, on); });
       for (const b of $$('[data-toggle]', form)) pon(b, b.getAttribute('aria-checked') === 'true');
       form.addEventListener('click', (e) => {
         const b = e.target.closest('[data-toggle]');

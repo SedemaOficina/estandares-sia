@@ -39,8 +39,10 @@
     "(prefers-reduced-motion: reduce)",
     "(forced-colors: active)",
     "(orientation: landscape)",
+    "(max-height: 499px)",
     "print"
   ],
+  "_nota_altura": "(max-height: 499px): pantalla baja (teléfono acostado, zoom al 400 %); la barra de pasos deja de ser fija (decisión de la Secretaría, 20 oct 2026).",
   "propiedadesDeLongitud": [
     "padding",
     "padding-top",

@@ -212,7 +212,9 @@
     nombre: {
       descripcion: 'Nombre o apellido de persona',
       inputmode: 'text', autocomplete: 'given-name',
-      normaliza: (v) => recorta(v),
+      /* El apóstrofo tipográfico (’ ‘ ʼ, el que pone el teclado del iPhone) y el acento suelto
+         cuentan como apóstrofo: «D’Angelo» se guarda como «D'Angelo». */
+      normaliza: (v) => recorta(v).replace(/[\u2018\u2019\u02BC\u00B4`]/g, "'"),
       valida: (v, a = {}, cfg = CONFIG) => {
         const M = cfg.mensajes;
         if (!/^[\p{L}\p{M}' .\-]+$/u.test(v)) return M.fmtNombre;
@@ -224,13 +226,18 @@
       descripcion: 'Correo electrónico',
       inputmode: 'email', autocomplete: 'email',
       dominiosFrecuentes: ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'live.com.mx', 'hotmail.es'],
-      normaliza: (v) => recorta(v).toLowerCase().replace(/\s/g, ''),
+      normaliza: (v) => recorta(v).toLowerCase(),
       valida: (v, a = {}, cfg = CONFIG) => {
         const M = cfg.mensajes;
         if (v.length > (a.maxlength || 120)) return plantilla(M.fmtCorreoLargo, { max: a.maxlength || 120 });
+        /* Un espacio dentro del correo no se quita en silencio: «ana lopez@…» puede no ser «analopez@…». */
+        if (/\s/.test(v)) return M.fmtCorreoEspacios;
         const partes = v.split('@');
         if (partes.length !== 2 || !partes[0] || !partes[1]) return M.fmtCorreoArroba;
-        if (!/^[^\s@]+\.[^\s@.]{2,}$/.test(partes[1])) return M.fmtCorreoDominio;
+        /* Antes de la arroba: sin comas ni signos que un correo no lleva, y sin un punto al principio, al final o dos seguidos. */
+        if (/[,;:<>()[\]\\"]/.test(partes[0]) || /^\.|\.$|\.\./.test(partes[0])) return M.fmtCorreoUsuario;
+        /* Después: nombres separados por un punto (letras, números y guiones), sin puntos seguidos, y al final al menos dos letras. */
+        if (!/^[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?(?:\.[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?)*\.(?:\p{L}{2,}|xn--[a-z0-9-]+)$/u.test(partes[1])) return M.fmtCorreoDominio;
         return '';
       },
       /* Sugerencia sin bloqueo para errores de dedo frecuentes («gmial.com»). */
@@ -244,10 +251,18 @@
     telefono: {
       descripcion: 'Teléfono de México: diez dígitos',
       inputmode: 'tel', autocomplete: 'tel-national',
-      /* Se aceptan espacios, guiones y paréntesis al escribir; un prefijo
-         +52 o 52 se retira. La regla de diez dígitos es la de México y debe
+      /* Se aceptan espacios, guiones y paréntesis al escribir. Se retira lo que
+         antes se marcaba y ya no forma parte del número: la lada del país (+52 o
+         52), el 1 que seguía al 52 en los celulares («+52 1 55…»), y el 044, 045
+         o 01 de las llamadas desde un fijo. Diez dígitos se dejan como están
+         aunque empiecen con 52. La regla de diez dígitos es la de México y debe
          confirmarse con el plan de numeración vigente [Fuente: __]. */
-      normaliza: (v) => { let d = soloDigitos(String(v).replace(/^\s*\+?52\s*/, '')); if (d.length === 12 && d.startsWith('52')) d = d.slice(2); return d; },
+      normaliza: (v) => {
+        const d = soloDigitos(v);
+        if (d.length === 12 && (d.startsWith('52') || d.startsWith('01'))) return d.slice(2);
+        if (d.length === 13 && (d.startsWith('521') || d.startsWith('044') || d.startsWith('045'))) return d.slice(3);
+        return d;
+      },
       valida: (v, a = {}, cfg = CONFIG) => (/^\d{10}$/.test(v) ? '' : cfg.mensajes.fmtTelefono)
     },
     cp: {
@@ -314,9 +329,10 @@
       }
     },
     fecha: {
-      descripcion: 'Fecha real en formato AAAA-MM-DD con límites configurables',
+      descripcion: 'Fecha real con límites configurables: se guarda como AAAA-MM-DD y la persona la ve como día/mes/año',
       inputmode: 'numeric', autocomplete: 'off',
-      normaliza: (v) => recorta(v),
+      /* Escrita como día/mes/año («15/03/2026», en un campo de texto o en el servidor) se guarda como AAAA-MM-DD. */
+      normaliza: (v) => { const t = recorta(v); return isoDeDma(t) || t; },
       valida: (v, a = {}, cfg = CONFIG) => {
         const M = cfg.mensajes;
         const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -335,6 +351,8 @@
       valida: (v, a = {}, cfg = CONFIG) => {
         const M = cfg.mensajes;
         const iso = isoDeDma(v);
+        /* «23/07/85»: el año de dos cifras no se adivina; se pide completo. */
+        if (!iso && /^\d{1,2}\s*[/.\- ]\s*\d{1,2}\s*[/.\- ]\s*\d{2}$/.test(v)) return M.fmtFechaDmaAnio;
         if (!iso) return M.fmtFechaDma;
         if (Number(iso.slice(0, 4)) < 1900) return M.fmtFechaDmaAnio;
         /* En el navegador llega data-no-futura; en el servidor, max ya resuelto a hoy. */
@@ -545,7 +563,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.6.1',
+    version: '1.6.2',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -577,7 +595,7 @@
       obligatorioTexto: 'Completa «{etiqueta}».',
       obligatorioOpcion: 'Elige una opción en «{etiqueta}».',
       obligatorioCasilla: 'Marca la casilla «{etiqueta}» para continuar.',
-      obligatorioArchivos: 'Adjunta al menos un archivo en «{etiqueta}».',
+      obligatorioArchivos: 'Agrega al menos un archivo en «{etiqueta}».',
       obligatorioOtro: 'Escribe cuál es la otra opción en «{etiqueta}».',
       minimoOpciones: 'Elige al menos {min} opciones en «{etiqueta}».',
       maximoOpciones: 'Elige como máximo {max} opciones en «{etiqueta}».',
@@ -592,7 +610,9 @@
       fmtNombreLargo: 'El nombre es demasiado largo: usa hasta {max} caracteres.',
       fmtCorreoLargo: 'El correo es demasiado largo: usa hasta {max} caracteres.',
       fmtCorreoArroba: 'El correo necesita una sola arroba, con texto antes y después. Ejemplo: nombre@dominio.mx',
-      fmtCorreoDominio: 'Revisa el dominio después de la arroba: debe llevar un punto. Ejemplo: nombre@dominio.mx',
+      fmtCorreoDominio: 'Revisa lo que va después de la arroba: nombres separados por un punto, sin puntos seguidos. Ejemplo: nombre@dominio.mx',
+      fmtCorreoUsuario: 'Revisa lo que va antes de la arroba: sin comas ni espacios, y sin un punto al principio, al final o dos seguidos. Ejemplo: nombre.apellido@dominio.mx',
+      fmtCorreoEspacios: 'El correo no lleva espacios: revísalo y quítalos. Ejemplo: nombre@dominio.mx',
       fmtCorreoSugerencia: '¿Quisiste escribir {correo}?',
       fmtTelefono: 'Escribe 10 dígitos, sin lada internacional. Ejemplo: 5512345678',
       fmtCp: 'El código postal lleva 5 dígitos. Ejemplo: 01000',
@@ -610,7 +630,7 @@
       fmtNumeroPaso: 'Usa múltiplos de {paso}.',
       fmtNumeroMin: 'El valor mínimo es {min}.',
       fmtNumeroMax: 'El valor máximo es {max}.',
-      fmtFecha: 'Escribe una fecha real con el formato AAAA-MM-DD. Ejemplo: 2026-03-15',
+      fmtFecha: 'Escribe una fecha real como día/mes/año. Ejemplo: 15/03/2026',
       fmtFechaAnio: 'Revisa el año: escribe una fecha entre 1900 y 2100.',
       fmtFechaDma: 'Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985',
       fmtFechaDmaAnio: 'Revisa el año: escribe los cuatro dígitos, entre 1900 y 2100. Ejemplo: 1985',
@@ -634,7 +654,7 @@
       czEdadCalculada: 'La edad no corresponde a la fecha de nacimiento.',
       czRangoHoras: 'La hora final debe ser posterior a la hora inicial.',
       czIgual: 'Los dos valores no coinciden. Escríbelos igual en ambos campos.',
-      czCpColonia: 'El código postal no corresponde a la colonia elegida según el catálogo. Revisa ambos datos; puedes continuar si estás seguro.',
+      czCpColonia: 'El código postal no corresponde a la colonia elegida según el catálogo. Revisa ambos datos; si son correctos, puedes continuar.',
       minimoCaracteres: 'Escribe al menos {min} caracteres en «{etiqueta}»; van {n}.',
       maximoCaracteres: 'Usa hasta {max} caracteres en «{etiqueta}».',
       advertencia: 'Advertencia:',
@@ -671,12 +691,12 @@
       ahora: 'Ahora',
       copiado: 'Copiado al portapapeles.',
       copiarFallo: 'No se pudo copiar. Selecciona el texto y cópialo a mano.',
-      compartirFallo: 'Tu navegador no permite compartir desde aquí. Copia el enlace.',
+      compartirFallo: 'Tu navegador no permite compartir desde aquí.',
       borradorGuardado: 'Borrador guardado en este dispositivo.',
       enviando: 'Enviando…',
       envioError: 'No se pudo enviar. Lo que capturaste sigue aquí; intenta de nuevo.',
       envioTimeout: 'El envío tardó demasiado y se detuvo. Lo que capturaste sigue aquí; intenta de nuevo.',
-      envioLimite: 'Por ahora no podemos recibir más envíos desde este dispositivo. Lo que capturaste no se perdió; intenta más tarde.',
+      envioLimite: 'Por ahora no se reciben más envíos desde este dispositivo. Lo que capturaste no se perdió; intenta más tarde.',
       envioRecibido: 'Tu envío se recibió. No lo envíes de nuevo.',
       envioRecibidoFolio: 'Tu envío se recibió con el folio {folio}. Guárdalo; no lo envíes de nuevo.',
       borradorSinAlmacen: 'Este equipo no permite guardar el borrador: si cierras la página antes de enviar, lo que capturaste se pierde.',
@@ -699,15 +719,15 @@
       archProveedorFallo: 'No se pudieron recuperar los archivos que habías agregado. Agrégalos de nuevo.',
       archRechazoTotal: 'con él se superan los {mb} MB en total.',
       archRechazoVacio: 'el archivo está vacío.',
-      archRechazoDuplicado: 'ya adjuntaste ese mismo archivo.',
+      archRechazoDuplicado: 'ya agregaste ese mismo archivo.',
       archRechazoDimension: 'la imagen es demasiado pequeña (mínimo {ancho} × {alto} píxeles).',
       archRechazoOptimizada: 'aun optimizada pesa {peso} y el máximo es {mb} MB.',
       archLimite: '{admitidos}: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
       archLimiteUno: '{admitidos}: {formatos}. Un archivo de hasta {mb} MB.',
       archFormatos: 'Formatos admitidos',
       archFormato: 'Formato admitido',
-      archLleno: 'Ya adjuntaste los {max} archivos. Para cambiar uno, quítalo.',
-      archLlenoUno: 'Ya adjuntaste el archivo. Para cambiarlo, quítalo.',
+      archLleno: 'Ya agregaste los {max} archivos. Para cambiar uno, quítalo.',
+      archLlenoUno: 'Ya agregaste el archivo. Para cambiarlo, quítalo.',
       archAgregado: 'Se agregó {nombre}.',
       archQuitado: 'Se quitó {nombre}.',
       archReintentar: 'Reintentar',
@@ -731,13 +751,13 @@
       repetibleMin: 'Agrega al menos {min} elementos en «{etiqueta}».',
       repetibleMax: 'Como máximo se admiten {max} elementos en «{etiqueta}».',
       mapaPunto: 'Punto marcado: {lat}, {lon}.',
-      mapaFuera: 'El punto queda fuera del ámbito. Muévelo o escribe la dirección.',
+      mapaFuera: 'El punto queda fuera de la Ciudad de México. Muévelo o escribe la dirección.',
       chipsBorrar: 'Borrar historial',
       chipsQuitar: 'Quitar {texto} de las sugerencias',
       chipsFijos: 'Respuestas frecuentes para {etiqueta}',
       chipsFijosContexto: '{nombre}, {contexto}',
       chipsFijosOrden: '{n} de {total}',
-      chipsAgregado: 'Agregado: {texto}',
+      chipsAgregado: 'Se agregó: {texto}',
       visorCargando: 'Cargando el documento…',
       visorError: 'No se pudo mostrar el documento aquí. Ábrelo en otra pestaña con el enlace de arriba.',
       visorNavegador: 'Se muestra con el visor del navegador. Si no lo ves completo, ábrelo en otra pestaña con el enlace de arriba.',
@@ -748,24 +768,24 @@
       copiarBotonFallo: 'No se pudo copiar',
       enlaceNuevaPestana: '(se abre en otra pestaña)',
       descargaBoton: 'Preparando…',
-      enlaceMapaSin: 'No encontramos coordenadas en ese texto. Pega el enlace completo de Google Maps (el que empieza con google.com/maps) o escribe las coordenadas.',
+      enlaceMapaSin: 'Ese texto no trae coordenadas. Pega el enlace completo de Google Maps (el que empieza con google.com/maps) o escribe las coordenadas.',
       enlaceMapaCorto: 'Los enlaces cortos de Google Maps no traen las coordenadas. Ábrelo en Google Maps: en el celular, mantén presionado el punto y copia los números que aparecen; en la computadora, haz clic derecho sobre el punto. Pégalos en «Coordenadas».',
-      enlaceMapaCentro: 'Ese enlace marca el centro de la pantalla, no un punto: tomamos {coordenadas}. Revisa que sea el lugar.',
+      enlaceMapaCentro: 'Ese enlace marca el centro de la pantalla, no un punto: se tomaron las coordenadas {coordenadas}. Revisa que sea el lugar.',
       enlaceMapaTomadas: 'Coordenadas tomadas del enlace: {coordenadas}.',
       enlaceMapaOrden: 'se acomodaron latitud y longitud',
       enlaceMapaSigno: 'se agregó el signo menos a la longitud, que en la Ciudad siempre es negativa',
       enlaceMapaAnuncio: 'Coordenadas: {coordenadas}{notas}.',
       conjuncion: ' y ',
-      fechaEdadCalculada: '{etiqueta}: {edad} años, calculada con la fecha de nacimiento.',
+      fechaEdadCalculada: '{etiqueta}: {edad} años, según la fecha de nacimiento.',
       fechaAtajos: 'Atajos de periodo',
       fechaUltimos: 'Últimos {n} días',
       fechaPeriodo: 'Periodo: del {desde} al {hasta}',
-      curpDerivado: '{etiqueta}: {valor}, tomado de la CURP.',
+      curpDerivado: '{etiqueta}: {valor}, según la CURP.',
       sexoH: 'Hombre',
       sexoM: 'Mujer',
       sexoX: 'No binario',
-      cascadaCpTomado: '{etiqueta}: {valor}, tomado del catálogo. Puedes corregirlo.',
-      cascadaTomadaCp: '{etiqueta}: {valor}, tomada del código postal.',
+      cascadaCpTomado: '{etiqueta}: {valor}, según el catálogo. Puedes corregirlo.',
+      cascadaTomadaCp: '{etiqueta}: {valor}, según el código postal.',
       chipsHistorial: 'Usados antes en {etiqueta}',
       chipsQuitada: 'Sugerencia quitada.',
       chipsBorrado: 'Historial borrado.',
@@ -779,7 +799,7 @@
       mapaSinConfirmar: 'sin confirmar: no se envía',
       mapaSinUbicacion: 'No se pudo obtener tu ubicación. Toca el mapa o escribe la dirección.',
       cargando: 'Cargando…',
-      repetibleAgregado: '{etiqueta} {n} agregado.',
+      repetibleAgregado: 'Se agregó {etiqueta} {n}.',
       repetibleQuitado: 'Fila {n} quitada.',
       pestanaAnuncio: 'Pestaña {nombre}',
       paginacionAnterior: 'Anterior',
@@ -789,7 +809,23 @@
       compartido: 'Compartido.',
       borradorRecuperado: 'Borrador recuperado en este dispositivo.',
       fechaHora: '{fecha} a las {hora}',
-      borradorNoGuardar: 'Nada se guarda en este equipo mientras esta pestaña siga abierta. Si la cierras antes de enviar, lo que capturaste se pierde.'
+      borradorNoGuardar: 'Nada se guarda en este equipo mientras esta pestaña siga abierta. Si la cierras antes de enviar, lo que capturaste se pierde.',
+      borradorRecuperadoPaso: 'Sigues en el paso {n} de {total}: «{titulo}».',
+      borradorRecuperadoFalta: 'Por seguridad esto no se guarda en el equipo; vuelve a llenarlo: {campos}.',
+      borradorArchivosFalta: 'Los archivos no se guardan en el equipo; vuelve a agregarlos en «{campos}».',
+      borradorDescartado: 'Se descartó el borrador: el formulario empieza vacío.',
+      borradorOtraPestana: 'Este formulario también está abierto en otra pestaña o ventana. Usa sólo una: lo que se guarda en una reemplaza el borrador de la otra.',
+      borradorEnviadoOtraPestana: 'Este formulario ya se envió desde otra pestaña o ventana, y aquí ya no se guarda el borrador. Si lo envías también desde aquí, llegará dos veces.',
+      acuseCompartir: 'Folio: {folio}. Recibido el {fecha}.',
+      cascadaElige: 'Elige una opción',
+      copiarTexto: 'Copiar',
+      paginacionPorPagina: 'Por página',
+      pasosBarra: 'Avance del formulario',
+      progresoPorCiento: '{n} por ciento',
+      visorDocumento: 'Documento',
+      mapaAcercar: 'Acercar',
+      mapaAlejar: 'Alejar',
+      mapaAproximada: 'Tu ubicación es aproximada (unos {metros} m a la redonda): revisa que el punto esté en el sitio y muévelo si hace falta.'
     }
   };
 
@@ -806,7 +842,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
 /* ===== codigo/js/formkit.core.js ===== */
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.6.1
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.6.2
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -1093,6 +1129,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       if (t === 'multiple') return $$('input[type="checkbox"]:checked', el).map(textoDeOpcion).join(', ');
       if (t === 'select') { const s = $('select', el); return s && s.value ? s.selectedOptions[0].textContent.trim() : ''; }
       if (t === 'casilla') return $('input', el).checked ? M.palabraSi : '';
+      /* Una fecha se ve como día/mes/año (FRM-30), aunque se guarde como AAAA-MM-DD. */
+      if (el.dataset.formato === 'fecha') { const v = valorDe(n); return cfg.dmaDeIso(v) || v; }
       return valorDe(n);
     }
     function textoDeOpcion(input) {
@@ -1101,13 +1139,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       return nombre ? nombre.textContent.trim() : input.value;
     }
 
-    /* Etiqueta visible del campo, sin la marca de obligatorio. */
+    /* Etiqueta visible del campo, sin la marca de obligatorio ni el texto de su ayuda «?». */
     function etiquetaDe(n) {
       const el = envoltura(n);
       const e = $('.etiqueta', el) || $('legend,label', el);
       if (!e) return el.dataset.etiqueta || n;
       const c = e.cloneNode(true);
-      $$('.marca-oblig,.solo-lector', c).forEach((x) => x.remove());
+      $$('.marca-oblig,.solo-lector,[data-tooltip]', c).forEach((x) => x.remove());
       const texto = c.textContent.replace(/\s+/g, ' ').trim();
       /* Dentro de un grupo repetible, la etiqueta dice de qué fila es: «Nombre (Acompañante 2)». */
       const fila = el.closest('.repetible-fila');
@@ -1245,11 +1283,14 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       }
     }
 
+    /* El contador cuenta como el mensaje de error: sin los espacios repetidos ni los de los
+       extremos, que no se guardan («40 / 600» y «van 35» no pueden convivir). */
     function actualizaContador(n) {
       const el = envoltura(n);
       const cont = $('.contador', el);
       const area = $('textarea', el);
-      if (cont && area) cont.textContent = `${area.value.length} / ${area.maxLength}`;
+      const f = cfg.formatos[el.dataset.formato || 'texto'];
+      if (cont && area) cont.textContent = `${(f ? f.normaliza(area.value) : area.value).length} / ${area.maxLength}`;
     }
     function autoAlto(area) { area.style.height = 'auto'; area.style.height = `${area.scrollHeight}px`; }
 
@@ -1510,8 +1551,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
     /* ----- Borrador local -----
        Se activa con data-borrador="clave" en el <form>. Versionado con
-       data-borrador-version. Excluye campos data-sensible y archivos (éstos, sólo
-       con un proveedor que dé la página: opciones.borradorArchivos, en archivos.js). */
+       data-borrador-version. Excluye campos data-sensible, los data-sin-borrador (lo que se
+       contesta en cada visita, como el consentimiento) y archivos (éstos, sólo con un proveedor
+       que dé la página: opciones.borradorArchivos, en archivos.js). */
     const claveBorrador = form.dataset.borrador || '';
     const versionBorrador = form.dataset.borradorVersion || '1';
     let temporizadorBorrador = 0;
@@ -1536,7 +1578,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     /* Lo que va en el borrador además de los datos (los archivos, con su proveedor; las
        filas de un repetible): el módulo se suscribe y el núcleo le avisa al escribir,
        restaurar o borrar el borrador. Con estado() aporta campos propios al borrador y
-       con prepara(b) rehace su estructura (las filas) antes de que se repongan los valores. */
+       con prepara(b) rehace su estructura (las filas) antes de que se repongan los valores;
+       con resumen(b) agrega una frase al aviso de recuperado («Sigues en el paso 2 de 4…») y
+       con descarta() vuelve a su inicio cuando la persona empieza de nuevo. */
     const suscritosBorrador = [];
     const alBorrador = (def) => { suscritosBorrador.push(def); };
     const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
@@ -1569,8 +1613,28 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     let noGuardar = false;
     try { noGuardar = !!claveBorrador && global.sessionStorage.getItem(claveNoGuardar) === '1'; } catch (e) { /* sin almacén de sesión */ }
 
+    /* Dos pestañas con el mismo formulario: lo que guarda una reemplaza el borrador de la otra.
+       Cuando otra pestaña guarda, ésta lo dice a la vista; cuando otra envía, ésta deja de
+       guardar (no rehace el borrador de una solicitud ya enviada) y también lo dice. El envío
+       se avisa con una señal que se escribe y se borra en el acto: no queda nada guardado. */
+    const claveSenal = `${claveBorrador}:senal`;
+    let enviadoEnOtra = false;
+    let otraPestanaAvisada = false;
+    function senal(tipo) { try { global.localStorage.setItem(claveSenal, JSON.stringify({ tipo, t: Date.now() })); global.localStorage.removeItem(claveSenal); } catch (e) { /* sin almacén: no hay otras pestañas que avisar */ } }
+    if (claveBorrador) global.addEventListener('storage', (e) => {
+      if (!arrancado || terminado) return;
+      if (e.key === claveBorrador && e.newValue && !otraPestanaAvisada && !enviadoEnOtra) { otraPestanaAvisada = true; aviso(form, { tono: 'advertencia', texto: M.borradorOtraPestana }); }
+      if (e.key !== claveSenal || !e.newValue) return;
+      let s = null;
+      try { s = JSON.parse(e.newValue); } catch (x) { return; }
+      if (!s || s.tipo !== 'enviado') return;
+      enviadoEnOtra = true;
+      clearTimeout(temporizadorBorrador);
+      aviso(form, { tono: 'advertencia', texto: M.borradorEnviadoOtraPestana });
+    });
+
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado || !personaActuo || franjaPendiente || noGuardar) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo || franjaPendiente || noGuardar || enviadoEnOtra) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -1579,7 +1643,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       const fuera = fueraDelBorrador();
       for (const n of nombres()) {
         const el = envoltura(n);
-        if (fuera.has(n) || tipoDe(el) === 'auxiliar' || tipos.has(tipoDe(el)) && !tipos.get(tipoDe(el)).enBorrador) continue;
+        /* data-sin-borrador: lo que se contesta en cada visita (el consentimiento, «No soy un
+           programa automático») vuelve sin marcar. */
+        if (fuera.has(n) || el.hasAttribute('data-sin-borrador') || tipoDe(el) === 'auxiliar' || tipos.has(tipoDe(el)) && !tipos.get(tipoDe(el)).enBorrador) continue;
         datos[n] = valorDe(n);
       }
       return datos;
@@ -1600,7 +1666,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     }
     /* Si la persona cierra o cambia de pestaña antes de que venza el retardo,
        el borrador pendiente se escribe en ese momento. */
-    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado && !franjaPendiente && !noGuardar) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
+    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado && !franjaPendiente && !noGuardar && !enviadoEnOtra) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
     function dejaDeGuardar() {
       noGuardar = true;
       clearTimeout(temporizadorBorrador);
@@ -1620,11 +1686,23 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         return b;
       } catch (e) { borraBorrador(); return null; }
     }
-    function restauraBorrador(b) {
+    /* Pone al día lo que depende de los valores (condiciones, listas vacías, contadores) cuando
+       éstos cambian sin que la persona escriba: al volver con «Adelante» el navegador repone
+       por su cuenta lo que había escrito, y al descartar el borrador la pantalla se vacía. */
+    function resincroniza() {
+      aplicaCondicionales();
+      for (const s of $$('select', form)) s.toggleAttribute('data-vacio', !s.value);
+      for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
+    }
+    window.addEventListener('pageshow', resincroniza);
+
+    /* foco: true cuando la persona pidió recuperarlo (el aviso recibe el foco que tenía el botón). */
+    function restauraBorrador(b, { foco = false } = {}) {
       avisaBorrador('prepara', b);
       for (const [n, v] of Object.entries(b.datos || {})) {
         const el = envoltura(n);
-        if (!el) continue;
+        /* Lo que se contesta en cada visita no vuelve, aunque lo traiga un borrador de otra versión. */
+        if (!el || el.hasAttribute('data-sin-borrador')) continue;
         const t = tipoDe(el);
         if (tipos.has(t)) { if (tipos.get(t).restaura) tipos.get(t).restaura(el, v); continue; }
         if (t === 'opcion') { const r = $$('input[type="radio"]', el).find((x) => x.value === v); if (r) r.checked = true; }
@@ -1636,7 +1714,26 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
       avisaBorrador('restaura', b);
-      anuncia(M.borradorRecuperado);
+      /* A la vista: que se recuperó, dónde quedó la persona (lo dicen los módulos, como el de
+         pasos) y qué tiene que volver a llenar porque no se guarda en el equipo (lo sensible; no
+         lo que se calcula de ello ni lo que se contesta en cada visita). */
+      const textos = [M.borradorRecuperado];
+      for (const x of suscritosBorrador) if (x.resumen) { const t = x.resumen(b); if (t) textos.push(t); }
+      const derivados = new Set(nombres().flatMap((m) => (envoltura(m).dataset.deriva || '').split(/\s+/).map((p) => p.split('=')[1]).filter(Boolean)));
+      const falta = [...fueraDelBorrador()].filter((m) => activo(m) && !derivados.has(m) && !controlesDe(m).some((c) => c.readOnly)).map(etiquetaDe);
+      if (falta.length) textos.push(plantilla(M.borradorRecuperadoFalta, { campos: falta.join(', ') }));
+      aviso(form, { tono: 'neutro', texto: textos, foco });
+    }
+    /* «Empezar de nuevo» confirmado: se borra el borrador y también lo que haya en pantalla, aunque
+       lo haya repuesto el navegador al volver con «Adelante»; los módulos vuelven a su inicio (el de
+       pasos, al primero). El foco va al aviso, que lo dice. */
+    function descarta() {
+      clearTimeout(temporizadorBorrador);
+      borraBorrador();
+      form.reset();
+      resincroniza();
+      avisaBorrador('descarta');
+      aviso(form, { tono: 'neutro', texto: M.borradorDescartado, foco: true });
     }
     function iniciaFranja(b) {
       franja.hidden = false;
@@ -1649,14 +1746,14 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const a = e.target.closest('[data-borrador]');
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
-        if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); contesta(); }
+        if (a.dataset.borrador === 'recuperar') { contesta(); restauraBorrador(b, { foco: true }); }
         else if (a.dataset.borrador === 'descartar') {
           if (confirma) { confirma.hidden = false; const seguro = $('[data-borrador="conservar"]', franja); if (seguro) seguro.focus(); }
           /* Sin la confirmación en el HTML, se pregunta con el módulo modal; borrar sin preguntar no (FRM-38). */
-          else if (FormKit.confirma) FormKit.confirma(a, { titulo: M.borradorDescartarTitulo, texto: M.borradorDescartarTexto, si: M.borradorDescartarSi, peligro: true }).then((ok) => { if (ok) { borraBorrador(); contesta(); } });
+          else if (FormKit.confirma) FormKit.confirma(a, { titulo: M.borradorDescartarTitulo, texto: M.borradorDescartarTexto, si: M.borradorDescartarSi, peligro: true }).then((ok) => { if (ok) { contesta(); descarta(); } });
           else console.warn('FormKit: la franja del borrador necesita [data-borrador-confirma] o el módulo «modal» para confirmar antes de descartar.');
         }
-        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); contesta(); }
+        else if (a.dataset.borrador === 'descartar-si') { contesta(); descarta(); }
         else if (a.dataset.borrador === 'conservar') { if (confirma) confirma.hidden = true; const r = $('[data-borrador="recuperar"]', franja); if (r) r.focus(); }
       });
     }
@@ -1725,7 +1822,12 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
     function botonEnviar() { return $('[data-accion="enviar"],button[type="submit"]', form); }
 
+    /* Un envío a la vez: mientras uno está en curso, otro clic o Enter no lo repite. Los
+       módulos se enteran con formkit:enviando ({enviando}): el de pasos no deja cambiar de paso. */
+    let enviandoAhora = false;
+    const avisaEnviando = (enviando) => form.dispatchEvent(new CustomEvent('formkit:enviando', { detail: { enviando } }));
     async function enviar() {
+      if (enviandoAhora) return false;
       /* Al enviar, la contraseña vuelve a ocultarse: que el navegador no la guarde ni la muestre como texto. */
       for (const b of $$('[data-ver-contrasena][aria-pressed="true"]', form)) verContrasena(b, false);
       /* Un módulo (pasos) puede validar por su cuenta; si devuelve null, el formulario no es suyo. */
@@ -1736,15 +1838,23 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       const avisoEnvio = $('[data-estado-envio]', form);
       if (avisoEnvio) avisoEnvio.hidden = true;
       const textoOriginal = boton ? boton.textContent : '';
+      enviandoAhora = true;
+      avisaEnviando(true);
+      /* «Enviando…» se ve en el botón y se anuncia: el cambio de texto solo no lo oye el lector. */
       if (boton) { boton.setAttribute('aria-disabled', 'true'); boton.setAttribute('aria-busy', 'true'); boton.textContent = M.enviando; }
+      anuncia(M.enviando);
       const control = new AbortController();
       let plazo = 0;
-      /* El aviso de envío, con su texto (si el HTML no trae .aviso-texto, se crea). */
+      /* El aviso de envío, con su texto (si el HTML no trae .aviso-texto, se crea). Si quedó en
+         una parte que no se ve (la persona cambió de paso mientras se enviaba), los módulos la
+         abren antes (formkit:muestra). */
       const pintaAvisoEnvio = (texto) => {
         if (!avisoEnvio) { anuncia(texto, true); return; }
         let t = $('.aviso-texto', avisoEnvio);
         if (!t) { t = document.createElement('span'); t.className = 'aviso-texto'; avisoEnvio.appendChild(t); }
-        t.textContent = texto; avisoEnvio.hidden = false; avisoEnvio.focus();
+        t.textContent = texto; avisoEnvio.hidden = false;
+        form.dispatchEvent(new CustomEvent('formkit:muestra', { detail: { elemento: avisoEnvio } }));
+        avisoEnvio.focus();
       };
       let respuesta;
       try {
@@ -1773,6 +1883,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         return false;
       } finally {
         clearTimeout(plazo);
+        enviandoAhora = false;
+        avisaEnviando(false);
         if (boton) { boton.removeAttribute('aria-disabled'); boton.removeAttribute('aria-busy'); boton.textContent = textoOriginal; }
       }
       /* Recibido. Desde aquí nada cuenta como envío fallido: si la página falla al
@@ -1790,7 +1902,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           if ($('[data-acuse]')) aviso(form, { tono: 'ok', texto: recibido.folio ? plantilla(M.envioRecibidoFolio, { folio: recibido.folio }) : M.envioRecibido, foco: true });
         }
       } catch (e) { console.error('FormKit: el envío se recibió, pero falló lo que la página hace después (alEnviar).', e); if (!form.hidden) aviso(form, { tono: 'ok', texto: M.envioRecibido, foco: true }); }
-      if (claveBorrador) borraBorrador();
+      if (claveBorrador) { borraBorrador(); senal('enviado'); }
       if (franja) { franja.hidden = true; franjaPendiente = false; }
       return true;
     }
@@ -2272,7 +2384,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    Contrato HTML:
      <div class="campo fecha" data-campo="fecha_hechos" data-formato="fecha" data-no-futura>
        <label class="etiqueta" for="fecha_hechos">Fecha</label>
-       <p class="ayuda">Formato AAAA-MM-DD.</p>
+       <p class="ayuda">Día, mes y año.</p>
        <div class="fecha-grupo">
          <input class="control" id="fecha_hechos" name="fecha_hechos" type="date">
          <button type="button" class="btn btn-secundario fecha-hoy" data-hoy>Hoy</button>
@@ -2308,7 +2420,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         ctl.dispatchEvent(new Event('change', { bubbles: true }));
         ctx.estadoDe(campo.dataset.campo).tocado = true;
         validaYPinta(campo.dataset.campo);
-        anuncia(`${ctx.etiquetaDe(campo.dataset.campo)}: ${ctl.value}`);
+        /* Se anuncia como se lee: día/mes/año (FRM-30). */
+        anuncia(`${ctx.etiquetaDe(campo.dataset.campo)}: ${ctx.textoDeValor(campo.dataset.campo)}`);
         programaBorrador();
       });
 
@@ -2615,9 +2728,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           FormKit.confirma(q, { titulo: M.filaConfirma, si: plantilla(M.filaQuitar, { n: filas().indexOf(fila) + 1 }), peligro: true }).then((ok) => { if (ok) quita(fila); });
         });
 
-        /* Filas iniciales: las que exija el mínimo (al menos una si el grupo es obligatorio). */
+        /* Filas iniciales: las que exija el mínimo (al menos una si el grupo es obligatorio). Se
+           ponen en silencio: al cargar la página no se anuncia nada que la persona no hizo. */
         const iniciales = Math.max(min, rep.hasAttribute('data-requerido') ? 1 : 0);
-        while (filas().length < iniciales) agrega(false);
+        while (filas().length < iniciales) agrega(false, { silencio: true });
         renumera();
 
         grupos.set(rep.dataset.repetible, {
@@ -2683,6 +2797,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     },
     iniciar(form, ctx) {
       const { $$ } = ctx;
+      /* Al vaciar el formulario («Empezar de nuevo», otro registro), cada interruptor vuelve a como venía en el HTML. */
+      const inicial = new Map($$('[data-toggle]', form).map((b) => [b, b.getAttribute('aria-checked') === 'true']));
+      form.addEventListener('reset', () => { for (const [b, on] of inicial) pon(b, on); });
       for (const b of $$('[data-toggle]', form)) pon(b, b.getAttribute('aria-checked') === 'true');
       form.addEventListener('click', (e) => {
         const b = e.target.closest('[data-toggle]');
@@ -2752,7 +2869,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (!barra) return;
         barra.textContent = '';
         const nav = document.createElement('nav');
-        nav.setAttribute('aria-label', barra.dataset.barra || 'Avance del formulario');
+        nav.setAttribute('aria-label', barra.dataset.barra || M.pasosBarra);
         const lista = document.createElement('ol');
         lista.className = 'pasos';
         pasos.forEach((p, i) => {
@@ -2777,7 +2894,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         txt.className = 'pasos-actual';
         txt.dataset.pasoActual = '';
         txt.setAttribute('aria-hidden', 'true'); /* el botón actual ya lo dice en su nombre accesible */
-        lista.addEventListener('click', (e) => { const b = e.target.closest('[data-ir]'); if (b) intentaIr(Number(b.dataset.ir)); });
+        lista.addEventListener('click', (e) => { const b = e.target.closest('[data-ir]'); if (b && !enviando) intentaIr(Number(b.dataset.ir)); });
         nav.append(lista, txt);
         barra.appendChild(nav);
       }
@@ -2795,8 +2912,24 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         $('[data-paso-actual]', barra).textContent = `${plantilla(M.pasoTexto, { n: actual + 1, total: pasos.length })} · ${pasos[actual].dataset.titulo}`;
       }
 
+      /* ----- Historial del navegador -----
+         «Atrás» del navegador (y el gesto de Android) regresa un paso y no saca del formulario
+         (decisión de la Secretaría): cada paso que se abre deja una entrada en el historial, con
+         la misma dirección. «Adelante» avanza con las mismas reglas que «Continuar». Con el acuse
+         a la vista, «Atrás» sale de la página como en cualquier otra; desde la pantalla de límite,
+         regresa al formulario. */
+      const idHistorial = form.id || 'formkit';
+      const esNuestro = (st) => !!st && st.formkitForm === idHistorial && Number.isInteger(st.formkitEntrada) && Number.isInteger(st.formkitPaso);
+      const estadoHistorial = (i) => ({ ...(history.state && typeof history.state === 'object' ? history.state : {}), formkitForm: idHistorial, formkitEntrada: entrada, formkitPaso: i });
+      /* Al recargar se conserva el número de entrada: las anteriores siguen en el historial. */
+      let entrada = esNuestro(history.state) ? history.state.formkitEntrada : 0;
+      const pasoDeEntrada = new Map();
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      let enviando = false;
+
       /* ----- Navegación ----- */
-      function ir(i, { foco = true } = {}) {
+      function ir(i, { foco = true, historial = true } = {}) {
+        if (historial && i !== actual) { entrada++; pasoDeEntrada.set(entrada, i); history.pushState(estadoHistorial(i), ''); }
         actual = i;
         pasos.forEach((p, k) => { p.hidden = k !== i; });
         quitaResumen();
@@ -2812,18 +2945,30 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
       /* Avanzar valida cada paso intermedio y se detiene en el primero con
          errores. Retroceder no valida: no se castiga volver. */
-      function intentaIr(destino) {
+      function intentaIr(destino, { historial = true } = {}) {
         if (destino === actual) return true;
-        if (destino < actual) { ir(destino); return true; }
+        if (destino < actual) { ir(destino, { historial }); return true; }
         for (let i = actual; i < destino; i++) {
           const fallos = validaContenedor(pasos[i]);
-          if (fallos.length) { conError.add(i); ir(i, { foco: false }); muestraResumen(pasos[i], fallos); pintaBarra(); return false; }
+          if (fallos.length) { conError.add(i); ir(i, { foco: false, historial }); muestraResumen(pasos[i], fallos); pintaBarra(); return false; }
           conError.delete(i);
           hechos.add(i);
         }
-        ir(destino);
+        ir(destino, { historial });
         return true;
       }
+
+      /* La entrada del historial a la que se llegó con «Atrás» o «Adelante». */
+      window.addEventListener('popstate', (e) => {
+        if (!esNuestro(e.state)) return;
+        const acuse = document.querySelector('[data-acuse]');
+        if (form.hidden && acuse && !acuse.hidden) { history.go(-(e.state.formkitEntrada + 1)); return; }
+        if (form.hidden && FormKit.acuse) FormKit.acuse.muestraSolo(form);
+        entrada = e.state.formkitEntrada;
+        pasoDeEntrada.set(entrada, e.state.formkitPaso);
+        /* Si avanzar no se puede (falta algo en un paso), la entrada dice el paso que se ve. */
+        if (!intentaIr(Math.min(Math.max(e.state.formkitPaso, 0), pasos.length - 1), { historial: false })) history.replaceState(estadoHistorial(actual), '');
+      });
 
       /* Al enviar se revalidan TODOS los pasos: la persona pudo saltar con la
          barra o editar desde la revisión. El primero con errores se abre. */
@@ -2849,11 +2994,21 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
       form.addEventListener('click', (e) => {
         const b = e.target.closest('[data-accion="siguiente"],[data-accion="atras"],[data-editar]');
-        if (!b || !form.contains(b)) return;
+        if (!b || !form.contains(b) || enviando) return;
         if (b.dataset.accion === 'siguiente') intentaIr(actual + 1);
-        else if (b.dataset.accion === 'atras') ir(actual - 1);
+        /* «Atrás» del formulario y el del navegador hacen lo mismo: si la entrada anterior es el
+           paso anterior, se regresa a ella; así el historial no se llena de idas y vueltas. */
+        else if (b.dataset.accion === 'atras') { if (entrada > 0 && pasoDeEntrada.get(entrada - 1) === actual - 1) history.back(); else ir(actual - 1); }
         else if (b.dataset.editar) { const n = b.dataset.editar; const i = pasos.findIndex((p) => p.contains(envoltura(n))); if (i >= 0) { ir(i, { foco: false }); enfocaCampo(n); } }
       });
+
+      /* Mientras se envía no se cambia de paso: el aviso de un envío que falla queda a la vista. */
+      form.addEventListener('formkit:enviando', (e) => {
+        enviando = e.detail.enviando;
+        for (const b of [...$$('[data-accion="atras"]', form), ...(barra ? $$('.pasos-btn', barra) : [])]) { if (enviando) b.setAttribute('aria-disabled', 'true'); else b.removeAttribute('aria-disabled'); }
+      });
+      /* Algo que el núcleo necesita mostrar (el aviso de envío) está en un paso oculto: se abre ese paso. */
+      form.addEventListener('formkit:muestra', (e) => { const i = pasos.findIndex((p) => p.contains(e.detail.elemento)); if (i >= 0 && i !== actual) ir(i, { foco: false }); });
 
       /* Recordatorio en la barra fija: lo que la persona está haciendo. */
       if (recordatorio && recordatorio.dataset.recordatorio) {
@@ -2868,11 +3023,32 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       const pasoValido = (x) => (Number.isInteger(x) && x >= 0 && x < pasos.length ? x : 0);
       ctx.alBorrador({
         estado: () => ({ paso: actual, hechos: [...hechos] }),
-        restaura: (b) => { if (Array.isArray(b.hechos)) b.hechos.filter((i) => Number.isInteger(i) && i >= 0 && i < pasos.length).forEach((i) => hechos.add(i)); ir(pasoValido(b.paso), { foco: false }); }
+        restaura: (b) => { if (Array.isArray(b.hechos)) b.hechos.filter((i) => Number.isInteger(i) && i >= 0 && i < pasos.length).forEach((i) => hechos.add(i)); ir(pasoValido(b.paso), { foco: false }); },
+        /* El aviso de recuperado dice dónde quedó la persona. */
+        resumen: () => plantilla(M.borradorRecuperadoPaso, { n: actual + 1, total: pasos.length, titulo: pasos[actual].dataset.titulo }),
+        /* Empezar de nuevo: al primer paso, sin pasos hechos. */
+        descarta: () => { hechos.clear(); conError.clear(); ir(0, { foco: false }); }
       });
 
+      /* El margen de desplazamiento es el alto real de la barra fija (crece con el recordatorio
+         y con el zoom), o cero cuando la pantalla es baja y la barra deja de ser fija: un campo
+         enfocado nunca queda tapado por ella. */
+      const fija = barra && barra.closest('.barra-fija');
+      if (fija) {
+        const mide = () => {
+          const s = getComputedStyle(fija);
+          const alto = s.position === 'sticky' && !fija.hidden ? fija.getBoundingClientRect().height + (parseFloat(s.marginBottom) || 0) : 0;
+          for (const v of ['--alto-barra-fija', '--alto-barra-fija-movil']) document.documentElement.style.setProperty(v, `${Math.ceil(alto)}px`);
+        };
+        if ('ResizeObserver' in window) new ResizeObserver(mide).observe(fija);
+        window.addEventListener('resize', mide);
+        mide();
+      }
+
       construyeBarra();
-      ir(0, { foco: false });
+      ir(0, { foco: false, historial: false });
+      history.replaceState(estadoHistorial(0), '');
+      pasoDeEntrada.set(entrada, 0);
       /* Con el primer paso a la vista, el aviso «la página no terminó de cargar» ya no hace falta. */
       for (const a of $$('[data-carga-pendiente]')) a.hidden = true;
 
@@ -2886,10 +3062,11 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 /* =========================================================
    revision.js · Módulo «revision» · nivel RECOMENDADO
 
-   Pantalla de revisión antes de enviar: un bloque plegable por paso con el
-   resumen de una línea y el detalle dentro; cada dato con «Editar», que
-   aterriza en el campo (no al inicio del paso). Los identificadores con
-   data-enmascara se muestran parcialmente ocultos.
+   Pantalla de revisión antes de enviar: un bloque por paso, abierto, con su
+   título, un solo «Editar» que aterriza en el primer campo del bloque, y cada
+   dato con su etiqueta y su valor. Un «Editar» por dato llenaba la pantalla
+   del teléfono de botones iguales (17 en la plantilla). Los identificadores
+   con data-enmascara se muestran parcialmente ocultos.
 
    Contrato HTML (último paso del formulario):
      <section class="tarjeta" data-paso data-revision data-titulo="Revisión" hidden>
@@ -2902,7 +3079,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
   FormKit.registra('revision', {
     selector: '[data-revision]',
     iniciar(form, ctx) {
-      const { $, $$, M, envoltura, etiquetaDe, textoDeValor, activo, icono } = ctx;
+      const { $, $$, M, envoltura, etiquetaDe, textoDeValor, activo, icono, idUnico } = ctx;
       const sec = $('[data-revision]', form);
       const dest = $('[data-revision-lista]', sec);
       const pasos = $$('[data-paso]', form);
@@ -2919,31 +3096,28 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           if (p === sec) return;
           const nombres = $$('[data-campo]', p).map((e) => e.dataset.campo).filter(activo);
           if (!nombres.length) return;
-          const det = document.createElement('details');
-          det.className = 'rev-bloque';
-          det.open = true;
-          const sum = document.createElement('summary');
-          sum.className = 'rev-titulo';
-          const rot = document.createElement('span'); rot.className = 'rev-rotulo'; rot.textContent = p.dataset.titulo;
-          const res = document.createElement('span'); res.className = 'rev-resumen';
-          res.textContent = nombres.map(texto).filter(Boolean).slice(0, 2).join(' · ') || M.sinValor;
-          sum.append(rot, res, icono('abajo', 'icono rev-flecha'));
+          const bloque = document.createElement('section');
+          bloque.className = 'rev-bloque';
+          const cab = document.createElement('div');
+          cab.className = 'rev-titulo';
+          const rot = document.createElement('h3'); rot.className = 'rev-rotulo'; rot.id = idUnico('rev'); rot.textContent = p.dataset.titulo;
+          bloque.setAttribute('aria-labelledby', rot.id);
+          /* Un «Editar» por bloque: lleva al primer campo del paso; su nombre dice cuál. */
+          const ed = document.createElement('button');
+          ed.type = 'button'; ed.className = 'btn-enlace'; ed.dataset.editar = nombres[0];
+          ed.append(icono('editar', 'icono icono-sm'), document.createTextNode(M.editar));
+          const oculto = document.createElement('span'); oculto.className = 'solo-lector'; oculto.textContent = ` ${p.dataset.titulo}`;
+          ed.appendChild(oculto);
+          cab.append(rot, ed);
           const dl = document.createElement('dl');
           dl.className = 'rev-datos';
           for (const n of nombres) {
             const dt = document.createElement('dt'); dt.className = 'rev-dato-etq'; dt.textContent = etiquetaDe(n);
-            const dd = document.createElement('dd'); dd.className = 'rev-dato-valor';
-            const val = document.createElement('span'); val.textContent = texto(n) || M.sinValor;
-            const ed = document.createElement('button');
-            ed.type = 'button'; ed.className = 'btn-enlace'; ed.dataset.editar = n;
-            ed.append(icono('editar', 'icono icono-sm'), document.createTextNode(M.editar));
-            const oculto = document.createElement('span'); oculto.className = 'solo-lector'; oculto.textContent = ` ${etiquetaDe(n)}`;
-            ed.appendChild(oculto);
-            dd.append(val, ed);
+            const dd = document.createElement('dd'); dd.className = 'rev-dato-valor'; dd.textContent = texto(n) || M.sinValor;
             dl.append(dt, dd);
           }
-          det.append(sum, dl);
-          dest.appendChild(det);
+          bloque.append(cab, dl);
+          dest.appendChild(bloque);
         });
       }
       form.addEventListener('formkit:paso', (e) => { if (e.detail.paso === sec) pinta(); });
@@ -3027,8 +3201,20 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (folio) folio.textContent = r.folio || M.acuseSinFolio;
         const copiar = $('[data-copiar="#folio"]', sec);
         if (copiar) copiar.hidden = !r.folio;
+        const fechaTexto = FormKit.utilidades.fechaHora(fechaValida, cfg);
         const fecha = $('[data-acuse-fecha]', sec);
-        if (fecha) fecha.textContent = FormKit.utilidades.fechaHora(fechaValida, cfg);
+        if (fecha) fecha.textContent = fechaTexto;
+        /* «Compartir» lleva el folio y la fecha, no la dirección del formulario (que abre vacío).
+           data-compartir-texto puede traer {folio} y {fecha}; sin {folio}, el folio va al final.
+           Sin folio no hay nada que compartir. */
+        const compartir = $('[data-compartir]', sec);
+        if (compartir) {
+          if (compartir.dataset.compartirPlantilla === undefined) compartir.dataset.compartirPlantilla = compartir.dataset.compartirTexto || M.acuseCompartir;
+          const p = compartir.dataset.compartirPlantilla;
+          compartir.dataset.compartirTexto = FormKit.utilidades.plantilla(/\{folio\}/.test(p) ? p : `${p}: {folio}`, { folio: r.folio || '', fecha: fechaTexto });
+          compartir.dataset.compartirUrl = '';
+          compartir.hidden = !r.folio;
+        }
         const desc = $('[data-acuse-descarga]', sec);
         if (desc) {
           desc.hidden = !r.acuseUrl;
@@ -3294,8 +3480,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
      <button type="button" class="btn-enlace" data-copiar="#folio">Copiar folio</button>
      <button type="button" class="btn-enlace" data-compartir data-compartir-titulo="…" data-compartir-texto="…">Compartir</button>
    Si el portapapeles no está disponible, selecciona el texto y lo dice; si
-   compartir no existe, cae en copiar el enlace. Los campos de solo lectura
-   con data-copiable reciben su botón «Copiar» automáticamente.
+   compartir no existe, copia lo mismo que compartiría (texto y enlace). Con
+   data-compartir-url="" se comparte sólo el texto (el acuse comparte su folio,
+   no la dirección del formulario). Los campos de solo lectura con
+   data-copiable reciben su botón «Copiar» automáticamente.
    ========================================================= */
 (function () {
   'use strict';
@@ -3313,7 +3501,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         const grupo = document.createElement('div'); grupo.className = 'copiar-grupo';
         ctl.parentNode.insertBefore(grupo, ctl); grupo.appendChild(ctl);
         const b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-secundario copiar-btn'; b.dataset.copiar = `#${ctl.id}`;
-        b.append(icono('copiar'), document.createTextNode('Copiar'));
+        b.append(icono('copiar'), document.createTextNode(M.copiarTexto));
         grupo.appendChild(b);
       }
 
@@ -3331,9 +3519,12 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         }
         const sh = e.target.closest('[data-compartir]');
         if (sh) {
-          const datos = { title: sh.dataset.compartirTitulo || document.title, text: sh.dataset.compartirTexto || '', url: sh.dataset.compartirUrl || location.href };
+          /* data-compartir-url="" comparte sólo el texto (el acuse: el folio, no la dirección del formulario). */
+          const url = sh.dataset.compartirUrl !== undefined ? sh.dataset.compartirUrl : location.href;
+          const datos = { title: sh.dataset.compartirTitulo || document.title, text: sh.dataset.compartirTexto || '', ...(url ? { url } : {}) };
           if (navigator.share) { try { await navigator.share(datos); confirma(sh, M.compartido, true); } catch (err) { /* la persona canceló */ } }
-          else { const ok = await copia(datos.url); confirma(sh, ok ? `${M.compartirFallo} ${M.copiado}` : M.compartirFallo, ok); }
+          /* Sin la hoja de compartir del equipo, se copia lo mismo que se compartiría. */
+          else { const ok = await copia([datos.text, datos.url].filter(Boolean).join(' ')); confirma(sh, `${M.compartirFallo} ${ok ? M.copiado : M.copiarFallo}`, ok); }
         }
       });
 
@@ -3460,6 +3651,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    ========================================================= */
 (function () {
   'use strict';
+  /* La función que activa cada grupo de pestañas, para elegir una desde la página (FormKit.pestanas.elige). */
+  const activas = new WeakMap();
   FormKit.registra('pestanas', {
     selector: '[data-pestanas]',
     fueraDelFormulario: true,
@@ -3469,7 +3662,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (cont.dataset.listo !== undefined) continue; /* ya iniciado por otro formulario de la página */
         cont.dataset.listo = '';
         const tabs = $$('[role="tab"]', cont);
-        const activa = (tab, foco = true) => {
+        /* Si las pestañas no caben, el borde del lado que tiene más se desvanece: se nota que hay
+           más y que la lista se desliza. */
+        const lista = cont.querySelector('[role="tablist"]');
+        const desborde = () => { const max = lista.scrollWidth - lista.clientWidth; lista.toggleAttribute('data-mas-antes', lista.scrollLeft > 1); lista.toggleAttribute('data-mas-despues', lista.scrollLeft < max - 1); };
+        if (lista) { lista.addEventListener('scroll', desborde, { passive: true }); window.addEventListener('resize', desborde); setTimeout(desborde, 0); }
+        /* anunciar: sólo cuando la persona cambia de pestaña; al cargar la página no se dice nada. */
+        const activa = (tab, foco = true, anunciar = true) => {
           for (const t of tabs) {
             const es = t === tab;
             t.setAttribute('aria-selected', String(es));
@@ -3478,7 +3677,12 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
             if (panel) panel.hidden = !es;
           }
           if (foco) tab.focus();
-          anuncia(FormKit.utilidades.plantilla(FormKit.config.mensajes.pestanaAnuncio, { nombre: tab.textContent.trim() }));
+          /* La pestaña elegida se ve completa aunque la lista se deslice (sólo de lado: la página no se mueve). */
+          if (lista) {
+            const dx = tab.getBoundingClientRect().left - lista.getBoundingClientRect().left;
+            if (dx < 0) lista.scrollLeft += dx; else if (dx + tab.offsetWidth > lista.clientWidth) lista.scrollLeft += dx + tab.offsetWidth - lista.clientWidth;
+          }
+          if (anunciar) anuncia(FormKit.utilidades.plantilla(FormKit.config.mensajes.pestanaAnuncio, { nombre: tab.textContent.trim() }));
         };
         cont.addEventListener('click', (e) => { const t = e.target.closest('[role="tab"]'); if (t && tabs.includes(t)) activa(t, false); });
         cont.addEventListener('keydown', (e) => {
@@ -3491,10 +3695,14 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           activa(tabs[(mapa[e.key] + tabs.length) % tabs.length]);
         });
         const inicial = tabs.find((t) => t.getAttribute('aria-selected') === 'true') || tabs[0];
-        if (inicial) activa(inicial, false);
+        if (inicial) activa(inicial, false, false);
+        activas.set(cont, activa);
       }
     }
   });
+  /* FormKit.pestanas.elige(pestaña, { foco, anuncia }): la página abre una pestaña (por ejemplo, la que la
+     persona dejó abierta antes de recargar), sin foco ni anuncio salvo que lo pida. */
+  FormKit.pestanas = { elige(tab, { foco = false, anuncia = false } = {}) { const c = tab && tab.closest('[data-pestanas]'); const fn = c && activas.get(c); if (fn) fn(tab, foco, anuncia); } };
 }());
 
 
@@ -3527,7 +3735,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     barra.value = v;
     const pct = Math.round((v / max) * 100);
     if (txt) txt.textContent = `${pct} %`;
-    barra.setAttribute('aria-valuetext', `${pct} por ciento`);
+    barra.setAttribute('aria-valuetext', FormKit.utilidades.plantilla(FormKit.config.mensajes.progresoPorCiento, { n: pct }));
   };
   FormKit.registra('progreso', {
     selector: '[data-progreso]',
@@ -3597,7 +3805,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     const sel = document.createElement('label'); sel.className = 'paginacion-tamano';
     const tamanos = (nav.dataset.tamanos || '').split(',').map((s) => Number(s.trim())).filter(Boolean);
     if (tamanos.length) {
-      sel.append(document.createTextNode('Por página '));
+      sel.append(document.createTextNode(`${M.paginacionPorPagina} `));
       const s = document.createElement('select'); s.className = 'control control-select paginacion-select';
       for (const t of tamanos) { const o = document.createElement('option'); o.value = String(t); o.textContent = String(t); o.selected = t === tam; s.appendChild(o); }
       s.addEventListener('change', () => { nav.dataset.tamano = s.value; nav.dataset.pagina = '1'; cambia(nav, ctx); });
@@ -3645,7 +3853,7 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
    Escape lo cierra; el texto queda enlazado al botón con aria-describedby
    mientras está abierto. CUÁNDO NO: para instrucciones necesarias para
    llenar el campo (van en la ayuda visible), para repetir lo que la ayuda
-   visible ya dice (si basta, no hay ícono; auditar-campos D5) ni para
+   visible ya dice (si basta, no hay icono; auditar-campos D5) ni para
    textos largos.
 
      <span class="tooltip" data-tooltip>
@@ -3771,9 +3979,26 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     }
 
     /* Orden por columna: botón dentro del th, aria-sort en el th. Un
-       encabezado que todavía no tiene texto se prepara cuando lo tenga. */
+       encabezado que todavía no tiene texto se prepara cuando lo tenga.
+       Las palabras se ordenan como en español (Álvarez y Ñúñez en su lugar, no
+       al final), las fechas día/mes/año como fechas y las cantidades como números. */
+    const COLACION = new Intl.Collator('es-MX', { sensitivity: 'base', numeric: true });
+    const claveDe = (t) => {
+      const f = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (f) return `${f[3]}-${f[2].padStart(2, '0')}-${f[1].padStart(2, '0')}`;
+      const n = Number(t.replace(/[^\d.-]/g, ''));
+      return t && !Number.isNaN(n) && /^[\d.,\s$-]+$/.test(t) ? n : t;
+    };
+    const compara = (x, y) => (typeof x === 'number' && typeof y === 'number' ? x - y : COLACION.compare(String(x), String(y)));
+    function ordena(th, asc) {
+      const i = ths().indexOf(th);
+      for (const o of ths()) o.setAttribute('aria-sort', o === th ? (asc ? 'ascending' : 'descending') : 'none');
+      const val = (tr) => { const td = $$('td', tr)[i]; return claveDe(td ? td.textContent.trim() : ''); };
+      const filas = $$('tbody tr', tabla).sort((a, b) => compara(val(a), val(b)) * (asc ? 1 : -1));
+      const tb = $('tbody', tabla); for (const f of filas) tb.appendChild(f);
+    }
     function preparaOrden() {
-      ths().forEach((th, i) => {
+      ths().forEach((th) => {
         if (!th.hasAttribute('data-ordenable') || $('.tabla-orden', th)) return;
         const texto = textoDe(th);
         if (!texto) return;
@@ -3784,17 +4009,20 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         th.setAttribute('aria-sort', 'none');
         b.addEventListener('click', () => {
           const asc = th.getAttribute('aria-sort') !== 'ascending';
-          for (const o of ths()) o.setAttribute('aria-sort', o === th ? (asc ? 'ascending' : 'descending') : 'none');
-          const filas = $$('tbody tr', tabla);
-          const val = (tr) => { const td = $$('td', tr)[i]; const t = td ? td.textContent.trim() : ''; const n = Number(t.replace(/[^\d.-]/g, '')); return t && !Number.isNaN(n) && /^[\d.,\s$-]+$/.test(t) ? n : t.toLowerCase(); };
-          filas.sort((a, b2) => { const x = val(a), y = val(b2); return (x > y ? 1 : x < y ? -1 : 0) * (asc ? 1 : -1); });
-          const tb = $('tbody', tabla); for (const f of filas) tb.appendChild(f);
+          ordena(th, asc);
           FormKit.anuncia(plantilla(M.tablaOrdenada, { columna: texto, sentido: asc ? M.tablaAscendente : M.tablaDescendente }));
         });
       });
     }
 
-    const repinta = () => { preparaOrden(); etiquetaCeldas(); };
+    /* Al repintar (otra página de resultados, un filtro), las filas nuevas se ponen en el
+       orden elegido: el encabezado nunca dice un orden que las filas no tienen. */
+    const repinta = () => {
+      preparaOrden();
+      const th = ths().find((t) => /^(ascending|descending)$/.test(t.getAttribute('aria-sort') || ''));
+      if (th) ordena(th, th.getAttribute('aria-sort') === 'ascending');
+      etiquetaCeldas();
+    };
     repinta();
     marco.addEventListener('formkit:tabla', repinta);
   }
@@ -4010,6 +4238,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (!firmas) return true; /* sin firma conocida no se rechaza: lo decide el servidor */
         const b = new Uint8Array(buf.slice(0, 12));
         if (extension === 'heic') return b.length > 8 && String.fromCharCode(b[4], b[5], b[6], b[7]) === 'ftyp';
+        /* «RIFF» lo comparten WebP, AVI y WAV: un WebP lleva además «WEBP» en los bytes 8 a 11. */
+        if (extension === 'webp') return b.length >= 12 && String.fromCharCode(...b.slice(0, 4)) === 'RIFF' && String.fromCharCode(...b.slice(8, 12)) === 'WEBP';
         return firmas.some((f) => f.every((x, i) => b[i] === x));
       }
 
@@ -4296,6 +4526,18 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
       ctx.alBorrador({
         escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo' && a.fuente).map((a) => paraProveedor(a, configDe(el))))),
         restaura: () => conProveedor((p, el) => p.lee && Promise.resolve().then(() => p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); }, () => FormKit.aviso($('[data-rechazos]', el) || el, { tono: 'advertencia', texto: M.archProveedorFallo }))),
+        /* Sin proveedor, el borrador sólo anota cuántos archivos había en cada campo (nunca su
+           contenido), para que el aviso de recuperado diga dónde volver a agregarlos. */
+        estado: () => {
+          if (ctx.opciones.borradorArchivos) return {};
+          const cuantos = {};
+          for (const el of camposArchivo()) { const n = (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo').length; if (n) cuantos[el.dataset.campo] = n; }
+          return Object.keys(cuantos).length ? { archivosSinGuardar: cuantos } : {};
+        },
+        resumen: (b) => {
+          const campos = b && b.archivosSinGuardar && typeof b.archivosSinGuardar === 'object' && !ctx.opciones.borradorArchivos ? Object.keys(b.archivosSinGuardar).filter((n) => ctx.envoltura(n)) : [];
+          return campos.length ? plantilla(M.borradorArchivosFalta, { campos: campos.map(ctx.etiquetaDe).join('», «') }) : '';
+        },
         borra: () => conProveedor((p, el) => p.borra && p.borra(el.dataset.campo))
       });
 
@@ -4338,11 +4580,11 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
            <button type="button" class="btn btn-secundario" data-visor-accion="acercar" aria-label="Acercar"><span class="visor-paso" aria-hidden="true">+</span></button>
            <button type="button" class="btn btn-secundario" data-visor-accion="ajustar">Ajustar al ancho</button>
            <button type="button" class="btn btn-secundario" data-visor-accion="girar">Girar</button>
-           <a class="btn-enlace visor-abrir" data-visor-abrir href="#" target="_blank" rel="noopener">Abrir en otra pestaña …</a>
+           <a class="btn-enlace visor-abrir" data-visor-abrir target="_blank" rel="noopener">Abrir en otra pestaña …</a>
          </div>
          <p class="visor-pagina" data-visor-pagina aria-live="polite"></p>
          <div class="aviso visor-aviso" data-visor-aviso hidden></div>
-         <div class="visor-hojas" data-visor-hojas tabindex="0" aria-label="Hojas del documento"></div>
+         <div class="visor-hojas" data-visor-hojas role="region" tabindex="0" aria-label="Hojas del documento"></div>
          <p class="visor-nota" data-visor-nota hidden></p>
        </dialog>
      </div>
@@ -4456,8 +4698,9 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     di(M.visorNavegador);
   }
 
-  async function abre({ url, titulo = 'Documento', archivo = '', tipo = '', nota = '' }, boton) {
+  async function abre({ url, titulo = '', archivo = '', tipo = '', nota = '' }, boton) {
     if (!prepara()) return;
+    titulo = titulo || M.visorDocumento;
     origen = boton || null;
     d.querySelector('[data-visor-titulo]').textContent = titulo;
     d.querySelector('[data-visor-archivo]').textContent = archivo;
@@ -4514,6 +4757,8 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     cfg = FormKit.config;
     M = cfg.mensajes;
     hojas = d.querySelector('[data-visor-hojas]');
+    /* La zona de hojas se enfoca para desplazarla con el teclado: como región, su nombre se lee. */
+    if (!hojas.hasAttribute('role')) hojas.setAttribute('role', 'region');
     aviso = d.querySelector('[data-visor-aviso]');
     contador = d.querySelector('[data-visor-pagina]');
     ancho = global.matchMedia(cfg.visor.fijoDesde);
@@ -4574,7 +4819,10 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
      · el mapa base (teselas) se declara en configuración
        (FORMKIT_CONFIG.mapa.teselas y .atribucion); sin él, el mapa muestra
        un fondo neutro y lo dice;
-     · no se pide geolocalización del dispositivo salvo data-geolocalizacion;
+     · no se pide geolocalización del dispositivo salvo data-geolocalizacion; una
+       ubicación de más de FORMKIT_CONFIG.mapa.aproximadaM metros (100) se dice aproximada;
+     · el complemento de gestos se declara en FORMKIT_CONFIG.mapa.gestos (su dirección) y
+       el módulo lo carga sólo si Leaflet cargó;
      · coordenadas en EPSG:4326, orden lon, lat al enviar, 6 decimales.
 
    Contrato HTML:
@@ -4605,8 +4853,15 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         /* La revisión dice lo mismo que se envía: un punto sin confirmar se ve como tal. */
         textoDe: (el) => { const s = estadoDe.get(el); if (!s || !s.punto) return ''; const t = `${s.punto.lat.toFixed(5)}, ${s.punto.lon.toFixed(5)}`; return s.exigeConfirmar && !s.confirmado ? `${t} · ${FormKit.config.mensajes.mapaSinConfirmar}` : t; },
         enBorrador: true,
-        /* En el borrador sólo hay un punto si ya contaba (confirmado, si se pide): se recupera así. */
-        restaura: (el, v) => { const s = estadoDe.get(el); if (s && v && s.coloca) { const [lat, lon] = v.split(',').map(Number); s.coloca({ lat, lon }, true); if (s.exigeConfirmar && s.confirma) s.confirma(true); } },
+        /* En el borrador sólo hay un punto si ya contaba (confirmado, si se pide): se recupera así.
+           Sin Leaflet (el mapa no cargó) el punto se conserva igual: se envía y la revisión lo dice. */
+        restaura: (el, v) => {
+          const s = estadoDe.get(el);
+          if (!s || !v || !/^-?[\d.]+,-?[\d.]+$/.test(v)) return;
+          const [lat, lon] = v.split(',').map(Number);
+          if (s.coloca) { s.coloca({ lat, lon }, true); if (s.exigeConfirmar && s.confirma) s.confirma(true); }
+          else { s.punto = { lat, lon }; s.confirmado = true; }
+        },
         valida: (el) => { const s = estadoDe.get(el); return s && s.fuera ? FormKit.config.ambito.coordenadas.mensaje : ''; },
         alArmar: (form, payload) => { for (const el of form.querySelectorAll('[data-campo]')) { const s = estadoDe.get(el); if (s && s.punto && payload.datos[el.dataset.campo]) payload.datos[el.dataset.campo] = { type: 'Point', coordinates: [Number(s.punto.lon.toFixed(6)), Number(s.punto.lat.toFixed(6))] }; } }
       }
@@ -4614,8 +4869,20 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
     iniciar(form, ctx) {
       const { $, $$, cfg, M, plantilla, anuncia, limpia, marca, programaBorrador } = ctx;
       const L = window.L;
-      const conf = Object.assign({ teselas: '', atribucion: '', zoom: 11, centro: [19.4326, -99.1332] }, (window.FORMKIT_CONFIG || {}).mapa || {});
+      /* gestos: dirección (relativa a la página) del complemento leaflet-gesture-handling;
+         aproximadaM: desde cuántos metros de imprecisión «Usar mi ubicación» avisa que es aproximada. */
+      const conf = Object.assign({ teselas: '', atribucion: '', zoom: 11, centro: [19.4326, -99.1332], gestos: '', aproximadaM: 100 }, (window.FORMKIT_CONFIG || {}).mapa || {});
       const bbox = cfg.ambito.coordenadas;
+      /* El complemento de gestos se carga aquí y sólo si Leaflet cargó: escrito en el HTML después
+         de Leaflet, sin Leaflet daba «L is not defined». Si la página ya lo cargó, se usa ése. */
+      const gestos = new Promise((listo) => {
+        if (!L || window.leafletGestureHandling || !conf.gestos) { listo(); return; }
+        const s = document.createElement('script');
+        s.src = conf.gestos;
+        s.addEventListener('load', listo);
+        s.addEventListener('error', () => { console.warn(`FormKit: no se pudo cargar el complemento de gestos del mapa desde ${conf.gestos}.`); listo(); });
+        document.head.appendChild(s);
+      });
 
       for (const cont of $$('[data-mapa]', form)) {
         const el = cont.closest('[data-campo]');
@@ -4630,11 +4897,16 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
 
         if (!L) { if (sin) sin.hidden = false; cont.hidden = true; continue; }
 
-        /* El plugin de gestos (leaflet-gesture-handling) se registra como
-           manejador «gestureHandling»; si está cargado se activa: un dedo
-           desplaza la página, dos el mapa. Sin él, Leaflet ignora la opción. */
-        const mapa = L.map(cont, { center: conf.centro, zoom: conf.zoom, gestureHandling: true, gestureHandlingOptions: { text: { touch: M.mapaGestoTactil, scroll: M.mapaGestoRueda, scrollMac: M.mapaGestoRuedaMac } }, zoomControl: true, attributionControl: !!conf.atribucion, tap: true });
-        if (mapa.gestureHandling && !mapa.gestureHandling.enabled()) mapa.gestureHandling.enable();
+        /* El complemento de gestos se registra como manejador «gestureHandling»; cuando está
+           cargado se activa: un dedo desplaza la página, dos el mapa. Sin él, Leaflet ignora la
+           opción. Acercar y alejar llevan su nombre en español (Leaflet los trae en inglés). */
+        const mapa = L.map(cont, { center: conf.centro, zoom: conf.zoom, gestureHandling: true, gestureHandlingOptions: { text: { touch: M.mapaGestoTactil, scroll: M.mapaGestoRueda, scrollMac: M.mapaGestoRuedaMac } }, zoomControl: false, attributionControl: !!conf.atribucion, tap: true });
+        L.control.zoom({ zoomInTitle: M.mapaAcercar, zoomOutTitle: M.mapaAlejar }).addTo(mapa);
+        gestos.then(() => {
+          const G = window.leafletGestureHandling;
+          if (!mapa.gestureHandling && G && G.GestureHandling) mapa.addHandler('gestureHandling', G.GestureHandling);
+          if (mapa.gestureHandling && !mapa.gestureHandling.enabled()) mapa.gestureHandling.enable();
+        });
         const limites = bbox ? L.latLngBounds([bbox.latMin, bbox.lonMin], [bbox.latMax, bbox.lonMax]) : null;
         const encuadra = () => { mapa.invalidateSize(); if (s.punto) mapa.setView([s.punto.lat, s.punto.lon], Math.max(mapa.getZoom(), 14)); else if (limites) mapa.fitBounds(limites); };
         if (limites) { mapa.setMaxBounds(limites.pad(0.1)); mapa.fitBounds(limites); }
@@ -4678,7 +4950,17 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
         if (btnConfirmar) btnConfirmar.addEventListener('click', () => s.confirma());
         if (btnGeo && cont.hasAttribute('data-geolocalizacion') && navigator.geolocation) {
           btnGeo.hidden = false;
-          btnGeo.addEventListener('click', () => { btnGeo.setAttribute('aria-busy', 'true'); navigator.geolocation.getCurrentPosition((pos) => { btnGeo.removeAttribute('aria-busy'); s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude }); mapa.setView([pos.coords.latitude, pos.coords.longitude], 16); }, () => { btnGeo.removeAttribute('aria-busy'); anuncia(M.mapaSinUbicacion, { cortes: true, visible: avisoGeo() }); }, { timeout: 10000 }); });
+          /* Una ubicación imprecisa (de la red, en computadora: cientos de metros) se dice
+             «aproximada», en su propio renglón y después del punto (GEO-31). */
+          btnGeo.addEventListener('click', () => {
+            btnGeo.setAttribute('aria-busy', 'true');
+            navigator.geolocation.getCurrentPosition((pos) => {
+              btnGeo.removeAttribute('aria-busy');
+              s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+              mapa.setView([pos.coords.latitude, pos.coords.longitude], 16);
+              if (pos.coords.accuracy > conf.aproximadaM) anuncia(plantilla(M.mapaAproximada, { metros: Math.round(pos.coords.accuracy) }), { visible: avisoGeo() });
+            }, () => { btnGeo.removeAttribute('aria-busy'); anuncia(M.mapaSinUbicacion, { cortes: true, visible: avisoGeo() }); }, { timeout: 10000 });
+          });
         }
         /* La alternativa manual (campo data-formato="coordenadas") también mueve el punto. */
         const manual = $$('[data-formato="coordenadas"] input', form)[0];
@@ -4913,11 +5195,13 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           continue;
         }
         const orden = ['alcaldia', 'colonia', 'cp'].filter((n) => por[n]);
-        const sel = (c, valores, placeholder) => {
+        /* La primera opción vacía conserva el texto que trae el HTML; sin él, el de los mensajes. */
+        const primeraDe = new Map(niveles.filter((c) => c.tagName === 'SELECT').map((c) => [c, c.options[0] && c.options[0].value === '' ? c.options[0].textContent.trim() : '']));
+        const sel = (c, valores) => {
           if (c.tagName !== 'SELECT') return;
           const actual = c.value;
           c.textContent = '';
-          const o0 = document.createElement('option'); o0.value = ''; o0.textContent = placeholder || 'Elige una opción'; c.appendChild(o0);
+          const o0 = document.createElement('option'); o0.value = ''; o0.textContent = primeraDe.get(c) || M.cascadaElige; c.appendChild(o0);
           for (const v of valores) { const o = document.createElement('option'); o.value = v; o.textContent = v; c.appendChild(o); }
           if (valores.includes(actual)) c.value = actual;
           c.toggleAttribute('data-vacio', !c.value);
@@ -5107,9 +5391,19 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           caja.appendChild(borrar);
         }
 
+        /* La sugerencia elegida se marca en su lugar: rehacer la fila quitaría el botón que
+           tiene el foco y el teclado se perdería. */
+        const marcaElegida = () => { for (const b of $$('[data-chip]', caja)) b.setAttribute('aria-pressed', String(valorDe(n) === b.dataset.chip)); };
         caja.addEventListener('click', (e) => {
           const q = e.target.closest('[data-chip-quitar]');
-          if (q) { escribe(lee().filter((v) => v !== q.dataset.chipQuitar)); pinta(); anuncia(M.chipsQuitada); return; }
+          /* Quitar una sugerencia rehace la fila: el foco va a la siguiente que quede o, si no queda ninguna, al campo. */
+          if (q) {
+            const i = $$('[data-chip-quitar]', caja).indexOf(q);
+            escribe(lee().filter((v) => v !== q.dataset.chipQuitar)); pinta(); anuncia(M.chipsQuitada);
+            const resto = $$('[data-chip]', caja);
+            (resto[Math.min(i, resto.length - 1)] || ctl).focus();
+            return;
+          }
           if (e.target.closest('[data-chips-borrar]')) { almacen.borra(clave(n)); pinta(); anuncia(M.chipsBorrado); ctl.focus(); return; }
           const b = e.target.closest('[data-chip]');
           if (!b) return;
@@ -5118,20 +5412,25 @@ window.FORMKIT_ICONOS = "<svg xmlns=\"http://www.w3.org/2000/svg\" hidden> <symb
           ctl.dispatchEvent(new Event('change', { bubbles: true }));
           ctx.estadoDe(n).tocado = true;
           ctx.validaYPinta(n);
-          pinta();
+          marcaElegida();
           anuncia(`${ctx.etiquetaDe(n)}: ${b.dataset.chip}`);
           programaBorrador();
         });
         caja.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.closest('[data-chip-quitar]')) { e.preventDefault(); e.target.closest('[data-chip-quitar]').click(); } });
+        ctl.addEventListener('input', marcaElegida);
 
-        /* Se guarda al salir del campo con un valor válido. */
+        /* Se guarda al salir del campo con un valor válido, pero la fila no se rehace mientras
+           la persona llena: está arriba del control, y crecer al salir del campo movía lo de
+           abajo justo cuando la persona tocaba otra cosa (el toque caía en otro lugar). Se
+           rehace al empezar otro registro (el formulario se envió o se vació) y al volver a
+           abrir la página. */
         campo.addEventListener('focusout', () => {
           const v = valorDe(n);
           if (!v || validaCampo(n)) return;
-          const lista = [v, ...lee().filter((x) => x !== v)];
-          escribe(lista);
-          pinta();
+          escribe([v, ...lee().filter((x) => x !== v)]);
         });
+        form.addEventListener('formkit:enviado', () => setTimeout(pinta, 0));
+        form.addEventListener('reset', () => setTimeout(pinta, 0));
         pinta();
       }
     }

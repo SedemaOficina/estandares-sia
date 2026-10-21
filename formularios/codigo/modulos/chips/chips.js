@@ -117,9 +117,19 @@
           caja.appendChild(borrar);
         }
 
+        /* La sugerencia elegida se marca en su lugar: rehacer la fila quitaría el botón que
+           tiene el foco y el teclado se perdería. */
+        const marcaElegida = () => { for (const b of $$('[data-chip]', caja)) b.setAttribute('aria-pressed', String(valorDe(n) === b.dataset.chip)); };
         caja.addEventListener('click', (e) => {
           const q = e.target.closest('[data-chip-quitar]');
-          if (q) { escribe(lee().filter((v) => v !== q.dataset.chipQuitar)); pinta(); anuncia(M.chipsQuitada); return; }
+          /* Quitar una sugerencia rehace la fila: el foco va a la siguiente que quede o, si no queda ninguna, al campo. */
+          if (q) {
+            const i = $$('[data-chip-quitar]', caja).indexOf(q);
+            escribe(lee().filter((v) => v !== q.dataset.chipQuitar)); pinta(); anuncia(M.chipsQuitada);
+            const resto = $$('[data-chip]', caja);
+            (resto[Math.min(i, resto.length - 1)] || ctl).focus();
+            return;
+          }
           if (e.target.closest('[data-chips-borrar]')) { almacen.borra(clave(n)); pinta(); anuncia(M.chipsBorrado); ctl.focus(); return; }
           const b = e.target.closest('[data-chip]');
           if (!b) return;
@@ -128,20 +138,25 @@
           ctl.dispatchEvent(new Event('change', { bubbles: true }));
           ctx.estadoDe(n).tocado = true;
           ctx.validaYPinta(n);
-          pinta();
+          marcaElegida();
           anuncia(`${ctx.etiquetaDe(n)}: ${b.dataset.chip}`);
           programaBorrador();
         });
         caja.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.closest('[data-chip-quitar]')) { e.preventDefault(); e.target.closest('[data-chip-quitar]').click(); } });
+        ctl.addEventListener('input', marcaElegida);
 
-        /* Se guarda al salir del campo con un valor válido. */
+        /* Se guarda al salir del campo con un valor válido, pero la fila no se rehace mientras
+           la persona llena: está arriba del control, y crecer al salir del campo movía lo de
+           abajo justo cuando la persona tocaba otra cosa (el toque caía en otro lugar). Se
+           rehace al empezar otro registro (el formulario se envió o se vació) y al volver a
+           abrir la página. */
         campo.addEventListener('focusout', () => {
           const v = valorDe(n);
           if (!v || validaCampo(n)) return;
-          const lista = [v, ...lee().filter((x) => x !== v)];
-          escribe(lista);
-          pinta();
+          escribe([v, ...lee().filter((x) => x !== v)]);
         });
+        form.addEventListener('formkit:enviado', () => setTimeout(pinta, 0));
+        form.addEventListener('reset', () => setTimeout(pinta, 0));
         pinta();
       }
     }

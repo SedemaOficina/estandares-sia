@@ -40,12 +40,11 @@ El código del estándar **no tiene dependencias**: scripts clásicos (sin módu
 <script src="codigo/js/iconos.js"></script>
 <script src="codigo/catalogos/cdmx-ejemplo.js"></script>   <!-- sólo con combo o cascadas; sustituir por el oficial -->
 <script src="codigo/js/formkit.core.js"></script>
-<script src="vendor/leaflet/leaflet.js"></script>          <!-- sólo con mapa -->
-<script src="vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.js"></script>
+<script src="vendor/leaflet/leaflet.js"></script>          <!-- sólo con mapa; el complemento de gestos lo carga el módulo (FORMKIT_CONFIG.mapa.gestos) -->
 <script src="codigo/modulos/<modulo>/<modulo>.js"></script>  <!-- uno por módulo usado, después del núcleo -->
 ```
 
-La configuración va **antes** del núcleo porque el núcleo la fusiona al cargar. El árbol de decisión de la guía genera estas etiquetas según lo marcado.
+La configuración va **antes** del núcleo porque el núcleo la fusiona al cargar. El árbol de decisión de la guía genera estas etiquetas según lo marcado. El complemento de gestos del mapa (`vendor/leaflet-gesture-handling`) no lleva `<script>`: su dirección, desde la página, va en `FORMKIT_CONFIG.mapa.gestos` y el módulo `mapa` lo carga sólo si Leaflet cargó (escrito después de Leaflet, sin Leaflet daba «L is not defined»). Si una página lo sigue cargando con su `<script>`, el módulo usa ése.
 
 ## 3. Arranque
 
@@ -101,6 +100,7 @@ Toda pregunta es una **envoltura** con `data-campo` que contiene etiqueta, ayuda
 | `data-uso="…"` | Para qué se pide el dato. Obligatorio en todo campo (`auditar-campos.mjs`). |
 | `data-finalidad="…"` | Marca dato personal y dice su finalidad. |
 | `data-sensible` | No entra al borrador local; se pide de nuevo. |
+| `data-sin-borrador` | No entra al borrador: se contesta en cada visita. Lo llevan el consentimiento («Leí el aviso de privacidad», «Acepto…») y «No soy un programa automático»; `auditar-campos` (D7) lo exige. |
 | `data-cruzada="clave [clave2]"` + `data-cruzada-campos="rol=campo rol2=campo2"` + `data-cruzada-nivel="advertencia"` | Validación cruzada (ver `docs/05`). |
 | `data-min-opciones` / `data-max-opciones` | En grupos de casillas. |
 | `data-mensaje="…"` | Mensaje propio de obligatorio para este campo (excepcional). |
@@ -120,9 +120,14 @@ En el `<form>`: `data-formkit` (arranque automático; `data-formkit="manual"` pa
 - `[data-guardado]`: renglón «Borrador guardado en este dispositivo.»; también dice si el borrador no se puede guardar (almacén lleno o bloqueado).
 - `[data-carga-pendiente]`: aviso visible en el HTML («La página no terminó de cargar. Recárgala…»). El núcleo lo oculta al arrancar y, por pasos, el módulo de pasos al mostrar el primero: si falta un archivo del estándar, la persona lo ve en lugar de una pantalla vacía. En una página, el botón de enviar es `type="button"` con `data-accion="enviar"`: sin el núcleo no envía nada.
 - `[data-recordatorio]` con `[data-recordatorio-texto]`: lo que la persona eligió al principio, a la vista en los pasos siguientes (módulo `pasos`).
+- `[data-limite]`: pantalla de límite de envíos (429), fuera del `<form>`, con su título y `[data-accion="reintentar"]` («Volver a la revisión» o «Volver al formulario»). La llevan las dos plantillas (módulo `acuse`).
 - `[data-trampa]` (campo señuelo), `[data-accion="enviar|siguiente|atras"]`.
 
-Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({indice, paso, total}), `formkit:fila` ({fila}, en el form, al agregar una fila repetible: los módulos preparan sus campos), `formkit:pagina` ({pagina, tamano, desde, hasta}, en el nav), `formkit:tabla` (repintar tabla).
+Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({indice, paso, total}), `formkit:fila` ({fila}, en el form, al agregar una fila repetible: los módulos preparan sus campos), `formkit:enviando` ({enviando}, en el form, al empezar y al terminar un envío: el módulo de pasos no deja cambiar de paso mientras tanto), `formkit:muestra` ({elemento}, en el form: el núcleo necesita mostrar algo que quedó en una parte oculta, como el aviso de envío; el módulo de pasos abre ese paso), `formkit:pagina` ({pagina, tamano, desde, hasta}, en el nav), `formkit:tabla` (repintar tabla; si una columna está ordenada, las filas nuevas toman ese orden).
+
+**«Atrás» del navegador.** En un formulario por pasos, cada paso que se abre deja una entrada en el historial, con la misma dirección (`history.pushState`): «Atrás» del navegador y el gesto de Android regresan un paso, «Adelante» avanza con las mismas reglas que «Continuar», y el botón «Atrás» del formulario hace lo mismo que el del navegador. Con el acuse a la vista, «Atrás» sale de la página; desde la pantalla de límite, regresa al formulario. Si el navegador repone por su cuenta lo escrito (al volver con «Adelante» a una página que dejó), las condiciones, las listas y los contadores se ponen al día.
+
+**Barra fija y pantallas bajas.** El módulo de pasos mide la barra fija y pone su alto real en `--alto-barra-fija` y `--alto-barra-fija-movil` (el `scroll-padding-top` del documento): ningún campo enfocado queda debajo de ella. Con menos de 500 px de alto, la barra deja de ser fija y el margen es 0.
 
 **Módulo `enlace-mapa`.** Un contenedor `[data-enlace-mapa="<data-campo destino>"]` con su `label`, un `input` (sin `data-campo` ni `name`: el enlace no viaja) y un `[data-enlace-mapa-estado]` para el aviso. Al pegar o al salir, escribe `lat, lon` con 6 decimales en el campo destino (`data-formato="coordenadas"`), que valida el núcleo y, si hay `mapa`, mueve el punto. Toma el último lugar marcado del enlace (`!3d…!4d…`), luego `q=`/`ll=`/`/place/`, y sólo al final el centro de la pantalla (`@`), con aviso. Acomoda en el campo destino coordenadas al revés, en grados-minutos-segundos, con coma decimal o con la longitud sin signo menos. `FormKit.leeCoordenadas(texto)` es la función pura.
 
@@ -180,11 +185,17 @@ Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({
 
 **El acuse sobrevive a una recarga.** El módulo `acuse` guarda el folio y la fecha (no los datos de la persona) con la clave del borrador más `:acuse` y, si la persona recarga la página, vuelve a mostrarlos durante `acuse.horasVisible` (24 horas). Un botón `<button type="button" class="btn btn-secundario" data-acuse-nuevo>Llenar otra solicitud</button>` en el acuse lo olvida y abre el formulario vacío. Mientras se ve el acuse o la pantalla de límite, lo que acompaña al formulario fuera de él (`.barra-fija`, la franja del borrador y `[data-guardado]`) se oculta, y vuelve como estaba al regresar al formulario.
 
-**Fechas para leer.** `FormKit.utilidades.fechaHora(fecha)` escribe una fecha y hora para la persona («17 de octubre de 2026 a las 23:27») en la zona de la Ciudad y en 24 horas, salvo `FORMKIT_CONFIG.fechas.horas24 = false`. Lo usan el acuse, el borrador y el resultado.
+**Fechas para leer.** `FormKit.utilidades.fechaHora(fecha)` escribe una fecha y hora para la persona («17 de octubre de 2026 a las 23:27») en la zona de la Ciudad y en 24 horas, salvo `FORMKIT_CONFIG.fechas.horas24 = false`; se arma por partes, así que dice lo mismo en todo navegador (el acuse es un comprobante). Lo usan el acuse, el borrador y el resultado. Un campo `data-formato="fecha"` se guarda como AAAA-MM-DD, pero la revisión y los anuncios lo dicen día/mes/año.
+
+**Compartir el acuse.** El botón `[data-compartir]` del acuse comparte el folio y la fecha, no la dirección del formulario (que abriría vacío): `data-compartir-texto="Folio de mi solicitud: {folio}. Recibida el {fecha}."` (sin `{folio}`, el folio va al final); sin folio, el botón se oculta. En cualquier otro botón, `data-compartir-url=""` comparte sólo el texto; sin la hoja de compartir del equipo, se copia lo mismo que se compartiría.
+
+**Al recuperar el borrador.** Un aviso a la vista (que recibe el foco si la persona eligió «Recuperar borrador») dice que se recuperó, en qué paso quedó la persona («Sigues en el paso 2 de 4: «Lugar».») y qué tiene que volver a llenar porque no se guarda en el equipo (lo sensible; no lo que se calcula de ello ni lo `data-sin-borrador`). «Empezar de nuevo» vacía también la pantalla y lleva al primer paso. Un módulo propio agrega su frase al aviso con `resumen(b)` y vuelve a su inicio con `descarta()` en `ctx.alBorrador`.
+
+**Dos pestañas con el mismo formulario.** Lo que guarda una pestaña reemplaza el borrador de la otra: cuando otra guarda, ésta lo dice a la vista; cuando otra envía (una señal que se escribe y se borra en el acto en `<clave>:senal`), ésta deja de guardar y avisa que si se envía también desde aquí llegará dos veces.
 
 **Código postal de todo el país.** `data-ambito="nacional"` en un campo `data-formato="cp"` acepta cualquier código de cinco dígitos; sin él, sólo los del ámbito configurado (la Ciudad).
 
-**Bloques listos.** Las secciones «Datos de identificación» y «Domicilio» están en la guía visual (sección «Bloques listos», plantillas `bloque-identificacion` y `bloque-domicilio`): se copian completas y se cambian `data-uso`, `data-finalidad` y el prefijo `b_` de los nombres. Los bloques «Fecha de nacimiento y edad» (`bloque-nacimiento`, para formularios sin CURP) y «Rango de edad» (`bloque-rango-edad`) cubren la edad sin pedirla escrita. El bloque «Redes sociales» (plantilla `bloque-redes`, clases `.redes` y `.redes-enlace` del núcleo) va en el pie: cada enlace lleva `aria-label` con el nombre de la red y de la Secretaría, y el ícono `aria-hidden`.
+**Bloques listos.** Las secciones «Datos de identificación» y «Domicilio» están en la guía visual (sección «Bloques listos», plantillas `bloque-identificacion` y `bloque-domicilio`): se copian completas y se cambian `data-uso`, `data-finalidad` y el prefijo `b_` de los nombres. Los bloques «Fecha de nacimiento y edad» (`bloque-nacimiento`, para formularios sin CURP) y «Rango de edad» (`bloque-rango-edad`) cubren la edad sin pedirla escrita. El bloque «Redes sociales» (plantilla `bloque-redes`, clases `.redes` y `.redes-enlace` del núcleo) va en el pie: cada enlace lleva `aria-label` con el nombre de la red y de la Secretaría, y el icono `aria-hidden`.
 
 ## 5. Payload que recibe el servidor
 

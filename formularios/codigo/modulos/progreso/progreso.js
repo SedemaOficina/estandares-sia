@@ -26,7 +26,7 @@
     barra.value = v;
     const pct = Math.round((v / max) * 100);
     if (txt) txt.textContent = `${pct} %`;
-    barra.setAttribute('aria-valuetext', `${pct} por ciento`);
+    barra.setAttribute('aria-valuetext', FormKit.utilidades.plantilla(FormKit.config.mensajes.progresoPorCiento, { n: pct }));
   };
   FormKit.registra('progreso', {
     selector: '[data-progreso]',

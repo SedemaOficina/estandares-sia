@@ -18,7 +18,7 @@
     return el;
   };
 
-  /* ----- Íconos: el catálogo de formularios, insertado una vez, igual que
+  /* ----- Iconos: el catálogo de formularios, insertado una vez, igual que
      lo hace formkit.core.js (inyectaSprite). ----- */
   if (window.FORMKIT_ICONOS && !document.querySelector('[data-sprite-iconos]')) {
     const sprite = crea('div');

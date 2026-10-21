@@ -22,6 +22,8 @@
   overflow:hidden;
 }
 .mapa-marcador{color:var(--guinda);filter:drop-shadow(0 var(--b-1) var(--b-2) var(--sombra-color))}
+/* Acercar y alejar de Leaflet: 44 px también en el teléfono, como todo lo que se toca (FRM-62); Leaflet los pinta de 30. */
+.leaflet-bar a.leaflet-control-zoom-in,.leaflet-bar a.leaflet-control-zoom-out{width:var(--objetivo-min);height:var(--objetivo-min);line-height:var(--objetivo-min)}
 .mapa-barra{display:flex;flex-direction:column;gap:var(--e-3);margin-bottom:var(--e-3)}
 .coords{
   display:inline-flex;

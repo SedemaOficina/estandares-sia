@@ -1,6 +1,6 @@
 {
   "name": "estandar-formularios-sia",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "private": true,
   "description": "Estándar de formularios web del Sistema de Información Ambiental (SEDEMA CDMX). Las dependencias son sólo de verificación; el código del estándar no tiene ninguna.",
   "type": "module",

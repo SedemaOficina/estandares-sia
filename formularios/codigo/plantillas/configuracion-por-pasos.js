@@ -12,8 +12,10 @@
 window.FORMKIT_CONFIG = {
   /* Mapa base: proveedor, licencia y atribución se declaran aquí, nunca en
      el código. Vacío = sin mosaicos (el punto se puede colocar igual).
-     Antes de publicar: decidir proveedor y revisar sus condiciones de uso. */
-  mapa: { teselas: '', atribucion: '', zoom: 11, centro: [19.4326, -99.1332] }
+     Antes de publicar: decidir proveedor y revisar sus condiciones de uso.
+     gestos: dirección, desde esta página, del complemento de gestos (un dedo desplaza la
+     página, dos el mapa); el módulo lo carga sólo si Leaflet cargó. */
+  mapa: { teselas: '', atribucion: '', zoom: 11, centro: [19.4326, -99.1332], gestos: '../../vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.js' }
   /* Los límites de un campo de archivos van en su HTML (data-max="3", data-mb,
      data-total-mb): así los ve también el servidor. Aquí, sólo lo que cambie para
      todos los campos del formulario, por ejemplo archivos: { mb: 10 }, y entonces el

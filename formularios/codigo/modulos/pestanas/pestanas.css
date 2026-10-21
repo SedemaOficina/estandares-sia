@@ -32,5 +32,10 @@
 
 /* @bloque estados */
 
+/* Hay más pestañas fuera de la vista: el borde de ese lado se desvanece. */
+.pestanas-lista[data-mas-despues]{mask-image:linear-gradient(to left, transparent, var(--texto) var(--e-8))}
+.pestanas-lista[data-mas-antes]{mask-image:linear-gradient(to right, transparent, var(--texto) var(--e-8))}
+.pestanas-lista[data-mas-antes][data-mas-despues]{mask-image:linear-gradient(to right, transparent, var(--texto) var(--e-8), var(--texto) calc(100% - var(--e-8)), transparent)}
 .pestana:hover{color:var(--azul)}
-.pestana[aria-selected="true"]{border-bottom-color:var(--guinda);color:var(--guinda)}
+/* La pestaña abierta es «lo elegido»: azul; el guinda es sólo de la acción principal. */
+.pestana[aria-selected="true"]{border-bottom-color:var(--azul);color:var(--azul)}

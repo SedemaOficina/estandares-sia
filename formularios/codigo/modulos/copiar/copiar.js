@@ -5,8 +5,10 @@
      <button type="button" class="btn-enlace" data-copiar="#folio">Copiar folio</button>
      <button type="button" class="btn-enlace" data-compartir data-compartir-titulo="…" data-compartir-texto="…">Compartir</button>
    Si el portapapeles no está disponible, selecciona el texto y lo dice; si
-   compartir no existe, cae en copiar el enlace. Los campos de solo lectura
-   con data-copiable reciben su botón «Copiar» automáticamente.
+   compartir no existe, copia lo mismo que compartiría (texto y enlace). Con
+   data-compartir-url="" se comparte sólo el texto (el acuse comparte su folio,
+   no la dirección del formulario). Los campos de solo lectura con
+   data-copiable reciben su botón «Copiar» automáticamente.
    ========================================================= */
 (function () {
   'use strict';
@@ -24,7 +26,7 @@
         const grupo = document.createElement('div'); grupo.className = 'copiar-grupo';
         ctl.parentNode.insertBefore(grupo, ctl); grupo.appendChild(ctl);
         const b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-secundario copiar-btn'; b.dataset.copiar = `#${ctl.id}`;
-        b.append(icono('copiar'), document.createTextNode('Copiar'));
+        b.append(icono('copiar'), document.createTextNode(M.copiarTexto));
         grupo.appendChild(b);
       }
 
@@ -42,9 +44,12 @@
         }
         const sh = e.target.closest('[data-compartir]');
         if (sh) {
-          const datos = { title: sh.dataset.compartirTitulo || document.title, text: sh.dataset.compartirTexto || '', url: sh.dataset.compartirUrl || location.href };
+          /* data-compartir-url="" comparte sólo el texto (el acuse: el folio, no la dirección del formulario). */
+          const url = sh.dataset.compartirUrl !== undefined ? sh.dataset.compartirUrl : location.href;
+          const datos = { title: sh.dataset.compartirTitulo || document.title, text: sh.dataset.compartirTexto || '', ...(url ? { url } : {}) };
           if (navigator.share) { try { await navigator.share(datos); confirma(sh, M.compartido, true); } catch (err) { /* la persona canceló */ } }
-          else { const ok = await copia(datos.url); confirma(sh, ok ? `${M.compartirFallo} ${M.copiado}` : M.compartirFallo, ok); }
+          /* Sin la hoja de compartir del equipo, se copia lo mismo que se compartiría. */
+          else { const ok = await copia([datos.text, datos.url].filter(Boolean).join(' ')); confirma(sh, `${M.compartirFallo} ${ok ? M.copiado : M.copiarFallo}`, ok); }
         }
       });
 

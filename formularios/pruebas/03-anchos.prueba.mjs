@@ -21,9 +21,11 @@ test.after(async () => { await navegador.close(); await servidor.cierra(); });
 
 /* Elementos cuyo alto menor a 44 px es deliberado y accesible: las casillas y
    radios nativos van dentro de una etiqueta que es el objetivo; el enlace de
-   salto sólo existe con foco; los enlaces dentro de texto corrido se exceptúan
-   por WCAG 2.5.8. */
-const EXCEPCIONES = /^(a\.salto|a\.migas-enlace|a\.resumen-errores-enlace|a\.priv-enlace|a\.pie-enlace|a\.|summary\.plegable-titulo|button\.pestana)/;
+   salto sólo existe con foco; las migas y los enlaces del resumen de errores van
+   en renglones con su espacio (24 px). Los enlaces dentro de texto corrido no se
+   miden (WCAG 2.5.8; ayudas.mjs). Ningún otro enlace ni pestaña se exceptúa:
+   FRM-62 también los incluye. */
+const EXCEPCIONES = /^(a\.salto|a\.migas-enlace|a\.resumen-errores-enlace|a\.priv-enlace|a\.pie-enlace|summary\.plegable-titulo)/;
 
 for (const [nombre, ruta] of Object.entries(PAGINAS)) {
   for (const ancho of ANCHOS) {

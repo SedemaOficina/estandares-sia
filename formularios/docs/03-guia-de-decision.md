@@ -65,7 +65,7 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Varias respuestas con la misma etiqueta (una por documento) | `data-contexto` para el resumen de errores | BASE |
 | Texto de varios párrafos / línea de datos (folio · fecha · estado) | `.texto-corrido` / `.linea-datos` con `.linea-datos-item` | BASE |
 | Que los archivos vuelvan con el borrador | proveedor de la página: `borradorArchivos` | RECOMENDADO |
-| Explicar un campo con un texto corto que no todos necesitan | `tooltip` (botón «?»); nunca repite la ayuda visible: si la ayuda visible basta, no hay ícono (`auditar-campos` D5) | OPCIONAL |
+| Explicar un campo con un texto corto que no todos necesitan | `tooltip` (botón «?»); nunca repite la ayuda visible: si la ayuda visible basta, no hay icono (`auditar-campos` D5) | OPCIONAL |
 | Plegar lo opcional de uso raro | `acordeon` (`details`) | OPCIONAL |
 | Ubicar a la persona en un sitio interno | `migas` | OPCIONAL |
 | Mostrar en pantalla qué versión del sitio es (de prueba, instalada en el SIA o sin leer) | `version`: distintivo fijo abajo a la izquierda, dentro del pie | OPCIONAL |
@@ -75,7 +75,7 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Ofrecer respuestas frecuentes conocidas (motivos para observar un documento) | `chips` con `data-chips-fijos`: lista fija, no guarda nada; en un texto largo, el chip agrega su texto para completarlo | OPCIONAL |
 | Ofrecer un archivo | `descarga` (formato y peso visibles) | OPCIONAL |
 | Copiar o compartir un folio | `copiar` | RECOMENDADO |
-| Enlazar a las redes de la Secretaría en el pie | **Bloque listo «Redes sociales»**: íconos de 44 px con nombre accesible; las direcciones van en la configuración del sitio (FRM-59) | OPCIONAL |
+| Enlazar a las redes de la Secretaría en el pie | **Bloque listo «Redes sociales»**: iconos de 44 px con nombre accesible; las direcciones van en la configuración del sitio (FRM-59) | OPCIONAL |
 
 ## 4. Lo que no es una pregunta
 

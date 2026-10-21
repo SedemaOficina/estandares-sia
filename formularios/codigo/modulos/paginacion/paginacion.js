@@ -57,7 +57,7 @@
     const sel = document.createElement('label'); sel.className = 'paginacion-tamano';
     const tamanos = (nav.dataset.tamanos || '').split(',').map((s) => Number(s.trim())).filter(Boolean);
     if (tamanos.length) {
-      sel.append(document.createTextNode('Por página '));
+      sel.append(document.createTextNode(`${M.paginacionPorPagina} `));
       const s = document.createElement('select'); s.className = 'control control-select paginacion-select';
       for (const t of tamanos) { const o = document.createElement('option'); o.value = String(t); o.textContent = String(t); o.selected = t === tam; s.appendChild(o); }
       s.addEventListener('change', () => { nav.dataset.tamano = s.value; nav.dataset.pagina = '1'; cambia(nav, ctx); });

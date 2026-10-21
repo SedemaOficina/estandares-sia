@@ -133,6 +133,8 @@ if (todo || args.includes('--artefacto')) {
     return `<iframe${a} data-src="${src}" data-incrustado srcdoc="${doc.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"${b}></iframe>`;
   });
   salida = salida.replace(/<img([^>]*) src="([^"]+\.png)"/g, (m, a, src) => { const r = resolve(RAIZ, 'guia-visual', src); return existsSync(r) ? `<img${a} src="${b64(relative(RAIZ, r), 'image/png')}"` : m; });
+  /* Los documentos de muestra del visor van dentro: abierta sola, la guía los muestra igual. */
+  salida = salida.replace(/data-visor-url="([^"]+\.(pdf|png))"/g, (m, src, ext) => { const r = resolve(RAIZ, 'guia-visual', src); return existsSync(r) ? `data-visor-url="${b64(relative(RAIZ, r), ext === 'pdf' ? 'application/pdf' : 'image/png')}"` : m; });
   salida = salida.replace('<html lang="es-MX">', '<html lang="es-MX" data-artefacto>');
   escribe('guia-visual/artefacto.html', salida);
 
@@ -140,7 +142,11 @@ if (todo || args.includes('--artefacto')) {
     const base = dirname(ruta);
     let d = readFileSync(ruta, 'utf8');
     d = d.replace(/<link rel="stylesheet" href="([^"]+)">/g, (m, href) => { const r = resolve(base, href); return existsSync(r) ? `<style>${incrustaCss(readFileSync(r, 'utf8'))}</style>` : m; });
-    d = d.replace(/<script src="([^"]+)"><\/script>/g, (m, src) => { const r = resolve(base, src); return existsSync(r) ? `<script>${readFileSync(r, 'utf8').replace(/<\/script>/g, '<\\/script>')}</script>` : m; });
+    const enLinea = (r) => `<script>${readFileSync(r, 'utf8').replace(/<\/script>/g, '<\\/script>')}</script>`;
+    /* Leaflet va con su complemento de gestos: el módulo mapa lo carga desde la dirección de la
+       configuración, que dentro del artefacto no existe; incrustado, el módulo lo encuentra ya cargado. */
+    const gestos = resolve(RAIZ, 'vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.js');
+    d = d.replace(/<script src="([^"]+)"><\/script>/g, (m, src) => { const r = resolve(base, src); if (!existsSync(r)) return m; return /leaflet\/leaflet\.js$/.test(src) && existsSync(gestos) ? enLinea(r) + enLinea(gestos) : enLinea(r); });
     d = d.replace(/<img([^>]*) src="([^"]+\.png)"/g, (m, a, src) => { const r = resolve(base, src); return existsSync(r) ? `<img${a} src="${b64(relative(RAIZ, r), 'image/png')}"` : m; });
     return d;
   }

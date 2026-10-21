@@ -86,10 +86,10 @@ for (const [clave, perfil] of Object.entries(PERFILES)) {
     assert.ok(bloques >= 3, 'la revisión muestra los bloques de los pasos');
     assert.ok((await p.locator('.rev-dato-valor').allTextContents()).some((t) => /55 0000 0000|5500000000/.test(t)), 'el teléfono se muestra como se escribió o normalizado');
 
-    /* «Editar» aterriza en el campo. */
-    await p.click('[data-editar="correo"]');
+    /* «Editar» de cada bloque aterriza en su primer campo (uno por bloque, C3-01). */
+    await p.locator('.rev-bloque').nth(1).locator('[data-editar]').click();
     await p.waitForTimeout(150);
-    assert.equal(await p.evaluate(() => document.activeElement.id), 'correo');
+    assert.equal(await p.evaluate(() => document.activeElement.id), 'calle');
     await p.click('.pasos-btn[data-ir="3"]');
     await p.waitForTimeout(200);
 

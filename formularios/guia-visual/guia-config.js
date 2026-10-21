@@ -9,7 +9,10 @@
    Todos los datos son ficticios.
    ========================================================= */
 window.FORMKIT_CONFIG = {
-  /* Ajustes de ejemplo; vacíos a propósito: la guía muestra los valores de fábrica. */
+  /* Ajustes de ejemplo; casi vacíos a propósito: la guía muestra los valores de fábrica.
+     Sólo se dice dónde está pdf.js, como cualquier página cuyo visor no esté junto a
+     modulos/: así lo encuentra también la guía en un solo archivo (artefacto.html). */
+  visor: { pdfjs: '../vendor/pdfjs-dist/' }
 };
 
 window.FORMKIT_CATALOGOS = window.FORMKIT_CATALOGOS || {};

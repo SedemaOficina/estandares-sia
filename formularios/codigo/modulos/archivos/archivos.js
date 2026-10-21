@@ -118,6 +118,8 @@
         if (!firmas) return true; /* sin firma conocida no se rechaza: lo decide el servidor */
         const b = new Uint8Array(buf.slice(0, 12));
         if (extension === 'heic') return b.length > 8 && String.fromCharCode(b[4], b[5], b[6], b[7]) === 'ftyp';
+        /* «RIFF» lo comparten WebP, AVI y WAV: un WebP lleva además «WEBP» en los bytes 8 a 11. */
+        if (extension === 'webp') return b.length >= 12 && String.fromCharCode(...b.slice(0, 4)) === 'RIFF' && String.fromCharCode(...b.slice(8, 12)) === 'WEBP';
         return firmas.some((f) => f.every((x, i) => b[i] === x));
       }
 
@@ -404,6 +406,18 @@
       ctx.alBorrador({
         escribe: () => conProveedor((p, el) => p.guarda && p.guarda(el.dataset.campo, (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo' && a.fuente).map((a) => paraProveedor(a, configDe(el))))),
         restaura: () => conProveedor((p, el) => p.lee && Promise.resolve().then(() => p.lee(el.dataset.campo)).then((archivos) => { if (archivos && archivos.length) agrega(Array.from(archivos), el); }, () => FormKit.aviso($('[data-rechazos]', el) || el, { tono: 'advertencia', texto: M.archProveedorFallo }))),
+        /* Sin proveedor, el borrador sólo anota cuántos archivos había en cada campo (nunca su
+           contenido), para que el aviso de recuperado diga dónde volver a agregarlos. */
+        estado: () => {
+          if (ctx.opciones.borradorArchivos) return {};
+          const cuantos = {};
+          for (const el of camposArchivo()) { const n = (archivosPorCampo.get(el) || []).filter((a) => a.estado === 'listo').length; if (n) cuantos[el.dataset.campo] = n; }
+          return Object.keys(cuantos).length ? { archivosSinGuardar: cuantos } : {};
+        },
+        resumen: (b) => {
+          const campos = b && b.archivosSinGuardar && typeof b.archivosSinGuardar === 'object' && !ctx.opciones.borradorArchivos ? Object.keys(b.archivosSinGuardar).filter((n) => ctx.envoltura(n)) : [];
+          return campos.length ? plantilla(M.borradorArchivosFalta, { campos: campos.map(ctx.etiquetaDe).join('», «') }) : '';
+        },
         borra: () => conProveedor((p, el) => p.borra && p.borra(el.dataset.campo))
       });
 

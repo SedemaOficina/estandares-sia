@@ -66,19 +66,27 @@
     const js = ['configuracion.js  ← tus ajustes: envío, catálogos, mapa', 'codigo/js/validaciones.config.js', 'codigo/js/iconos.js'];
     if (elegidos.includes('cascadas') || elegidos.includes('combo')) js.push('codigo/catalogos/cdmx-ejemplo.js  ← sustituye por el catálogo oficial');
     js.push('codigo/js/formkit.core.js');
-    if (elegidos.includes('mapa')) js.push('vendor/leaflet/leaflet.js', 'vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.js');
+    if (elegidos.includes('mapa')) js.push('vendor/leaflet/leaflet.js');
     js.push(...elegidos.map((n) => modulosPorNombre[n].archivos.js).filter(Boolean));
     const lineas = [...css.map((c) => `<link rel="stylesheet" href="${c}">`), '', ...js.map((j) => { const [ruta, nota] = j.split('  ← '); return `<script src="${ruta}"></script>${nota ? `  <!-- ${nota} -->` : ''}`; })];
     $('[data-arbol-codigo]').textContent = lineas.join('\n');
     const notas = [];
     if (form.elements.terceros.checked) notas.push('Datos de terceros: en esos campos autocomplete="off" con el motivo en un comentario del HTML; en los de quien llena, el autocomplete correspondiente (name, email, tel-national, postal-code…).');
-    if (elegidos.includes('mapa')) notas.push('El mapa base se declara en FORMKIT_CONFIG.mapa (teselas y atribución); sin él, el punto sigue pudiendo colocarse.');
+    if (elegidos.includes('mapa')) notas.push('El mapa base se declara en FORMKIT_CONFIG.mapa (teselas y atribución); sin él, el punto sigue pudiendo colocarse. El complemento de gestos (vendor/leaflet-gesture-handling) no lleva <script>: su dirección va en FORMKIT_CONFIG.mapa.gestos y el módulo lo carga sólo si Leaflet cargó.');
     if (elegidos.includes('visor')) notas.push('El visor carga pdf.js de vendor/pdfjs-dist/: copia esa carpeta junto al paquete o indica su ruta en FORMKIT_CONFIG.visor.pdfjs.');
     if (elegidos.includes('pasos')) notas.push('Con pasos, copia la plantilla codigo/plantillas/por-pasos.html; si no, una-pagina.html.');
     notas.push(`${elegidos.length} módulo(s) además del núcleo. Las rutas son relativas a la carpeta del paquete; ajústalas a tu proyecto.`);
     $('[data-arbol-nota]').textContent = notas.join(' ');
   }
-  $('[data-arbol]').addEventListener('change', pintaArbol);
+  /* Lo que la persona deja elegido en la guía (el árbol, el ancho y la pestaña de los ejemplos)
+     vuelve al recargar. Sólo en este navegador; sin almacén, la guía empieza como siempre. */
+  const recuerda = {
+    lee(k) { try { return JSON.parse(localStorage.getItem(`guia-formularios:${k}`)); } catch (e) { return null; } },
+    guarda(k, v) { try { localStorage.setItem(`guia-formularios:${k}`, JSON.stringify(v)); } catch (e) { /* sin almacén */ } }
+  };
+  const arbolGuardado = recuerda.lee('arbol');
+  if (Array.isArray(arbolGuardado)) for (const c of $$('[data-arbol] input[type="checkbox"]')) c.checked = arbolGuardado.includes(c.name);
+  $('[data-arbol]').addEventListener('change', () => { pintaArbol(); recuerda.guarda('arbol', $$('[data-arbol] input:checked').map((c) => c.name)); });
   pintaArbol();
 
   /* ---------- Fundamentos ---------- */
@@ -221,7 +229,7 @@
     const pre = el('pre', { clase: 'guia-pre', tabindex: '0' }, el('code', { texto: codigoDe(tpl) }));
     pre.id = FormKit.utilidades.idUnico('cod');
     det.append(el('div', { clase: 'guia-codigo' }, [pre, el('button', { type: 'button', clase: 'btn btn-secundario guia-copiar', 'data-copiar': `#${pre.id}` }, [icono('copiar'), texto('Copiar HTML')])]));
-    return [cont, det];
+    return [cont, det, pre.id];
   }
   function metaDl(pares) {
     const dl = el('dl', { clase: 'guia-ficha-meta' });
@@ -230,12 +238,15 @@
   }
   function ficha({ id, titulo, nivel, proposito, meta, demo, errores, movil, escritorio, encabezado = 'h3' }) {
     const art = el('article', { clase: 'guia-ficha', id, 'aria-labelledby': `t-${id}` });
-    art.append(el('div', { clase: 'guia-ficha-cab' }, [el(encabezado, { clase: 'guia-ficha-titulo', id: `t-${id}`, texto: titulo }), badge(nivel)]));
+    const d = demo ? demoDe(demo.nombre, titulo) : null;
+    /* «Copiar HTML» también arriba, junto al título: en el teléfono la muestra y el código quedan
+       varias pantallas abajo (decisión de la Secretaría). Copia lo mismo que el botón de abajo. */
+    const copiarArriba = d ? el('button', { type: 'button', clase: 'btn-enlace guia-copiar-arriba', 'data-copiar': `#${d[2]}` }, [icono('copiar'), texto('Copiar HTML'), el('span', { clase: 'solo-lector', texto: ` de ${titulo}` })]) : null;
+    art.append(el('div', { clase: 'guia-ficha-cab' }, [el(encabezado, { clase: 'guia-ficha-titulo', id: `t-${id}`, texto: titulo }), badge(nivel), copiarArriba].filter(Boolean)));
     if (proposito) art.append(el('p', { clase: 'guia-ficha-proposito', texto: proposito }));
     if (meta) art.append(metaDl(meta));
     if (movil || escritorio) art.append(el('div', { clase: 'guia-ficha-cols' }, [el('div', { clase: 'guia-col' }, [el('p', { clase: 'guia-col-titulo', texto: 'En teléfono' }), texto(movil || '—')]), el('div', { clase: 'guia-col' }, [el('p', { clase: 'guia-col-titulo', texto: 'En escritorio' }), texto(escritorio || '—')])]));
-    const d = demo ? demoDe(demo.nombre, titulo) : null;
-    if (d) art.append(...d);
+    if (d) art.append(d[0], d[1]);
     else if (demo) art.append(el('p', { clase: 'texto-gris' }, [texto('Esta pieza se ve completa, en contexto, en '), el('a', { href: '#ejemplos', texto: 'los formularios de ejemplo' }), texto('.')]));
     if (errores && errores.length) art.append(el('details', { clase: 'guia-detalles' }, [el('summary', { texto: `Errores frecuentes que el estándar evita (${errores.length})` }), el('ul', { clase: 'guia-errores' }, errores.map((e) => el('li', { texto: e })))]));
     return art;
@@ -251,7 +262,7 @@
         ['Ayuda de bloque', 'Si la misma ayuda vale para todos los campos de una sección, va una vez bajo su título (.ayuda-bloque) y el núcleo la enlaza a cada campo. Ver «Datos de identificación» en Bloques listos.']],
       movil: 'Una columna; teclado adecuado por inputmode (numérico para CP, teléfono para tel, correo con @); 48 px de alto; el error no empuja el diseño porque reserva su alto.', escritorio: 'Los datos hermanos en dos o tres columnas desde 760 px, con subgrid: los controles de una fila quedan alineados aunque una etiqueta ocupe dos líneas o sólo uno lleve ayuda.',
       errores: ['Placeholder en lugar de etiqueta.', 'Validar en cada tecla antes de que la persona termine.', 'Mensajes «Campo inválido» sin decir qué hacer.', 'Pedir un dato sin uso declarado (data-uso).', 'Juntar en una fila datos que no son hermanos sólo porque son cortos.'] },
-    { id: 'n-select', titulo: 'Lista desplegable, solo lectura, deshabilitado, casilla de declaración', proposito: 'El select nativo con flecha propia y «Elige una opción» como primera opción vacía. Solo lectura (readonly, borde discontinuo, se envía, copiable) frente a deshabilitado (disabled, gris, no se envía). La casilla de declaración o consentimiento va destacada y nunca premarcada.', demo: { nombre: 'select-casilla' },
+    { id: 'n-select', titulo: 'Selector de una lista corta, solo lectura, deshabilitado y casilla de declaración', proposito: 'El select nativo con flecha propia y «Elige una opción» como primera opción vacía. Solo lectura (readonly, borde discontinuo, se envía, copiable) frente a deshabilitado (disabled, gris, no se envía). La casilla de declaración o consentimiento va destacada y nunca premarcada.', demo: { nombre: 'select-casilla' },
       movil: 'El select abre el selector nativo del sistema; la casilla y su texto son un solo objetivo táctil.', escritorio: 'Select con flecha propia; al pasar el cursor por la casilla cambia el fondo.',
       errores: ['Deshabilitar un campo que la persona debe ver y copiar (es solo lectura).', 'Premarcar el consentimiento.', 'Select sin opción vacía inicial: se envía la primera sin querer.'] },
     { id: 'n-condicional', titulo: 'Pregunta condicional', proposito: 'Un bloque con data-si="campo=valor|valor2" existe sólo mientras la respuesta coincida: no se valida, no viaja en el envío y lo escrito se conserva por si la persona vuelve a cambiar de opinión. Al mostrarse se anuncia al lector de pantalla.', demo: { nombre: 'condicional' },
@@ -269,11 +280,12 @@
      agrupadas por tipo en el orden en que se arma un formulario. Dentro de
      cada grupo, primero lo más usado; un módulo nuevo que no esté en ORDEN
      cae al final de su grupo. */
-  const GRUPOS = [['pregunta', 'Preguntas'], ['archivos', 'Ubicación y archivos'], ['navegacion', 'Recorrido de la página'], ['retroalimentacion', 'Respuesta a la persona']];
-  const ORDEN = ['opciones', 'otro', 'combo', 'fecha', 'cascadas', 'identificadores', 'repetibles', 'chips', 'toggle', 'escala',
+  const GRUPOS = [['pregunta', 'Preguntas'], ['archivos', 'Ubicación y archivos'], ['navegacion', 'Recorrido de la página'], ['retroalimentacion', 'Respuesta a la persona'], ['consulta', 'Consulta de registros']];
+  const ORDEN = ['opciones', 'otro', 'combo', 'fecha', 'cascadas', 'identificadores', 'repetibles', 'chips', 'toggle', 'escala', 'tooltip',
     'archivos', 'visor', 'mapa', 'enlace-mapa',
-    'pasos', 'progreso', 'acordeon', 'pestanas', 'migas', 'paginacion', 'version',
-    'revision', 'modal', 'acuse', 'copiar', 'descarga', 'tooltip', 'tabla'];
+    'pasos', 'progreso', 'acordeon', 'pestanas', 'migas', 'version',
+    'revision', 'modal', 'acuse', 'copiar', 'descarga',
+    'tabla', 'paginacion'];
   const posicion = (n) => { const i = ORDEN.indexOf(n); return i < 0 ? ORDEN.length : i; };
   const nombreTipo = Object.fromEntries(GRUPOS);
   /* En el menú: sección → (grupo →) ficha. */
@@ -324,10 +336,10 @@
       errores: ['«Calle y número» en un solo campo (FRM-13).', 'Mostrar manzana y lote a todas las personas: sólo aplican a una parte de los domicilios.', 'Rechazar el domicilio que no tiene número: se acepta «S/N».', 'Tomar del enlace el centro de la pantalla en lugar del lugar marcado.', 'Hacer del mapa la única forma de dar la ubicación.'] }
   ];
   FICHAS_BLOQUES.push({ id: 'b-redes', titulo: 'Redes sociales de la Secretaría', nivel: 'OPCIONAL', demo: { nombre: 'bloque-redes' },
-    proposito: 'Los enlaces a las redes oficiales de la Secretaría, para el pie: íconos de 44 px, cada uno con su nombre accesible («Facebook de la Secretaría del Medio Ambiente»). Son la excepción a «el ícono va con texto», porque las marcas se reconocen solas. Las direcciones de las cuentas viven en la configuración del sitio, no escritas en cada página.',
-    meta: [['Cuentas', 'Facebook, X (@SEDEMA_CDMX), Instagram (sedemacdmx), TikTok (@sedema_cdmx) y YouTube.'], ['Íconos', 'i-facebook, i-x, i-instagram, i-tiktok, i-youtube, en el mismo sprite que los demás.']],
-    movil: 'Una fila que se parte en dos renglones si no cabe; cada ícono mide 44 px.', escritorio: 'Una fila; al pasar el cursor, fondo azul tenue.',
-    errores: ['Ícono sin nombre accesible: el lector de pantalla sólo dice «enlace».', 'Usar una cuenta sin verificarla en el sitio oficial de la Secretaría.', 'Traer los íconos de otra fuente, con otro grosor o tamaño.'] });
+    proposito: 'Los enlaces a las redes oficiales de la Secretaría, para el pie: iconos de 44 px, cada uno con su nombre accesible («Facebook de la Secretaría del Medio Ambiente»). Son la excepción a «el icono va con texto», porque las marcas se reconocen solas. Las direcciones de las cuentas viven en la configuración del sitio, no escritas en cada página.',
+    meta: [['Cuentas', 'Facebook, X (@SEDEMA_CDMX), Instagram (sedemacdmx), TikTok (@sedema_cdmx) y YouTube.'], ['Iconos', 'i-facebook, i-x, i-instagram, i-tiktok, i-youtube, en el mismo sprite que los demás.']],
+    movil: 'Una fila que se parte en dos renglones si no cabe; cada icono mide 44 px.', escritorio: 'Una fila; al pasar el cursor, fondo azul tenue.',
+    errores: ['Icono sin nombre accesible: el lector de pantalla sólo dice «enlace».', 'Usar una cuenta sin verificarla en el sitio oficial de la Secretaría.', 'Traer los iconos de otra fuente, con otro grosor o tamaño.'] });
   const contBloques = $('[data-fichas-bloques]');
   if (contBloques) for (const f of FICHAS_BLOQUES) contBloques.append(ficha(f));
 
@@ -400,15 +412,15 @@
 
   /* ---------- Probador de validaciones ---------- */
   const CASOS = {
-    nombre: [['valido', 'María José Pérez'], ['valido', "O'Connor"], ['invalido', 'Juan123'], ['limite', 'Ñandú de la Peña-Ruiz']],
-    correo: [['valido', 'nombre@ejemplo.local'], ['invalido', 'nombre@'], ['invalido', 'sin arroba.mx'], ['limite', 'nombre@gmial.com']],
-    telefono: [['valido', '55 1234 5678'], ['valido', '+52 5512345678'], ['invalido', '123'], ['limite', '(55) 1234-5678']],
+    nombre: [['valido', 'María José Pérez'], ['valido', "O'Connor"], ['invalido', 'Juan123'], ['limite', 'Ñandú de la Peña-Ruiz'], ['limite', 'D’Angelo']],
+    correo: [['valido', 'nombre@ejemplo.local'], ['invalido', 'nombre@'], ['invalido', 'sin arroba.mx'], ['invalido', 'ana@dominio..mx'], ['invalido', 'ana lopez@correo.mx'], ['limite', 'nombre@gmial.com']],
+    telefono: [['valido', '55 1234 5678'], ['valido', '+52 5512345678'], ['invalido', '123'], ['limite', '(55) 1234-5678'], ['limite', '+52 1 55 1234 5678']],
     cp: [['valido', '01000'], ['valido', '16999'], ['invalido', '1234'], ['limite', '17000']],
     curp: [['valido', 'PUEF900515HDFRJL04'], ['invalido', 'PUEF900515HDFRJL0'], ['invalido', 'PUEF901345HDFRJL04'], ['limite', 'puef900515hdfrjl04']],
     rfc: [['valido', 'XAXX010101000'], ['valido', 'ABC010101AB1'], ['invalido', 'XAXX0101'], ['limite', 'xaxx-010101-000'], ['limite', 'muño-800101-ab1']],
     numero: [['valido', '12.5'], ['valido', '12,5'], ['invalido', 'doce'], ['limite', '-0']],
-    fecha: [['valido', '2026-03-15'], ['invalido', '2026-02-30'], ['invalido', '15/03/2026'], ['limite', '2000-02-29']],
-    'fecha-dma': [['valido', '23/07/1985'], ['valido', '23071985'], ['invalido', '31/02/1990'], ['limite', '1985-07-23']],
+    fecha: [['valido', '15/03/2026'], ['valido', '2026-03-15'], ['invalido', '30/02/2026'], ['limite', '29/02/2000']],
+    'fecha-dma': [['valido', '23/07/1985'], ['valido', '23071985'], ['invalido', '31/02/1990'], ['invalido', '23/07/85'], ['limite', '1985-07-23']],
     hora: [['valido', '14:30'], ['valido', '00:00'], ['invalido', '24:00'], ['limite', '23:59']],
     texto: [['valido', 'Hay una fuga de agua en la banqueta desde el martes por la tarde.'], ['invalido', 'asdfghjkl'], ['limite', 'Hola.']],
     coordenadas: [['valido', '19.4326,-99.1332'], ['invalido', '19.4326'], ['invalido', '91,0'], ['limite', '19.4326, -99.1332']],
@@ -477,7 +489,7 @@
     { titulo: 'Una ayuda para toda la sección frente a la misma ayuda en cada campo', si: '<p class="ayuda-bloque" id="snb0">Escríbelos como aparecen en tu identificación oficial.</p><div class="fila"><div class="campo"><label class="etiqueta" for="snb1">Nombre(s)</label><input class="control" id="snb1" type="text" autocomplete="off" aria-describedby="snb0"></div><div class="campo"><label class="etiqueta" for="snb2">Apellido paterno</label><input class="control" id="snb2" type="text" autocomplete="off" aria-describedby="snb0"></div></div>', no: '<div class="fila"><div class="campo"><label class="etiqueta" for="snb3">Nombre(s)</label><p class="ayuda" id="snb3a">Escríbelo como aparece en tu identificación oficial.</p><input class="control" id="snb3" type="text" autocomplete="off" aria-describedby="snb3a"></div><div class="campo"><label class="etiqueta" for="snb4">Apellido paterno</label><p class="ayuda" id="snb4a">Escríbelo como aparece en tu identificación oficial.</p><input class="control" id="snb4" type="text" autocomplete="off" aria-describedby="snb4a"></div></div>', porque: 'Si la misma ayuda vale para toda la sección, se dice una vez bajo su título y el núcleo la enlaza a cada campo para el lector de pantalla. La ayuda de cada campo queda para lo propio de él.' },
     { titulo: 'Sí / No en un renglón frente a dos renglones a todo lo ancho', si: '<fieldset class="grupo"><legend class="etiqueta">¿Ya habías hecho este trámite?</legend><div class="opciones-lista opciones-en-linea"><label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="snl1" value="si"><span><span class="opcion-nombre">Sí</span></span></label><label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="snl1" value="no"><span><span class="opcion-nombre">No</span></span></label></div></fieldset>', no: '<fieldset class="grupo"><legend class="etiqueta">¿Ya habías hecho este trámite?</legend><div class="opciones-lista"><label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="snl2" value="si"><span><span class="opcion-nombre">Sí</span></span></label><label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="snl2" value="no"><span><span class="opcion-nombre">No</span></span></label></div></fieldset>', porque: 'Dos o tres respuestas cortas sin descripción van en línea: una columna por opción desde tableta y una por renglón en teléfono. Con descripción, una por renglón.' },
     { titulo: 'Datos hermanos en una fila frente a todo en una columna', si: '<div class="fila"><div class="campo"><label class="etiqueta" for="snf1">Correo electrónico</label><input class="control" id="snf1" type="email" autocomplete="off"></div><div class="campo"><label class="etiqueta" for="snf2">Confirma tu correo</label><input class="control" id="snf2" type="email" autocomplete="off"></div></div>', no: '<div class="campo"><label class="etiqueta" for="snf3">Correo electrónico</label><input class="control" id="snf3" type="email" autocomplete="off"></div><div class="campo"><label class="etiqueta" for="snf4">Confirma tu correo</label><input class="control" id="snf4" type="email" autocomplete="off"></div>', porque: 'Las partes de un dato y un dato con su confirmación se leen juntos: desde tableta van lado a lado y el formulario se acorta. Lo que no es hermano va en su propio renglón, aunque sea corto.' },
-    { titulo: 'El ícono de ayuda dice algo nuevo, o no va', si: '<div class="campo"><label class="etiqueta" for="snt1">CURP</label><p class="ayuda" id="snt1a">Son 18 caracteres, como aparecen en tu acta de nacimiento.</p><input class="control" id="snt1" type="text" autocomplete="off" aria-describedby="snt1a"></div>', no: '<div class="campo"><label class="etiqueta" for="snt2">CURP <span class="tooltip"><button type="button" class="btn-icono tooltip-btn" aria-expanded="true" aria-label="Ayuda sobre la CURP" aria-describedby="snt2t"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-ayuda"></use></svg></button><span class="tooltip-texto" role="tooltip" id="snt2t">Son 18 caracteres; está en tu acta.</span></span></label><p class="ayuda" id="snt2a">Son 18 caracteres, como aparecen en tu acta de nacimiento.</p><input class="control" id="snt2" type="text" autocomplete="off" aria-describedby="snt2a"></div>', porque: 'Si la ayuda visible basta, el campo no lleva «?». El ícono que repite lo visible obliga a abrirlo para nada y el lector de pantalla lo lee dos veces.' }
+    { titulo: 'El icono de ayuda dice algo nuevo, o no va', si: '<div class="campo"><label class="etiqueta" for="snt1">CURP</label><p class="ayuda" id="snt1a">Son 18 caracteres, como aparecen en tu acta de nacimiento.</p><input class="control" id="snt1" type="text" autocomplete="off" aria-describedby="snt1a"></div>', no: '<div class="campo"><label class="etiqueta" for="snt2">CURP <span class="tooltip"><button type="button" class="btn-icono tooltip-btn" aria-expanded="true" aria-label="Ayuda sobre la CURP" aria-describedby="snt2t"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-ayuda"></use></svg></button><span class="tooltip-texto" role="tooltip" id="snt2t">Son 18 caracteres; está en tu acta.</span></span></label><p class="ayuda" id="snt2a">Son 18 caracteres, como aparecen en tu acta de nacimiento.</p><input class="control" id="snt2" type="text" autocomplete="off" aria-describedby="snt2a"></div>', porque: 'Si la ayuda visible basta, el campo no lleva «?». El icono que repite lo visible obliga a abrirlo para nada y el lector de pantalla lo lee dos veces.' }
   ];
   const sino = $('[data-pares-sino]');
   if (sino) for (const p of SINO) {
@@ -486,9 +498,11 @@
   }
 
   /* ---------- Ejemplos: ancho de los marcos y carga diferida ---------- */
-  const ANCHO_INICIAL = ($('.guia-ancho[aria-pressed="true"]') || {}).dataset?.ancho || '390';
+  const anchoGuardado = recuerda.lee('ancho');
+  const ANCHO_INICIAL = (typeof anchoGuardado === 'string' && $(`.guia-ancho[data-ancho="${anchoGuardado}"]`) ? anchoGuardado : '') || ($('.guia-ancho[aria-pressed="true"]') || {}).dataset?.ancho || '390';
   function cargaMarcos(panel) { for (const f of $$('.guia-marco[data-src]', panel)) if (!f.src && !f.hasAttribute('srcdoc')) f.src = f.dataset.src; }
-  function ponAncho(ancho) {
+  /* anuncia: sólo cuando lo cambia la persona; al cargar la página no se dice nada. */
+  function ponAncho(ancho, { anuncia = false } = {}) {
     for (const b of $$('.guia-ancho')) b.setAttribute('aria-pressed', String(b.dataset.ancho === ancho));
     for (const m of $$('[data-marcos]')) {
       m.dataset.ancho = ancho;
@@ -503,13 +517,21 @@
         if (!m.closest('[hidden]')) cargaMarcos(m);
       } else if (extra) extra.remove();
     }
-    FormKit.anuncia(ancho === 'lado' ? 'Vista en teléfono y escritorio, lado a lado' : `Vista a ${ancho} píxeles`);
+    if (anuncia) { FormKit.anuncia(ancho === 'lado' ? 'Vista en teléfono y escritorio, lado a lado' : `Vista a ${ancho} píxeles`); recuerda.guarda('ancho', ancho); }
   }
-  $('.guia-ejemplos-barra')?.addEventListener('click', (e) => { const b = e.target.closest('.guia-ancho'); if (b) ponAncho(b.dataset.ancho); });
+  $('.guia-ejemplos-barra')?.addEventListener('click', (e) => { const b = e.target.closest('.guia-ancho'); if (b) ponAncho(b.dataset.ancho, { anuncia: true }); });
   ponAncho(ANCHO_INICIAL);
   /* Los iframes de las pestañas no visibles se cargan al mostrarlas. */
   const pestanasEj = $('#ejemplos [data-pestanas]');
-  if (pestanasEj) { const carga = () => { for (const p of $$('.pestanas-panel:not([hidden])', pestanasEj)) cargaMarcos(p); }; pestanasEj.addEventListener('click', () => setTimeout(carga, 0)); pestanasEj.addEventListener('keyup', () => setTimeout(carga, 0)); carga(); }
+  if (pestanasEj) {
+    const carga = () => { for (const p of $$('.pestanas-panel:not([hidden])', pestanasEj)) cargaMarcos(p); const t = $('[role="tab"][aria-selected="true"]', pestanasEj); if (t) recuerda.guarda('ejemplo', t.id); };
+    pestanasEj.addEventListener('click', () => setTimeout(carga, 0)); pestanasEj.addEventListener('keyup', () => setTimeout(carga, 0));
+    /* La pestaña de ejemplos que se dejó abierta vuelve a abrirse. */
+    const ejGuardado = recuerda.lee('ejemplo');
+    const tab = typeof ejGuardado === 'string' && document.getElementById(ejGuardado);
+    const cuando = (fn) => (document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn) : fn());
+    if (tab && pestanasEj.contains(tab) && tab.getAttribute('aria-selected') !== 'true') cuando(() => { FormKit.pestanas.elige(tab); carga(); }); else carga();
+  }
 
   /* ---------- Navegación ---------- */
   const selNav = $('[data-nav-select]');
@@ -518,7 +540,8 @@
     let tras = $(`option[value="${$('a', li).getAttribute('href').slice(1)}"]`, selNav);
     if (tras) for (const a of $$('.guia-nav-sub a', li)) { const o = el('option', { value: a.getAttribute('href').slice(1), texto: `   ${a.textContent}` }); tras.after(o); tras = o; }
   }
-  if (selNav) selNav.addEventListener('change', () => { const s = document.getElementById(selNav.value); if (s) { s.scrollIntoView({ block: 'start' }); $('h2, .guia-ficha-titulo', s)?.focus(); } });
+  /* Elegir en el índice del teléfono lleva a la sección y cambia la dirección (#…): se puede compartir o volver. */
+  if (selNav) selNav.addEventListener('change', () => { const s = document.getElementById(selNav.value); if (s) { history.replaceState(history.state, '', `#${selNav.value}`); s.scrollIntoView({ block: 'start' }); $('h2, .guia-ficha-titulo', s)?.focus(); } });
   for (const h of $$('.guia-seccion > h2, .guia-ficha-titulo')) h.tabIndex = -1;
   /* Resalta la sección y la ficha que se están leyendo, y mantiene su enlace a la vista en el menú. */
   const nav = $('.guia-nav');

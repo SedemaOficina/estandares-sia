@@ -34,10 +34,10 @@
 </header>
 
 <main class="pagina" id="contenido">
+  <!-- Migas: cada enlace lleva a una página que existe; cambia las direcciones por las de tu sitio. -->
   <nav class="migas" aria-label="Ubicación">
     <ol class="migas-lista">
-      <li class="migas-item"><a class="migas-enlace" href="#">Inicio</a></li>
-      <li class="migas-item"><a class="migas-enlace" href="#">Programas</a></li>
+      <li class="migas-item"><a class="migas-enlace" href="https://www.sedema.cdmx.gob.mx/">Inicio</a></li>
       <li class="migas-item"><span class="migas-actual" aria-current="page">Registro</span></li>
     </ol>
   </nav>
@@ -130,7 +130,7 @@
       <label class="etiqueta" for="personas">Personas en tu hogar
         <span class="tooltip" data-tooltip>
           <button type="button" class="btn-icono tooltip-btn" aria-expanded="false" aria-label="Ayuda sobre las personas en tu hogar"><svg class="icono icono-sm" aria-hidden="true"><use href="#i-ayuda"></use></svg></button>
-          <span class="tooltip-texto" role="tooltip" hidden>Cuenta a todas las personas que viven contigo, incluida tú.</span>
+          <span class="tooltip-texto" role="tooltip" hidden>Cuéntate a ti y a todas las personas que viven contigo.</span>
         </span>
       </label>
       <div class="control-grupo"><input class="control control-corto" id="personas" name="personas" type="text" inputmode="numeric" min="1" max="20" step="1" autocomplete="off"><span class="control-unidad" aria-hidden="true">personas</span></div>
@@ -187,7 +187,7 @@
     </fieldset>
 
     <div class="repetible" data-repetible="acompanantes" data-max="3" data-etiqueta="Acompañante">
-      <p class="etiqueta">Acompañantes (opcional, hasta 3)</p>
+      <p class="etiqueta">Acompañantes (hasta 3)</p>
       <ol class="repetible-lista" data-repetible-lista></ol>
       <template data-repetible-plantilla>
         <li>
@@ -211,7 +211,7 @@
     <div class="priv">
       <p class="priv-parrafo">La Secretaría usa estos datos sólo para operar el programa. <button type="button" class="btn-enlace" data-abre-dialogo="dialogo-privacidad">Leer el aviso de privacidad</button></p>
     </div>
-    <div class="destacado" data-campo="aviso" data-requerido data-uso="Dejar constancia de que se informó a la persona.">
+    <div class="destacado" data-campo="aviso" data-requerido data-sin-borrador data-uso="Dejar constancia de que se informó a la persona.">
       <label class="casilla"><input class="casilla-input" type="checkbox" name="aviso" value="si"><span class="casilla-texto"><span class="etiqueta destacado-nombre">Leí el aviso de privacidad y acepto el tratamiento de mis datos</span></span></label>
     </div>
     <div class="solo-lector" aria-hidden="true" data-trampa><label>No llenar <input type="text" name="sitio_web" tabindex="-1" autocomplete="off"></label></div>
@@ -223,6 +223,13 @@
       <button type="button" class="btn btn-primario" data-accion="enviar">Enviar registro</button>
     </div>
   </form>
+
+  <!-- Límite de envíos: dice que la captura no se perdió (FRM-44). «Volver al formulario» regresa a lo capturado. -->
+  <section class="tarjeta" data-limite hidden>
+    <h2 class="titulo-paso" tabindex="-1">Por ahora no se reciben más envíos desde este dispositivo</h2>
+    <p class="bajada">Lo que capturaste no se perdió y sigue en el formulario. Intenta de nuevo más tarde.</p>
+    <div class="acciones"><button type="button" class="btn btn-primario" data-accion="reintentar">Volver al formulario</button></div>
+  </section>
 
   <section class="tarjeta acuse" data-acuse hidden>
     <div class="acuse-marca" aria-hidden="true"><svg class="icono"><use href="#i-palomita"></use></svg></div>
@@ -236,7 +243,7 @@
       <li class="secuencia-item">Recibes la convocatoria de la primera actividad.</li>
     </ol>
     <!-- La acción para seguir: cambia la dirección por la página de inicio del sitio o por la siguiente tarea. «Hacer otro registro» olvida este acuse (que se vuelve a mostrar si la persona recarga) y abre el formulario vacío. -->
-    <div class="acuse-acciones"><button type="button" class="btn btn-secundario" data-acuse-nuevo>Hacer otro registro</button><a class="btn btn-primario" href="./">Volver al inicio</a></div>
+    <div class="acuse-acciones"><button type="button" class="btn btn-secundario" data-acuse-nuevo>Hacer otro registro</button><a class="btn btn-primario" href="https://www.sedema.cdmx.gob.mx/">Volver al inicio</a></div>
   </section>
 </main>
 

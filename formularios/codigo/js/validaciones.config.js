@@ -210,7 +210,9 @@
     nombre: {
       descripcion: 'Nombre o apellido de persona',
       inputmode: 'text', autocomplete: 'given-name',
-      normaliza: (v) => recorta(v),
+      /* El apóstrofo tipográfico (’ ‘ ʼ, el que pone el teclado del iPhone) y el acento suelto
+         cuentan como apóstrofo: «D’Angelo» se guarda como «D'Angelo». */
+      normaliza: (v) => recorta(v).replace(/[\u2018\u2019\u02BC\u00B4`]/g, "'"),
       valida: (v, a = {}, cfg = CONFIG) => {
         const M = cfg.mensajes;
         if (!/^[\p{L}\p{M}' .\-]+$/u.test(v)) return M.fmtNombre;
@@ -222,13 +224,18 @@
       descripcion: 'Correo electrónico',
       inputmode: 'email', autocomplete: 'email',
       dominiosFrecuentes: ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'live.com.mx', 'hotmail.es'],
-      normaliza: (v) => recorta(v).toLowerCase().replace(/\s/g, ''),
+      normaliza: (v) => recorta(v).toLowerCase(),
       valida: (v, a = {}, cfg = CONFIG) => {
         const M = cfg.mensajes;
         if (v.length > (a.maxlength || 120)) return plantilla(M.fmtCorreoLargo, { max: a.maxlength || 120 });
+        /* Un espacio dentro del correo no se quita en silencio: «ana lopez@…» puede no ser «analopez@…». */
+        if (/\s/.test(v)) return M.fmtCorreoEspacios;
         const partes = v.split('@');
         if (partes.length !== 2 || !partes[0] || !partes[1]) return M.fmtCorreoArroba;
-        if (!/^[^\s@]+\.[^\s@.]{2,}$/.test(partes[1])) return M.fmtCorreoDominio;
+        /* Antes de la arroba: sin comas ni signos que un correo no lleva, y sin un punto al principio, al final o dos seguidos. */
+        if (/[,;:<>()[\]\\"]/.test(partes[0]) || /^\.|\.$|\.\./.test(partes[0])) return M.fmtCorreoUsuario;
+        /* Después: nombres separados por un punto (letras, números y guiones), sin puntos seguidos, y al final al menos dos letras. */
+        if (!/^[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?(?:\.[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?)*\.(?:\p{L}{2,}|xn--[a-z0-9-]+)$/u.test(partes[1])) return M.fmtCorreoDominio;
         return '';
       },
       /* Sugerencia sin bloqueo para errores de dedo frecuentes («gmial.com»). */
@@ -242,10 +249,18 @@
     telefono: {
       descripcion: 'Teléfono de México: diez dígitos',
       inputmode: 'tel', autocomplete: 'tel-national',
-      /* Se aceptan espacios, guiones y paréntesis al escribir; un prefijo
-         +52 o 52 se retira. La regla de diez dígitos es la de México y debe
+      /* Se aceptan espacios, guiones y paréntesis al escribir. Se retira lo que
+         antes se marcaba y ya no forma parte del número: la lada del país (+52 o
+         52), el 1 que seguía al 52 en los celulares («+52 1 55…»), y el 044, 045
+         o 01 de las llamadas desde un fijo. Diez dígitos se dejan como están
+         aunque empiecen con 52. La regla de diez dígitos es la de México y debe
          confirmarse con el plan de numeración vigente [Fuente: __]. */
-      normaliza: (v) => { let d = soloDigitos(String(v).replace(/^\s*\+?52\s*/, '')); if (d.length === 12 && d.startsWith('52')) d = d.slice(2); return d; },
+      normaliza: (v) => {
+        const d = soloDigitos(v);
+        if (d.length === 12 && (d.startsWith('52') || d.startsWith('01'))) return d.slice(2);
+        if (d.length === 13 && (d.startsWith('521') || d.startsWith('044') || d.startsWith('045'))) return d.slice(3);
+        return d;
+      },
       valida: (v, a = {}, cfg = CONFIG) => (/^\d{10}$/.test(v) ? '' : cfg.mensajes.fmtTelefono)
     },
     cp: {
@@ -312,9 +327,10 @@
       }
     },
     fecha: {
-      descripcion: 'Fecha real en formato AAAA-MM-DD con límites configurables',
+      descripcion: 'Fecha real con límites configurables: se guarda como AAAA-MM-DD y la persona la ve como día/mes/año',
       inputmode: 'numeric', autocomplete: 'off',
-      normaliza: (v) => recorta(v),
+      /* Escrita como día/mes/año («15/03/2026», en un campo de texto o en el servidor) se guarda como AAAA-MM-DD. */
+      normaliza: (v) => { const t = recorta(v); return isoDeDma(t) || t; },
       valida: (v, a = {}, cfg = CONFIG) => {
         const M = cfg.mensajes;
         const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -333,6 +349,8 @@
       valida: (v, a = {}, cfg = CONFIG) => {
         const M = cfg.mensajes;
         const iso = isoDeDma(v);
+        /* «23/07/85»: el año de dos cifras no se adivina; se pide completo. */
+        if (!iso && /^\d{1,2}\s*[/.\- ]\s*\d{1,2}\s*[/.\- ]\s*\d{2}$/.test(v)) return M.fmtFechaDmaAnio;
         if (!iso) return M.fmtFechaDma;
         if (Number(iso.slice(0, 4)) < 1900) return M.fmtFechaDmaAnio;
         /* En el navegador llega data-no-futura; en el servidor, max ya resuelto a hoy. */
@@ -543,7 +561,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.6.1',
+    version: '1.6.2',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },
@@ -575,7 +593,7 @@
       obligatorioTexto: 'Completa «{etiqueta}».',
       obligatorioOpcion: 'Elige una opción en «{etiqueta}».',
       obligatorioCasilla: 'Marca la casilla «{etiqueta}» para continuar.',
-      obligatorioArchivos: 'Adjunta al menos un archivo en «{etiqueta}».',
+      obligatorioArchivos: 'Agrega al menos un archivo en «{etiqueta}».',
       obligatorioOtro: 'Escribe cuál es la otra opción en «{etiqueta}».',
       minimoOpciones: 'Elige al menos {min} opciones en «{etiqueta}».',
       maximoOpciones: 'Elige como máximo {max} opciones en «{etiqueta}».',
@@ -590,7 +608,9 @@
       fmtNombreLargo: 'El nombre es demasiado largo: usa hasta {max} caracteres.',
       fmtCorreoLargo: 'El correo es demasiado largo: usa hasta {max} caracteres.',
       fmtCorreoArroba: 'El correo necesita una sola arroba, con texto antes y después. Ejemplo: nombre@dominio.mx',
-      fmtCorreoDominio: 'Revisa el dominio después de la arroba: debe llevar un punto. Ejemplo: nombre@dominio.mx',
+      fmtCorreoDominio: 'Revisa lo que va después de la arroba: nombres separados por un punto, sin puntos seguidos. Ejemplo: nombre@dominio.mx',
+      fmtCorreoUsuario: 'Revisa lo que va antes de la arroba: sin comas ni espacios, y sin un punto al principio, al final o dos seguidos. Ejemplo: nombre.apellido@dominio.mx',
+      fmtCorreoEspacios: 'El correo no lleva espacios: revísalo y quítalos. Ejemplo: nombre@dominio.mx',
       fmtCorreoSugerencia: '¿Quisiste escribir {correo}?',
       fmtTelefono: 'Escribe 10 dígitos, sin lada internacional. Ejemplo: 5512345678',
       fmtCp: 'El código postal lleva 5 dígitos. Ejemplo: 01000',
@@ -608,7 +628,7 @@
       fmtNumeroPaso: 'Usa múltiplos de {paso}.',
       fmtNumeroMin: 'El valor mínimo es {min}.',
       fmtNumeroMax: 'El valor máximo es {max}.',
-      fmtFecha: 'Escribe una fecha real con el formato AAAA-MM-DD. Ejemplo: 2026-03-15',
+      fmtFecha: 'Escribe una fecha real como día/mes/año. Ejemplo: 15/03/2026',
       fmtFechaAnio: 'Revisa el año: escribe una fecha entre 1900 y 2100.',
       fmtFechaDma: 'Escribe una fecha real como día/mes/año. Ejemplo: 23/07/1985',
       fmtFechaDmaAnio: 'Revisa el año: escribe los cuatro dígitos, entre 1900 y 2100. Ejemplo: 1985',
@@ -632,7 +652,7 @@
       czEdadCalculada: 'La edad no corresponde a la fecha de nacimiento.',
       czRangoHoras: 'La hora final debe ser posterior a la hora inicial.',
       czIgual: 'Los dos valores no coinciden. Escríbelos igual en ambos campos.',
-      czCpColonia: 'El código postal no corresponde a la colonia elegida según el catálogo. Revisa ambos datos; puedes continuar si estás seguro.',
+      czCpColonia: 'El código postal no corresponde a la colonia elegida según el catálogo. Revisa ambos datos; si son correctos, puedes continuar.',
       minimoCaracteres: 'Escribe al menos {min} caracteres en «{etiqueta}»; van {n}.',
       maximoCaracteres: 'Usa hasta {max} caracteres en «{etiqueta}».',
       advertencia: 'Advertencia:',
@@ -669,12 +689,12 @@
       ahora: 'Ahora',
       copiado: 'Copiado al portapapeles.',
       copiarFallo: 'No se pudo copiar. Selecciona el texto y cópialo a mano.',
-      compartirFallo: 'Tu navegador no permite compartir desde aquí. Copia el enlace.',
+      compartirFallo: 'Tu navegador no permite compartir desde aquí.',
       borradorGuardado: 'Borrador guardado en este dispositivo.',
       enviando: 'Enviando…',
       envioError: 'No se pudo enviar. Lo que capturaste sigue aquí; intenta de nuevo.',
       envioTimeout: 'El envío tardó demasiado y se detuvo. Lo que capturaste sigue aquí; intenta de nuevo.',
-      envioLimite: 'Por ahora no podemos recibir más envíos desde este dispositivo. Lo que capturaste no se perdió; intenta más tarde.',
+      envioLimite: 'Por ahora no se reciben más envíos desde este dispositivo. Lo que capturaste no se perdió; intenta más tarde.',
       envioRecibido: 'Tu envío se recibió. No lo envíes de nuevo.',
       envioRecibidoFolio: 'Tu envío se recibió con el folio {folio}. Guárdalo; no lo envíes de nuevo.',
       borradorSinAlmacen: 'Este equipo no permite guardar el borrador: si cierras la página antes de enviar, lo que capturaste se pierde.',
@@ -697,15 +717,15 @@
       archProveedorFallo: 'No se pudieron recuperar los archivos que habías agregado. Agrégalos de nuevo.',
       archRechazoTotal: 'con él se superan los {mb} MB en total.',
       archRechazoVacio: 'el archivo está vacío.',
-      archRechazoDuplicado: 'ya adjuntaste ese mismo archivo.',
+      archRechazoDuplicado: 'ya agregaste ese mismo archivo.',
       archRechazoDimension: 'la imagen es demasiado pequeña (mínimo {ancho} × {alto} píxeles).',
       archRechazoOptimizada: 'aun optimizada pesa {peso} y el máximo es {mb} MB.',
       archLimite: '{admitidos}: {formatos}. Hasta {max} archivos de {mb} MB cada uno.',
       archLimiteUno: '{admitidos}: {formatos}. Un archivo de hasta {mb} MB.',
       archFormatos: 'Formatos admitidos',
       archFormato: 'Formato admitido',
-      archLleno: 'Ya adjuntaste los {max} archivos. Para cambiar uno, quítalo.',
-      archLlenoUno: 'Ya adjuntaste el archivo. Para cambiarlo, quítalo.',
+      archLleno: 'Ya agregaste los {max} archivos. Para cambiar uno, quítalo.',
+      archLlenoUno: 'Ya agregaste el archivo. Para cambiarlo, quítalo.',
       archAgregado: 'Se agregó {nombre}.',
       archQuitado: 'Se quitó {nombre}.',
       archReintentar: 'Reintentar',
@@ -729,13 +749,13 @@
       repetibleMin: 'Agrega al menos {min} elementos en «{etiqueta}».',
       repetibleMax: 'Como máximo se admiten {max} elementos en «{etiqueta}».',
       mapaPunto: 'Punto marcado: {lat}, {lon}.',
-      mapaFuera: 'El punto queda fuera del ámbito. Muévelo o escribe la dirección.',
+      mapaFuera: 'El punto queda fuera de la Ciudad de México. Muévelo o escribe la dirección.',
       chipsBorrar: 'Borrar historial',
       chipsQuitar: 'Quitar {texto} de las sugerencias',
       chipsFijos: 'Respuestas frecuentes para {etiqueta}',
       chipsFijosContexto: '{nombre}, {contexto}',
       chipsFijosOrden: '{n} de {total}',
-      chipsAgregado: 'Agregado: {texto}',
+      chipsAgregado: 'Se agregó: {texto}',
       visorCargando: 'Cargando el documento…',
       visorError: 'No se pudo mostrar el documento aquí. Ábrelo en otra pestaña con el enlace de arriba.',
       visorNavegador: 'Se muestra con el visor del navegador. Si no lo ves completo, ábrelo en otra pestaña con el enlace de arriba.',
@@ -746,24 +766,24 @@
       copiarBotonFallo: 'No se pudo copiar',
       enlaceNuevaPestana: '(se abre en otra pestaña)',
       descargaBoton: 'Preparando…',
-      enlaceMapaSin: 'No encontramos coordenadas en ese texto. Pega el enlace completo de Google Maps (el que empieza con google.com/maps) o escribe las coordenadas.',
+      enlaceMapaSin: 'Ese texto no trae coordenadas. Pega el enlace completo de Google Maps (el que empieza con google.com/maps) o escribe las coordenadas.',
       enlaceMapaCorto: 'Los enlaces cortos de Google Maps no traen las coordenadas. Ábrelo en Google Maps: en el celular, mantén presionado el punto y copia los números que aparecen; en la computadora, haz clic derecho sobre el punto. Pégalos en «Coordenadas».',
-      enlaceMapaCentro: 'Ese enlace marca el centro de la pantalla, no un punto: tomamos {coordenadas}. Revisa que sea el lugar.',
+      enlaceMapaCentro: 'Ese enlace marca el centro de la pantalla, no un punto: se tomaron las coordenadas {coordenadas}. Revisa que sea el lugar.',
       enlaceMapaTomadas: 'Coordenadas tomadas del enlace: {coordenadas}.',
       enlaceMapaOrden: 'se acomodaron latitud y longitud',
       enlaceMapaSigno: 'se agregó el signo menos a la longitud, que en la Ciudad siempre es negativa',
       enlaceMapaAnuncio: 'Coordenadas: {coordenadas}{notas}.',
       conjuncion: ' y ',
-      fechaEdadCalculada: '{etiqueta}: {edad} años, calculada con la fecha de nacimiento.',
+      fechaEdadCalculada: '{etiqueta}: {edad} años, según la fecha de nacimiento.',
       fechaAtajos: 'Atajos de periodo',
       fechaUltimos: 'Últimos {n} días',
       fechaPeriodo: 'Periodo: del {desde} al {hasta}',
-      curpDerivado: '{etiqueta}: {valor}, tomado de la CURP.',
+      curpDerivado: '{etiqueta}: {valor}, según la CURP.',
       sexoH: 'Hombre',
       sexoM: 'Mujer',
       sexoX: 'No binario',
-      cascadaCpTomado: '{etiqueta}: {valor}, tomado del catálogo. Puedes corregirlo.',
-      cascadaTomadaCp: '{etiqueta}: {valor}, tomada del código postal.',
+      cascadaCpTomado: '{etiqueta}: {valor}, según el catálogo. Puedes corregirlo.',
+      cascadaTomadaCp: '{etiqueta}: {valor}, según el código postal.',
       chipsHistorial: 'Usados antes en {etiqueta}',
       chipsQuitada: 'Sugerencia quitada.',
       chipsBorrado: 'Historial borrado.',
@@ -777,7 +797,7 @@
       mapaSinConfirmar: 'sin confirmar: no se envía',
       mapaSinUbicacion: 'No se pudo obtener tu ubicación. Toca el mapa o escribe la dirección.',
       cargando: 'Cargando…',
-      repetibleAgregado: '{etiqueta} {n} agregado.',
+      repetibleAgregado: 'Se agregó {etiqueta} {n}.',
       repetibleQuitado: 'Fila {n} quitada.',
       pestanaAnuncio: 'Pestaña {nombre}',
       paginacionAnterior: 'Anterior',
@@ -787,7 +807,23 @@
       compartido: 'Compartido.',
       borradorRecuperado: 'Borrador recuperado en este dispositivo.',
       fechaHora: '{fecha} a las {hora}',
-      borradorNoGuardar: 'Nada se guarda en este equipo mientras esta pestaña siga abierta. Si la cierras antes de enviar, lo que capturaste se pierde.'
+      borradorNoGuardar: 'Nada se guarda en este equipo mientras esta pestaña siga abierta. Si la cierras antes de enviar, lo que capturaste se pierde.',
+      borradorRecuperadoPaso: 'Sigues en el paso {n} de {total}: «{titulo}».',
+      borradorRecuperadoFalta: 'Por seguridad esto no se guarda en el equipo; vuelve a llenarlo: {campos}.',
+      borradorArchivosFalta: 'Los archivos no se guardan en el equipo; vuelve a agregarlos en «{campos}».',
+      borradorDescartado: 'Se descartó el borrador: el formulario empieza vacío.',
+      borradorOtraPestana: 'Este formulario también está abierto en otra pestaña o ventana. Usa sólo una: lo que se guarda en una reemplaza el borrador de la otra.',
+      borradorEnviadoOtraPestana: 'Este formulario ya se envió desde otra pestaña o ventana, y aquí ya no se guarda el borrador. Si lo envías también desde aquí, llegará dos veces.',
+      acuseCompartir: 'Folio: {folio}. Recibido el {fecha}.',
+      cascadaElige: 'Elige una opción',
+      copiarTexto: 'Copiar',
+      paginacionPorPagina: 'Por página',
+      pasosBarra: 'Avance del formulario',
+      progresoPorCiento: '{n} por ciento',
+      visorDocumento: 'Documento',
+      mapaAcercar: 'Acercar',
+      mapaAlejar: 'Alejar',
+      mapaAproximada: 'Tu ubicación es aproximada (unos {metros} m a la redonda): revisa que el punto esté en el sitio y muévelo si hace falta.'
     }
   };
 

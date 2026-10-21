@@ -30,6 +30,8 @@
       que: 'Elegir un solo nombre para el estándar de mapas: «mapas», «visores de mapas» o «geovisores».' },
     { de: 'Mapas', tema: 'Aprobar la fase 1', quien: 'Decide la Secretaría',
       que: 'Aprobar la fase 1 de geovisores, incluidas de forma explícita las decisiones D5, D6, D8, D9 y D10, para pasar a la fase 2.' },
+    { de: 'Formularios', tema: 'Plantillas más cortas', quien: 'Decide la Secretaría',
+      que: 'El paso 2 de la plantilla por pasos tiene 213 palabras y 20 controles, y la plantilla de una página muestra casi todo lo que el estándar sabe hacer. Decidir si los apoyos de ubicación (enlace de Google Maps y mapa) se pliegan y si se agrega una plantilla mínima aparte.' },
     { de: 'Los dos', tema: 'Contacto y seguridad', quien: 'Decide la Secretaría',
       que: 'Definir un contacto institucional y un canal para reportar fallas de seguridad, para el README y la política de seguridad del repositorio.' }
   ];

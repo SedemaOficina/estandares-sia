@@ -5,7 +5,8 @@
    palomita y el número; que tenga error, el icono de alerta: nunca sólo el
    color. En teléfono las etiquetas se ocultan y aparece «Paso X de N ·
    Título». La barra queda fija arriba y el desplazamiento automático la
-   respeta (scroll-padding-top en base.css).
+   respeta (scroll-padding-top en base.css, con el alto real que mide el
+   módulo); con menos de 500 px de alto deja de ser fija.
    También define la barra de acciones fija en teléfono (opcional, clase
    .acciones-fijas): queda al pie, respeta la franja segura y no tapa el
    campo enfocado porque el relleno inferior de la página lo compensa.
@@ -125,6 +126,11 @@
   .pasos-etq{display:block}
   .pasos-actual{display:none}
   .acciones-fijas{position:static;margin:var(--e-6) 0 0;padding:var(--e-5) 0 0;border-radius:0}
+}
+
+/* Pantalla baja (teléfono acostado, zoom al 400 %): fija, la barra taparía más de la mitad. */
+@media (max-height: 499px){
+  .barra-fija{position:static}
 }
 
 @media (forced-colors: active){

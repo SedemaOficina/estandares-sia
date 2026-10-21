@@ -867,3 +867,377 @@ test('el código no lleva caracteres invisibles ni que inviertan el texto escrit
   const con = archivos.filter((f) => /[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/.test(readFileSync(resolve(RAIZ, f), 'utf8')));
   assert.deepEqual(con, [], 'se escriben como \\u200B, que se ve al leer el código');
 });
+
+/* ---------- Bloque 5 (1.6.2): uso y textos ---------- */
+
+const pasoVisible = (p) => p.evaluate(() => [...document.querySelectorAll('[data-paso]')].findIndex((s) => !s.hidden));
+const hastaRevision = async (p) => { await llenaSolicitud(p); await continuar(p); await llenaLugar(p); await continuar(p); await p.check('input[name="contacto"][value="no"]'); await continuar(p); };
+const textoVisible = (ruta) => readFileSync(resolve(RAIZ, ruta), 'utf8').replace(/<!--[\s\S]*?-->/g, ' ').replace(/<script[\s\S]*?<\/script>/g, ' ').replace(/<[^>]+>/g, ' ');
+
+test('textos: sin «nosotros», con género parejo y un solo nombre para «fuera de la Ciudad» (C5-03, C5-05, C5-07)', async () => {
+  await import(pathToFileURL(resolve(RAIZ, 'codigo/js/validaciones.config.js')).href);
+  const M = globalThis.FORMKIT_VALIDACIONES.mensajes;
+  const NOSOTROS = /\b(recibimos|podemos|encontramos|tomamos|cu[eé]ntanos|contactemos|pedimos|contarnos|nosotros|nuestr[oa]s?)\b/i;
+  const fuentes = { mensajes: Object.values(M).join('\n'), 'por-pasos': textoVisible('codigo/plantillas/por-pasos.html'), 'una-pagina': textoVisible('codigo/plantillas/una-pagina.html'), encuesta: textoVisible('guia-visual/ejemplos/encuesta.html'), 'captura-interna': textoVisible('guia-visual/ejemplos/captura-interna.html') };
+  for (const [donde, t] of Object.entries(fuentes)) {
+    assert.doesNotMatch(t, NOSOTROS, `${donde} habla en «nosotros»: «${(t.match(NOSOTROS) || [])[0]}»`);
+    assert.doesNotMatch(t, /incluida tú|estás segur[oa]/i, `${donde}: género no parejo`);
+  }
+  for (const k of ['curpDerivado', 'cascadaCpTomado', 'cascadaTomadaCp', 'repetibleAgregado', 'chipsAgregado', 'fechaEdadCalculada']) assert.doesNotMatch(M[k], /\b(tomad[oa]|agregad[oa]|calculad[oa])\b/, `${k} fija el género: «${M[k]}»`);
+  assert.doesNotMatch(M.mapaFuera, /ámbito/, 'el punto fuera se dice como en el resto: fuera de la Ciudad');
+});
+
+test('textos: ninguno queda escrito en el código de un módulo; todos salen de los mensajes (C5-04)', () => {
+  const BS = String.fromCharCode(92);
+  function cadenas(src) {
+    const out = []; let i = 0, linea = 1;
+    while (i < src.length) {
+      const c = src[i];
+      if (c === '\n') { linea++; i++; continue; }
+      if (c === '/' && src[i + 1] === '*') { const f = src.indexOf('*/', i + 2); for (const x of src.slice(i, f)) if (x === '\n') linea++; i = f + 2; continue; }
+      if (c === '/' && src[i + 1] === '/') { i = src.indexOf('\n', i); continue; }
+      if (c === '/' && /[=(,:!&|?{};]\s*$/.test(src.slice(Math.max(0, i - 3), i))) {
+        let j = i + 1;
+        while (j < src.length && src[j] !== '/') { if (src[j] === BS) j++; else if (src[j] === '[') { while (j < src.length && src[j] !== ']') { if (src[j] === BS) j++; j++; } } j++; }
+        i = j + 1; continue;
+      }
+      if (c === "'" || c === '"' || c === '`') {
+        let j = i + 1, s = ''; const l0 = linea;
+        while (j < src.length && src[j] !== c) { if (src[j] === BS) { s += src[j + 1]; j += 2; continue; } if (src[j] === '\n') linea++; s += src[j]; j++; }
+        out.push({ linea: l0, s, previo: src.slice(Math.max(0, src.lastIndexOf('\n', i)), i) });
+        i = j + 1; continue;
+      }
+      i++;
+    }
+    return out;
+  }
+  const archivos = ['codigo/js/formkit.core.js', ...execFileSync('git', ['ls-files', 'codigo/modulos'], { cwd: RAIZ, encoding: 'utf8' }).trim().split('\n').filter((f) => /\/([\w-]+)\/\1\.js$/.test(f))];
+  const fijos = [];
+  for (const a of archivos) {
+    for (const { linea, s, previo } of cadenas(readFileSync(resolve(RAIZ, a), 'utf8'))) {
+      if (/console\.(warn|error|log)\(|new Error\(|throw /.test(previo)) continue;
+      const t = s.replace(/\$\{[^}]*\}/g, ' ').trim();
+      if (!t || t === 'use strict' || /^[A-Z][a-z]+(-[A-Z][a-z]+)+$/.test(t) || ['Files', 'Point'].includes(t)) continue;
+      if (/className|classList|querySelector|closest\(|matches\(|\$\$?\(|setAttribute\('(class|role|aria-(?:controls|describedby|current|sort|checked|selected|expanded|pressed|busy|disabled|hidden|live|modal))'|createElement\(|createElementNS|addEventListener\(|dispatchEvent|CustomEvent\(|key ===|e\.key|tagName|type ===|type !==|dataset\.\w+ *(?:===|!==|=) *$|toggleAttribute|removeAttribute|hasAttribute|getAttribute/.test(previo.slice(-60))) continue;
+      if (/^[A-Z]+$/.test(t) || /^[a-z]+[A-Z]\w*$/.test(t) || /^[A-Z][a-z]+([A-Z][a-z]+)+$/.test(t) || /^_\w+$/.test(t) || /\.\w{2,4}$/.test(t)) continue;
+      const aPersona = /setAttribute\('(aria-label|aria-valuetext|title|alt|placeholder)', *$|textContent *= *$|createTextNode\($|= *$/.test(previo.trimEnd());
+      if (!aPersona && /^[a-z0-9-]+( [a-z0-9-]+)*$/.test(t)) continue;
+      if (/[[\]#:>=*()]|^\./.test(t) || !/[A-Za-zÁÉÍÓÚáéíóúñÑ]{3,}/.test(t)) continue;
+      if (!/[áéíóúñ]|^[A-ZÁÉÍÓÚ¿¡][a-záéíóúñ]+|\s(de|del|la|el|por|para|con|un|una|sin)\s|^por /.test(t)) continue;
+      fijos.push(`${a}:${linea} «${s}»`);
+    }
+  }
+  assert.deepEqual(fijos, [], 'los textos que ve o escucha la persona salen de mensajes (un formulario de usted los cambia ahí)');
+});
+
+test('formatos: el apóstrofo del iPhone, correos mal escritos, «+52 1 55…», fechas día/mes/año y años de dos cifras (F2-11, C5-08, C5-01)', async () => {
+  await import(pathToFileURL(resolve(RAIZ, 'codigo/js/validaciones.config.js')).href);
+  const C = globalThis.FORMKIT_VALIDACIONES;
+  const v = (f, x) => { const n = C.formatos[f].normaliza(x); return { n, m: C.formatos[f].valida(n, {}, C) }; };
+  assert.deepEqual(v('nombre', 'D’Angelo'), { n: "D'Angelo", m: '' }, 'el apóstrofo tipográfico se acepta y se guarda simple');
+  assert.equal(v('correo', 'ana lopez@gmail.com').m, C.mensajes.fmtCorreoEspacios, 'un espacio no se quita en silencio');
+  for (const c of ['ana@b..com', 'ana..x@dominio.mx', 'a,b@dominio.mx', '.ana@dominio.mx', 'ana@-x.mx']) assert.ok(v('correo', c).m, `«${c}» se rechaza`);
+  for (const c of ['Ana.Lopez@Gmail.com', 'nombre@sub.dominio.com.mx', 'a+b@dominio-uno.mx', 'josé@dominio.mx']) assert.equal(v('correo', c).m, '', `«${c}» se acepta`);
+  for (const [t, n] of [['+52 1 55 1234 5678', '5512345678'], ['044 55 1234 5678', '5512345678'], ['01 55 1234 5678', '5512345678'], ['+52 55 1234 5678', '5512345678'], ['5212345678', '5212345678']]) assert.deepEqual(v('telefono', t), { n, m: '' }, `«${t}»`);
+  assert.deepEqual(v('fecha', '15/03/2026'), { n: '2026-03-15', m: '' }, 'una fecha escrita día/mes/año se acepta y se guarda AAAA-MM-DD');
+  assert.doesNotMatch(C.mensajes.fmtFecha, /AAAA/, 'el mensaje habla en día/mes/año');
+  assert.equal(v('fecha-dma', '23/07/85').m, C.mensajes.fmtFechaDmaAnio, 'un año de dos cifras se pide completo');
+});
+
+test('a la vista: «Hoy» y la revisión dicen la fecha día/mes/año, el contador cuenta como el mensaje y la ayuda «?» no entra en el error (C5-01, C5-09, C5-02)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  const hoy = await p.evaluate(() => FormKit.config.dmaDeIso(FormKit.config.hoyISO()));
+  await p.click('[data-campo="fecha_hechos"] [data-hoy]'); await p.waitForTimeout(150);
+  assert.ok((await p.locator('[data-anuncios]').textContent()).includes(hoy), 'el anuncio de «Hoy» dice día/mes/año');
+  await p.fill('#descripcion', 'Una  fuga   de agua');
+  assert.equal((await p.locator('[data-campo="descripcion"] .contador').textContent()).trim(), `${'Una fuga de agua'.length} / 600`, 'el contador no cuenta espacios repetidos');
+  await hastaRevision(p);
+  const fecha = await p.evaluate(() => [...document.querySelectorAll('[data-revision] .rev-dato-etq')].find((d) => /Cuándo/.test(d.textContent)).nextElementSibling.textContent);
+  assert.equal(fecha, hoy, 'la revisión dice la fecha día/mes/año');
+  await p.context().close();
+  const u = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
+  await u.click('[data-accion="enviar"]'); await u.waitForTimeout(200);
+  const enlace = (await u.locator('.resumen-errores a').allTextContents()).find((t) => /Personas en tu hogar/.test(t));
+  assert.equal(enlace, 'Completa «Personas en tu hogar».', 'la etiqueta del error no lleva el texto de la ayuda «?»');
+  await u.context().close();
+});
+
+test('sugerencias de uso frecuente: salir del campo no mueve lo de abajo, y con teclado el foco no se pierde al elegir una (C2-02, B4-01)', async () => {
+  const p = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
+  await p.click('#alcaldia'); await p.locator('#alcaldia').pressSequentially('coy'); await p.keyboard.press('ArrowDown'); await p.keyboard.press('Enter');
+  const y = () => p.locator('input[name="intereses"][value="talleres"]').evaluate((e) => Math.round(e.getBoundingClientRect().top + scrollY));
+  const antes = await y();
+  await p.locator('label:has(input[name="intereses"][value="talleres"])').click();
+  assert.ok(await p.isChecked('input[name="intereses"][value="talleres"]'), 'el toque que sale del campo marca la opción tocada');
+  assert.equal(await y(), antes, 'salir del campo no mueve lo de abajo');
+  await p.waitForTimeout(700);
+  await p.reload(); await p.waitForSelector('form[data-formkit="listo"]');
+  const chip = p.locator('.chips:not(.chips-fijos) .chip').first();
+  assert.equal(await chip.count(), 1, 'al volver, la sugerencia está');
+  await chip.focus(); await p.keyboard.press('Enter'); await p.waitForTimeout(100);
+  assert.equal(await p.inputValue('#alcaldia'), 'Coyoacán');
+  assert.ok(await p.evaluate(() => document.activeElement.matches('.chip')), 'Enter deja el foco en la sugerencia');
+  const ruta = [];
+  for (let i = 0; i < 6; i++) { await p.keyboard.press('Tab'); const f = await p.evaluate(() => (document.activeElement === document.body ? 'body' : document.activeElement.id || document.activeElement.className)); ruta.push(f); if (f === 'alcaldia') break; }
+  assert.ok(!ruta.includes('body') && ruta.includes('alcaldia'), `con Tab se llega al campo sin perder el foco: ${ruta.join(' → ')}`);
+  await p.context().close();
+});
+
+test('revisión: un «Editar» por bloque, abierto, que lleva a su primer campo; la bajada dice lo que se ve (C3-01)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.movil.contexto });
+  await hastaRevision(p);
+  const r = await p.evaluate(() => { const s = document.querySelector('[data-revision]'); return { editar: s.querySelectorAll('[data-editar]').length, bloques: s.querySelectorAll('.rev-bloque').length, plegables: s.querySelectorAll('details').length, bajada: s.querySelector('.bajada').textContent }; });
+  assert.ok(r.bloques >= 3 && r.editar === r.bloques, `un «Editar» por bloque: ${r.editar} en ${r.bloques}`);
+  assert.equal(r.plegables, 0, 'los bloques están abiertos, sin plegar');
+  assert.doesNotMatch(r.bajada, /Abre cada bloque/);
+  await p.locator('.rev-bloque').nth(1).locator('[data-editar]').click(); await p.waitForTimeout(150);
+  assert.equal(await p.evaluate(() => document.activeElement.id), 'calle');
+  await p.context().close();
+});
+
+test('«Atrás» del navegador regresa un paso y «Adelante» vuelve a avanzar; desde el primero sale de la página (C4-05)', async () => {
+  const p = await nuevaPagina(navegador, PERFILES.movil.contexto);
+  await p.goto(`${servidor.origen}/guia-visual/index.html`);
+  await p.goto(`${servidor.url}/${PAGINAS['por-pasos']}`);
+  await p.waitForSelector('form[data-formkit="listo"]');
+  await p.evaluate(() => localStorage.clear());
+  await llenaSolicitud(p); await continuar(p);
+  assert.equal(await pasoVisible(p), 1);
+  await p.goBack(); await p.waitForTimeout(200);
+  assert.match(p.url(), /por-pasos\.html/, '«Atrás» no saca del formulario');
+  assert.equal(await pasoVisible(p), 0, 'regresa al paso anterior');
+  await p.goForward(); await p.waitForTimeout(200);
+  assert.equal(await pasoVisible(p), 1, '«Adelante» vuelve al paso siguiente');
+  await visible(p, '[data-accion="atras"]').click(); await p.waitForTimeout(200);
+  assert.equal(await pasoVisible(p), 0, 'el «Atrás» del formulario hace lo mismo');
+  await p.goBack(); await p.waitForTimeout(400);
+  assert.doesNotMatch(p.url(), /por-pasos\.html/, 'desde el primer paso, «Atrás» sale de la página');
+  await p.context().close();
+});
+
+test('dos pestañas con el mismo formulario: cada una dice que la otra guardó y, si la otra envía, deja de guardar (C4-02)', async () => {
+  const ctx = await navegador.newContext({ ...PERFILES.escritorio.contexto, locale: 'es-MX' });
+  const url = `${servidor.url}/pruebas/paginas/en-memoria.html`;
+  const html = `<!doctype html><html lang="es-MX"><head><meta charset="utf-8"><title>Prueba</title></head><body>
+<form data-formkit data-borrador="prueba-pestanas" data-borrador-version="1" action="#"><div class="campo" data-campo="a" data-uso="Prueba."><label class="etiqueta" for="a">A</label><input class="control" id="a" name="a"></div><button type="submit" data-accion="enviar">Enviar</button></form>
+<script>window.FORMKIT_CONFIG = { borrador: { retardoMs: 50 } }; window.FORMKIT_OPCIONES = { enviar: () => Promise.resolve({ folio: 'F-1' }) };</script>${NUCLEO}</body></html>`;
+  await ctx.route(url, (r) => r.fulfill({ contentType: 'text/html; charset=utf-8', body: html }));
+  const a = await ctx.newPage(); const b = await ctx.newPage();
+  await a.goto(url); await b.goto(url);
+  await b.evaluate(() => localStorage.clear());
+  const avisoDe = (pg) => pg.evaluate(() => (document.querySelector('form [data-aviso-formkit]') || {}).textContent || '');
+  await a.fill('#a', 'Escrito en A'); await a.waitForTimeout(400);
+  assert.match(await avisoDe(b), /otra pestaña/, 'B dice que A guardó');
+  await a.click('[data-accion="enviar"]'); await a.waitForTimeout(400);
+  assert.match(await avisoDe(b), /ya se envió/, 'B dice que A envió');
+  await b.fill('#a', 'Escrito en B'); await b.waitForTimeout(400);
+  assert.equal(await b.evaluate(() => localStorage.getItem('prueba-pestanas')), null, 'B no rehace el borrador de lo que ya se envió');
+  await ctx.close();
+});
+
+test('borrador: al recuperarlo, el foco va a un aviso que dice el paso y qué volver a llenar; el consentimiento no se guarda; «Empezar de nuevo» vacía la pantalla (C4-10, C4-04, C4-12, C4-05)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  await llenaSolicitud(p); await continuar(p); await llenaLugar(p); await continuar(p);
+  await p.setInputFiles('[data-archivos] input[type="file"]:not([data-entrada-camara])', [{ name: 'foto.png', mimeType: 'image/png', buffer: pngRuido(400, 300) }]); await p.waitForTimeout(900);
+  await p.check('input[name="contacto"][value="si"]'); await p.fill('#nombre', 'Fulana'); await p.fill('#apellido_paterno', 'de Tal'); await p.fill('#correo', 'fulana@ejemplo.local');
+  await continuar(p); await aceptaDeclaraciones(p); await p.waitForTimeout(900);
+  const datos = await p.evaluate(() => JSON.parse(localStorage.getItem('sia-plantilla-pasos')).datos);
+  assert.ok(!('aviso' in datos) && !('humano' in datos), `el consentimiento y la casilla de persona no van al borrador: ${Object.keys(datos).join(', ')}`);
+  await p.reload(); await p.waitForSelector('form[data-formkit="listo"]');
+  await p.click('[data-borrador="recuperar"]'); await p.waitForTimeout(150);
+  const foco = await p.evaluate(() => (document.activeElement.closest('.aviso') ? document.activeElement.textContent : ''));
+  assert.match(foco, /paso 4 de 4/, `el aviso con el foco dice dónde quedó: «${foco}»`);
+  assert.match(foco, /Nombre\(s\).*Correo electrónico/, 'y qué hay que volver a llenar');
+  assert.match(foco, /archivos no se guardan.*Fotografías o documentos/, 'y dónde volver a agregar los archivos');
+  await p.reload(); await p.waitForSelector('form[data-formkit="listo"]');
+  await p.fill('#descripcion', 'Escrito antes de decidir');
+  await p.click('[data-borrador="descartar"]'); await p.click('[data-borrador="descartar-si"]'); await p.waitForTimeout(150);
+  assert.equal(await p.inputValue('#descripcion'), '', '«Empezar de nuevo» vacía lo que se ve');
+  assert.match(await p.evaluate(() => document.activeElement.textContent), /Se descartó el borrador/, 'y el foco va al aviso que lo dice');
+  await p.context().close();
+  /* Lo mismo con un interruptor: vuelve a como venía en el HTML. */
+  const u = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
+  await u.click('[data-toggle]'); await u.waitForTimeout(900);
+  await u.reload(); await u.waitForSelector('form[data-formkit="listo"]');
+  await u.click('[data-toggle]');
+  await u.click('[data-borrador="descartar"]'); await u.click('[data-borrador="descartar-si"]'); await u.waitForTimeout(150);
+  assert.equal(await u.getAttribute('[data-toggle]', 'aria-checked'), 'false', '«Empezar de nuevo» apaga el interruptor');
+  await u.context().close();
+});
+
+test('mientras se envía, «Enviando…» se anuncia y se lee, y no se puede cambiar de paso (B4-04, C4-11)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { consulta: '?simular=lento', contexto: PERFILES.escritorio.contexto });
+  await hastaRevision(p); await aceptaDeclaraciones(p);
+  await visible(p, '[data-accion="enviar"]').click(); await p.waitForTimeout(250);
+  const r = await p.evaluate(() => { const b = document.querySelector('[data-accion="enviar"]'); return { anuncio: document.querySelector('[data-anuncios]').textContent, opacidad: getComputedStyle(b).opacity, atras: document.querySelector('[data-paso]:not([hidden]) [data-accion="atras"]').getAttribute('aria-disabled') }; });
+  assert.equal(r.anuncio, 'Enviando…', '«Enviando…» se anuncia');
+  assert.equal(r.opacidad, '1', 'y no se ve apagado');
+  assert.equal(r.atras, 'true', '«Atrás» queda inactivo mientras se envía');
+  /* force: Playwright espera a que un botón con aria-disabled se habilite; aquí se toca como lo haría la persona. */
+  await visible(p, '[data-accion="atras"]').click({ force: true }); await p.waitForTimeout(150);
+  assert.equal(await pasoVisible(p), 3, 'sigue en la revisión, donde aparecerá el aviso si el envío falla');
+  await p.context().close();
+});
+
+test('la plantilla de una página tiene su pantalla de límite, que regresa a lo capturado (C4-13)', async () => {
+  const p = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { consulta: '?simular=limite', contexto: PERFILES.escritorio.contexto });
+  await p.fill('#nombre', 'Fulano'); await p.fill('#apellido_paterno', 'Prueba'); await p.fill('#apellido_materno', 'Ejemplo');
+  await p.fill('#curp', 'PUEF900515HDFRJL04'); await p.keyboard.press('Tab');
+  await p.fill('#correo', 'fulano@ejemplo.local'); await p.fill('#correo2', 'fulano@ejemplo.local');
+  await p.fill('#personas', '3');
+  await p.click('#alcaldia'); await p.locator('#alcaldia').pressSequentially('coy'); await p.keyboard.press('ArrowDown'); await p.keyboard.press('Enter');
+  await p.check('input[name="intereses"][value="talleres"]');
+  await p.click('[data-atajo="7"]');
+  await p.check('input[name="interes"][value="4"]');
+  await p.check('input[name="aviso"]');
+  await p.click('[data-accion="enviar"]'); await p.waitForTimeout(1000);
+  assert.ok(await p.locator('[data-limite]').isVisible(), `aparece la pantalla de límite (errores: ${(await p.locator('.resumen-errores a').allTextContents()).join(' | ')})`);
+  assert.match(await p.evaluate(() => document.activeElement.textContent), /no se reciben más envíos/);
+  await p.click('[data-limite] [data-accion="reintentar"]');
+  assert.ok(await p.locator('form').isVisible(), 'regresa al formulario');
+  assert.equal(await p.inputValue('#nombre'), 'Fulano', 'con lo capturado');
+  await p.context().close();
+});
+
+test('tabla: ordena como en español, las fechas día/mes/año como fechas, conserva el orden al repintar, y el foco se ve sobre la cabecera guinda (F2-10, A6-01)', async () => {
+  const p = await enMemoria(`<!doctype html><html lang="es-MX"><head><meta charset="utf-8"><title>Prueba</title><link rel="stylesheet" href="../../codigo/css/tokens.css"><link rel="stylesheet" href="../../codigo/css/base.css"><link rel="stylesheet" href="../../codigo/css/nucleo.css"><link rel="stylesheet" href="../../codigo/modulos/tabla/tabla.css"></head><body>
+<div class="tabla-marco" data-tabla><table class="tabla"><caption>Personas</caption><thead><tr><th scope="col" data-ordenable>Nombre</th><th scope="col" data-ordenable>Fecha</th></tr></thead><tbody>
+<tr><td>Zamora</td><td>15/01/2026</td></tr><tr><td>Ñúñez</td><td>01/12/2025</td></tr><tr><td>Álvarez</td><td>05/03/2026</td></tr><tr><td>Beltrán</td><td>28/02/2026</td></tr></tbody></table></div>
+${NUCLEO}<script src="../../codigo/modulos/tabla/tabla.js"></script></body></html>`);
+  const col = (i) => p.locator(`tbody tr td:nth-child(${i})`).allTextContents().then((l) => l.map((t) => t.trim()));
+  await p.keyboard.press('Tab');
+  const foco = await p.evaluate(() => ({ en: document.activeElement.className, color: getComputedStyle(document.activeElement).outlineColor }));
+  assert.equal(foco.en, 'tabla-orden');
+  assert.equal(foco.color, 'rgb(255, 255, 255)', 'sobre la cabecera guinda el anillo de foco va en blanco');
+  await p.click('th:nth-child(1) .tabla-orden');
+  assert.deepEqual(await col(1), ['Álvarez', 'Beltrán', 'Ñúñez', 'Zamora'], 'la tilde y la Ñ van en su lugar');
+  await p.click('th:nth-child(2) .tabla-orden');
+  assert.deepEqual(await col(2), ['01/12/2025', '15/01/2026', '28/02/2026', '05/03/2026'], 'las fechas se ordenan como fechas');
+  await p.click('th:nth-child(2) .tabla-orden');
+  await p.evaluate(() => { const tr = document.createElement('tr'); tr.innerHTML = '<td>Nava</td><td>31/12/2026</td>'; document.querySelector('tbody').appendChild(tr); document.querySelector('[data-tabla]').dispatchEvent(new CustomEvent('formkit:tabla')); });
+  assert.equal((await col(2))[0], '31/12/2026', 'la fila nueva toma el orden que dice el encabezado');
+  assert.deepEqual(paginaErrores(p), []);
+  await p.context().close();
+});
+
+test('mapa: acercar y alejar en español y de 44 px, la ubicación imprecisa se dice aproximada, y sin Leaflet la consola queda limpia (G2-02, B1-03, B6-03, B6-04)', async () => {
+  const p = await nuevaPagina(navegador, { ...PERFILES.movil.contexto, geolocation: { latitude: 19.43, longitude: -99.13, accuracy: 3000 }, permissions: ['geolocation'] });
+  await p.route('**/plantillas/por-pasos.html', async (r) => { const resp = await r.fetch(); r.fulfill({ response: resp, body: (await resp.text()).replace('data-mapa data-confirmar', 'data-mapa data-confirmar data-geolocalizacion') }); });
+  await p.goto(`${servidor.url}/${PAGINAS['por-pasos']}`);
+  await p.evaluate(() => localStorage.clear());
+  await llenaSolicitud(p); await continuar(p);
+  const z = await p.evaluate(() => { const a = document.querySelector('.leaflet-control-zoom-in'); const r = a.getBoundingClientRect(); return { titulo: a.title, nombre: a.getAttribute('aria-label'), ancho: r.width, alto: r.height }; });
+  assert.equal(z.titulo, 'Acercar'); assert.equal(z.nombre, 'Acercar');
+  assert.ok(z.ancho >= 44 && z.alto >= 44, `«Acercar» mide ${z.ancho}×${z.alto}`);
+  assert.ok(await p.evaluate(() => !!window.leafletGestureHandling), 'el módulo cargó el complemento de gestos');
+  await p.click('[data-mapa-geolocalizar]');
+  await p.waitForSelector('.mapa-geo-aviso:not([hidden])', { timeout: 5000 });
+  assert.match(await p.locator('.mapa-geo-aviso').textContent(), /aproximada.*3000 m/);
+  await p.context().close();
+  const q = await nuevaPagina(navegador, PERFILES.escritorio.contexto);
+  await q.route('**/vendor/leaflet/leaflet.js', (r) => r.fulfill({ status: 404, body: '' }));
+  await q.goto(`${servidor.url}/${PAGINAS['por-pasos']}`);
+  await q.waitForSelector('form[data-formkit="listo"]');
+  assert.deepEqual(paginaErrores(q), [], 'sin Leaflet no hay errores en la consola');
+  await q.context().close();
+});
+
+test('pantalla: «Borrador guardado» tiene su renglón reservado, la barra deja de ser fija en pantallas bajas y las ayudas miden 14 px en el teléfono (C2-11, B4-03, decisión 27)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.movil.contexto });
+  const alto = () => p.evaluate(() => Math.round(document.querySelector('[data-guardado]').getBoundingClientRect().height));
+  const antes = await alto();
+  await p.check('input[name="tipo"][value="visita"]');
+  await p.waitForSelector('[data-guardado][data-visible]', { timeout: 3000 });
+  assert.ok(antes > 0 && await alto() === antes, `aparecer no cambia su alto (${antes} → ${await alto()}): el formulario no se mueve`);
+  assert.deepEqual(await p.evaluate(() => [getComputedStyle(document.querySelector('.ayuda')).fontSize, getComputedStyle(document.querySelector('.contador')).fontSize]), ['14px', '14px'], 'ayuda y contador a 14 px en el teléfono');
+  const m = await p.evaluate(() => ({ margen: parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop), barra: document.querySelector('.barra-fija').getBoundingClientRect().height }));
+  assert.ok(m.margen >= m.barra, `el margen de desplazamiento (${m.margen}) cubre la barra (${m.barra})`);
+  await p.setViewportSize({ width: 640, height: 360 }); await p.waitForTimeout(300);
+  assert.equal(await p.evaluate(() => getComputedStyle(document.querySelector('.barra-fija')).position), 'static', 'con menos de 500 px de alto la barra no es fija');
+  assert.equal(await p.evaluate(() => parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)), 0);
+  await p.context().close();
+});
+
+test('compartir el acuse lleva el folio y la fecha, no la dirección del formulario (C2-01)', async () => {
+  const p = await nuevaPagina(navegador, PERFILES.escritorio.contexto);
+  await p.addInitScript(() => { window.__copiado = ''; Object.defineProperty(Navigator.prototype, 'share', { value: undefined, configurable: true }); Object.defineProperty(navigator, 'clipboard', { value: { writeText: (t) => { window.__copiado = t; return Promise.resolve(); } }, configurable: true }); });
+  await p.goto(`${servidor.url}/${PAGINAS['por-pasos']}`);
+  await p.evaluate(() => localStorage.clear());
+  await hastaRevision(p); await aceptaDeclaraciones(p);
+  await visible(p, '[data-accion="enviar"]').click();
+  await p.waitForSelector('[data-acuse]:not([hidden])', { timeout: 5000 });
+  const folio = (await p.locator('[data-acuse-folio]').textContent()).trim();
+  await p.click('[data-compartir]'); await p.waitForTimeout(150);
+  const copiado = await p.evaluate(() => window.__copiado);
+  assert.ok(copiado.includes(folio), `lo compartido lleva el folio: «${copiado}»`);
+  assert.doesNotMatch(copiado, /https?:\/\//, 'y no la dirección del formulario');
+  await p.context().close();
+});
+
+test('ejemplos: la captura interna deja el folio a la vista y el registro en la consulta, «Ver» y «Editar» hacen algo; la encuesta no cuenta la pregunta opcional (C2-03, C2-10, C6-03, C2-05)', async () => {
+  const p = await abrePagina(navegador, servidor.url, 'guia-visual/ejemplos/captura-interna.html', { contexto: PERFILES.escritorio.contexto });
+  await p.waitForTimeout(300);
+  assert.ok(await p.locator('tbody tr td .mono').count() > 0, 'el folio y la fecha van en .mono');
+  await p.click('#t-captura');
+  await p.click('#categoria'); await p.locator('#categoria').pressSequentially('Arbo'); await p.keyboard.press('ArrowDown'); await p.keyboard.press('Enter');
+  await p.click('[data-campo="fecha"] [data-hoy]');
+  await p.fill('#titulo', 'Registro de prueba nuevo');
+  await p.click('[data-accion="enviar"]'); await p.waitForTimeout(800);
+  const aviso = (await p.locator('#captura [data-aviso-formkit]').textContent()).trim();
+  const folio = (aviso.match(/EJ-[A-Z0-9-]+/) || [])[0];
+  assert.ok(folio, `el folio queda a la vista: «${aviso}»`);
+  await p.click('#t-consulta'); await p.fill('#buscar', folio); await p.waitForTimeout(200);
+  assert.equal(await p.locator('tbody tr').count(), 1, 'el registro aparece en la consulta');
+  await p.click('tbody tr [data-accion-fila="ver"]');
+  assert.ok(await p.locator('#dialogo-registro[open]').isVisible(), '«Ver» abre el registro');
+  await p.keyboard.press('Escape');
+  await p.click('tbody tr [data-accion-fila="editar"]');
+  assert.equal(await p.inputValue('#titulo'), 'Registro de prueba nuevo', '«Editar» lo lleva a la captura');
+  assert.deepEqual(paginaErrores(p), []);
+  await p.context().close();
+  const e = await abrePagina(navegador, servidor.url, 'guia-visual/ejemplos/encuesta.html', { contexto: PERFILES.escritorio.contexto });
+  await e.check('input[name="limpieza"][value="4"]'); await e.check('input[name="motivo"][value="pasear"]'); await e.waitForTimeout(100);
+  assert.equal(await e.evaluate(() => { const b = document.querySelector('progress'); return b.value / b.max; }), 1, 'con lo obligatorio contestado, la barra llega al final');
+  await e.context().close();
+});
+
+test('salidas con destino: «Volver al inicio», migas y enlaces de la guía no llevan a «./» ni a «#» (C2-07)', () => {
+  for (const ruta of ['codigo/plantillas/por-pasos.html', 'codigo/plantillas/una-pagina.html', 'guia-visual/ejemplos/encuesta.html', 'guia-visual/ejemplos/captura-interna.html', 'guia-visual/index.html']) {
+    const html = readFileSync(resolve(RAIZ, ruta), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+    assert.deepEqual(html.match(/href="(\.\/|#|#migas)"/g) || [], [], `${ruta}: enlaces sin destino`);
+  }
+});
+
+test('guía en el teléfono: índice fijo con letrero, «Copiar HTML» arriba de cada ficha, nada se anuncia al cargar, recuerda el ancho y lo elegido va en azul (C3-02, C2-12, C4-06, C6-01)', async () => {
+  const p = await abrePagina(navegador, servidor.url, PAGINAS.guia, { contexto: PERFILES.movil.contexto });
+  await p.waitForTimeout(900);
+  const r = await p.evaluate(() => ({ pos: getComputedStyle(document.querySelector('.guia-nav')).position, letrero: getComputedStyle(document.querySelector('label[for="guia-salto"]')).position, anuncio: (document.querySelector('[data-anuncios]') || {}).textContent || '', fichas: document.querySelectorAll('.guia-ficha:has(.guia-demo)').length, arriba: document.querySelectorAll('.guia-ficha-cab .guia-copiar-arriba').length }));
+  assert.equal(r.pos, 'sticky', 'el índice queda fijo arriba');
+  assert.notEqual(r.letrero, 'absolute', 'con su letrero a la vista');
+  assert.equal(r.anuncio, '', 'al cargar no se anuncia nada');
+  assert.ok(r.arriba > 0 && r.arriba === r.fichas, `«Copiar HTML» arriba en ${r.arriba} de ${r.fichas} fichas`);
+  await p.selectOption('[data-nav-select]', 'validaciones');
+  assert.match(p.url(), /#validaciones$/, 'el índice cambia la dirección');
+  await p.click('.guia-ancho[data-ancho="768"]');
+  await p.mouse.move(0, 0); await p.waitForTimeout(400);
+  assert.equal(await p.locator('.guia-ancho[data-ancho="768"]').evaluate((b) => getComputedStyle(b).backgroundColor), 'rgb(26, 86, 168)', 'lo elegido va en azul');
+  await p.reload(); await p.waitForTimeout(900);
+  assert.equal(await p.getAttribute('.guia-ancho[data-ancho="768"]', 'aria-pressed'), 'true', 'al recargar recuerda el ancho');
+  await p.context().close();
+});
+
+test('la guía en un solo archivo lleva sus documentos de muestra y sabe dónde está pdf.js (B1-04)', () => {
+  const art = readFileSync(resolve(RAIZ, 'guia-visual/artefacto.html'), 'utf8');
+  assert.match(art, /data-visor-url="data:application\/pdf;base64,/, 'el PDF de muestra va dentro');
+  assert.match(art, /data-visor-url="data:image\/png;base64,/, 'la imagen de muestra va dentro');
+  assert.match(readFileSync(resolve(RAIZ, 'guia-visual/guia-config.js'), 'utf8'), /visor:\s*\{\s*pdfjs:\s*'\.\.\/vendor\/pdfjs-dist\/'/, 'la guía dice dónde está pdf.js');
+});
+
+test('auditar-campos exige data-sin-borrador en el consentimiento y en «No soy un programa automático» (C4-12)', () => {
+  const dir = mkdtempSync(resolve(tmpdir(), 'formkit-d7-'));
+  const html = resolve(dir, 'f.html');
+  writeFileSync(html, '<form><div class="destacado" data-campo="aviso" data-requerido data-uso="Constancia."><label class="casilla"><input class="casilla-input" type="checkbox" name="aviso" value="si"><span class="casilla-texto">Leí el aviso de privacidad</span></label></div></form>');
+  const r = spawnSync(process.execPath, [resolve(RAIZ, 'herramientas/auditar-campos.mjs'), html], { encoding: 'utf8' });
+  assert.equal(r.status, 1, 'sin la marca, falla');
+  assert.match(r.stderr, /D7/);
+});

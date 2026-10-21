@@ -156,6 +156,9 @@ export async function objetivosPequenos(p, minimo = 44) {
     const out = [];
     for (const e of document.querySelectorAll('button, a[href], input:not([type=hidden]), select, textarea, [role=button], [role=tab], summary')) {
       if (e.closest('[hidden]') || e.closest('iframe')) continue;
+      /* Un enlace dentro de texto corrido (con texto alrededor) se exceptúa por WCAG 2.5.8. */
+      const parrafo = e.matches('a[href]') && e.closest('p, li, dd, td, figcaption, .aviso-texto');
+      if (parrafo && parrafo.textContent.replace(/\s+/g, ' ').trim().length > e.textContent.replace(/\s+/g, ' ').trim().length + 3) continue;
       const r = e.getBoundingClientRect();
       if (!r.width || !r.height) continue;
       /* Los radios y casillas nativos viven dentro de una etiqueta que es el objetivo real. */

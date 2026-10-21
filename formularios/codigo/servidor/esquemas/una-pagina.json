@@ -1,6 +1,6 @@
 {
   "formulario": "una-pagina.html",
-  "generado": "2026-10-20T21:45:31.612Z",
+  "generado": "2026-10-21T02:04:38.914Z",
   "campos": {
     "nombre": {
       "etiqueta": "Nombre(s)",
@@ -174,7 +174,7 @@
       "autocomplete": "tel-national"
     },
     "personas": {
-      "etiqueta": "Personas en tu hogar Cuenta a todas las personas que viven contigo, incluida tú.",
+      "etiqueta": "Personas en tu hogar Cuéntate a ti y a todas las personas que viven contigo.",
       "tipo": "texto",
       "requerido": true,
       "formato": "numero",
@@ -330,7 +330,9 @@
       "requerido": true,
       "sensible": false,
       "uso": "Dejar constancia de que se informó a la persona.",
-      "atributos": {}
+      "atributos": {
+        "sinBorrador": ""
+      }
     }
   },
   "repetibles": [

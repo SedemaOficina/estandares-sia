@@ -1,6 +1,6 @@
 {
   "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -79,11 +79,11 @@
     ],
     "tamano": {
       "tokens.css": 8535,
-      "base.css": 6625,
-      "nucleo.css": 19504,
-      "validaciones.config.js": 48803,
+      "base.css": 6761,
+      "nucleo.css": 20003,
+      "validaciones.config.js": 52004,
       "iconos.js": 6047,
-      "formkit.core.js": 66783
+      "formkit.core.js": 72359
     }
   },
   "modulos": [
@@ -201,7 +201,7 @@
       },
       "tamano": {
         "css": 1003,
-        "js": 7872
+        "js": 7960
       }
     },
     {
@@ -259,7 +259,7 @@
       },
       "tamano": {
         "css": 1103,
-        "js": 9630
+        "js": 9747
       }
     },
     {
@@ -285,7 +285,7 @@
       },
       "tamano": {
         "css": 1458,
-        "js": 2633
+        "js": 2967
       }
     },
     {
@@ -339,8 +339,8 @@
         "js": "codigo/modulos/pasos/pasos.js"
       },
       "tamano": {
-        "css": 4892,
-        "js": 9252
+        "css": 5140,
+        "js": 13774
       }
     },
     {
@@ -348,20 +348,21 @@
       "titulo": "Pantalla de revisión",
       "nivel": "RECOMENDADO",
       "tipo": "retroalimentacion",
-      "proposito": "Resumen de todo lo capturado por bloques, con «Editar» que aterriza en el campo y enmascarado de identificadores.",
+      "proposito": "Resumen de todo lo capturado, un bloque abierto por paso con un solo «Editar» que aterriza en su primer campo, y enmascarado de identificadores.",
       "cuando": "Siempre que haya más de un paso o datos personales.",
       "cuandoNo": "Formularios de una pregunta.",
       "dependencias": [
         "pasos"
       ],
       "js": true,
-      "accesibilidad": "details/summary nativos; «Editar» con el nombre del campo para el lector.",
+      "accesibilidad": "Un encabezado por bloque; «Editar» dice de qué bloque es para el lector.",
       "movil": "Etiqueta y valor apilados.",
       "escritorio": "Dos columnas.",
       "errores": [
         "«Editar» que lleva al inicio del paso.",
         "Mostrar campos ocultos por condicional.",
-        "«Editar» que baja de renglón con un valor largo.",
+        "Un «Editar» por dato: en el teléfono la revisión se llena de botones iguales.",
+        "Bloques plegables con una bajada que dice «abre cada bloque» cuando ya están abiertos.",
         "Rótulo con fondo gris y en negritas: el rótulo va gris y de peso normal, y el dato destaca."
       ],
       "archivos": {
@@ -369,8 +370,8 @@
         "js": "codigo/modulos/revision/revision.js"
       },
       "tamano": {
-        "css": 2448,
-        "js": 3292
+        "css": 1837,
+        "js": 3242
       }
     },
     {
@@ -378,7 +379,7 @@
       "titulo": "Acuse y «qué sigue»",
       "nivel": "RECOMENDADO",
       "tipo": "retroalimentacion",
-      "proposito": "Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones). Sobrevive a una recarga: el folio y la fecha se vuelven a mostrar durante acuse.horasVisible, y [data-acuse-nuevo] abre el formulario vacío.",
+      "proposito": "Pantalla final con folio copiable, fecha, secuencia «qué sigue» (del núcleo, aquí centrada), descarga opcional y pantalla de límite de envíos. Termina con una acción principal para seguir (.acuse-acciones). «Compartir» lleva el folio y la fecha. Sobrevive a una recarga: el folio y la fecha se vuelven a mostrar durante acuse.horasVisible, y [data-acuse-nuevo] abre el formulario vacío.",
       "cuando": "Todo envío que genere folio.",
       "cuandoNo": "Capturas internas sin acuse.",
       "dependencias": [
@@ -394,7 +395,8 @@
         "No borrar el borrador al recibir.",
         "Acuse sin una acción para seguir.",
         "Quitarle el relleno lateral a la tarjeta del acuse: en teléfono los botones quedan pegados a la orilla.",
-        "Perder el folio al recargar la página."
+        "Perder el folio al recargar la página.",
+        "Compartir un texto fijo sin el folio."
       ],
       "archivos": {
         "css": "codigo/modulos/acuse/acuse.css",
@@ -402,7 +404,7 @@
       },
       "tamano": {
         "css": 2250,
-        "js": 6506
+        "js": 7352
       }
     },
     {
@@ -476,10 +478,11 @@
       "js": true,
       "accesibilidad": "El botón cambia su texto a «Copiado» y se anuncia; sin portapapeles selecciona el texto.",
       "movil": "navigator.share cuando existe.",
-      "escritorio": "Copia el enlace.",
+      "escritorio": "Sin la hoja de compartir del equipo, copia lo mismo que compartiría.",
       "errores": [
         "Confirmar sólo con un color.",
-        "Icono solo sin texto."
+        "Icono solo sin texto.",
+        "Compartir la dirección del formulario en lugar del folio: abre vacío."
       ],
       "archivos": {
         "css": "codigo/modulos/copiar/copiar.css",
@@ -487,7 +490,7 @@
       },
       "tamano": {
         "css": 542,
-        "js": 4058
+        "js": 4537
       }
     },
     {
@@ -552,8 +555,8 @@
       "cuandoNo": "Dividir un formulario que debe llenarse completo (usa pasos).",
       "dependencias": [],
       "js": true,
-      "accesibilidad": "role=tab/tabpanel, aria-selected, tabindex rotatorio, flechas e Inicio/Fin.",
-      "movil": "Lista con desplazamiento horizontal.",
+      "accesibilidad": "role=tab/tabpanel, aria-selected, tabindex rotatorio, flechas e Inicio/Fin; la pestaña abierta en azul (lo elegido), nunca en guinda.",
+      "movil": "Lista con desplazamiento horizontal; si no caben, el borde del lado que tiene más se desvanece.",
       "escritorio": "Igual.",
       "errores": [
         "Pestañas con campos obligatorios ocultos.",
@@ -564,8 +567,8 @@
         "js": "codigo/modulos/pestanas/pestanas.js"
       },
       "tamano": {
-        "css": 1101,
-        "js": 3009
+        "css": 1665,
+        "js": 4725
       }
     },
     {
@@ -617,20 +620,20 @@
       },
       "tamano": {
         "css": 1126,
-        "js": 1997
+        "js": 2061
       }
     },
     {
       "nombre": "paginacion",
       "titulo": "Paginación de resultados",
       "nivel": "OPCIONAL",
-      "tipo": "navegacion",
+      "tipo": "consulta",
       "proposito": "Paginación numerada o «Cargar más» con rango visible, tamaño de página, anuncio y foco al inicio de la lista.",
       "cuando": "Listas y tablas de más de una pantalla.",
       "cuandoNo": "Menos de 20 resultados.",
       "dependencias": [],
       "js": true,
-      "accesibilidad": "nav con etiqueta; aria-current=page; Anterior/Siguiente con aria-disabled; anuncio «Página N de M».",
+      "accesibilidad": "nav con etiqueta; aria-current=page (en azul: lo elegido); Anterior/Siguiente con aria-disabled; anuncio «Página N de M».",
       "movil": "Anterior · «Página X de N» · Siguiente.",
       "escritorio": "Números, rango y selector.",
       "errores": [
@@ -643,8 +646,8 @@
         "js": "codigo/modulos/paginacion/paginacion.js"
       },
       "tamano": {
-        "css": 2189,
-        "js": 6168
+        "css": 2306,
+        "js": 6181
       }
     },
     {
@@ -678,10 +681,10 @@
       "nombre": "tooltip",
       "titulo": "Ayuda desplegable",
       "nivel": "OPCIONAL",
-      "tipo": "retroalimentacion",
+      "tipo": "pregunta",
       "proposito": "Botón «?» que muestra un texto corto, por clic y teclado, con Escape.",
       "cuando": "Aclaración breve junto a una etiqueta.",
-      "cuandoNo": "Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay ícono).",
+      "cuandoNo": "Instrucciones necesarias para llenar el campo (van en la ayuda visible); repetir lo que la ayuda visible ya dice (si basta, no hay icono).",
       "dependencias": [],
       "js": true,
       "accesibilidad": "aria-expanded, aria-describedby mientras está abierto, role=tooltip; no depende de hover.",
@@ -698,22 +701,22 @@
       },
       "tamano": {
         "css": 1511,
-        "js": 2946
+        "js": 2945
       }
     },
     {
       "nombre": "tabla",
       "titulo": "Tabla de consulta y de captura",
       "nivel": "OPCIONAL",
-      "tipo": "retroalimentacion",
-      "proposito": "Tabla con caption, orden por columna accesible, estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.",
+      "tipo": "consulta",
+      "proposito": "Tabla con caption, orden por columna accesible (palabras como en español, fechas día/mes/año como fechas), estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.",
       "cuando": "Consulta interna de registros.",
       "cuandoNo": "Maquetar.",
       "dependencias": [
         "repetibles"
       ],
       "js": true,
-      "accesibilidad": "th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123».",
+      "accesibilidad": "th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123»; sobre la cabecera guinda el anillo de foco va en blanco.",
       "movil": "Cada fila es una tarjeta: rótulo gris de peso normal y dato que destaca.",
       "escritorio": "Tabla con desplazamiento controlado; botones, folios y etiquetas no se parten y la columna de acciones toma el ancho de sus botones.",
       "errores": [
@@ -722,15 +725,17 @@
         "Desplazamiento horizontal libre en teléfono.",
         "Filtrar ocultando filas y que el rayado alterno se descuadre (cuenta sólo las filas visibles).",
         "Mostrar en teléfono el rótulo de una columna cuyo encabezado es sólo para lector de pantalla.",
-        "Dejar que una columna se encoja hasta partir botones, folios o fechas («Revisa / r», «10/10/20 / 26»)."
+        "Dejar que una columna se encoja hasta partir botones, folios o fechas («Revisa / r», «10/10/20 / 26»).",
+        "Ordenar con el código de los caracteres: «Álvarez» y «Ñúñez» al final y las fechas por día.",
+        "Un encabezado que dice «descendente» sobre filas que ya no lo están (otra página)."
       ],
       "archivos": {
         "css": "codigo/modulos/tabla/tabla.css",
         "js": "codigo/modulos/tabla/tabla.js"
       },
       "tamano": {
-        "css": 4509,
-        "js": 7517
+        "css": 4667,
+        "js": 8470
       }
     },
     {
@@ -789,7 +794,7 @@
       },
       "tamano": {
         "css": 3211,
-        "js": 27874
+        "js": 29079
       }
     },
     {
@@ -818,7 +823,7 @@
       },
       "tamano": {
         "css": 3228,
-        "js": 12515
+        "js": 12729
       }
     },
     {
@@ -826,7 +831,7 @@
       "titulo": "Mapa con selección de punto",
       "nivel": "OPCIONAL",
       "tipo": "archivos",
-      "proposito": "Leaflet autoalojado con gestos que no atrapan la página, marcador propio, ámbito acotado, confirmación del punto, alternativa manual y sin mapa base.",
+      "proposito": "Leaflet autoalojado con gestos que no atrapan la página (el complemento lo carga el módulo si Leaflet cargó), marcador propio, ámbito acotado, confirmación del punto, alternativa manual, sin mapa base, acercar y alejar en español y ubicación aproximada dicha como tal.",
       "cuando": "Se necesita un punto además de la dirección.",
       "cuandoNo": "Basta la dirección escrita; coordenadas exactas que identifiquen un domicilio sin uso declarado.",
       "dependencias": [],
@@ -837,15 +842,17 @@
       "errores": [
         "Mapa como único camino.",
         "Teselas con clave escrita en el código.",
-        "Punto fuera del ámbito aceptado hasta el envío."
+        "Punto fuera del ámbito aceptado hasta el envío.",
+        "Controles de Leaflet en inglés («Zoom in») en una página en español.",
+        "El complemento de gestos escrito en la página después de Leaflet: sin Leaflet da «L is not defined»."
       ],
       "archivos": {
         "css": "codigo/modulos/mapa/mapa.css",
         "js": "codigo/modulos/mapa/mapa.js"
       },
       "tamano": {
-        "css": 2754,
-        "js": 10806
+        "css": 3046,
+        "js": 13014
       }
     },
     {
@@ -901,7 +908,7 @@
       },
       "tamano": {
         "css": 539,
-        "js": 8776
+        "js": 9048
       }
     },
     {
@@ -919,7 +926,8 @@
       "escritorio": "Igual.",
       "errores": [
         "Guardar historial de nombre o correo.",
-        "Chips sin forma de borrarlos."
+        "Chips sin forma de borrarlos.",
+        "Rehacer la fila de sugerencias al salir del campo: crece arriba del control, mueve lo de abajo y el toque siguiente cae en otro lugar; con teclado, el foco se pierde."
       ],
       "archivos": {
         "css": "codigo/modulos/chips/chips.css",
@@ -927,9 +935,9 @@
       },
       "tamano": {
         "css": 2048,
-        "js": 8845
+        "js": 9992
       }
     }
   ],
-  "generado": "2026-10-20T22:46:01.711Z"
+  "generado": "2026-10-21T02:30:22.957Z"
 }

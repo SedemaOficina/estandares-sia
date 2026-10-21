@@ -14,7 +14,7 @@
   /* Anchos de los marcos de ejemplo: los viewports que el estándar exige probar. */
   --guia-ancho-320:320px; --guia-ancho-390:390px; --guia-ancho-768:768px; --guia-ancho-1280:1280px;
   --guia-marco-alto:640px; --guia-marco-alto-movil:560px;
-  --guia-nav-ancho:240px; --guia-muestra:56px; --guia-pre-max:360px; --guia-caja-max:120px;
+  --guia-nav-ancho:240px; --guia-nav-alto-movil:96px; --guia-muestra:56px; --guia-pre-max:360px; --guia-caja-max:120px;
   --guia-toast-ancho:360px; --guia-col-min:280px; --guia-tabla-max:480px;
   /* Color de muestra y su fondo; cada muestra los redefine desde guia.js con los tokens reales. */
   --guia-c:var(--guinda); --guia-f:var(--blanco);
@@ -23,14 +23,17 @@
 /* @bloque estructura */
 
 .guia-cuerpo{width:100%;max-width:var(--ancho-pagina);margin:0 auto;padding:0 var(--e-pagina) var(--e-8)}
-.guia-nav{padding:var(--e-4) 0}
+/* En el teléfono el índice queda fijo arriba, con su letrero (decisión de la Secretaría): las
+   secciones dejan su alto libre al saltar a ellas. */
+.guia-nav{position:sticky;top:0;z-index:var(--z-barra);padding:var(--e-2) 0;background:var(--fondo);border-bottom:var(--b-1) solid var(--linea)}
+.guia-nav-etq{display:block;margin-bottom:var(--e-1);font-size:var(--t-sm)}
 .guia-nav-lista{display:none}
 /* Menú en tres niveles: sección (negritas), grupo (rótulo gris) y ficha (letra normal, con línea a la izquierda). */
 .guia-nav-sub{margin:var(--e-1) 0 var(--e-2);padding-left:var(--e-3);border-left:var(--b-1) solid var(--linea);font-size:var(--t-sm)}
 .guia-nav-sub .guia-nav-sub{margin:var(--e-1) 0 0;padding-left:0;border-left:0}
 .guia-nav-sub li{margin:var(--e-1) 0}
 .guia-main{min-width:0}
-.guia-seccion{padding:var(--e-seccion) 0;border-top:var(--b-1) solid var(--linea);scroll-margin-top:var(--e-4)}
+.guia-seccion{padding:var(--e-seccion) 0;border-top:var(--b-1) solid var(--linea);scroll-margin-top:var(--guia-nav-alto-movil)}
 .guia-seccion:first-child{border-top:0}
 .guia-dos{display:grid;gap:var(--e-6)}
 .guia-ficha-cols{display:grid;gap:var(--e-4)}
@@ -38,6 +41,8 @@
 /* @bloque componentes */
 
 .guia-bajada{max-width:none}
+/* El regreso a la portada es un enlace de acción: 44 px de alto con el dedo, como todo lo que se toca (FRM-62). */
+.guia-volver{display:inline-flex;align-items:center;min-height:var(--objetivo-min)}
 /* Árbol de decisión y resultado */
 .guia-arbol{min-width:0;display:grid;gap:var(--e-2);padding:var(--e-seccion);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja)}
 .guia-resultado{min-width:0;padding:var(--e-seccion);background:var(--guinda-cl);border-radius:var(--r-caja)}
@@ -78,8 +83,10 @@
 .guia-iconos{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--e-11),1fr));gap:var(--e-2)}
 .guia-icono-item{display:grid;justify-items:center;gap:var(--e-1);padding:var(--e-3) var(--e-1);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-ctrl);font-family:var(--fuente-mono);font-size:var(--t-xs);text-align:center;color:var(--gris);overflow-wrap:anywhere}
 /* Fichas de núcleo y módulos */
-.guia-ficha{margin:var(--e-6) 0;padding:var(--e-seccion);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja);scroll-margin-top:var(--e-4)}
+.guia-ficha{margin:var(--e-6) 0;padding:var(--e-seccion);background:var(--blanco);border:var(--b-1) solid var(--linea);border-radius:var(--r-caja);scroll-margin-top:var(--guia-nav-alto-movil)}
 .guia-ficha-cab{display:flex;flex-wrap:wrap;gap:var(--e-2) var(--e-3);align-items:center;margin-bottom:var(--e-2)}
+/* «Copiar HTML» de arriba: al final del renglón del título. */
+.guia-copiar-arriba{margin-left:auto}
 .guia-ficha-titulo{margin:0;font-family:var(--fuente-titulo);font-size:var(--t-xl);font-weight:var(--peso-semi);line-height:var(--interlineado-titulo);color:var(--guinda)}
 .guia-ficha-proposito{margin:0 0 var(--e-4);color:var(--texto)}
 .guia-ficha-meta{display:grid;grid-template-columns:auto 1fr;gap:var(--e-1) var(--e-3);margin:0 0 var(--e-4);font-size:var(--t-sm)}
@@ -141,9 +148,10 @@
 .guia-nivel-badge[data-nivel="BASE"]{background:var(--guinda)}
 .guia-nivel-badge[data-nivel="RECOMENDADO"]{background:var(--azul)}
 .guia-nivel-badge[data-nivel="OPCIONAL"]{background:var(--gris)}
-.guia-nav-lista a[aria-current="true"]{font-weight:var(--peso-fuerte);color:var(--guinda)}
+/* Lo elegido (la sección que se lee, el ancho de los ejemplos) va en azul, como en el estándar. */
+.guia-nav-lista a[aria-current="true"]{font-weight:var(--peso-fuerte);color:var(--azul)}
 .guia-nav-sub a[aria-current="true"]{font-weight:var(--peso-semi)}
-.guia-ancho[aria-pressed="true"]{background:var(--guinda);border-color:var(--guinda);color:var(--blanco)}
+.guia-ancho[aria-pressed="true"]{background:var(--azul);border-color:var(--azul);color:var(--blanco)}
 .guia-caso[data-estado="valido"] .guia-caso-estado{color:var(--ok)}
 .guia-caso[data-estado="invalido"] .guia-caso-estado{color:var(--error)}
 .guia-caso[data-estado="limite"] .guia-caso-estado{color:var(--pend)}
@@ -175,8 +183,9 @@
 }
 @media (min-width:1024px){
   .guia-cuerpo{display:grid;grid-template-columns:var(--guia-nav-ancho) minmax(0,1fr);gap:var(--e-8);align-items:start}
-  .guia-nav{position:sticky;top:0;max-height:100vh;overflow-y:auto;padding:var(--e-seccion) 0}
-  .guia-nav-select{display:none}
+  .guia-nav{max-height:100vh;overflow-y:auto;padding:var(--e-seccion) 0;background:none;border-bottom:0}
+  .guia-nav-select,.guia-nav-etq{display:none}
+  .guia-seccion,.guia-ficha{scroll-margin-top:var(--e-4)}
   .guia-nav-lista{display:block;margin:0;font-size:var(--t-md)}
   .guia-nav-lista > li{margin:var(--e-3) 0}
   .guia-nav-lista a{font-weight:var(--peso-fuerte);color:var(--texto);text-decoration:none}

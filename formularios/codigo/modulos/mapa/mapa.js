@@ -19,7 +19,10 @@
      · el mapa base (teselas) se declara en configuración
        (FORMKIT_CONFIG.mapa.teselas y .atribucion); sin él, el mapa muestra
        un fondo neutro y lo dice;
-     · no se pide geolocalización del dispositivo salvo data-geolocalizacion;
+     · no se pide geolocalización del dispositivo salvo data-geolocalizacion; una
+       ubicación de más de FORMKIT_CONFIG.mapa.aproximadaM metros (100) se dice aproximada;
+     · el complemento de gestos se declara en FORMKIT_CONFIG.mapa.gestos (su dirección) y
+       el módulo lo carga sólo si Leaflet cargó;
      · coordenadas en EPSG:4326, orden lon, lat al enviar, 6 decimales.
 
    Contrato HTML:
@@ -50,8 +53,15 @@
         /* La revisión dice lo mismo que se envía: un punto sin confirmar se ve como tal. */
         textoDe: (el) => { const s = estadoDe.get(el); if (!s || !s.punto) return ''; const t = `${s.punto.lat.toFixed(5)}, ${s.punto.lon.toFixed(5)}`; return s.exigeConfirmar && !s.confirmado ? `${t} · ${FormKit.config.mensajes.mapaSinConfirmar}` : t; },
         enBorrador: true,
-        /* En el borrador sólo hay un punto si ya contaba (confirmado, si se pide): se recupera así. */
-        restaura: (el, v) => { const s = estadoDe.get(el); if (s && v && s.coloca) { const [lat, lon] = v.split(',').map(Number); s.coloca({ lat, lon }, true); if (s.exigeConfirmar && s.confirma) s.confirma(true); } },
+        /* En el borrador sólo hay un punto si ya contaba (confirmado, si se pide): se recupera así.
+           Sin Leaflet (el mapa no cargó) el punto se conserva igual: se envía y la revisión lo dice. */
+        restaura: (el, v) => {
+          const s = estadoDe.get(el);
+          if (!s || !v || !/^-?[\d.]+,-?[\d.]+$/.test(v)) return;
+          const [lat, lon] = v.split(',').map(Number);
+          if (s.coloca) { s.coloca({ lat, lon }, true); if (s.exigeConfirmar && s.confirma) s.confirma(true); }
+          else { s.punto = { lat, lon }; s.confirmado = true; }
+        },
         valida: (el) => { const s = estadoDe.get(el); return s && s.fuera ? FormKit.config.ambito.coordenadas.mensaje : ''; },
         alArmar: (form, payload) => { for (const el of form.querySelectorAll('[data-campo]')) { const s = estadoDe.get(el); if (s && s.punto && payload.datos[el.dataset.campo]) payload.datos[el.dataset.campo] = { type: 'Point', coordinates: [Number(s.punto.lon.toFixed(6)), Number(s.punto.lat.toFixed(6))] }; } }
       }
@@ -59,8 +69,20 @@
     iniciar(form, ctx) {
       const { $, $$, cfg, M, plantilla, anuncia, limpia, marca, programaBorrador } = ctx;
       const L = window.L;
-      const conf = Object.assign({ teselas: '', atribucion: '', zoom: 11, centro: [19.4326, -99.1332] }, (window.FORMKIT_CONFIG || {}).mapa || {});
+      /* gestos: dirección (relativa a la página) del complemento leaflet-gesture-handling;
+         aproximadaM: desde cuántos metros de imprecisión «Usar mi ubicación» avisa que es aproximada. */
+      const conf = Object.assign({ teselas: '', atribucion: '', zoom: 11, centro: [19.4326, -99.1332], gestos: '', aproximadaM: 100 }, (window.FORMKIT_CONFIG || {}).mapa || {});
       const bbox = cfg.ambito.coordenadas;
+      /* El complemento de gestos se carga aquí y sólo si Leaflet cargó: escrito en el HTML después
+         de Leaflet, sin Leaflet daba «L is not defined». Si la página ya lo cargó, se usa ése. */
+      const gestos = new Promise((listo) => {
+        if (!L || window.leafletGestureHandling || !conf.gestos) { listo(); return; }
+        const s = document.createElement('script');
+        s.src = conf.gestos;
+        s.addEventListener('load', listo);
+        s.addEventListener('error', () => { console.warn(`FormKit: no se pudo cargar el complemento de gestos del mapa desde ${conf.gestos}.`); listo(); });
+        document.head.appendChild(s);
+      });
 
       for (const cont of $$('[data-mapa]', form)) {
         const el = cont.closest('[data-campo]');
@@ -75,11 +97,16 @@
 
         if (!L) { if (sin) sin.hidden = false; cont.hidden = true; continue; }
 
-        /* El plugin de gestos (leaflet-gesture-handling) se registra como
-           manejador «gestureHandling»; si está cargado se activa: un dedo
-           desplaza la página, dos el mapa. Sin él, Leaflet ignora la opción. */
-        const mapa = L.map(cont, { center: conf.centro, zoom: conf.zoom, gestureHandling: true, gestureHandlingOptions: { text: { touch: M.mapaGestoTactil, scroll: M.mapaGestoRueda, scrollMac: M.mapaGestoRuedaMac } }, zoomControl: true, attributionControl: !!conf.atribucion, tap: true });
-        if (mapa.gestureHandling && !mapa.gestureHandling.enabled()) mapa.gestureHandling.enable();
+        /* El complemento de gestos se registra como manejador «gestureHandling»; cuando está
+           cargado se activa: un dedo desplaza la página, dos el mapa. Sin él, Leaflet ignora la
+           opción. Acercar y alejar llevan su nombre en español (Leaflet los trae en inglés). */
+        const mapa = L.map(cont, { center: conf.centro, zoom: conf.zoom, gestureHandling: true, gestureHandlingOptions: { text: { touch: M.mapaGestoTactil, scroll: M.mapaGestoRueda, scrollMac: M.mapaGestoRuedaMac } }, zoomControl: false, attributionControl: !!conf.atribucion, tap: true });
+        L.control.zoom({ zoomInTitle: M.mapaAcercar, zoomOutTitle: M.mapaAlejar }).addTo(mapa);
+        gestos.then(() => {
+          const G = window.leafletGestureHandling;
+          if (!mapa.gestureHandling && G && G.GestureHandling) mapa.addHandler('gestureHandling', G.GestureHandling);
+          if (mapa.gestureHandling && !mapa.gestureHandling.enabled()) mapa.gestureHandling.enable();
+        });
         const limites = bbox ? L.latLngBounds([bbox.latMin, bbox.lonMin], [bbox.latMax, bbox.lonMax]) : null;
         const encuadra = () => { mapa.invalidateSize(); if (s.punto) mapa.setView([s.punto.lat, s.punto.lon], Math.max(mapa.getZoom(), 14)); else if (limites) mapa.fitBounds(limites); };
         if (limites) { mapa.setMaxBounds(limites.pad(0.1)); mapa.fitBounds(limites); }
@@ -123,7 +150,17 @@
         if (btnConfirmar) btnConfirmar.addEventListener('click', () => s.confirma());
         if (btnGeo && cont.hasAttribute('data-geolocalizacion') && navigator.geolocation) {
           btnGeo.hidden = false;
-          btnGeo.addEventListener('click', () => { btnGeo.setAttribute('aria-busy', 'true'); navigator.geolocation.getCurrentPosition((pos) => { btnGeo.removeAttribute('aria-busy'); s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude }); mapa.setView([pos.coords.latitude, pos.coords.longitude], 16); }, () => { btnGeo.removeAttribute('aria-busy'); anuncia(M.mapaSinUbicacion, { cortes: true, visible: avisoGeo() }); }, { timeout: 10000 }); });
+          /* Una ubicación imprecisa (de la red, en computadora: cientos de metros) se dice
+             «aproximada», en su propio renglón y después del punto (GEO-31). */
+          btnGeo.addEventListener('click', () => {
+            btnGeo.setAttribute('aria-busy', 'true');
+            navigator.geolocation.getCurrentPosition((pos) => {
+              btnGeo.removeAttribute('aria-busy');
+              s.coloca({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+              mapa.setView([pos.coords.latitude, pos.coords.longitude], 16);
+              if (pos.coords.accuracy > conf.aproximadaM) anuncia(plantilla(M.mapaAproximada, { metros: Math.round(pos.coords.accuracy) }), { visible: avisoGeo() });
+            }, () => { btnGeo.removeAttribute('aria-busy'); anuncia(M.mapaSinUbicacion, { cortes: true, visible: avisoGeo() }); }, { timeout: 10000 });
+          });
         }
         /* La alternativa manual (campo data-formato="coordenadas") también mueve el punto. */
         const manual = $$('[data-formato="coordenadas"] input', form)[0];

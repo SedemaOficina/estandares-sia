@@ -36,12 +36,13 @@
    revisada por la Secretaría el 14 oct 2026): el color solo no lo dice, por eso
    lleva la leyenda y «(obligatorio)» para el lector de pantalla. */
 .marca-oblig{margin-left:var(--e-1);font-weight:var(--peso-fuerte);color:var(--guinda)}
-.ayuda{margin-bottom:var(--e-2);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
+/* Ayudas y contador: 14 px en el teléfono, 13 y 12 desde tableta (decisión de la Secretaría). */
+.ayuda{margin-bottom:var(--e-2);font-size:var(--t-md);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
 .ayuda:empty{margin:0}
 /* Ayuda de bloque: va una vez bajo el título de la sección cuando vale igual
    para todos sus campos; la ayuda de cada campo queda para lo propio de él. */
-.ayuda-bloque{margin-bottom:var(--e-4);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
-.contador{margin-top:var(--e-1);font-size:var(--t-xs);text-align:right;color:var(--gris-cl)}
+.ayuda-bloque{margin-bottom:var(--e-4);font-size:var(--t-md);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
+.contador{margin-top:var(--e-1);font-size:var(--t-md);text-align:right;color:var(--gris-cl)}
 
 /* Error del campo: icono + palabra «Error» + qué hacer. No depende del rojo. */
 .err{
@@ -143,7 +144,7 @@
   border-radius:var(--r-caja);
 }
 .destacado-nombre{display:block;font-weight:var(--peso-medio);line-height:var(--interlineado-compacto)}
-.destacado-ayuda{display:block;margin-top:var(--e-1);font-size:var(--t-sm);color:var(--gris-cl)}
+.destacado-ayuda{display:block;margin-top:var(--e-1);font-size:var(--t-md);color:var(--gris-cl)}
 
 /* ---------- Iconos ----------
    Un solo conjunto SVG (codigo/iconos/sprite.svg). Heredan el color del
@@ -279,8 +280,10 @@
 .resumen-errores-lista{margin-left:var(--e-5);font-size:var(--t-md);list-style:disc}
 .resumen-errores-lista li{padding:var(--e-1) 0} /* separa los enlaces para cumplir los 24 px de WCAG 2.5.8 */
 .resumen-errores-enlace{font-weight:var(--peso-semi);color:var(--error)}
-/* «Borrador guardado»: el sistema avisa en verde, discreto, con aria-live. */
-.guardado{height:0;overflow:hidden;font-size:var(--t-sm);color:var(--ok);opacity:0;transition:opacity var(--dur-media)}
+/* «Borrador guardado»: el sistema avisa en verde, discreto, con aria-live. Su renglón está
+   reservado y sólo cambia la opacidad: aparecer y desaparecer no mueve el formulario (un clic
+   a media aparición caía en otro lugar). */
+.guardado{min-height:calc(var(--t-sm) * var(--interlineado-cuerpo) + var(--e-2));padding-bottom:var(--e-2);font-size:var(--t-sm);color:var(--ok);opacity:0;transition:opacity var(--dur-media)}
 
 /* Franja de borrador recuperado, antes del formulario. */
 .franja{
@@ -386,9 +389,10 @@
 /* Deshabilitado accesible: aria-disabled conserva el foco y el anuncio; la
    acción la bloquea formkit. :disabled queda para lo que de verdad no aplica. */
 .btn:disabled,.btn[aria-disabled="true"]{opacity:var(--op-inactivo);cursor:not-allowed}
-.btn[aria-busy="true"]{cursor:progress}
+/* «Enviando…» no se ve apagado: la persona tiene que leerlo (el clic ya está bloqueado). */
+.btn[aria-busy="true"]{opacity:1;cursor:progress}
 
-.guardado[data-visible]{height:auto;padding-bottom:var(--e-2);opacity:1}
+.guardado[data-visible]{opacity:1}
 
 /* @bloque utilidades */
 
@@ -427,6 +431,8 @@
    principal a la derecha, botones a su medida. */
 @media (min-width:760px){
   html{scroll-padding-top:var(--alto-barra-fija)}
+  .ayuda,.ayuda-bloque,.destacado-ayuda{font-size:var(--t-sm)}
+  .contador{font-size:var(--t-xs)}
   .fila{grid-template-columns:1fr 1fr}
   .fila-3{grid-template-columns:1fr 1fr 1fr}
   .fila-2-1{grid-template-columns:2fr 1fr}

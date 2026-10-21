@@ -39,6 +39,8 @@ td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
 
 /* @bloque estados */
 
+/* Sobre la cabecera guinda el anillo azul no se ve (1.57:1): ahí va en blanco (par N25, 7.65:1). */
+.tabla-orden:focus-visible{outline-color:var(--blanco)}
 [aria-sort="ascending"] .tabla-orden-icono{opacity:1;transform:rotate(180deg)}
 [aria-sort="descending"] .tabla-orden-icono{opacity:1}
 .tabla[aria-busy="true"]{opacity:var(--op-inactivo)}

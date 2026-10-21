@@ -9,7 +9,7 @@
    Contrato HTML:
      <div class="campo fecha" data-campo="fecha_hechos" data-formato="fecha" data-no-futura>
        <label class="etiqueta" for="fecha_hechos">Fecha</label>
-       <p class="ayuda">Formato AAAA-MM-DD.</p>
+       <p class="ayuda">Día, mes y año.</p>
        <div class="fecha-grupo">
          <input class="control" id="fecha_hechos" name="fecha_hechos" type="date">
          <button type="button" class="btn btn-secundario fecha-hoy" data-hoy>Hoy</button>
@@ -45,7 +45,8 @@
         ctl.dispatchEvent(new Event('change', { bubbles: true }));
         ctx.estadoDe(campo.dataset.campo).tocado = true;
         validaYPinta(campo.dataset.campo);
-        anuncia(`${ctx.etiquetaDe(campo.dataset.campo)}: ${ctl.value}`);
+        /* Se anuncia como se lee: día/mes/año (FRM-30). */
+        anuncia(`${ctx.etiquetaDe(campo.dataset.campo)}: ${ctx.textoDeValor(campo.dataset.campo)}`);
         programaBorrador();
       });
 

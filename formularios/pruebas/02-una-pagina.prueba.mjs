@@ -56,8 +56,8 @@ for (const perfil of Object.values(PERFILES)) {
     await p.click('#alcaldia'); await p.type('#alcaldia', 'coy'); await p.keyboard.press('ArrowDown'); await p.keyboard.press('Enter'); await p.keyboard.press('Tab');
     await p.waitForTimeout(100);
     assert.equal(await p.inputValue('#alcaldia'), 'Coyoacán');
-    const chips = await p.locator('.chip').allTextContents();
-    assert.deepEqual(chips.map((t) => t.trim()), ['Coyoacán'], 'el valor usado aparece como chip');
+    /* La sugerencia se guarda, pero no aparece mientras se llena: crecer arriba del campo movería lo de abajo (C2-02). */
+    assert.equal(await p.locator('.chip').count(), 0, 'mientras se llena, la fila de sugerencias no cambia');
     const claves = await p.evaluate(() => Object.keys(localStorage));
     assert.ok(claves.some((k) => /chips|sugerencias/i.test(k)), `el historial vive en el almacén local: ${claves.join(', ')}`);
 

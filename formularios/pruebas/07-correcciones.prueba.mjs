@@ -256,7 +256,7 @@ test('archivos: con el máximo cargado se oculta «Elegir archivo», el listo se
   await p.waitForSelector('[data-campo="retrato"] .arch[data-estado="listo"]');
   assert.ok(await zona.isHidden(), 'con el máximo (1) ya no se ofrece');
   const nota = p.locator('[data-campo="retrato"] .arch-lleno');
-  assert.match((await nota.textContent()).trim(), /^Ya adjuntaste el archivo/, 'y lo que se anuncia también se lee en pantalla (P117)');
+  assert.match((await nota.textContent()).trim(), /^Ya agregaste el archivo/, 'y lo que se anuncia también se lee en pantalla (P117)');
   const fondo = await p.locator('[data-campo="retrato"] .arch').evaluate((li) => getComputedStyle(li).backgroundColor);
   assert.equal(fondo, 'rgb(241, 248, 244)', 'el archivo listo se ve en verde (--ok-bg)');
   await p.click('[data-campo="retrato"] .arch-quitar');
@@ -265,20 +265,21 @@ test('archivos: con el máximo cargado se oculta «Elegir archivo», el listo se
   await p.context().close();
 });
 
-test('acuse con relleno lateral y una acción para seguir; en la revisión, «Editar» no baja de renglón (P72)', async () => {
+test('acuse con relleno lateral y una acción para seguir; en la revisión, «Editar» va en el renglón del título de su bloque (P72, C3-01)', async () => {
   const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.movil.contexto });
   const acuse = await p.evaluate(() => { const a = document.querySelector('.tarjeta.acuse'); return { relleno: parseFloat(getComputedStyle(a).paddingLeft), seguir: a.querySelectorAll('.btn-primario').length }; });
   assert.ok(acuse.relleno > 0, `la tarjeta del acuse conserva su relleno lateral: ${acuse.relleno}`);
   assert.equal(acuse.seguir, 1, 'el acuse trae una sola acción principal para seguir');
   const fila = await p.evaluate(() => {
-    const dd = document.createElement('dd'); dd.className = 'rev-dato-valor';
-    const v = document.createElement('span'); v.textContent = 'Calle de Prueba con un nombre muy largo que no cabe en un renglón del teléfono, número 1234';
+    const s = document.createElement('section'); s.className = 'rev-bloque';
+    const c = document.createElement('div'); c.className = 'rev-titulo';
+    const h = document.createElement('h3'); h.className = 'rev-rotulo'; h.textContent = 'Evidencia y contacto';
     const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-enlace'; b.textContent = 'Editar';
-    dd.append(v, b); document.querySelector('main').append(dd);
-    const r = { v: v.getBoundingClientRect(), b: b.getBoundingClientRect() }; dd.remove();
-    return { mismoRenglon: Math.abs(r.v.top - r.b.top) < 8, aLaDerecha: r.b.left > r.v.left };
+    c.append(h, b); s.append(c); document.querySelector('main').append(s);
+    const r = { h: h.getBoundingClientRect(), b: b.getBoundingClientRect() }; s.remove();
+    return { mismoRenglon: Math.abs((r.h.top + r.h.bottom) / 2 - (r.b.top + r.b.bottom) / 2) < 8, aLaDerecha: r.b.left > r.h.right };
   });
-  assert.ok(fila.mismoRenglon && fila.aLaDerecha, `«Editar» queda arriba y a la derecha del valor: ${JSON.stringify(fila)}`);
+  assert.ok(fila.mismoRenglon && fila.aLaDerecha, `«Editar» va a la derecha del título de su bloque: ${JSON.stringify(fila)}`);
   await p.context().close();
 });
 

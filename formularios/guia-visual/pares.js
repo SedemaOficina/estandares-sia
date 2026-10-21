@@ -267,6 +267,13 @@ window.GUIA_PARES = [
   "donde": "Anillo de foco sobre una opción o casilla elegida"
  },
  {
+  "id": "N25",
+  "texto": "--blanco",
+  "fondo": "--guinda",
+  "minimo": 3,
+  "donde": "Anillo de foco sobre la cabecera guinda de la tabla (ahí va en blanco: el azul daría 1.57:1)"
+ },
+ {
   "id": "N07",
   "texto": "--azul",
   "fondo": "--blanco",

@@ -46,7 +46,7 @@
 
   <!-- Borrador recuperado: sólo aparece si hay uno vigente en este dispositivo. -->
   <div class="franja" data-franja-borrador hidden>
-    <p class="franja-texto">Hay un borrador guardado el <span data-borrador-fecha></span>. Guardar el avance no es presentar la solicitud.</p>
+    <p class="franja-texto">Hay un borrador guardado el <span data-borrador-fecha></span>. Guardar el avance no es enviar la solicitud.</p>
     <button type="button" class="btn btn-secundario" data-borrador="recuperar">Recuperar borrador</button>
     <button type="button" class="btn btn-secundario" data-borrador="descartar">Empezar de nuevo</button>
     <button type="button" class="btn-enlace" data-borrador="no-guardar">No guardar en este equipo</button>
@@ -95,7 +95,7 @@
 
       <div class="campo" data-campo="fecha_hechos" data-formato="fecha" data-no-futura data-requerido data-uso="Ubicar la solicitud en el tiempo.">
         <label class="etiqueta" for="fecha_hechos">¿Cuándo ocurrió o cuándo lo necesitas?</label>
-        <p class="ayuda">Formato AAAA-MM-DD. Si fue hoy, usa el botón.</p>
+        <p class="ayuda">Día, mes y año. Si fue hoy, usa el botón.</p>
         <div class="fecha-grupo">
           <input class="control" id="fecha_hechos" name="fecha_hechos" type="date" autocomplete="off">
           <button type="button" class="btn btn-secundario fecha-hoy" data-hoy></button>
@@ -103,7 +103,7 @@
       </div>
 
       <div class="campo" data-campo="descripcion" data-requerido data-uso="Valorar el caso y decidir la atención.">
-        <label class="etiqueta" for="descripcion">Cuéntanos con tus palabras</label>
+        <label class="etiqueta" for="descripcion">Descríbelo con tus palabras</label>
         <p class="ayuda">Qué ocurre y desde cuándo. No incluyas datos de otras personas.</p>
         <textarea class="control control-texto" id="descripcion" name="descripcion" rows="4" minlength="40" maxlength="600" data-legible autocomplete="off"></textarea>
       </div>
@@ -163,7 +163,13 @@
       </div>
 
       <div data-cascada data-catalogo="cdmx">
-        <!-- La lista (alcaldía, colonia): sin catálogo se oculta entera y queda la captura manual de abajo; el código postal sigue en los dos casos. -->
+        <!-- El código postal va primero: al escribirlo se proponen alcaldía y colonia. La lista (alcaldía, colonia): sin catálogo
+             se oculta entera y queda la captura manual de abajo; el código postal sigue en los dos casos. -->
+        <div class="campo" data-campo="cp" data-formato="cp" data-requerido data-uso="Verificar que el sitio está en la Ciudad de México.">
+          <label class="etiqueta" for="cp">Código postal</label>
+          <p class="ayuda">Cinco dígitos. Al escribirlo se proponen la alcaldía y la colonia.</p>
+          <input class="control control-corto" id="cp" name="cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="off">
+        </div>
         <div data-cascada-lista>
         <div class="fila">
           <div class="campo" data-campo="alcaldia" data-requerido data-uso="Turnar a la autoridad competente en el territorio.">
@@ -193,16 +199,11 @@
             <div class="campo" data-campo="colonia_manual" data-requerido data-uso="Localizar el sitio sin catálogo."><label class="etiqueta" for="colonia_manual">Colonia</label><input class="control" id="colonia_manual" name="colonia_manual" type="text" maxlength="80" autocomplete="off"></div>
           </div>
         </div>
-        <div class="campo" data-campo="cp" data-formato="cp" data-requerido data-uso="Verificar que el sitio está en la Ciudad de México.">
-          <label class="etiqueta" for="cp">Código postal</label>
-          <p class="ayuda">Cinco dígitos. Si lo escribes primero, propone alcaldía y colonia.</p>
-          <input class="control control-corto" id="cp" name="cp" type="text" inputmode="numeric" maxlength="5" data-nivel="cp" autocomplete="off">
-        </div>
       </div>
 
       <div class="campo" data-enlace-mapa="coordenadas">
         <label class="etiqueta" for="enlace">Enlace de Google Maps</label>
-        <p class="ayuda" id="enlace_ayuda">Si tienes el sitio en Google Maps, pega aquí su enlace y tomamos de ahí las coordenadas.</p>
+        <p class="ayuda" id="enlace_ayuda">Si tienes el sitio en Google Maps, pega aquí su enlace: de ahí se toman las coordenadas.</p>
         <input class="control" id="enlace" type="text" inputmode="url" autocomplete="off" spellcheck="false" aria-describedby="enlace_ayuda">
         <div data-enlace-mapa-estado></div>
       </div>
@@ -213,7 +214,7 @@
       </div>
 
       <div class="campo" data-campo="punto" data-uso="Afinar la ubicación cuando la dirección no basta.">
-        <span class="etiqueta" id="et-punto">Punto en el mapa (opcional)</span>
+        <span class="etiqueta" id="et-punto">Punto en el mapa</span>
         <p class="ayuda">Toca el sitio o arrastra el marcador. Con el mapa enfocado, Enter coloca el punto en el centro. Las coordenadas de arriba también lo mueven.</p>
         <div class="mapa" data-mapa data-confirmar role="application" aria-labelledby="et-punto" tabindex="0"></div>
         <p class="mapa-sin" data-mapa-sin hidden>El mapa no cargó. Puedes seguir: escribe la dirección o las coordenadas.</p>
@@ -239,7 +240,7 @@
 
       <div class="campo" data-campo="fotos" data-uso="Documentar la solicitud." data-conservar-exif="false" data-max="3">
         <span class="etiqueta" id="et-fotos">Fotografías o documentos</span>
-        <p class="ayuda" id="ay-fotos">Ayudan a valorar el caso. Puedes continuar sin adjuntar.</p>
+        <p class="ayuda" id="ay-fotos">Ayudan a valorar el caso. Puedes continuar sin agregar ninguno.</p>
         <div data-archivos>
           <button type="button" class="zona-carga" aria-describedby="ay-fotos">
             <svg class="icono" aria-hidden="true"><use href="#i-adjunto"></use></svg>
@@ -255,7 +256,7 @@
       </div>
 
       <fieldset class="grupo" data-campo="contacto" data-requerido data-uso="Decidir si se piden datos de contacto.">
-        <legend class="etiqueta">¿Quieres que te contactemos?</legend>
+        <legend class="etiqueta">¿Quieres que la Secretaría te contacte?</legend>
         <div class="opciones-lista opciones-en-linea">
           <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="contacto" value="si"><span><span class="opcion-nombre">Sí</span></span></label>
           <label class="opcion-fila"><input class="opcion-fila-input" type="radio" name="contacto" value="no"><span><span class="opcion-nombre">No, anónimo</span></span></label>
@@ -301,7 +302,7 @@
     <!-- Paso 4 · Revisión y envío -->
     <section class="tarjeta" data-paso data-revision data-titulo="Revisión" hidden>
       <h2 class="titulo-paso">Revisa antes de enviar</h2>
-      <p class="bajada">Abre cada bloque para ver lo que capturaste. «Editar» te lleva al campo.</p>
+      <p class="bajada">Revisa lo que capturaste. Si algo no está bien, «Editar» te lleva a ese bloque.</p>
       <div data-revision-lista></div>
 
       <div class="priv">
@@ -309,10 +310,10 @@
         <button type="button" class="btn-enlace" data-abre-dialogo="dialogo-privacidad">Leer el aviso de privacidad</button>
       </div>
 
-      <div class="destacado" data-campo="aviso" data-requerido data-uso="Dejar constancia de que se informó a la persona.">
+      <div class="destacado" data-campo="aviso" data-requerido data-sin-borrador data-uso="Dejar constancia de que se informó a la persona.">
         <label class="casilla"><input class="casilla-input" type="checkbox" name="aviso" value="si"><span class="casilla-texto"><span class="etiqueta destacado-nombre">Leí el aviso de privacidad</span></span></label>
       </div>
-      <div class="destacado" data-campo="humano" data-requerido data-uso="Distinguir personas de envíos automáticos.">
+      <div class="destacado" data-campo="humano" data-requerido data-sin-borrador data-uso="Distinguir personas de envíos automáticos.">
         <label class="casilla"><input class="casilla-input" type="checkbox" name="humano" value="si"><span class="casilla-texto"><span class="etiqueta destacado-nombre">No soy un programa automático</span><span class="destacado-ayuda">Lo comprueba el sistema; no es una pregunta sobre tu solicitud.</span></span></label>
       </div>
       <!-- Trampa para programas automáticos: una persona no la ve ni la llena. -->
@@ -329,7 +330,7 @@
 
   <!-- Límite de envíos: dice que la captura no se perdió. -->
   <section class="tarjeta" data-limite hidden>
-    <h2 class="titulo-paso" tabindex="-1">Por ahora no podemos recibir más envíos desde este dispositivo</h2>
+    <h2 class="titulo-paso" tabindex="-1">Por ahora no se reciben más envíos desde este dispositivo</h2>
     <p class="bajada">Lo que capturaste no se perdió y sigue en el formulario. Intenta de nuevo más tarde.</p>
     <div class="acciones"><button type="button" class="btn btn-primario" data-accion="reintentar">Volver a la revisión</button></div>
   </section>
@@ -337,7 +338,7 @@
   <!-- Acuse -->
   <section class="tarjeta acuse" data-acuse hidden>
     <div class="acuse-marca" aria-hidden="true"><svg class="icono"><use href="#i-palomita"></use></svg></div>
-    <h2 class="titulo-paso" tabindex="-1">Recibimos tu solicitud</h2>
+    <h2 class="titulo-paso" tabindex="-1">La Secretaría recibió tu solicitud</h2>
     <p class="bajada texto-centrado">Guarda tu folio: es la referencia para cualquier consulta.</p>
     <div class="acuse-datos">
       <div class="acuse-dato">
@@ -348,7 +349,7 @@
     </div>
     <div class="acuse-acciones">
       <a class="btn btn-secundario descarga" data-acuse-descarga data-descarga data-formato="PDF" hidden download>Descargar acuse</a>
-      <button type="button" class="btn btn-secundario" data-compartir data-compartir-texto="Folio de mi solicitud"><svg class="icono" aria-hidden="true"><use href="#i-compartir"></use></svg>Compartir</button>
+      <button type="button" class="btn btn-secundario" data-compartir data-compartir-texto="Folio de mi solicitud: {folio}. Recibida el {fecha}."><svg class="icono" aria-hidden="true"><use href="#i-compartir"></use></svg>Compartir</button>
     </div>
     <ol class="secuencia">
       <li class="secuencia-item">La Secretaría registra la solicitud y la turna al área competente.</li>
@@ -356,7 +357,7 @@
       <li class="secuencia-item">Si dejaste un medio de contacto, se te informa el resultado.</li>
     </ol>
     <!-- La acción para seguir: cambia la dirección por la página de inicio del sitio o por la siguiente tarea. «Llenar otra solicitud» olvida este acuse (que se vuelve a mostrar si la persona recarga) y abre el formulario vacío. -->
-    <div class="acuse-acciones"><button type="button" class="btn btn-secundario" data-acuse-nuevo>Llenar otra solicitud</button><a class="btn btn-primario" href="./">Volver al inicio</a></div>
+    <div class="acuse-acciones"><button type="button" class="btn btn-secundario" data-acuse-nuevo>Llenar otra solicitud</button><a class="btn btn-primario" href="https://www.sedema.cdmx.gob.mx/">Volver al inicio</a></div>
   </section>
 </main>
 
@@ -383,7 +384,6 @@
 <script src="../modulos/pasos/pasos.js"></script>
 <script src="../modulos/archivos/archivos.js"></script>
 <script src="../../vendor/leaflet/leaflet.js"></script>
-<script src="../../vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.js"></script>
 <script src="../modulos/mapa/mapa.js"></script>
 <script src="../modulos/enlace-mapa/enlace-mapa.js"></script>
 <script src="../modulos/revision/revision.js"></script>

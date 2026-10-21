@@ -42,13 +42,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-02 · La barra de pasos es navegable y exige lo mismo que «Continuar»
 
-**Regla.** Cada paso de la barra es un botón. Avanzar desde la barra valida los pasos intermedios y se detiene en el primero con errores; retroceder siempre se permite y no valida. Los pasos futuros quedan habilitados para que el teclado pueda inspeccionarlos.
+**Regla.** Cada paso de la barra es un botón. Avanzar desde la barra valida los pasos intermedios y se detiene en el primero con errores; retroceder siempre se permite y no valida. Los pasos futuros quedan habilitados para que el teclado pueda inspeccionarlos. «Atrás» y «Adelante» del navegador (y el gesto de Android) recorren los pasos: cada paso que se abre deja una entrada en el historial, con la misma dirección; «Adelante» exige lo mismo que «Continuar». Con el acuse a la vista, «Atrás» sale de la página. Mientras se envía no se cambia de paso: «Atrás» y la barra quedan con aria-disabled.
 
 **Por qué.** Dos caminos para avanzar con reglas distintas producen envíos incompletos; deshabilitar pasos esconde el recorrido al teclado.
 
 **Nivel.** RECOMENDADO · **Origen.** A FRM-02; B FRM-EST-02; C8 · *decisión heredada*
 
-**Verificación.** 01-por-pasos.prueba.mjs: «la barra permite inspeccionar pasos futuros…»
+**Verificación.** 01-por-pasos.prueba.mjs: «la barra permite inspeccionar pasos futuros…»; 08: «Atrás» del navegador regresa un paso (C4-05); envío lento y «Atrás» (C4-11)
 
 ### FRM-03 · Al abrir un paso, el foco va a su título y se anuncia
 
@@ -62,33 +62,33 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-04 · La barra de avance no se apaga en teléfono ni tapa lo enfocado
 
-**Regla.** En pantalla angosta la barra conserva los círculos y muestra «Paso X de N · Título» en lugar de las etiquetas. Si la barra es fija, el documento declara scroll-padding-top con su alto para que ningún campo enfocado quede debajo.
+**Regla.** En pantalla angosta la barra conserva los círculos y muestra «Paso X de N · Título» en lugar de las etiquetas. Si la barra es fija, el documento declara scroll-padding-top con su alto para que ningún campo enfocado quede debajo. El alto que se reserva es el real de la barra (lo mide el módulo de pasos: crece con el recordatorio y con el zoom). Con menos de 500 px de alto (teléfono acostado, zoom al 400 %) la barra deja de ser fija.
 
 **Por qué.** Quitar la barra en el teléfono quita la orientación justo donde más falta; una barra fija que tapa el campo enfocado hace invisible el error.
 
 **Nivel.** RECOMENDADO · **Origen.** A FRM-03; A FRM-04 · *decisión heredada*
 
-**Verificación.** 03-anchos.prueba.mjs: 320, 360 y 390 px; base.css html{scroll-padding-top}
+**Verificación.** 03-anchos.prueba.mjs: 320, 360 y 390 px; base.css html{scroll-padding-top}; 08: barra fija en pantalla baja (B4-03)
 
 ### FRM-05 · Una pantalla de revisión antes de enviar, con «Editar» que aterriza en el campo
 
-**Regla.** Los formularios por pasos muestran todo lo capturado agrupado por paso antes de enviar (módulo «revision»). Cada bloque lleva «Editar», que abre el paso y enfoca el campo correspondiente. «Editar» se queda junto al valor, arriba y a la derecha, aunque el valor ocupe varios renglones. En cada dato, el rótulo va en gris y peso normal, sin fondo, y el dato destaca, como en toda lista de rótulo y dato (la tabla del teléfono, el acuse). La revisión dice lo mismo que se envía: un punto del mapa que falta confirmar se ve como «sin confirmar: no se envía».
+**Regla.** Los formularios por pasos muestran todo lo capturado agrupado por paso antes de enviar (módulo «revision»). Cada bloque va abierto, con su título y un solo «Editar», que abre el paso y enfoca su primer campo: un «Editar» por dato llenaba el teléfono de botones iguales. En cada dato, el rótulo va en gris y peso normal, sin fondo, y el dato destaca, como en toda lista de rótulo y dato (la tabla del teléfono, el acuse). La revisión dice lo mismo que se envía: un punto del mapa que falta confirmar se ve como «sin confirmar: no se envía».
 
 **Por qué.** Revisar antes de enviar evita envíos equivocados y repeticiones; «Editar» que sólo cambia de paso obliga a buscar el campo.
 
 **Nivel.** RECOMENDADO · **Origen.** A FRM-08; P72 (proyecto de acreditaciones, 17 oct 2026); P147 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos.prueba.mjs: «Editar» aterriza en el campo; 07: «Editar» junto al valor largo; 07: rótulo de la revisión (P147); 08: punto sin confirmar en la revisión (F2-02)
+**Verificación.** 01-por-pasos.prueba.mjs: «Editar» aterriza en el campo; 07: rótulo de la revisión (P147); 08: punto sin confirmar en la revisión (F2-02); 08: un «Editar» por bloque (C3-01)
 
 ### FRM-06 · Un acuse con folio al terminar
 
-**Regla.** Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue como secuencia numerada (FRM-84), si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia. La fecha y la hora de recepción se escriben en la zona de la Ciudad y en 24 horas («17 de octubre de 2026 a las 23:27»); con fechas.horas24 = false, en 12 horas con a. m. y p. m. El folio y la fecha (no los datos de la persona) se guardan en el dispositivo: si la persona recarga la página, vuelve a ver su acuse durante acuse.horasVisible (24 horas), y «Llenar otra solicitud» ([data-acuse-nuevo]) lo olvida y abre el formulario vacío. Mientras se ve el acuse o la pantalla de límite, la barra de pasos, la franja del borrador y el aviso de guardado no se ven. Si la respuesta no trae folio, el acuse lo dice con palabras; si no trae fecha válida, usa la hora en que llegó.
+**Regla.** Todo envío exitoso termina en una pantalla de acuse (módulo «acuse») con folio copiable, fecha, qué sigue como secuencia numerada (FRM-84), si existe, descarga del comprobante, y una acción principal para seguir (volver al inicio o la siguiente tarea). La tarjeta del acuse conserva su relleno lateral: en teléfono los botones no quedan pegados a la orilla. El foco va al título del acuse y se anuncia. La fecha y la hora de recepción se escriben en la zona de la Ciudad y en 24 horas («17 de octubre de 2026 a las 23:27»); con fechas.horas24 = false, en 12 horas con a. m. y p. m. El folio y la fecha (no los datos de la persona) se guardan en el dispositivo: si la persona recarga la página, vuelve a ver su acuse durante acuse.horasVisible (24 horas), y «Llenar otra solicitud» ([data-acuse-nuevo]) lo olvida y abre el formulario vacío. Mientras se ve el acuse o la pantalla de límite, la barra de pasos, la franja del borrador y el aviso de guardado no se ven. Si la respuesta no trae folio, el acuse lo dice con palabras; si no trae fecha válida, usa la hora en que llegó. «Compartir» lleva el folio y la fecha (data-compartir-texto puede traer {folio} y {fecha}), no la dirección del formulario.
 
 **Por qué.** Sin acuse la persona no sabe si terminó; sin folio no puede dar seguimiento.
 
 **Nivel.** RECOMENDADO · **Origen.** A FRM-09; B FRM-EST-03; P72 (proyecto de acreditaciones, 17 oct 2026); P128 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs; 07: relleno y acción del acuse; 07: fecha en 24 horas (P128); 08: el acuse sobrevive a una recarga (C4-07)
+**Verificación.** 01-por-pasos.prueba.mjs: acuse y copiar; 02-una-pagina.prueba.mjs; 07: relleno y acción del acuse; 07: fecha en 24 horas (P128); 08: el acuse sobrevive a una recarga (C4-07); 08: compartir el folio (C2-01)
 
 ### FRM-07 · La pregunta condicional existe sólo mientras aplica
 
@@ -124,7 +124,7 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-10 · Lo obligatorio se marca con asterisco guinda y con la palabra
 
-**Regla.** Los campos obligatorios llevan un asterisco guinda (--guinda) con aria-hidden y la palabra «(obligatorio)» sólo para lectores de pantalla; la leyenda «Los campos con * son obligatorios» aparece una vez por pantalla. Los opcionales no se marcan.
+**Regla.** Los campos obligatorios llevan un asterisco guinda (--guinda) con aria-hidden y la palabra «(obligatorio)» sólo para lectores de pantalla; la leyenda «Los campos con * son obligatorios» aparece una vez por pantalla. Los opcionales no se marcan. Por lo mismo, ninguna etiqueta dice «(opcional)».
 
 **Por qué.** El asterisco va en guinda, el color de la identidad, y no en rojo, que se confundiría con un error. El guinda se distingue de un error porque el error lleva icono, la palabra «Error» y borde rojo grueso, y el asterisco nunca va solo: va con la leyenda y con «(obligatorio)» para el lector de pantalla, que sin la palabra no lo sabe.
 
@@ -174,13 +174,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-15 · Texto largo con contador y mínimo legible
 
-**Regla.** El texto libre lleva maxlength visible como contador y, cuando se exige una descripción, minlength y data-legible: se rechaza el tecleo al azar por forma, nunca por ortografía.
+**Regla.** El texto libre lleva maxlength visible como contador y, cuando se exige una descripción, minlength y data-legible: se rechaza el tecleo al azar por forma, nunca por ortografía. El contador cuenta lo mismo que el mensaje de error: sin los espacios repetidos ni los de los extremos.
 
 **Por qué.** Sin contador se corta sin aviso; validar el sentido castiga a quien escribe distinto.
 
 **Nivel.** BASE · **Origen.** A FRM-35; B FRM-CMP-08; B FRM-VAL-06 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: validación en el momento acordado
+**Verificación.** 01-por-pasos: validación en el momento acordado; 08: contador y mensaje (C5-09)
 
 ## 3. Tipos de pregunta
 
@@ -266,23 +266,23 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-24 · Pestañas, acordeón, migas, progreso, paginación, ayuda desplegable, tabla y visor de documentos son módulos con teclado completo
 
-**Regla.** Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay ícono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que se inicia sola también sin formulario, vuelve a leer sus encabezados cuando la página avisa con formkit:tabla, en teléfono se vuelve tarjetas con rótulo y valor en dos columnas fijas (el rótulo gris de peso normal y el dato que destaca, como en toda lista de rótulo y dato) y en computadora lleva la línea de cada fila bajo todas sus columnas, con el contenido centrado en vertical, sin partir botones, folios (.mono) ni etiquetas, y con la columna de acciones al ancho de sus botones; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con un solo contador «Hoja n de total», en su barra, acercar y girar, fijo junto a lo que se revisa en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor, que se busca junto a la copia del estándar o en la ruta que diga la configuración. Una imagen que no carga en el visor se dice como un PDF que no carga, y abrir varios PDF no deja vivos sus hilos. La tabla dice «No hay resultados» también cuando un filtro oculta todas las filas; el progreso sin valor dice «Cargando…», no el porcentaje anterior; «(se abre en otra pestaña)» se dice una vez aunque haya dos formularios; la ayuda desplegable abre también en las filas agregadas.
+**Regla.** Cada componente de navegación o consulta se copia sólo si el formulario lo usa: pestañas con flechas, Home y End; acordeón con details; migas con aria-current; progreso con progress; paginación que conserva filtros y lleva el foco a la lista; ayuda desplegable que se abre con clic y teclado y cierra con Escape, y que nunca repite la ayuda visible del campo (si la ayuda visible basta, no hay icono); tabla ordenable con aria-sort y acciones por fila con nombre completo, que se inicia sola también sin formulario, vuelve a leer sus encabezados cuando la página avisa con formkit:tabla, en teléfono se vuelve tarjetas con rótulo y valor en dos columnas fijas (el rótulo gris de peso normal y el dato que destaca, como en toda lista de rótulo y dato) y en computadora lleva la línea de cada fila bajo todas sus columnas, con el contenido centrado en vertical, sin partir botones, folios (.mono) ni etiquetas, y con la columna de acciones al ancho de sus botones; al filtrar con [hidden], la fila oculta no se ve y el rayado cuenta sólo las visibles, y la columna cuyo encabezado es sólo para lector de pantalla no muestra rótulo en teléfono; visor de documentos que muestra todas las hojas del PDF con un solo contador «Hoja n de total», en su barra, acercar y girar, fijo junto a lo que se revisa en computadora y a pantalla completa en teléfono (Escape cierra y el foco vuelve al botón), con pdf.js del propio servidor, que se busca junto a la copia del estándar o en la ruta que diga la configuración. Una imagen que no carga en el visor se dice como un PDF que no carga, y abrir varios PDF no deja vivos sus hilos. La tabla dice «No hay resultados» también cuando un filtro oculta todas las filas; el progreso sin valor dice «Cargando…», no el porcentaje anterior; «(se abre en otra pestaña)» se dice una vez aunque haya dos formularios; la ayuda desplegable abre también en las filas agregadas. La tabla ordena las palabras como en español (Álvarez y Ñúñez en su lugar), las fechas día/mes/año como fechas y las cantidades como números, y al repintar (otra página, un filtro) pone las filas nuevas en el orden elegido. Sobre la cabecera guinda de la tabla el anillo de foco va en blanco (el azul daría 1.57:1). Lo elegido (la página actual, la pestaña abierta) va en azul, como las opciones elegidas. Si las pestañas no caben, el borde del lado que tiene más se desvanece. La zona de hojas del visor es una región con nombre.
 
-**Por qué.** Un componente a medias (sólo ratón, sólo escritorio) excluye a una parte de las personas y obliga a rehacerlo después. Un ícono que repite lo que ya se lee obliga a abrirlo para nada.
+**Por qué.** Un componente a medias (sólo ratón, sólo escritorio) excluye a una parte de las personas y obliga a rehacerlo después. Un icono que repite lo que ya se lee obliga a abrirlo para nada.
 
 **Nivel.** OPCIONAL · **Origen.** encargo 5.1; encargo 5.4; S2-4 (proyecto de acreditaciones, 16 oct 2026); P66 (proyecto de acreditaciones, 16 oct 2026); P67 (proyecto de acreditaciones, 16 oct 2026); P96 (proyecto de acreditaciones, 17 oct 2026); P103 (proyecto de acreditaciones, 17 oct 2026); P104 (proyecto de acreditaciones, 17 oct 2026); P110 (proyecto de acreditaciones, 17 oct 2026); P145 (proyecto de acreditaciones, 18 oct 2026); P146 (proyecto de acreditaciones, 18 oct 2026); P147 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión del encargo*
 
-**Verificación.** 04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos; auditar-campos D5; 07: tabla filtrada y visor; 07: tabla sin partir datos, contador del visor, rótulos (P145 a P147); 08: visor, tabla, progreso y descarga (B5-11, F2-12)
+**Verificación.** 04-modulos.prueba.mjs: pestañas, paginación, tabla, ayuda; 03-anchos; auditar-campos D5; 07: tabla filtrada y visor; 07: tabla sin partir datos, contador del visor, rótulos (P145 a P147); 08: visor, tabla, progreso y descarga (B5-11, F2-12); 08: orden de la tabla y foco en su cabecera (F2-10, A6-01); pestañas que no caben (C2-06)
 
 ### FRM-25 · Chips de uso frecuente con historial del propio dispositivo o con una lista fija
 
-**Regla.** Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo, los motivos para pedir que se corrija algo) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete. Cada grupo de chips tiene un nombre distinto para el lector de pantalla, aunque los campos compartan etiqueta. Cada respuesta fija se ve completa: no se encoge en la fila (si no cabe, pasa completa al renglón siguiente) y al pasar el cursor sólo cambia su borde; el fondo azul es de la respuesta elegida.
+**Regla.** Las sugerencias de uso frecuente (módulo «chips») se forman con lo que la persona ya escribió en ese dispositivo, viven en el almacén local y nunca viajan en el envío. Se prohíben en campos con data-finalidad o data-sensible. Una lista fija de respuestas frecuentes conocidas (data-chips-fijos, por ejemplo, los motivos para pedir que se corrija algo) no guarda nada y se admite en cualquier campo; en un texto largo, el chip agrega su texto al final para que la persona lo complete. Cada grupo de chips tiene un nombre distinto para el lector de pantalla, aunque los campos compartan etiqueta. Cada respuesta fija se ve completa: no se encoge en la fila (si no cabe, pasa completa al renglón siguiente) y al pasar el cursor sólo cambia su borde; el fondo azul es de la respuesta elegida. La fila de sugerencias no se rehace mientras la persona llena: va arriba del control, y crecer al salir del campo movía lo de abajo justo cuando la persona tocaba otra cosa (el toque caía en otro lugar); elegir una sugerencia la marca en su lugar y el foco se queda en ella. Se rehace al empezar otro registro (envío o vaciado) y al volver a abrir la página.
 
 **Por qué.** Un historial compartido o enviado es una fuga de datos; sugerir datos personales los expone en pantallas ajenas.
 
 **Nivel.** OPCIONAL · **Origen.** encargo 5.2; P65 (proyecto de acreditaciones, 16 oct 2026); P97 (proyecto de acreditaciones, 17 oct 2026); P135 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026 · *decisión del encargo*
 
-**Verificación.** 04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad; 07: chips fijos; 07: motivos completos y cursor (P135)
+**Verificación.** 04-modulos.prueba.mjs: chips; chips.js rechaza data-finalidad; 07: chips fijos; 07: motivos completos y cursor (P135); 08: sugerencias sin salto ni pérdida de foco (C2-02, B4-01)
 
 ## 4. Validación y errores
 
@@ -328,13 +328,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-30 · Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, folio fiscal, contraseña
 
-**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, y sugiere sin bloquear ante errores de dedo frecuentes; el RFC conserva la Ñ (se quitan los acentos, no la tilde de la Ñ); el teléfono se normaliza a 10 dígitos quitando espacios, guiones y +52; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir (AAAA-MM-DD es el formato interno; toda fecha que el formulario escribe o anuncia a la persona va en día/mes/año), y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos. En el número, una coma se toma como punto decimal («12,5»), salvo que agrupe miles («1,500», «12,345.50»): eso no se adivina, se pide escribirlo sin comas. Una fecha escrita no pasa de 20 caracteres y ninguna expresión del catálogo tarda más con un texto largo. El año de una fecha va de 1900 a 2100 cuando ningún otro límite lo dice («0100» y «9999» son errores de dedo). El texto pierde los caracteres de control y los invisibles (como el espacio de ancho cero), y los dígitos de ancho completo cuentan como dígitos.
+**Regla.** Cada dato de formato conocido se valida con la regla del catálogo: el correo necesita una sola @ y un dominio con punto, no lleva espacios (se pide quitarlos, no se quitan en silencio) ni comas o puntos seguidos, y sugiere sin bloquear ante errores de dedo frecuentes; el RFC conserva la Ñ (se quitan los acentos, no la tilde de la Ñ); el teléfono se normaliza a 10 dígitos quitando espacios, guiones, +52, el 1 de los celulares («+52 1 55…») y el 044, 045 o 01 de antes; el CP exige 5 dígitos y, si está configurado, el ámbito de la Ciudad (01000–16999); la fecha debe existir (AAAA-MM-DD es el formato interno; toda fecha que el formulario escribe o anuncia a la persona va en día/mes/año), y el mensaje de límite (min, max) da la fecha en día/mes/año en los dos formatos; el número respeta min, max y step. El campo de contraseña lleva «Mostrar» / «Ocultar» dentro del campo, con aria-pressed y un nombre que dice de qué campo es («Mostrar: Confirma tu contraseña»), y se vuelve a ocultar al enviar. El folio fiscal de una factura (formato «folio-fiscal») es un UUID de 36 caracteres en grupos 8-4-4-4-12, que se acepta en minúsculas y sin guiones y se guarda en mayúsculas con ellos. En el número, una coma se toma como punto decimal («12,5»), salvo que agrupe miles («1,500», «12,345.50»): eso no se adivina, se pide escribirlo sin comas. Una fecha escrita no pasa de 20 caracteres y ninguna expresión del catálogo tarda más con un texto largo. El año de una fecha va de 1900 a 2100 cuando ningún otro límite lo dice («0100» y «9999» son errores de dedo). El texto pierde los caracteres de control y los invisibles (como el espacio de ancho cero), y los dígitos de ancho completo cuentan como dígitos. En el nombre, el apóstrofo tipográfico (el del teclado del iPhone: «D’Angelo») se guarda como apóstrofo simple. Una fecha escrita día/mes/año en un campo de fecha se guarda como AAAA-MM-DD y la revisión la muestra día/mes/año; un año de dos cifras («23/07/85») se pide completo.
 
 **Por qué.** Cada formulario que inventa su propia regla de correo o teléfono produce datos incomparables.
 
 **Nivel.** BASE · **Origen.** encargo 5.5; C10; P70 (proyecto de acreditaciones, 16 oct 2026); P42 (proyecto de acreditaciones, 15 oct 2026); P73 (proyecto de acreditaciones, 17 oct 2026); P82 (proyecto de acreditaciones, 17 oct 2026); P98 (proyecto de acreditaciones, 17 oct 2026); P112 (proyecto de acreditaciones, 17 oct 2026); P129 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión del encargo*
 
-**Verificación.** guía: probador; 06-servidor; validaciones.config.js; 06: RFC con Ñ (P129); 08: «1,500» (F2-01), texto enorme en una fecha (E3-03); 08: invisibles, ancho completo y años (E3-09, E3-10)
+**Verificación.** guía: probador; 06-servidor; validaciones.config.js; 06: RFC con Ñ (P129); 08: «1,500» (F2-01), texto enorme en una fecha (E3-03); 08: invisibles, ancho completo y años (E3-09, E3-10); 08: correo, teléfono, apóstrofo y fechas (C5-08, F2-11, C5-01)
 
 ### FRM-31 · Las validaciones cruzadas marcan los campos implicados y pueden ser advertencia
 
@@ -370,7 +370,7 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-34 · Una sola acción principal por pantalla
 
-**Regla.** Cada pantalla, y cada diálogo, que cuenta como pantalla propia, tiene un solo botón relleno: guinda para avanzar o, dentro de una confirmación destructiva, rojo. Lo demás es secundario (gris con borde), peligro, enlace-botón o botón de icono con nombre accesible y 44 px. El peligro es sólo para lo destructivo y siempre con confirmación: el botón que la abre va con contorno rojo (.btn-peligro-contorno) y el que hace el daño, dentro de la confirmación, en rojo relleno con texto blanco (.btn-peligro), para que pese más que «Volver sin cambios».
+**Regla.** Cada pantalla, y cada diálogo, que cuenta como pantalla propia, tiene un solo botón relleno: guinda para avanzar o, dentro de una confirmación destructiva, rojo. Lo demás es secundario (gris con borde), peligro, enlace-botón o botón de icono con nombre accesible y 44 px. El peligro es sólo para lo destructivo y siempre con confirmación: el botón que la abre va con contorno rojo (.btn-peligro-contorno) y el que hace el daño, dentro de la confirmación, en rojo relleno con texto blanco (.btn-peligro), para que pese más que «Volver sin cambios». Lo elegido (página actual, pestaña abierta, opción marcada) va en azul: el guinda es sólo de la acción principal.
 
 **Por qué.** Dos botones guinda compiten y la persona no sabe cuál la lleva adelante.
 
@@ -400,13 +400,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-37 · Un botón no se deshabilita en silencio: aria-disabled y aria-busy
 
-**Regla.** Mientras se envía, el botón lleva aria-disabled y aria-busy con texto «Enviando…» y conserva el foco; al terminar se recupera. Si un botón no está disponible, se deja pulsar y se explica, o se marca con aria-disabled, nunca con disabled (disabled queda para los campos que no aplican, FRM-14).
+**Regla.** Mientras se envía, el botón lleva aria-disabled y aria-busy con texto «Enviando…» y conserva el foco; al terminar se recupera. Si un botón no está disponible, se deja pulsar y se explica, o se marca con aria-disabled, nunca con disabled (disabled queda para los campos que no aplican, FRM-14). «Enviando…» se anuncia y el botón no se ve apagado: la persona tiene que leerlo.
 
 **Por qué.** disabled saca el botón del orden de tabulación y el lector de pantalla no sabe por qué desapareció.
 
 **Nivel.** BASE · **Origen.** A FRM-42; B FRM-ACC-03; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: el botón se recupera; 02-una-pagina: agregar al máximo
+**Verificación.** 01-por-pasos: el botón se recupera; 02-una-pagina: agregar al máximo; 08: «Enviando…» (B4-04)
 
 ### FRM-38 · Toda acción que no se deshace o que afecta a otra persona pide confirmación dentro de la página, con sus consecuencias
 
@@ -440,7 +440,7 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-41 · Copiar y compartir confirman con palabras
 
-**Regla.** Copiar un folio o un dato de solo lectura cambia el texto del botón a «Copiado» un momento y lo anuncia; si el portapapeles falla se dice «No se pudo copiar». Compartir usa la API nativa si existe y, si no, copia el enlace.
+**Regla.** Copiar un folio o un dato de solo lectura cambia el texto del botón a «Copiado» un momento y lo anuncia; si el portapapeles falla se dice «No se pudo copiar». Compartir usa la API nativa si existe y, si no, copia lo mismo que compartiría (data-compartir-url="" comparte sólo el texto).
 
 **Por qué.** Un clic sin confirmación deja la duda; un fallo silencioso hace que la persona copie a mano lo que creía copiado.
 
@@ -482,13 +482,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-42 · Todo formulario largo guarda borrador en el dispositivo y lo ofrece al volver
 
-**Regla.** Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja («Hay un borrador guardado el …») con «Recuperar borrador» y «Empezar de nuevo»; «Empezar de nuevo» pide confirmación en la franja, con el foco en «Conservar» y el botón «Descartar borrador» (FRM-38). Sin franja en la página, el borrador se recupera solo al volver. El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas. El borrador empieza con el primer gesto de la persona en el formulario (escribir, elegir, tocar, soltar un archivo): lo que la página escribe sola, como al precargar una solicitud para continuarla, no crea un borrador. Mientras la franja espera la respuesta de la persona, no se guarda nada: lo que escriba antes de elegir no reemplaza al borrador guardado. Con su respuesta, el borrador vuelve a guardarse. La franja ofrece también «No guardar en este equipo» ([data-borrador="no-guardar"]): borra el borrador y, mientras la pestaña siga abierta, no se guarda nada (equipos compartidos). Al abrir cualquier formulario del estándar se borran los borradores vencidos de todo el sitio, no sólo el suyo, y un borrador con fecha futura se descarta. Un borrador alterado (paso fuera de rango, opciones que no son lista, historial de sugerencias raro) no detiene el formulario, y uno con fecha en el futuro se borra. Si el equipo no deja guardar (almacén lleno o bloqueado), el renglón del borrador lo dice.
+**Regla.** Con data-borrador el núcleo guarda los datos y el paso en el almacén local (versionado con data-borrador-version) y al volver muestra una franja («Hay un borrador guardado el …») con «Recuperar borrador» y «Empezar de nuevo»; «Empezar de nuevo» pide confirmación en la franja, con el foco en «Conservar» y el botón «Descartar borrador» (FRM-38). Sin franja en la página, el borrador se recupera solo al volver. El aviso dice que el borrador aún no se presenta. La fecha del borrador se escribe como la del acuse: en la zona de la Ciudad y en 24 horas. El borrador empieza con el primer gesto de la persona en el formulario (escribir, elegir, tocar, soltar un archivo): lo que la página escribe sola, como al precargar una solicitud para continuarla, no crea un borrador. Mientras la franja espera la respuesta de la persona, no se guarda nada: lo que escriba antes de elegir no reemplaza al borrador guardado. Con su respuesta, el borrador vuelve a guardarse. La franja ofrece también «No guardar en este equipo» ([data-borrador="no-guardar"]): borra el borrador y, mientras la pestaña siga abierta, no se guarda nada (equipos compartidos). Al abrir cualquier formulario del estándar se borran los borradores vencidos de todo el sitio, no sólo el suyo, y un borrador con fecha futura se descarta. Un borrador alterado (paso fuera de rango, opciones que no son lista, historial de sugerencias raro) no detiene el formulario, y uno con fecha en el futuro se borra. Si el equipo no deja guardar (almacén lleno o bloqueado), el renglón del borrador lo dice. Lo que se contesta en cada visita (el consentimiento, «No soy un programa automático») lleva data-sin-borrador y vuelve sin marcar. Al recuperar el borrador, un aviso a la vista dice en qué paso quedó la persona y qué tiene que volver a llenar porque no se guarda en el equipo, y recibe el foco; «Empezar de nuevo» vacía también lo que el navegador haya repuesto en pantalla. Con el mismo formulario en dos pestañas, cada una dice a la vista que la otra guardó; si la otra envía, ésta deja de guardar y lo dice. Al volver con «Adelante», las condiciones se ponen al día con lo que el navegador repuso. El aviso «Borrador guardado» tiene su renglón reservado: aparecer no mueve el formulario.
 
 **Por qué.** Perder diez minutos de captura por cerrar la pestaña es la causa principal de abandono.
 
 **Nivel.** RECOMENDADO · **Origen.** A FRM-14; A FRM-17; B FRM-EST-04; P128 (proyecto de acreditaciones, 18 oct 2026); P148 (proyecto de acreditaciones, 18 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: borrador se guarda, se ofrece y se restaura; 07: la precarga no crea borrador (P148); 08: escribir antes de contestar la franja (C4-01); 08: borradores vencidos de otros formularios y «No guardar en este equipo» (E1-05); 08: borrador alterado y almacén que no guarda (E3-07, B5-14)
+**Verificación.** 01-por-pasos: borrador se guarda, se ofrece y se restaura; 07: la precarga no crea borrador (P148); 08: escribir antes de contestar la franja (C4-01); 08: borradores vencidos de otros formularios y «No guardar en este equipo» (E1-05); 08: borrador alterado y almacén que no guarda (E3-07, B5-14); 08: recuperar y descartar (C4-10, C4-05), dos pestañas (C4-02), consentimiento (C4-12), «Borrador guardado» (C2-11)
 
 ### FRM-43 · El borrador del dispositivo nunca guarda campos sensibles ni archivos, y se invalida con la estructura
 
@@ -502,17 +502,17 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-44 · Todo envío tiene límite de espera, clave de idempotencia y dice qué pasó
 
-**Regla.** El envío lleva AbortController con plazo configurable y una clave de idempotencia por envío, la misma en cada reintento hasta que el servidor lo reciba. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver». El aviso de un envío fallido se queda hasta que la persona cambia un dato o vuelve a enviar: no se oculta al mover el foco, porque el botón de abajo subiría a media pulsación y el clic se perdería. Un 2xx es un envío recibido aunque no traiga JSON (204, «OK», null): no se dice que falló. Desde que el servidor lo recibe nada cuenta como envío fallido; si lo que la página hace después falla, se dice que el envío se recibió y que no se envíe de nuevo. El borrador se borra después de mostrar el acuse. Tras un envío logrado la clave se renueva: si el formulario sigue en pantalla (captura en serie), el siguiente registro lleva otra clave y vuelve a guardar borrador. Sin enviar propio, el envío por omisión va en JSON y, con archivos, en multipart/form-data: la parte payload lleva el JSON y cada archivo va en una parte archivo, en orden. El plazo corre desde que se envía y vale aunque un enviar propio no atienda la señal. Un rechazo se dice completo: los errores de un campo junto a él y los demás, con sus palabras, en el aviso de envío. Si la página tiene acuse y su módulo no cargó, un envío recibido se dice con su folio. Si una foto que se procesaba termina con error, el envío se detiene y lo dice junto al campo.
+**Regla.** El envío lleva AbortController con plazo configurable y una clave de idempotencia por envío, la misma en cada reintento hasta que el servidor lo reciba. El fallo (red, plazo, error del servidor) se dice con palabras en un aviso de bloqueo que recibe el foco; lo capturado se conserva y el botón se recupera. El límite de peticiones (429) abre una pantalla propia con «Volver». El aviso de un envío fallido se queda hasta que la persona cambia un dato o vuelve a enviar: no se oculta al mover el foco, porque el botón de abajo subiría a media pulsación y el clic se perdería. Un 2xx es un envío recibido aunque no traiga JSON (204, «OK», null): no se dice que falló. Desde que el servidor lo recibe nada cuenta como envío fallido; si lo que la página hace después falla, se dice que el envío se recibió y que no se envíe de nuevo. El borrador se borra después de mostrar el acuse. Tras un envío logrado la clave se renueva: si el formulario sigue en pantalla (captura en serie), el siguiente registro lleva otra clave y vuelve a guardar borrador. Sin enviar propio, el envío por omisión va en JSON y, con archivos, en multipart/form-data: la parte payload lleva el JSON y cada archivo va en una parte archivo, en orden. El plazo corre desde que se envía y vale aunque un enviar propio no atienda la señal. Un rechazo se dice completo: los errores de un campo junto a él y los demás, con sus palabras, en el aviso de envío. Si la página tiene acuse y su módulo no cargó, un envío recibido se dice con su folio. Si una foto que se procesaba termina con error, el envío se detiene y lo dice junto al campo. Las dos plantillas tienen su pantalla de límite. Si el aviso de un envío fallido quedó en un paso que no se ve, ese paso se abre.
 
 **Por qué.** Un giro eterno y una pantalla en blanco son el peor error posible; un reenvío sin idempotencia duplica registros.
 
 **Nivel.** BASE · **Origen.** A FRM-42; A FRM-43; B FRM-SEG-02; P87 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: error simulado, límite y éxito; 07: aviso de envío fallido; 08: envíos recibidos sin JSON (B5-05), captura en serie (C4-08); 08: multipart, rechazo completo, plazo, sin acuse y foto con error (B5-07, B5-08, B5-10, B5-13, E3-04)
+**Verificación.** 01-por-pasos: error simulado, límite y éxito; 07: aviso de envío fallido; 08: envíos recibidos sin JSON (B5-05), captura en serie (C4-08); 08: multipart, rechazo completo, plazo, sin acuse y foto con error (B5-07, B5-08, B5-10, B5-13, E3-04); 08: límite en una página (C4-13)
 
 ### FRM-45 · El envío no se duplica
 
-**Regla.** Mientras el envío está en curso el botón está ocupado y un segundo clic no manda nada; Enter en un campo intermedio avanza de paso en lugar de enviar.
+**Regla.** Mientras el envío está en curso el botón está ocupado y un segundo clic no manda nada; Enter en un campo intermedio avanza de paso en lugar de enviar. Un envío a la vez: otro clic o Enter mientras se envía no lo repite.
 
 **Por qué.** Dos clics nerviosos en «Enviar» crean dos registros.
 
@@ -534,7 +534,7 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-47 · Cascada alcaldía → colonia → código postal con catálogo versionado y camino inverso
 
-**Regla.** La cascada (módulo «cascadas») toma sus filas de FORMKIT_CATALOGOS.<nombre> con fuente y fecha de corte declaradas; cambiar un padre reinicia a los hijos y lo anuncia; escribir el código postal propone alcaldía y colonia; la colonia propone el CP. Sin catálogo se muestra la captura manual. El catálogo que viaja con el paquete es ficticio y se sustituye por el oficial. Sin catálogo se oculta la lista entera ([data-cascada-lista]) y no cada campo, de modo que ninguna condición la vuelva a mostrar; la captura manual ([data-cascada-manual]) pide alcaldía y colonia, y el código postal se queda. El esquema marca qué campos son de la lista y cuáles de la captura manual: si llega la manual, el servidor exige ésa y no la lista. Cada select de la cascada se contrasta con su catálogo (por su nombre en data-catalogo, sea un arreglo o {filas}) y la colonia, con la alcaldía elegida. Una fila incompleta del catálogo se omite con un aviso en la consola y no detiene la página.
+**Regla.** La cascada (módulo «cascadas») toma sus filas de FORMKIT_CATALOGOS.<nombre> con fuente y fecha de corte declaradas; cambiar un padre reinicia a los hijos y lo anuncia; el código postal va primero y escribirlo propone alcaldía y colonia; la colonia propone el CP. Sin catálogo se muestra la captura manual. El catálogo que viaja con el paquete es ficticio y se sustituye por el oficial. Sin catálogo se oculta la lista entera ([data-cascada-lista]) y no cada campo, de modo que ninguna condición la vuelva a mostrar; la captura manual ([data-cascada-manual]) pide alcaldía y colonia, y el código postal se queda. El esquema marca qué campos son de la lista y cuáles de la captura manual: si llega la manual, el servidor exige ésa y no la lista. Cada select de la cascada se contrasta con su catálogo (por su nombre en data-catalogo, sea un arreglo o {filas}) y la colonia, con la alcaldía elegida. Una fila incompleta del catálogo se omite con un aviso en la consola y no detiene la página.
 
 **Por qué.** Una lista de colonias escrita en el HTML se desactualiza y pesa; obligar a elegir alcaldía cuando la persona sabe su CP es un paso de más.
 
@@ -554,13 +554,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-49 · El punto en el mapa se coloca con toque, arrastre o teclado, se confirma y no se pide geolocalización por omisión
 
-**Regla.** El mapa (Leaflet autoalojado con gestos: un dedo desplaza la página, dos el mapa) coloca el punto al tocar, permite arrastrarlo y, con el mapa enfocado, Enter lo coloca en el centro. Con data-confirmar el punto debe confirmarse. Las coordenadas se dicen en texto como latitud, longitud; viajan como punto GeoJSON [lon, lat] en EPSG:4326 con seis decimales. La geolocalización del dispositivo sólo se ofrece con data-geolocalizacion. El ámbito se acota y un punto fuera se dice al momento. Al recuperar el borrador, el punto confirmado vuelve confirmado. Enter sobre «+» o «−» acerca o aleja y nada más. Si no se obtiene la ubicación, el aviso va en su propio renglón y el punto ya elegido se queda. Las coordenadas que el enlace corrige (sin signo menos) llegan al mapa ya corregidas.
+**Regla.** El mapa (Leaflet autoalojado con gestos: un dedo desplaza la página, dos el mapa) coloca el punto al tocar, permite arrastrarlo y, con el mapa enfocado, Enter lo coloca en el centro. Con data-confirmar el punto debe confirmarse. Las coordenadas se dicen en texto como latitud, longitud; viajan como punto GeoJSON [lon, lat] en EPSG:4326 con seis decimales. La geolocalización del dispositivo sólo se ofrece con data-geolocalizacion. El ámbito se acota y un punto fuera se dice al momento. Al recuperar el borrador, el punto confirmado vuelve confirmado. Enter sobre «+» o «−» acerca o aleja y nada más. Si no se obtiene la ubicación, el aviso va en su propio renglón y el punto ya elegido se queda. Las coordenadas que el enlace corrige (sin signo menos) llegan al mapa ya corregidas. Acercar y alejar llevan su nombre en español y miden 44 px. Una ubicación del dispositivo con más de 100 m de imprecisión (FORMKIT_CONFIG.mapa.aproximadaM) se dice aproximada. El complemento de gestos no lleva <script> en la página: su dirección va en FORMKIT_CONFIG.mapa.gestos y el módulo lo carga sólo si Leaflet cargó (sin Leaflet no hay error en la consola), y sin Leaflet el punto de un borrador se conserva.
 
 **Por qué.** Un mapa que atrapa el desplazamiento del teléfono bloquea la página; un punto sin confirmar se envía por un roce; pedir permiso de ubicación sin motivo ahuyenta.
 
 **Nivel.** OPCIONAL · **Origen.** A FRM-53; A FRM-54; B FRM-UBI-01; B FRM-UBI-03; auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 01-por-pasos: mapa toca, confirma; mapa.js; 08: borrador con el punto confirmado (F2-02); 08: mapa (F2-04, F2-05)
+**Verificación.** 01-por-pasos: mapa toca, confirma; mapa.js; 08: borrador con el punto confirmado (F2-02); 08: mapa (F2-04, F2-05); 08: mapa en español, ubicación aproximada y sin Leaflet (G2-02, B6-03, B6-04)
 
 ### FRM-50 · El mapa base, el marcador y el cruce son del proyecto, no de un tercero
 
@@ -690,13 +690,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-62 · Todo lo que se toca mide al menos 44 px con puntero táctil
 
-**Regla.** Botones, enlaces de acción, opciones, pestañas y controles miden al menos 44 px con puntero táctil, sea cual sea el ancho de la pantalla; los enlaces dentro de texto corrido cumplen 24 px con espacio alrededor.
+**Regla.** Botones, enlaces de acción, opciones, pestañas y controles miden al menos 44 px con puntero táctil, sea cual sea el ancho de la pantalla; los enlaces dentro de texto corrido cumplen 24 px con espacio alrededor. Incluye los botones de acercar y alejar del mapa; la prueba de anchos no exime enlaces ni pestañas, sólo los enlaces dentro de texto corrido.
 
 **Por qué.** El dedo no acierta a 32 px; errar un botón en la calle es abandonar.
 
 **Nivel.** BASE · **Origen.** A FRM-46; B FRM-A11Y-02; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
-**Verificación.** 03-anchos.prueba.mjs: objetivos táctiles (320–768)
+**Verificación.** 03-anchos.prueba.mjs: objetivos táctiles (320–768); 03-anchos: enlaces y pestañas (B1-03)
 
 ### FRM-63 · Teclado adecuado, zoom permitido, áreas seguras y alto dinámico
 
@@ -814,13 +814,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-73 · Registro institucional claro: frases cortas, voz activa, sin siglas sin explicar
 
-**Regla.** Los textos del formulario hablan a la persona de tú por omisión, con oraciones cortas; un formulario que habla de usted lo hace en todos sus textos, sin mezclar (los mensajes se cambian en la configuración, FRM-11). El nombre de la institución se escribe completo la primera vez y las acciones se le atribuyen («la Secretaría»).
+**Regla.** Los textos del formulario hablan a la persona de tú por omisión, con oraciones cortas; un formulario que habla de usted lo hace en todos sus textos, sin mezclar (los mensajes se cambian en la configuración, FRM-11). El nombre de la institución se escribe completo la primera vez y las acciones se le atribuyen («la Secretaría»). Ningún texto habla en «nosotros» («Recibimos», «no podemos», «Cuéntanos»): las acciones son de «la Secretaría» o se dicen de forma impersonal («Tu solicitud se recibió», «se toman las coordenadas»), y los mensajes con dato variable no fijan el género («según la CURP», no «tomado de la CURP»).
 
 **Por qué.** Un formulario que no se entiende se llena mal o no se llena.
 
 **Nivel.** BASE · **Origen.** A FRM-92; B FRM-TXT-04; auditoría del estándar, 18 oct 2026 · *decisión heredada*
 
-**Verificación.** revisión editorial (no automatizable)
+**Verificación.** revisión editorial (no automatizable); 08: textos sin «nosotros» (C5-03, C5-07)
 
 ### FRM-74 · Lo que no se dice, no se promete
 

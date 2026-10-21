@@ -7,7 +7,7 @@ Todo lo que el estándar usa y no escribió. Regla: **todo autoalojado** (FRM-77
 | Paquete | Versión | Licencia | Para qué | Viaja al sitio |
 |---|---|---|---|---|
 | Leaflet | 1.9.4 | BSD-2-Clause | Mapa del módulo `mapa` (sólo si el formulario pide un punto). | Sólo con el módulo `mapa` |
-| leaflet-gesture-handling | 1.2.2 | MIT | Un dedo desplaza la página, dos el mapa; Ctrl + rueda acerca. | Sólo con el módulo `mapa` |
+| leaflet-gesture-handling | 1.2.2 | MIT | Un dedo desplaza la página, dos el mapa; Ctrl + rueda acerca. | Sólo con el módulo `mapa`, que lo carga si Leaflet cargó (su dirección en `FORMKIT_CONFIG.mapa.gestos`); no lleva `<script>` en la página |
 | pdfjs-dist | 4.10.38 | Apache-2.0 | Visor de documentos (módulo `visor`); se carga al abrir el primer PDF, con `isEvalSupported: false`. | Sólo con el módulo `visor` |
 | axe-core | 4.13.0 | MPL-2.0 | Auditoría de accesibilidad en las pruebas. | **No** (sólo verificación) |
 

@@ -1,7 +1,7 @@
 /* GENERADO: núcleo + todos los módulos. Para copiar sólo lo que se usa, toma los archivos de codigo/. */
 /* ===== codigo/css/tokens.css ===== */
 /* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.6.1
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.6.2
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -195,7 +195,9 @@
 
 /* Con una barra fija arriba, todo desplazamiento automático (el foco al
    abrir un paso, el salto al resumen de errores) debe detenerse por debajo
-   de ella. Se declara una vez aquí y cubre cualquier elemento. */
+   de ella. Se declara una vez aquí y cubre cualquier elemento. El módulo de pasos
+   mide la barra y pone su alto real en --alto-barra-fija y --alto-barra-fija-movil
+   (0 cuando deja de ser fija). */
 html{scroll-padding-top:var(--alto-barra-fija-movil);-webkit-text-size-adjust:100%}
 
 body{
@@ -410,12 +412,13 @@ a{color:var(--azul)}
    revisada por la Secretaría el 14 oct 2026): el color solo no lo dice, por eso
    lleva la leyenda y «(obligatorio)» para el lector de pantalla. */
 .marca-oblig{margin-left:var(--e-1);font-weight:var(--peso-fuerte);color:var(--guinda)}
-.ayuda{margin-bottom:var(--e-2);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
+/* Ayudas y contador: 14 px en el teléfono, 13 y 12 desde tableta (decisión de la Secretaría). */
+.ayuda{margin-bottom:var(--e-2);font-size:var(--t-md);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
 .ayuda:empty{margin:0}
 /* Ayuda de bloque: va una vez bajo el título de la sección cuando vale igual
    para todos sus campos; la ayuda de cada campo queda para lo propio de él. */
-.ayuda-bloque{margin-bottom:var(--e-4);font-size:var(--t-sm);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
-.contador{margin-top:var(--e-1);font-size:var(--t-xs);text-align:right;color:var(--gris-cl)}
+.ayuda-bloque{margin-bottom:var(--e-4);font-size:var(--t-md);line-height:var(--interlineado-compacto);color:var(--gris-cl)}
+.contador{margin-top:var(--e-1);font-size:var(--t-md);text-align:right;color:var(--gris-cl)}
 
 /* Error del campo: icono + palabra «Error» + qué hacer. No depende del rojo. */
 .err{
@@ -517,7 +520,7 @@ a{color:var(--azul)}
   border-radius:var(--r-caja);
 }
 .destacado-nombre{display:block;font-weight:var(--peso-medio);line-height:var(--interlineado-compacto)}
-.destacado-ayuda{display:block;margin-top:var(--e-1);font-size:var(--t-sm);color:var(--gris-cl)}
+.destacado-ayuda{display:block;margin-top:var(--e-1);font-size:var(--t-md);color:var(--gris-cl)}
 
 /* ---------- Iconos ----------
    Un solo conjunto SVG (codigo/iconos/sprite.svg). Heredan el color del
@@ -653,8 +656,10 @@ a{color:var(--azul)}
 .resumen-errores-lista{margin-left:var(--e-5);font-size:var(--t-md);list-style:disc}
 .resumen-errores-lista li{padding:var(--e-1) 0} /* separa los enlaces para cumplir los 24 px de WCAG 2.5.8 */
 .resumen-errores-enlace{font-weight:var(--peso-semi);color:var(--error)}
-/* «Borrador guardado»: el sistema avisa en verde, discreto, con aria-live. */
-.guardado{height:0;overflow:hidden;font-size:var(--t-sm);color:var(--ok);opacity:0;transition:opacity var(--dur-media)}
+/* «Borrador guardado»: el sistema avisa en verde, discreto, con aria-live. Su renglón está
+   reservado y sólo cambia la opacidad: aparecer y desaparecer no mueve el formulario (un clic
+   a media aparición caía en otro lugar). */
+.guardado{min-height:calc(var(--t-sm) * var(--interlineado-cuerpo) + var(--e-2));padding-bottom:var(--e-2);font-size:var(--t-sm);color:var(--ok);opacity:0;transition:opacity var(--dur-media)}
 
 /* Franja de borrador recuperado, antes del formulario. */
 .franja{
@@ -760,9 +765,10 @@ a{color:var(--azul)}
 /* Deshabilitado accesible: aria-disabled conserva el foco y el anuncio; la
    acción la bloquea formkit. :disabled queda para lo que de verdad no aplica. */
 .btn:disabled,.btn[aria-disabled="true"]{opacity:var(--op-inactivo);cursor:not-allowed}
-.btn[aria-busy="true"]{cursor:progress}
+/* «Enviando…» no se ve apagado: la persona tiene que leerlo (el clic ya está bloqueado). */
+.btn[aria-busy="true"]{opacity:1;cursor:progress}
 
-.guardado[data-visible]{height:auto;padding-bottom:var(--e-2);opacity:1}
+.guardado[data-visible]{opacity:1}
 
 /* @bloque utilidades */
 
@@ -801,6 +807,8 @@ a{color:var(--azul)}
    principal a la derecha, botones a su medida. */
 @media (min-width:760px){
   html{scroll-padding-top:var(--alto-barra-fija)}
+  .ayuda,.ayuda-bloque,.destacado-ayuda{font-size:var(--t-sm)}
+  .contador{font-size:var(--t-xs)}
   .fila{grid-template-columns:1fr 1fr}
   .fila-3{grid-template-columns:1fr 1fr 1fr}
   .fila-2-1{grid-template-columns:2fr 1fr}
@@ -1158,7 +1166,8 @@ a{color:var(--azul)}
    palomita y el número; que tenga error, el icono de alerta: nunca sólo el
    color. En teléfono las etiquetas se ocultan y aparece «Paso X de N ·
    Título». La barra queda fija arriba y el desplazamiento automático la
-   respeta (scroll-padding-top en base.css).
+   respeta (scroll-padding-top en base.css, con el alto real que mide el
+   módulo); con menos de 500 px de alto deja de ser fija.
    También define la barra de acciones fija en teléfono (opcional, clase
    .acciones-fijas): queda al pie, respeta la franja segura y no tapa el
    campo enfocado porque el relleno inferior de la página lo compensa.
@@ -1280,6 +1289,11 @@ a{color:var(--azul)}
   .acciones-fijas{position:static;margin:var(--e-6) 0 0;padding:var(--e-5) 0 0;border-radius:0}
 }
 
+/* Pantalla baja (teléfono acostado, zoom al 400 %): fija, la barra taparía más de la mitad. */
+@media (max-height: 499px){
+  .barra-fija{position:static}
+}
+
 @media (forced-colors: active){
   .pasos-btn[aria-current="step"] .pasos-bolita{outline:var(--b-3) solid Highlight}
 }
@@ -1292,9 +1306,9 @@ a{color:var(--azul)}
 /* ===== codigo/modulos/revision/revision.css ===== */
 /* =========================================================
    revision.css · Módulo «revision» · nivel RECOMENDADO
-   Un bloque plegable por paso; cada dato con «Editar». En teléfono la
+   Un bloque por paso con su título y un solo «Editar». En teléfono la
    etiqueta y el valor se apilan; desde tableta van en dos columnas.
-   Depende de: nucleo.css. Bloques: componentes → estados → adaptaciones.
+   Depende de: nucleo.css. Bloques: componentes → adaptaciones.
    ========================================================= */
 
 /* @bloque componentes */
@@ -1304,16 +1318,14 @@ a{color:var(--azul)}
   display:flex;
   flex-wrap:wrap;
   align-items:center;
+  justify-content:space-between;
   gap:var(--e-2) var(--e-3);
   min-height:var(--objetivo-min);
-  padding:var(--e-3) var(--e-4);
-  list-style:none;
-  cursor:pointer;
+  margin-bottom:var(--e-3);
+  padding:var(--e-2) var(--e-4);
+  border-bottom:var(--b-1) solid var(--linea);
 }
-.rev-titulo::-webkit-details-marker{display:none}
-.rev-rotulo{font-size:var(--t-xs);font-weight:var(--peso-semi);letter-spacing:var(--tracking-rotulo);text-transform:uppercase;color:var(--gris)}
-.rev-resumen{flex:1 1 100%;font-size:var(--t-md);overflow-wrap:anywhere}
-.rev-flecha{margin-left:auto;color:var(--gris);transition:transform var(--dur-rapida)}
+.rev-rotulo{margin:0;font-size:var(--t-xs);font-weight:var(--peso-semi);letter-spacing:var(--tracking-rotulo);text-transform:uppercase;color:var(--gris)}
 .rev-datos{
   display:grid;
   grid-template-columns:minmax(0,1fr);
@@ -1327,20 +1339,11 @@ a{color:var(--azul)}
 }
 /* Como en la ficha y en la tabla del teléfono: rótulo gris de peso normal, dato que destaca. */
 .rev-dato-etq{padding:var(--e-2) var(--e-3) 0;background:var(--blanco);font-size:var(--t-sm);font-weight:var(--peso-normal);color:var(--gris)}
-.rev-dato-valor{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--e-2);padding:0 var(--e-3) var(--e-2);background:var(--blanco);font-weight:var(--peso-semi);white-space:pre-wrap;word-break:break-word}
-/* Con un valor largo, el valor se parte en renglones y «Editar» se queda a su lado, arriba. */
-.rev-dato-valor > span{flex:1 1 auto;min-width:0}
-.rev-dato-valor > .btn-enlace{flex:none}
-
-/* @bloque estados */
-
-.rev-bloque[open] .rev-titulo{border-bottom:var(--b-1) solid var(--linea);margin-bottom:var(--e-3)}
-.rev-bloque[open] .rev-flecha{transform:rotate(180deg)}
+.rev-dato-valor{margin:0;padding:0 var(--e-3) var(--e-2);background:var(--blanco);font-weight:var(--peso-semi);white-space:pre-wrap;overflow-wrap:anywhere}
 
 /* @bloque adaptaciones */
 
 @media (min-width:760px){
-  .rev-resumen{flex:1 1 auto}
   .rev-datos{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
   .rev-dato-etq{padding:var(--e-3)}
   .rev-dato-valor{padding:var(--e-3)}
@@ -1634,8 +1637,13 @@ a{color:var(--azul)}
 
 /* @bloque estados */
 
+/* Hay más pestañas fuera de la vista: el borde de ese lado se desvanece. */
+.pestanas-lista[data-mas-despues]{mask-image:linear-gradient(to left, transparent, var(--texto) var(--e-8))}
+.pestanas-lista[data-mas-antes]{mask-image:linear-gradient(to right, transparent, var(--texto) var(--e-8))}
+.pestanas-lista[data-mas-antes][data-mas-despues]{mask-image:linear-gradient(to right, transparent, var(--texto) var(--e-8), var(--texto) calc(100% - var(--e-8)), transparent)}
 .pestana:hover{color:var(--azul)}
-.pestana[aria-selected="true"]{border-bottom-color:var(--guinda);color:var(--guinda)}
+/* La pestaña abierta es «lo elegido»: azul; el guinda es sólo de la acción principal. */
+.pestana[aria-selected="true"]{border-bottom-color:var(--azul);color:var(--azul)}
 
 
 /* ===== codigo/modulos/migas/migas.css ===== */
@@ -1764,7 +1772,8 @@ a{color:var(--azul)}
 /* @bloque estados */
 
 .paginacion-btn:hover{border-color:var(--azul);background:var(--azul-cl)}
-.paginacion-btn[aria-current="page"]{background:var(--guinda);border-color:var(--guinda);color:var(--blanco);cursor:default}
+/* La página actual es «lo elegido»: azul, como las opciones elegidas; el guinda es sólo de la acción principal. */
+.paginacion-btn[aria-current="page"]{background:var(--azul);border-color:var(--azul);color:var(--blanco);cursor:default}
 .paginacion-btn[aria-disabled="true"]{opacity:var(--op-inactivo);cursor:not-allowed}
 
 /* @bloque adaptaciones */
@@ -1923,6 +1932,8 @@ td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
 
 /* @bloque estados */
 
+/* Sobre la cabecera guinda el anillo azul no se ve (1.57:1): ahí va en blanco (par N25, 7.65:1). */
+.tabla-orden:focus-visible{outline-color:var(--blanco)}
 [aria-sort="ascending"] .tabla-orden-icono{opacity:1;transform:rotate(180deg)}
 [aria-sort="descending"] .tabla-orden-icono{opacity:1}
 .tabla[aria-busy="true"]{opacity:var(--op-inactivo)}
@@ -2159,6 +2170,8 @@ td[data-etiqueta-oculta] > .tabla-valor{grid-column:1 / -1}
   overflow:hidden;
 }
 .mapa-marcador{color:var(--guinda);filter:drop-shadow(0 var(--b-1) var(--b-2) var(--sombra-color))}
+/* Acercar y alejar de Leaflet: 44 px también en el teléfono, como todo lo que se toca (FRM-62); Leaflet los pinta de 30. */
+.leaflet-bar a.leaflet-control-zoom-in,.leaflet-bar a.leaflet-control-zoom-out{width:var(--objetivo-min);height:var(--objetivo-min);line-height:var(--objetivo-min)}
 .mapa-barra{display:flex;flex-direction:column;gap:var(--e-3);margin-bottom:var(--e-3)}
 .coords{
   display:inline-flex;

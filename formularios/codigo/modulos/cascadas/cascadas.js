@@ -59,11 +59,13 @@
           continue;
         }
         const orden = ['alcaldia', 'colonia', 'cp'].filter((n) => por[n]);
-        const sel = (c, valores, placeholder) => {
+        /* La primera opción vacía conserva el texto que trae el HTML; sin él, el de los mensajes. */
+        const primeraDe = new Map(niveles.filter((c) => c.tagName === 'SELECT').map((c) => [c, c.options[0] && c.options[0].value === '' ? c.options[0].textContent.trim() : '']));
+        const sel = (c, valores) => {
           if (c.tagName !== 'SELECT') return;
           const actual = c.value;
           c.textContent = '';
-          const o0 = document.createElement('option'); o0.value = ''; o0.textContent = placeholder || 'Elige una opción'; c.appendChild(o0);
+          const o0 = document.createElement('option'); o0.value = ''; o0.textContent = primeraDe.get(c) || M.cascadaElige; c.appendChild(o0);
           for (const v of valores) { const o = document.createElement('option'); o.value = v; o.textContent = v; c.appendChild(o); }
           if (valores.includes(actual)) c.value = actual;
           c.toggleAttribute('data-vacio', !c.value);

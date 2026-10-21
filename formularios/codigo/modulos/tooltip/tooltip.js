@@ -7,7 +7,7 @@
    Escape lo cierra; el texto queda enlazado al botón con aria-describedby
    mientras está abierto. CUÁNDO NO: para instrucciones necesarias para
    llenar el campo (van en la ayuda visible), para repetir lo que la ayuda
-   visible ya dice (si basta, no hay ícono; auditar-campos D5) ni para
+   visible ya dice (si basta, no hay icono; auditar-campos D5) ni para
    textos largos.
 
      <span class="tooltip" data-tooltip>

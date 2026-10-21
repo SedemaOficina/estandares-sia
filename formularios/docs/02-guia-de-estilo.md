@@ -20,9 +20,9 @@ Qué se ve y por qué. Todo valor de este documento vive en `codigo/css/tokens.c
 | `--blanco` | #FFFFFF | Tarjetas y controles. |
 | `--beige` | #FFFEF8 | Pie institucional. |
 | `--aviso-bg` | #F7F8F9 | Aviso neutro, control deshabilitado. |
-| `--azul` | #1A56A8 | Enlaces, casilla marcada, «Atrás», estado seleccionado. |
+| `--azul` | #1A56A8 | Enlaces, casilla marcada, «Atrás», lo elegido (opción marcada, página actual de la paginación, pestaña abierta). |
 | `--azul-cl` | #EEF3FA | Fondo de lo seleccionado (tarjeta, chip, opción de combo). |
-| `--foco` | #1A73C7 | Anillo de foco de todo elemento interactivo. |
+| `--foco` | #1A73C7 | Anillo de foco de todo elemento interactivo. Sobre la cabecera guinda de la tabla el anillo va en blanco (par N25): el azul daría 1.57:1. |
 | `--error` | #B3261E | Error bloqueante: borde, mensaje, resumen, botón de peligro. |
 | `--pend` | #8A5200 | Advertencia y «Pendiente»: ámbar, siempre con icono y texto. |
 | `--ok` | #1B6B43 | Éxito y «guardado». |
@@ -74,6 +74,7 @@ Cada par de la tabla es un uso real del estándar: el texto sobre el fondo donde
 | N04 | `--foco` #1A73C7 | `--fondo` #F4F5F6 | 4.45:1 | 3:1 | cumple | Anillo de foco sobre la página |
 | N05 | `--foco` #1A73C7 | `--beige` #FFFEF8 | 4.81:1 | 3:1 | cumple | Anillo de foco en encabezado y pie |
 | N06 | `--foco` #1A73C7 | `--azul-cl` #EEF3FA | 4.36:1 | 3:1 | cumple | Anillo de foco sobre una opción o casilla elegida |
+| N25 | `--blanco` #FFFFFF | `--guinda` #9D2148 | 7.65:1 | 3:1 | cumple | Anillo de foco sobre la cabecera guinda de la tabla (ahí va en blanco: el azul daría 1.57:1) |
 | N07 | `--azul` #1A56A8 | `--blanco` #FFFFFF | 7.14:1 | 3:1 | cumple | Borde de la opción elegida |
 | N08 | `--error` #B3261E | `--error-bg` #FDF3F2 | 6.00:1 | 3:1 | cumple | Borde de un campo con error |
 | N09 | `--ok` #1B6B43 | `--blanco` #FFFFFF | 6.50:1 | 3:1 | cumple | Marca de recepción (círculo verde sobre tarjeta) |
@@ -124,7 +125,8 @@ Cada par de la tabla es un uso real del estándar: el texto sobre el fondo donde
 | Pregunta (`.etiqueta`) | Roboto 500 | `--t-base` = 16px |
 | Respuesta y cuerpo | Roboto 400 | `--t-base` = 16px, interlineado 1.55; ancho máximo de 70 caracteres sólo en el texto corrido (`.texto-corrido`) |
 | Botones secundarios, celdas | Roboto 500 | `--t-md` = 14px |
-| Ayuda, contador, pies (`.ayuda`) | Roboto 400 | `--t-sm` = 13px |
+| Ayuda y contador (`.ayuda`, `.contador`) | Roboto 400 | `--t-md` = 14px en el teléfono; desde 760 px, `--t-sm` = 13px la ayuda y `--t-xs` = 12px el contador (decisión de la Secretaría, 20 oct 2026) |
+| Pies y notas | Roboto 400 | `--t-sm` = 13px |
 | Rótulo (`.rotulo`) | Roboto 400, mayúsculas, tracking .06em | `--t-sm` = 13px |
 
 Los tamaños grandes son fluidos: crecen con el ancho de la pantalla entre un mínimo legible en teléfono y un máximo en escritorio. El cuerpo y los controles **nunca bajan de 16 px**: por debajo, iOS hace zoom al enfocar un campo. Las dos familias viajan en `codigo/fuentes/` con su licencia (OFL) y sólo en los pesos declarados (C12): Cabin 600 y 700; Roboto 400, 500 y 700.
@@ -172,7 +174,7 @@ El CSS parte del teléfono y sólo crece. Hay tres puntos de corte, declarados e
 | Advertencia | Mensaje ámbar con icono; el control no cambia de borde | `.err[data-nivel="advertencia"]` |
 | Solo lectura | Fondo gris muy claro, borde discontinuo; se envía | `readonly` |
 | Deshabilitado | Gris, opacidad .45; no se envía; el teclado lo salta | `disabled` (sólo lo que no aplica todavía) |
-| Ocupado | Botón con `aria-busy`, texto «Enviando…», icono que gira | `aria-disabled="true" aria-busy="true"` |
+| Ocupado | Botón con `aria-busy`, texto «Enviando…» que se anuncia y se ve con todo su contraste (no apagado) | `aria-disabled="true" aria-busy="true"` |
 | Seleccionado | Fondo azul claro, sombra interior, palomita | `:checked`, `[aria-pressed="true"]`, `[aria-selected="true"]` |
 | Oculto | No existe para nadie | `hidden` (sin `!important`; nada lo pisa) |
 
@@ -188,6 +190,24 @@ El botón principal es guinda relleno, uno por pantalla (y uno por diálogo). El
 
 Un solo sprite SVG (`codigo/iconos/sprite.svg`, 30 símbolos) que `formkit.core.js` inyecta una vez por página. Los iconos heredan el color del texto (`currentColor`), miden `--icono` (20 px) o `--icono-sm` (16 px). El decorativo lleva `aria-hidden="true"`; el que comunica algo va siempre junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con `aria-label` y 44 px de objetivo. Catálogo: alerta, error, ok, info, ayuda, cerrar, palomita, flecha-izq, flecha-der, abajo, descarga, copiar, compartir, eliminar, editar, ubicacion, fecha, adjunto, camara, buscar, mas, cargando, reloj, externo, archivo. Marcas de redes sociales (rellenas, como las publica cada red; sólo en el bloque de redes del pie): facebook, x, instagram, tiktok, youtube.
 
-## 9. Lo que la guía visual muestra y este documento no
+## 9. Palabras: una para cada cosa
+
+Lo que lee la persona usa siempre la misma palabra para lo mismo, en los mensajes, las plantillas y las guías:
+
+| Se dice | No se dice | Dónde |
+|---|---|---|
+| agregar (un archivo) | adjuntar, subir, cargar | mensajes de archivos, ayudas |
+| quitar (lo que la persona agregó) | borrar, eliminar | archivos, filas, sugerencias; «Eliminar» queda para registros guardados |
+| enviar (la solicitud) | presentar, mandar | botones, franja del borrador, acuse |
+| Empezar de nuevo · Descartar borrador | Borrar, Limpiar | franja del borrador y su confirmación |
+| respuesta (en lo que la persona revisa) | campo, dato, valor | resumen de errores, revisión |
+| teléfono | celular, móvil | etiquetas y ayudas |
+| icono | ícono | guías y documentos |
+| sólo (adverbio: «sólo si…») · solo (adjetivo: «un solo campo», «solo lectura») | — | todos los textos |
+| la Secretaría (quien recibe, revisa, contacta) o forma impersonal («se recibió», «se toman») | nosotros («recibimos», «no podemos», «cuéntanos») | todo el formulario (FRM-73) |
+
+Los mensajes con un dato variable no fijan el género: «Fecha de nacimiento: 23/07/1985, según la CURP», no «tomado de la CURP».
+
+## 10. Lo que la guía visual muestra y este documento no
 
 Las muestras vivas de cada estado, el probador de validaciones, los pares «sí y no» y los cuatro formularios de ejemplo a 320, 390, 768 y 1280 px o lado a lado están en `guia-visual/index.html` (y en `guia-visual/artefacto.html`, autocontenido). Si una decisión visual no está en este documento ni en la guía, no es parte del estándar.

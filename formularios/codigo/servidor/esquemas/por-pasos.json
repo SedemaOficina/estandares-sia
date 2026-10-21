@@ -1,6 +1,6 @@
 {
   "formulario": "por-pasos.html",
-  "generado": "2026-10-20T21:45:31.514Z",
+  "generado": "2026-10-21T02:04:38.745Z",
   "campos": {
     "tipo": {
       "etiqueta": "Tipo de solicitud",
@@ -67,7 +67,7 @@
       "autocomplete": "off"
     },
     "descripcion": {
-      "etiqueta": "Cuéntanos con tus palabras",
+      "etiqueta": "Descríbelo con tus palabras",
       "tipo": "textarea",
       "requerido": true,
       "formato": "texto",
@@ -186,6 +186,29 @@
       },
       "autocomplete": "off"
     },
+    "cp": {
+      "etiqueta": "Código postal",
+      "tipo": "texto",
+      "requerido": true,
+      "formato": "cp",
+      "sensible": false,
+      "uso": "Verificar que el sitio está en la Ciudad de México.",
+      "atributos": {
+        "maxlength": "5"
+      },
+      "autocomplete": "off",
+      "cruzadas": [
+        {
+          "clave": "cp-colonia",
+          "mapa": {
+            "cp": "cp",
+            "colonia": "colonia"
+          },
+          "nivel": "advertencia",
+          "catalogo": "cdmx"
+        }
+      ]
+    },
     "alcaldia": {
       "etiqueta": "Alcaldía",
       "tipo": "select",
@@ -287,29 +310,6 @@
       "autocomplete": "off",
       "cascadaManual": 0
     },
-    "cp": {
-      "etiqueta": "Código postal",
-      "tipo": "texto",
-      "requerido": true,
-      "formato": "cp",
-      "sensible": false,
-      "uso": "Verificar que el sitio está en la Ciudad de México.",
-      "atributos": {
-        "maxlength": "5"
-      },
-      "autocomplete": "off",
-      "cruzadas": [
-        {
-          "clave": "cp-colonia",
-          "mapa": {
-            "cp": "cp",
-            "colonia": "colonia"
-          },
-          "nivel": "advertencia",
-          "catalogo": "cdmx"
-        }
-      ]
-    },
     "coordenadas": {
       "etiqueta": "Coordenadas (latitud, longitud)",
       "tipo": "texto",
@@ -321,7 +321,7 @@
       "autocomplete": "off"
     },
     "punto": {
-      "etiqueta": "Punto en el mapa (opcional)",
+      "etiqueta": "Punto en el mapa",
       "tipo": "mapa",
       "requerido": false,
       "sensible": false,
@@ -340,7 +340,7 @@
       }
     },
     "contacto": {
-      "etiqueta": "¿Quieres que te contactemos?",
+      "etiqueta": "¿Quieres que la Secretaría te contacte?",
       "tipo": "opcion",
       "requerido": true,
       "sensible": false,
@@ -490,7 +490,9 @@
       "requerido": true,
       "sensible": false,
       "uso": "Dejar constancia de que se informó a la persona.",
-      "atributos": {}
+      "atributos": {
+        "sinBorrador": ""
+      }
     },
     "humano": {
       "etiqueta": "No soy un programa automático",
@@ -498,7 +500,9 @@
       "requerido": true,
       "sensible": false,
       "uso": "Distinguir personas de envíos automáticos.",
-      "atributos": {}
+      "atributos": {
+        "sinBorrador": ""
+      }
     }
   },
   "repetibles": [],

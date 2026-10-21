@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.6.1
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.6.2
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -286,6 +286,8 @@
       if (t === 'multiple') return $$('input[type="checkbox"]:checked', el).map(textoDeOpcion).join(', ');
       if (t === 'select') { const s = $('select', el); return s && s.value ? s.selectedOptions[0].textContent.trim() : ''; }
       if (t === 'casilla') return $('input', el).checked ? M.palabraSi : '';
+      /* Una fecha se ve como día/mes/año (FRM-30), aunque se guarde como AAAA-MM-DD. */
+      if (el.dataset.formato === 'fecha') { const v = valorDe(n); return cfg.dmaDeIso(v) || v; }
       return valorDe(n);
     }
     function textoDeOpcion(input) {
@@ -294,13 +296,13 @@
       return nombre ? nombre.textContent.trim() : input.value;
     }
 
-    /* Etiqueta visible del campo, sin la marca de obligatorio. */
+    /* Etiqueta visible del campo, sin la marca de obligatorio ni el texto de su ayuda «?». */
     function etiquetaDe(n) {
       const el = envoltura(n);
       const e = $('.etiqueta', el) || $('legend,label', el);
       if (!e) return el.dataset.etiqueta || n;
       const c = e.cloneNode(true);
-      $$('.marca-oblig,.solo-lector', c).forEach((x) => x.remove());
+      $$('.marca-oblig,.solo-lector,[data-tooltip]', c).forEach((x) => x.remove());
       const texto = c.textContent.replace(/\s+/g, ' ').trim();
       /* Dentro de un grupo repetible, la etiqueta dice de qué fila es: «Nombre (Acompañante 2)». */
       const fila = el.closest('.repetible-fila');
@@ -438,11 +440,14 @@
       }
     }
 
+    /* El contador cuenta como el mensaje de error: sin los espacios repetidos ni los de los
+       extremos, que no se guardan («40 / 600» y «van 35» no pueden convivir). */
     function actualizaContador(n) {
       const el = envoltura(n);
       const cont = $('.contador', el);
       const area = $('textarea', el);
-      if (cont && area) cont.textContent = `${area.value.length} / ${area.maxLength}`;
+      const f = cfg.formatos[el.dataset.formato || 'texto'];
+      if (cont && area) cont.textContent = `${(f ? f.normaliza(area.value) : area.value).length} / ${area.maxLength}`;
     }
     function autoAlto(area) { area.style.height = 'auto'; area.style.height = `${area.scrollHeight}px`; }
 
@@ -703,8 +708,9 @@
 
     /* ----- Borrador local -----
        Se activa con data-borrador="clave" en el <form>. Versionado con
-       data-borrador-version. Excluye campos data-sensible y archivos (éstos, sólo
-       con un proveedor que dé la página: opciones.borradorArchivos, en archivos.js). */
+       data-borrador-version. Excluye campos data-sensible, los data-sin-borrador (lo que se
+       contesta en cada visita, como el consentimiento) y archivos (éstos, sólo con un proveedor
+       que dé la página: opciones.borradorArchivos, en archivos.js). */
     const claveBorrador = form.dataset.borrador || '';
     const versionBorrador = form.dataset.borradorVersion || '1';
     let temporizadorBorrador = 0;
@@ -729,7 +735,9 @@
     /* Lo que va en el borrador además de los datos (los archivos, con su proveedor; las
        filas de un repetible): el módulo se suscribe y el núcleo le avisa al escribir,
        restaurar o borrar el borrador. Con estado() aporta campos propios al borrador y
-       con prepara(b) rehace su estructura (las filas) antes de que se repongan los valores. */
+       con prepara(b) rehace su estructura (las filas) antes de que se repongan los valores;
+       con resumen(b) agrega una frase al aviso de recuperado («Sigues en el paso 2 de 4…») y
+       con descarta() vuelve a su inicio cuando la persona empieza de nuevo. */
     const suscritosBorrador = [];
     const alBorrador = (def) => { suscritosBorrador.push(def); };
     const avisaBorrador = (accion, b) => { for (const x of suscritosBorrador) if (x[accion]) x[accion](b); };
@@ -762,8 +770,28 @@
     let noGuardar = false;
     try { noGuardar = !!claveBorrador && global.sessionStorage.getItem(claveNoGuardar) === '1'; } catch (e) { /* sin almacén de sesión */ }
 
+    /* Dos pestañas con el mismo formulario: lo que guarda una reemplaza el borrador de la otra.
+       Cuando otra pestaña guarda, ésta lo dice a la vista; cuando otra envía, ésta deja de
+       guardar (no rehace el borrador de una solicitud ya enviada) y también lo dice. El envío
+       se avisa con una señal que se escribe y se borra en el acto: no queda nada guardado. */
+    const claveSenal = `${claveBorrador}:senal`;
+    let enviadoEnOtra = false;
+    let otraPestanaAvisada = false;
+    function senal(tipo) { try { global.localStorage.setItem(claveSenal, JSON.stringify({ tipo, t: Date.now() })); global.localStorage.removeItem(claveSenal); } catch (e) { /* sin almacén: no hay otras pestañas que avisar */ } }
+    if (claveBorrador) global.addEventListener('storage', (e) => {
+      if (!arrancado || terminado) return;
+      if (e.key === claveBorrador && e.newValue && !otraPestanaAvisada && !enviadoEnOtra) { otraPestanaAvisada = true; aviso(form, { tono: 'advertencia', texto: M.borradorOtraPestana }); }
+      if (e.key !== claveSenal || !e.newValue) return;
+      let s = null;
+      try { s = JSON.parse(e.newValue); } catch (x) { return; }
+      if (!s || s.tipo !== 'enviado') return;
+      enviadoEnOtra = true;
+      clearTimeout(temporizadorBorrador);
+      aviso(form, { tono: 'advertencia', texto: M.borradorEnviadoOtraPestana });
+    });
+
     function programaBorrador() {
-      if (!claveBorrador || !arrancado || terminado || !personaActuo || franjaPendiente || noGuardar) return;
+      if (!claveBorrador || !arrancado || terminado || !personaActuo || franjaPendiente || noGuardar || enviadoEnOtra) return;
       clearTimeout(temporizadorBorrador);
       temporizadorBorrador = setTimeout(escribeBorrador, cfg.borrador.retardoMs);
     }
@@ -772,7 +800,9 @@
       const fuera = fueraDelBorrador();
       for (const n of nombres()) {
         const el = envoltura(n);
-        if (fuera.has(n) || tipoDe(el) === 'auxiliar' || tipos.has(tipoDe(el)) && !tipos.get(tipoDe(el)).enBorrador) continue;
+        /* data-sin-borrador: lo que se contesta en cada visita (el consentimiento, «No soy un
+           programa automático») vuelve sin marcar. */
+        if (fuera.has(n) || el.hasAttribute('data-sin-borrador') || tipoDe(el) === 'auxiliar' || tipos.has(tipoDe(el)) && !tipos.get(tipoDe(el)).enBorrador) continue;
         datos[n] = valorDe(n);
       }
       return datos;
@@ -793,7 +823,7 @@
     }
     /* Si la persona cierra o cambia de pestaña antes de que venza el retardo,
        el borrador pendiente se escribe en ese momento. */
-    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado && !franjaPendiente && !noGuardar) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
+    window.addEventListener('pagehide', () => { if (temporizadorBorrador && claveBorrador && arrancado && !terminado && !franjaPendiente && !noGuardar && !enviadoEnOtra) { clearTimeout(temporizadorBorrador); escribeBorrador(); } });
     function dejaDeGuardar() {
       noGuardar = true;
       clearTimeout(temporizadorBorrador);
@@ -813,11 +843,23 @@
         return b;
       } catch (e) { borraBorrador(); return null; }
     }
-    function restauraBorrador(b) {
+    /* Pone al día lo que depende de los valores (condiciones, listas vacías, contadores) cuando
+       éstos cambian sin que la persona escriba: al volver con «Adelante» el navegador repone
+       por su cuenta lo que había escrito, y al descartar el borrador la pantalla se vacía. */
+    function resincroniza() {
+      aplicaCondicionales();
+      for (const s of $$('select', form)) s.toggleAttribute('data-vacio', !s.value);
+      for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
+    }
+    window.addEventListener('pageshow', resincroniza);
+
+    /* foco: true cuando la persona pidió recuperarlo (el aviso recibe el foco que tenía el botón). */
+    function restauraBorrador(b, { foco = false } = {}) {
       avisaBorrador('prepara', b);
       for (const [n, v] of Object.entries(b.datos || {})) {
         const el = envoltura(n);
-        if (!el) continue;
+        /* Lo que se contesta en cada visita no vuelve, aunque lo traiga un borrador de otra versión. */
+        if (!el || el.hasAttribute('data-sin-borrador')) continue;
         const t = tipoDe(el);
         if (tipos.has(t)) { if (tipos.get(t).restaura) tipos.get(t).restaura(el, v); continue; }
         if (t === 'opcion') { const r = $$('input[type="radio"]', el).find((x) => x.value === v); if (r) r.checked = true; }
@@ -829,7 +871,26 @@
       for (const n of nombres()) { actualizaContador(n); const a = $('textarea', envoltura(n)); if (a) autoAlto(a); }
       if (FormKit.ganchos.restauraBorrador) FormKit.ganchos.restauraBorrador(form, b);
       avisaBorrador('restaura', b);
-      anuncia(M.borradorRecuperado);
+      /* A la vista: que se recuperó, dónde quedó la persona (lo dicen los módulos, como el de
+         pasos) y qué tiene que volver a llenar porque no se guarda en el equipo (lo sensible; no
+         lo que se calcula de ello ni lo que se contesta en cada visita). */
+      const textos = [M.borradorRecuperado];
+      for (const x of suscritosBorrador) if (x.resumen) { const t = x.resumen(b); if (t) textos.push(t); }
+      const derivados = new Set(nombres().flatMap((m) => (envoltura(m).dataset.deriva || '').split(/\s+/).map((p) => p.split('=')[1]).filter(Boolean)));
+      const falta = [...fueraDelBorrador()].filter((m) => activo(m) && !derivados.has(m) && !controlesDe(m).some((c) => c.readOnly)).map(etiquetaDe);
+      if (falta.length) textos.push(plantilla(M.borradorRecuperadoFalta, { campos: falta.join(', ') }));
+      aviso(form, { tono: 'neutro', texto: textos, foco });
+    }
+    /* «Empezar de nuevo» confirmado: se borra el borrador y también lo que haya en pantalla, aunque
+       lo haya repuesto el navegador al volver con «Adelante»; los módulos vuelven a su inicio (el de
+       pasos, al primero). El foco va al aviso, que lo dice. */
+    function descarta() {
+      clearTimeout(temporizadorBorrador);
+      borraBorrador();
+      form.reset();
+      resincroniza();
+      avisaBorrador('descarta');
+      aviso(form, { tono: 'neutro', texto: M.borradorDescartado, foco: true });
     }
     function iniciaFranja(b) {
       franja.hidden = false;
@@ -842,14 +903,14 @@
         const a = e.target.closest('[data-borrador]');
         if (!a) return;
         const confirma = $('[data-borrador-confirma]', franja);
-        if (a.dataset.borrador === 'recuperar') { restauraBorrador(b); contesta(); }
+        if (a.dataset.borrador === 'recuperar') { contesta(); restauraBorrador(b, { foco: true }); }
         else if (a.dataset.borrador === 'descartar') {
           if (confirma) { confirma.hidden = false; const seguro = $('[data-borrador="conservar"]', franja); if (seguro) seguro.focus(); }
           /* Sin la confirmación en el HTML, se pregunta con el módulo modal; borrar sin preguntar no (FRM-38). */
-          else if (FormKit.confirma) FormKit.confirma(a, { titulo: M.borradorDescartarTitulo, texto: M.borradorDescartarTexto, si: M.borradorDescartarSi, peligro: true }).then((ok) => { if (ok) { borraBorrador(); contesta(); } });
+          else if (FormKit.confirma) FormKit.confirma(a, { titulo: M.borradorDescartarTitulo, texto: M.borradorDescartarTexto, si: M.borradorDescartarSi, peligro: true }).then((ok) => { if (ok) { contesta(); descarta(); } });
           else console.warn('FormKit: la franja del borrador necesita [data-borrador-confirma] o el módulo «modal» para confirmar antes de descartar.');
         }
-        else if (a.dataset.borrador === 'descartar-si') { borraBorrador(); contesta(); }
+        else if (a.dataset.borrador === 'descartar-si') { contesta(); descarta(); }
         else if (a.dataset.borrador === 'conservar') { if (confirma) confirma.hidden = true; const r = $('[data-borrador="recuperar"]', franja); if (r) r.focus(); }
       });
     }
@@ -918,7 +979,12 @@
 
     function botonEnviar() { return $('[data-accion="enviar"],button[type="submit"]', form); }
 
+    /* Un envío a la vez: mientras uno está en curso, otro clic o Enter no lo repite. Los
+       módulos se enteran con formkit:enviando ({enviando}): el de pasos no deja cambiar de paso. */
+    let enviandoAhora = false;
+    const avisaEnviando = (enviando) => form.dispatchEvent(new CustomEvent('formkit:enviando', { detail: { enviando } }));
     async function enviar() {
+      if (enviandoAhora) return false;
       /* Al enviar, la contraseña vuelve a ocultarse: que el navegador no la guarde ni la muestre como texto. */
       for (const b of $$('[data-ver-contrasena][aria-pressed="true"]', form)) verContrasena(b, false);
       /* Un módulo (pasos) puede validar por su cuenta; si devuelve null, el formulario no es suyo. */
@@ -929,15 +995,23 @@
       const avisoEnvio = $('[data-estado-envio]', form);
       if (avisoEnvio) avisoEnvio.hidden = true;
       const textoOriginal = boton ? boton.textContent : '';
+      enviandoAhora = true;
+      avisaEnviando(true);
+      /* «Enviando…» se ve en el botón y se anuncia: el cambio de texto solo no lo oye el lector. */
       if (boton) { boton.setAttribute('aria-disabled', 'true'); boton.setAttribute('aria-busy', 'true'); boton.textContent = M.enviando; }
+      anuncia(M.enviando);
       const control = new AbortController();
       let plazo = 0;
-      /* El aviso de envío, con su texto (si el HTML no trae .aviso-texto, se crea). */
+      /* El aviso de envío, con su texto (si el HTML no trae .aviso-texto, se crea). Si quedó en
+         una parte que no se ve (la persona cambió de paso mientras se enviaba), los módulos la
+         abren antes (formkit:muestra). */
       const pintaAvisoEnvio = (texto) => {
         if (!avisoEnvio) { anuncia(texto, true); return; }
         let t = $('.aviso-texto', avisoEnvio);
         if (!t) { t = document.createElement('span'); t.className = 'aviso-texto'; avisoEnvio.appendChild(t); }
-        t.textContent = texto; avisoEnvio.hidden = false; avisoEnvio.focus();
+        t.textContent = texto; avisoEnvio.hidden = false;
+        form.dispatchEvent(new CustomEvent('formkit:muestra', { detail: { elemento: avisoEnvio } }));
+        avisoEnvio.focus();
       };
       let respuesta;
       try {
@@ -966,6 +1040,8 @@
         return false;
       } finally {
         clearTimeout(plazo);
+        enviandoAhora = false;
+        avisaEnviando(false);
         if (boton) { boton.removeAttribute('aria-disabled'); boton.removeAttribute('aria-busy'); boton.textContent = textoOriginal; }
       }
       /* Recibido. Desde aquí nada cuenta como envío fallido: si la página falla al
@@ -983,7 +1059,7 @@
           if ($('[data-acuse]')) aviso(form, { tono: 'ok', texto: recibido.folio ? plantilla(M.envioRecibidoFolio, { folio: recibido.folio }) : M.envioRecibido, foco: true });
         }
       } catch (e) { console.error('FormKit: el envío se recibió, pero falló lo que la página hace después (alEnviar).', e); if (!form.hidden) aviso(form, { tono: 'ok', texto: M.envioRecibido, foco: true }); }
-      if (claveBorrador) borraBorrador();
+      if (claveBorrador) { borraBorrador(); senal('enviado'); }
       if (franja) { franja.hidden = true; franjaPendiente = false; }
       return true;
     }

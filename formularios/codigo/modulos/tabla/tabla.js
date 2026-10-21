@@ -76,9 +76,26 @@
     }
 
     /* Orden por columna: botón dentro del th, aria-sort en el th. Un
-       encabezado que todavía no tiene texto se prepara cuando lo tenga. */
+       encabezado que todavía no tiene texto se prepara cuando lo tenga.
+       Las palabras se ordenan como en español (Álvarez y Ñúñez en su lugar, no
+       al final), las fechas día/mes/año como fechas y las cantidades como números. */
+    const COLACION = new Intl.Collator('es-MX', { sensitivity: 'base', numeric: true });
+    const claveDe = (t) => {
+      const f = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (f) return `${f[3]}-${f[2].padStart(2, '0')}-${f[1].padStart(2, '0')}`;
+      const n = Number(t.replace(/[^\d.-]/g, ''));
+      return t && !Number.isNaN(n) && /^[\d.,\s$-]+$/.test(t) ? n : t;
+    };
+    const compara = (x, y) => (typeof x === 'number' && typeof y === 'number' ? x - y : COLACION.compare(String(x), String(y)));
+    function ordena(th, asc) {
+      const i = ths().indexOf(th);
+      for (const o of ths()) o.setAttribute('aria-sort', o === th ? (asc ? 'ascending' : 'descending') : 'none');
+      const val = (tr) => { const td = $$('td', tr)[i]; return claveDe(td ? td.textContent.trim() : ''); };
+      const filas = $$('tbody tr', tabla).sort((a, b) => compara(val(a), val(b)) * (asc ? 1 : -1));
+      const tb = $('tbody', tabla); for (const f of filas) tb.appendChild(f);
+    }
     function preparaOrden() {
-      ths().forEach((th, i) => {
+      ths().forEach((th) => {
         if (!th.hasAttribute('data-ordenable') || $('.tabla-orden', th)) return;
         const texto = textoDe(th);
         if (!texto) return;
@@ -89,17 +106,20 @@
         th.setAttribute('aria-sort', 'none');
         b.addEventListener('click', () => {
           const asc = th.getAttribute('aria-sort') !== 'ascending';
-          for (const o of ths()) o.setAttribute('aria-sort', o === th ? (asc ? 'ascending' : 'descending') : 'none');
-          const filas = $$('tbody tr', tabla);
-          const val = (tr) => { const td = $$('td', tr)[i]; const t = td ? td.textContent.trim() : ''; const n = Number(t.replace(/[^\d.-]/g, '')); return t && !Number.isNaN(n) && /^[\d.,\s$-]+$/.test(t) ? n : t.toLowerCase(); };
-          filas.sort((a, b2) => { const x = val(a), y = val(b2); return (x > y ? 1 : x < y ? -1 : 0) * (asc ? 1 : -1); });
-          const tb = $('tbody', tabla); for (const f of filas) tb.appendChild(f);
+          ordena(th, asc);
           FormKit.anuncia(plantilla(M.tablaOrdenada, { columna: texto, sentido: asc ? M.tablaAscendente : M.tablaDescendente }));
         });
       });
     }
 
-    const repinta = () => { preparaOrden(); etiquetaCeldas(); };
+    /* Al repintar (otra página de resultados, un filtro), las filas nuevas se ponen en el
+       orden elegido: el encabezado nunca dice un orden que las filas no tienen. */
+    const repinta = () => {
+      preparaOrden();
+      const th = ths().find((t) => /^(ascending|descending)$/.test(t.getAttribute('aria-sort') || ''));
+      if (th) ordena(th, th.getAttribute('aria-sort') === 'ascending');
+      etiquetaCeldas();
+    };
     repinta();
     marco.addEventListener('formkit:tabla', repinta);
   }

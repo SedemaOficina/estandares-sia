@@ -71,8 +71,20 @@
         if (folio) folio.textContent = r.folio || M.acuseSinFolio;
         const copiar = $('[data-copiar="#folio"]', sec);
         if (copiar) copiar.hidden = !r.folio;
+        const fechaTexto = FormKit.utilidades.fechaHora(fechaValida, cfg);
         const fecha = $('[data-acuse-fecha]', sec);
-        if (fecha) fecha.textContent = FormKit.utilidades.fechaHora(fechaValida, cfg);
+        if (fecha) fecha.textContent = fechaTexto;
+        /* «Compartir» lleva el folio y la fecha, no la dirección del formulario (que abre vacío).
+           data-compartir-texto puede traer {folio} y {fecha}; sin {folio}, el folio va al final.
+           Sin folio no hay nada que compartir. */
+        const compartir = $('[data-compartir]', sec);
+        if (compartir) {
+          if (compartir.dataset.compartirPlantilla === undefined) compartir.dataset.compartirPlantilla = compartir.dataset.compartirTexto || M.acuseCompartir;
+          const p = compartir.dataset.compartirPlantilla;
+          compartir.dataset.compartirTexto = FormKit.utilidades.plantilla(/\{folio\}/.test(p) ? p : `${p}: {folio}`, { folio: r.folio || '', fecha: fechaTexto });
+          compartir.dataset.compartirUrl = '';
+          compartir.hidden = !r.folio;
+        }
         const desc = $('[data-acuse-descarga]', sec);
         if (desc) {
           desc.hidden = !r.acuseUrl;
