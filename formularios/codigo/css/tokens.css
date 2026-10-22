@@ -1,5 +1,5 @@
 /* =========================================================
-   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.6.2
+   tokens.css · Estándar de formularios del SIA (SEDEMA) · v1.6.3
 
    El ÚNICO lugar donde viven color, tipografía, tamaño, radio, espaciado,
    capa, duración y punto de quiebre. Ninguna otra hoja del paquete escribe
@@ -51,13 +51,13 @@
   /* Identidad */
   --guinda:#9D2148;
   --guinda-osc:#7A1A38;      /* acción principal al pasar el cursor o pulsar */
-  --guinda-cl:#F7F1F3;       /* fondo tenue de identidad y fila alterna de tabla */
+  --guinda-cl:#F7F1F3;       /* fondo suave: filas alternas de tabla, leyenda de obligatorios, número de «qué sigue» */
   --dorado:#B28E5C;          /* SÓLO filetes y rellenos decorativos (3.04:1) */
   --dorado-txt:#8C6C3E;      /* el dorado cuando debe leerse (4.85:1 sobre blanco) */
 
   /* Neutros */
   --texto:#2B2D2E;           /* cuerpo y respuesta de la persona */
-  --gris:#55585A;            /* texto secundario, marca de obligatorio */
+  --gris:#55585A;            /* texto secundario: rótulos, pies, notas */
   --gris-cl:#6B6E70;         /* ayudas, contadores, marcadores de campo */
   --linea:#DCDEE0;           /* separa; NUNCA delimita un control (1.35:1) */
   --borde:#878B8E;           /* delimita un control: 3:1 o más sobre blanco y página */
@@ -153,13 +153,11 @@
 
   /* ---------- Área segura (teléfonos con muesca) ---------- */
   --safe-inf:env(safe-area-inset-bottom, 0px);
-  --safe-izq:env(safe-area-inset-left, 0px);
-  --safe-der:env(safe-area-inset-right, 0px);
 
   /* ---------- Capas de apilamiento ---------- */
   --z-base:0;
   --z-lista:30;      /* listas desplegables y tooltips */
-  --z-barra:40;      /* barra de pasos fija y barra de acciones fija */
+  --z-barra:40;      /* barra de pasos fija */
   --z-dialogo:50;    /* hoja inferior y diálogo con polyfill */
 
   /* ---------- Movimiento ---------- */

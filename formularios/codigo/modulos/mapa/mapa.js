@@ -98,8 +98,9 @@
         if (!L) { if (sin) sin.hidden = false; cont.hidden = true; continue; }
 
         /* El complemento de gestos se registra como manejador «gestureHandling»; cuando está
-           cargado se activa: un dedo desplaza la página, dos el mapa. Sin él, Leaflet ignora la
-           opción. Acercar y alejar llevan su nombre en español (Leaflet los trae en inglés). */
+           cargado se activa a mano (RODEO-04): un dedo desplaza la página, dos el mapa. Sin él,
+           Leaflet ignora la opción. Acercar y alejar llevan su nombre en español (RODEO-02:
+           Leaflet los trae en inglés). Los rodeos están en docs/07, sección 5. */
         const mapa = L.map(cont, { center: conf.centro, zoom: conf.zoom, gestureHandling: true, gestureHandlingOptions: { text: { touch: M.mapaGestoTactil, scroll: M.mapaGestoRueda, scrollMac: M.mapaGestoRuedaMac } }, zoomControl: false, attributionControl: !!conf.atribucion, tap: true });
         L.control.zoom({ zoomInTitle: M.mapaAcercar, zoomOutTitle: M.mapaAlejar }).addTo(mapa);
         gestos.then(() => {
@@ -112,7 +113,7 @@
         if (limites) { mapa.setMaxBounds(limites.pad(0.1)); mapa.fitBounds(limites); }
         if (conf.teselas) L.tileLayer(conf.teselas, { attribution: conf.atribucion, maxZoom: 19 }).on('tileerror', () => { if (sin) sin.hidden = false; }).addTo(mapa);
         else if (sin) { sin.hidden = false; sin.textContent = M.mapaSinBase; }
-        /* Marcador propio en guinda (SVG en línea): no depende de imágenes externas. */
+        /* Marcador propio en guinda (SVG en línea): no depende de las imágenes de Leaflet (RODEO-03). */
         const icono = L.divIcon({ className: 'mapa-marcador', html: '<svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true" focusable="false"><path d="M12 22s-7-7.3-7-12.5a7 7 0 0 1 14 0C19 14.7 12 22 12 22z" fill="currentColor"/><circle cx="12" cy="9.5" r="2.6" fill="#fff"/></svg>', iconSize: [32, 32], iconAnchor: [16, 32] });
         let marcador = null;
 
@@ -166,7 +167,7 @@
         const manual = $$('[data-formato="coordenadas"] input', form)[0];
         if (manual) manual.addEventListener('change', () => { const m = cfg.formatos.coordenadas.normaliza(manual.value).match(/^(-?[\d.]+),(-?[\d.]+)$/); if (m) { s.coloca({ lat: Number(m[1]), lon: Number(m[2]) }); mapa.setView([Number(m[1]), Number(m[2])], 16); } });
         /* Leaflet necesita saber su tamaño cuando el paso se muestra: un mapa
-           iniciado oculto calcula mal el encuadre. */
+           iniciado oculto calcula mal el encuadre (RODEO-01). */
         form.addEventListener('formkit:paso', () => setTimeout(encuadra, 50));
         window.addEventListener('resize', () => mapa.invalidateSize());
         s.mapa = mapa;

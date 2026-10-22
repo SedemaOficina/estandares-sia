@@ -6,7 +6,8 @@
 <title>Solicitud de ejemplo · Plantilla por pasos</title>
 <meta name="description" content="Plantilla de formulario por pasos del estándar de formularios del SIA (SEDEMA). Contenido ficticio.">
 <link rel="icon" href="data:,">
-<!-- Núcleo (obligatorio) -->
+<!-- Núcleo (obligatorio). En producción, las hojas y los guiones del estándar van juntos en un archivo de cada uno:
+     node herramientas/juntar.mjs (docs/08, presupuesto de peso). Aquí van separados para copiar sólo lo que se usa. -->
 <link rel="stylesheet" href="../css/tokens.css">
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="../css/nucleo.css">
@@ -48,7 +49,7 @@
   <div class="franja" data-franja-borrador hidden>
     <p class="franja-texto">Hay un borrador guardado el <span data-borrador-fecha></span>. Guardar el avance no es enviar la solicitud.</p>
     <button type="button" class="btn btn-secundario" data-borrador="recuperar">Recuperar borrador</button>
-    <button type="button" class="btn btn-secundario" data-borrador="descartar">Empezar de nuevo</button>
+    <button type="button" class="btn btn-peligro-contorno" data-borrador="descartar">Empezar de nuevo</button>
     <button type="button" class="btn-enlace" data-borrador="no-guardar">No guardar en este equipo</button>
     <div class="aviso aviso-advertencia" data-borrador-confirma hidden>
       <svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg>
@@ -310,6 +311,7 @@
         <button type="button" class="btn-enlace" data-abre-dialogo="dialogo-privacidad">Leer el aviso de privacidad</button>
       </div>
 
+      <p class="leyenda-oblig">Los campos con <span aria-hidden="true">*</span> son obligatorios.</p>
       <div class="destacado" data-campo="aviso" data-requerido data-sin-borrador data-uso="Dejar constancia de que se informó a la persona.">
         <label class="casilla"><input class="casilla-input" type="checkbox" name="aviso" value="si"><span class="casilla-texto"><span class="etiqueta destacado-nombre">Leí el aviso de privacidad</span></span></label>
       </div>

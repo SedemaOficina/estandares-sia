@@ -1,5 +1,5 @@
 /* =========================================================
-   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.6.2
+   formkit.core.js · Estándar de formularios del SIA (SEDEMA) · v1.6.3
 
    Núcleo obligatorio. Lee la declaración de cada campo de sus ATRIBUTOS
    (required, data-formato, data-si, data-cruzada, data-uso…) y toma
@@ -60,6 +60,16 @@
   const normalizaBusqueda = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   let contadorIds = 0;
   const idUnico = (p) => `${p}-${++contadorIds}`;
+  /* Un catálogo de ejemplo (es_ficticio: true) en una página que no dice ser de pruebas (sin la
+     franja .entorno-pruebas ni <html data-muestras>, como la guía) se avisa una vez en la consola:
+     así no se publica un formulario con colonias inventadas. */
+  const ficticiosAvisados = new Set();
+  const avisaFicticio = (nombre, cat) => {
+    if (!cat || cat.es_ficticio !== true || ficticiosAvisados.has(nombre)) return;
+    if (document.querySelector('.entorno-pruebas') || document.documentElement.hasAttribute('data-muestras')) return;
+    ficticiosAvisados.add(nombre);
+    console.warn(`FormKit: el catálogo «${nombre}» es de ejemplo (es_ficticio: true) y esta página no dice que es de pruebas. Antes de publicar, cámbialo por el oficial (codigo/catalogos/LEEME.md).`);
+  };
 
   /* Fecha y hora para leer («17 de octubre de 2026 a las 23:27»), en la zona de la
      configuración y con su reloj: 24 horas salvo fechas.horas24 = false. */
@@ -489,7 +499,13 @@
       if (f) {
         const msg = f.valida(f.normaliza(v), a, cfg);
         if (msg) return msg;
-      } else if (a.minlength && v.length < Number(a.minlength)) return plantilla(M.minimoCaracteres, { ...datos, min: a.minlength, n: v.length });
+        return '';
+      }
+      /* Sin formato, el largo se cuenta como en el servidor (sin espacios de más) y el máximo también se
+         revisa aquí: un valor que no tecleó la persona (recuperado o escrito por la página) no lo limita el navegador. */
+      const largo = cfg.recorta(v).length;
+      if (a.maxlength && largo > Number(a.maxlength)) return plantilla(M.maximoCaracteres, { ...datos, max: a.maxlength });
+      if (a.minlength && largo < Number(a.minlength)) return plantilla(M.minimoCaracteres, { ...datos, min: a.minlength, n: largo });
       return '';
     }
 
@@ -1235,7 +1251,7 @@
     registra, iniciar, anuncia, aviso, icono, almacen,
     /* FormKit.marcaError(campo, mensaje): pinta el error junto al campo, en el formulario que lo tenga. */
     marcaError: marcaErrorGlobal,
-    utilidades: { $, $$, plantilla, pesoTxt, normalizaBusqueda, idUnico, fusiona, fechaHora, relojDe },
+    utilidades: { $, $$, plantilla, pesoTxt, normalizaBusqueda, idUnico, fusiona, fechaHora, relojDe, avisaFicticio },
     /* Ganchos que un módulo puede ocupar: validaTodo (pasos), submit, estadoBorrador, restauraBorrador, erroresServidor. */
     ganchos: {}
   };

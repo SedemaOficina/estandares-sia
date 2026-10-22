@@ -113,6 +113,10 @@ for (const perfil of Object.values(PERFILES)) {
     assert.equal(caja.payload.datos.intereses_otro, 'Compostaje');
     assert.equal(caja.payload.datos.intereses.length, 3);
     assert.equal(caja.payload.datos.avisos, 'si', 'el interruptor viaja como valor del campo oculto');
+    /* No basta contar filas: viajan las que quedaron, con lo que se escribió, y no la que se quitó. */
+    const acomp = Object.entries(caja.payload.datos).filter(([k]) => /^acompanantes\.\d+\.nombre$/.test(k)).map(([, v]) => v).sort();
+    assert.deepEqual(acomp, ['Persona Dos', 'Persona Uno'], 'viajan las dos filas que quedaron');
+    assert.ok(!Object.values(caja.payload.datos).includes('Mengano'), 'la fila quitada no viaja');
     const enServidor = await validaEnServidor(caja.payload, 'una-pagina');
     assert.deepEqual(enServidor.errores, [], 'el servidor acepta lo que el navegador envía, acompañantes incluidos');
     assert.deepEqual(p.registro, [], 'consola y red limpias');

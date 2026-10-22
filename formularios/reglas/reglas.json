@@ -205,10 +205,11 @@
     "A FRM-30",
     "B FRM-CMP-02",
     "C2 (revisada por la Secretaría, 14 oct 2026)",
-    "decisión de la Secretaría, 14 oct 2026: asterisco guinda (C2 revisada; antes gris)"
+    "decisión de la Secretaría, 14 oct 2026: asterisco guinda (C2 revisada; antes gris)",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "nucleo.css .marca-oblig; guía: el campo (ninguna prueba automática revisa todavía el asterisco ni la leyenda)"
+   "verificacion": "nucleo.css .marca-oblig; guía: el campo; 08: asterisco que el lector no oye, la palabra para el lector, una leyenda por pantalla y ningún «(opcional)» (A1-12)"
   },
   {
    "id": "FRM-11",
@@ -601,24 +602,26 @@
    "origen": [
     "A FRM-41",
     "B FRM-ACC-01",
-    "C7"
+    "C7",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "guía: botones; nucleo.css .btn-atras"
+   "verificacion": "guía: botones; nucleo.css .btn-atras; 08: «Atrás» azul con su flecha (A1-12)"
   },
   {
    "id": "FRM-36",
    "seccion": 5,
    "titulo": "Los botones dicen qué hacen; nunca «Aceptar», «OK» ni «Confirmar»",
-   "regla": "La etiqueta es un verbo concreto con su objeto («Enviar solicitud», «Guardar borrador», «Descartar borrador»), nunca «Aceptar», «OK», «Confirmar» ni «Sí». Los botones de icono llevan aria-label; los de descarga dicen formato y peso.",
+   "regla": "La etiqueta es un verbo concreto con su objeto («Enviar solicitud», «Guardar borrador», «Descartar borrador»), nunca «Aceptar», «OK», «Confirmar» ni «Sí». Los botones de icono llevan aria-label; los de descarga dicen formato y peso. FormKit.confirma avisa en la consola si su botón no repite el verbo: sin «si», o con «Aceptar», «Confirmar», «Sí» u «OK».",
    "porque": "«Aceptar» no dice qué se acepta; un icono sin nombre es un botón mudo para el lector de pantalla.",
    "nivel": "BASE",
    "origen": [
     "B FRM-ACC-02",
-    "auditoría del estándar, 18 oct 2026"
+    "auditoría del estándar, 18 oct 2026",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "03-anchos: ningún botón sin nombre; guía: botones"
+   "verificacion": "03-anchos: ningún botón sin nombre; guía: botones; 08: aviso de FormKit.confirma (F2-13)"
   },
   {
    "id": "FRM-37",
@@ -656,16 +659,17 @@
    "id": "FRM-39",
    "seccion": 5,
    "titulo": "Cuatro avisos, cada uno con el icono de su tono, título, texto y rol",
-   "regla": "Neutro (informa, sin rol, icono info), advertencia (ámbar, sin bloqueo, icono alerta), bloqueo (rojo, role=alert, icono error) y éxito (verde, role=status, icono ok). El icono de su tono va siempre. Un aviso de más de una frase lleva título (.aviso-titulo) que dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. Lo que impide continuar es asertivo; lo demás es cortés. El aviso que responde a una acción de la persona recibe el foco; FormKit.aviso(lugar, {tono, titulo, texto, pasos, foco}) lo pinta así, con su cuerpo en <div class=\"aviso-texto\">: texto puede ser un nodo (un párrafo con un enlace) y pasos, la secuencia «qué sigue». Un aviso nunca sustituye al mensaje del campo.",
+   "regla": "Neutro (informa, sin rol, icono info), advertencia (ámbar, sin bloqueo, icono alerta), bloqueo (rojo, role=alert, icono error) y éxito (verde, role=status, icono ok). El icono de su tono va siempre. Un aviso de más de una frase lleva título (.aviso-titulo) que dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. Lo que impide continuar es asertivo; lo demás es cortés. El aviso que responde a una acción de la persona recibe el foco; FormKit.aviso(lugar, {tono, titulo, texto, pasos, foco}) lo pinta así, con su cuerpo en <div class=\"aviso-texto\">: texto puede ser un nodo (un párrafo con un enlace) y pasos, la secuencia «qué sigue». Un aviso nunca sustituye al mensaje del campo. Ningún aviso usa el guinda (ni de fondo, ni de borde, ni de texto) y el guinda no va junto a un mensaje de error: se parece al rojo de error (decisión de la Secretaría, 20 oct 2026); los colores no cambian.",
    "porque": "Un aviso rojo para todo entrena a ignorarlo; un alert cortés no se oye; una frase larga sin título no deja ver si algo salió bien o mal.",
    "nivel": "BASE",
    "origen": [
     "encargo 5.4",
     "P115 (proyecto de acreditaciones, 17 oct 2026)",
-    "P131 (proyecto de acreditaciones, 18 oct 2026)"
+    "P131 (proyecto de acreditaciones, 18 oct 2026)",
+    "decisión de la Secretaría, 20 oct 2026: el guinda no se usa en avisos ni junto a un mensaje de error"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "guía: botones y avisos; 05-accesibilidad; 07: FormKit.aviso (P115); 07: aviso con pasos y enlace (P131)"
+   "verificacion": "guía: botones y avisos; 05-accesibilidad; 07: FormKit.aviso (P115); 07: aviso con pasos y enlace (P131); 08: ninguna hoja pinta de guinda un aviso, un error, el resumen, la franja o el recordatorio (decisión 21)"
   },
   {
    "id": "FRM-40",
@@ -984,10 +988,11 @@
    "nivel": "BASE",
    "origen": [
     "A FRM-83",
-    "norma 1.6"
+    "norma 1.6",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "revisión de código; plantillas: configuracion-*.js"
+   "verificacion": "revisión de código; plantillas: configuracion-*.js; 08: ni el núcleo ni los módulos escriben una dirección (A1-12)"
   },
   {
    "id": "FRM-60",
@@ -1135,23 +1140,24 @@
    "id": "FRM-70",
    "seccion": 11,
    "titulo": "Sin manejadores en línea, sin estilos en línea, sin código zombi",
-   "regla": "Los eventos se registran por delegación en el código; el HTML no lleva onclick ni style (salvo variables de muestra en la guía). Toda clase y variable declarada se usa en algún HTML o script del paquete.",
+   "regla": "Los eventos se registran por delegación en el código; el HTML no lleva onclick, style ni un <script> con código dentro de la página: la política de seguridad estricta que pide el SIA los bloquea, y la configuración de cada página va en su propio archivo .js. Toda clase y variable declarada se usa en algún HTML o script del paquete.",
    "porque": "Un onclick en el HTML no se puede probar ni auditar; una clase sin uso es una promesa que nadie cumple.",
    "nivel": "BASE",
    "origen": [
     "A FRM-89",
     "A FRM-90",
     "B FRM-STY-07",
-    "auditoría del estándar, 18 oct 2026"
+    "auditoría del estándar, 18 oct 2026",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "auditor-css A09, A14, A16; revisión"
+   "verificacion": "auditor-css A09, A14, A16; revisión; 08: plantillas, ejemplos y guías sin guiones, estilos ni manejadores en el HTML (B9-01); comprobar-formulario.mjs, para el formulario de un proyecto"
   },
   {
    "id": "FRM-71",
    "seccion": 11,
    "titulo": "Núcleo obligatorio y módulos independientes con manifiesto",
-   "regla": "El núcleo (tokens, base, nucleo, validaciones.config, iconos, formkit.core) va siempre; cada módulo vive en su carpeta con su CSS y su JS, declara en codigo/manifiesto.json nivel, propósito, cuándo, cuándo no, dependencias, accesibilidad y comportamiento en teléfono y escritorio, y se activa solo si el formulario contiene su selector. Los módulos de ámbito documento se inician una sola vez aunque la página tenga varios formularios. Cada formulario se inicia una sola vez: una segunda llamada a FormKit.iniciar le suma sus opciones y devuelve la misma instancia. Un módulo que también sirve sin formulario (tabla, visor, estado) se inicia solo al cargar la página. Cada módulo arranca por su cuenta: si uno falla, los demás y el formulario siguen, y la consola dice cuál. Un módulo también se activa si su selector está en la plantilla de una fila repetible, y prepara los campos de cada fila que se agrega (evento formkit:fila). Cada formulario lleva en el HTML el aviso «La página no terminó de cargar» ([data-carga-pendiente]), que el núcleo oculta al arrancar (por pasos, el módulo de pasos al mostrar el primero); en una página, el botón de enviar es type=\"button\": sin el núcleo no envía nada.",
+   "regla": "El núcleo (tokens, base, nucleo, validaciones.config, iconos, formkit.core) va siempre; cada módulo vive en su carpeta con su CSS y su JS, declara en codigo/manifiesto.json nivel, propósito, cuándo, cuándo no, dependencias, accesibilidad y comportamiento en teléfono y escritorio, y se activa solo si el formulario contiene su selector. Los módulos de ámbito documento se inician una sola vez aunque la página tenga varios formularios. Cada formulario se inicia una sola vez: una segunda llamada a FormKit.iniciar le suma sus opciones y devuelve la misma instancia. Un módulo que también sirve sin formulario (tabla, visor, estado) se inicia solo al cargar la página. Cada módulo arranca por su cuenta: si uno falla, los demás y el formulario siguen, y la consola dice cuál. Un módulo también se activa si su selector está en la plantilla de una fila repetible, y prepara los campos de cada fila que se agrega (evento formkit:fila). Cada formulario lleva en el HTML el aviso «La página no terminó de cargar» ([data-carga-pendiente]), que el núcleo oculta al arrancar (por pasos, el módulo de pasos al mostrar el primero); en una página, el botón de enviar es type=\"button\": sin el núcleo no envía nada. La construcción se detiene si una carpeta de codigo/modulos no está en el manifiesto o lleva un archivo que el manifiesto no declara, y la verificación revisa lo derivado (dist, esquemas, artefacto) sin reescribirlo: si algo se atrasó, falla y dice qué.",
    "porque": "Un paquete monolítico se copia entero o no se copia; un módulo sin ficha se usa mal.",
    "nivel": "BASE",
    "origen": [
@@ -1163,7 +1169,7 @@
     "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "06-servidor: manifiesto; 04-modulos: varios formularios en una página; 08: módulo que falla, aviso de carga y filas agregadas (B5-03, B5-04, F2-09)"
+   "verificacion": "06-servidor: manifiesto; 04-modulos: varios formularios en una página; 08: módulo que falla, aviso de carga y filas agregadas (B5-03, B5-04, F2-09); construir.mjs --comprobar en npm run verificar; 08: derivado atrasado y archivo de más (A3-01, A3-03)"
   },
   {
    "id": "FRM-72",
@@ -1228,15 +1234,16 @@
    "id": "FRM-76",
    "seccion": 12,
    "titulo": "Datos de ejemplo siempre ficticios y legibles",
-   "regla": "Nombres, correos, teléfonos, folios y catálogos de muestra son inequívocamente falsos (ejemplo.local, teléfonos de ceros, «Fulana de Tal»), marcados como ficticios, y legibles para que no parezcan un error del sistema.",
+   "regla": "Nombres, correos, teléfonos, folios y catálogos de muestra son inequívocamente falsos (ejemplo.local, teléfonos de ceros, «Fulana de Tal»), marcados como ficticios, y legibles para que no parezcan un error del sistema. Mientras un catálogo diga es_ficticio: true, una página que no se presente como de pruebas (franja .entorno-pruebas) lo avisa en la consola.",
    "porque": "Un dato creíble en una base de pruebas termina en una captura o en producción y ya no se distingue.",
    "nivel": "BASE",
    "origen": [
     "norma 3",
-    "encargo"
+    "encargo",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "revisión; catálogo cdmx-ejemplo.js es_ficticio"
+   "verificacion": "catálogo cdmx-ejemplo.js es_ficticio; 06: catálogo completo (D1-05); 08: catálogos marcados, franja de pruebas y teléfonos de ceros en las muestras (A1-12); 08: aviso del catálogo de ejemplo (D3-01)"
   },
   {
    "id": "FRM-77",
@@ -1272,16 +1279,17 @@
    "id": "FRM-79",
    "seccion": 13,
    "titulo": "Cada biblioteca con versión exacta, licencia y suma de verificación",
-   "regla": "vendor/MANIFIESTO.json registra Leaflet, leaflet-gesture-handling, pdf.js y axe-core con versión, licencia y SHA-256; herramientas/vendor.mjs --verificar lo comprueba.",
+   "regla": "vendor/MANIFIESTO.json registra Leaflet, leaflet-gesture-handling, pdf.js y axe-core con versión, licencia y SHA-256; herramientas/vendor.mjs --verificar lo comprueba. Lo que una biblioteca hace mal y el estándar rodea en su código lleva en el comentario su clave (RODEO-01…) y su fila en docs/07, sección 5: biblioteca y versión, qué falla, dónde está el rodeo y cuándo se quita; herramientas/rodeos.mjs exige que coincidan.",
    "porque": "Una biblioteca sin suma puede cambiar sin que nadie lo note.",
    "nivel": "BASE",
    "origen": [
     "A FRM-98",
     "B FRM-LIB-02",
-    "auditoría del estándar, 18 oct 2026"
+    "auditoría del estándar, 18 oct 2026",
+    "auditoría del estándar, 19 oct 2026"
    ],
    "tipo": "decisión heredada",
-   "verificacion": "06-servidor: bibliotecas coinciden con el manifiesto"
+   "verificacion": "06-servidor: bibliotecas coinciden con el manifiesto; rodeos.mjs en npm run verificar (06: G2-01)"
   },
   {
    "id": "FRM-80",
@@ -1301,15 +1309,16 @@
    "id": "FRM-81",
    "seccion": 13,
    "titulo": "Ningún bloque se cierra sin verificación con evidencia",
-   "regla": "Antes de liberar: npm run verificar en verde (auditor, contraste, campos, bibliotecas, documentos generados, pruebas en dos perfiles y siete anchos, axe-core); capturas en verificacion/capturas; recorrido con teclado y lector de pantalla real; prueba en un iPhone y un Android reales con red limitada; casilla «Verificado en móvil y en escritorio». Lo que no pudo comprobarse se escribe.",
+   "regla": "Antes de liberar: npm run verificar en verde (auditor, contraste, campos, bibliotecas y sus rodeos, documentos y derivados al día, presupuesto de peso, pruebas en dos perfiles y siete anchos, axe-core), que también corre solo antes de cada commit (gancho .githooks) y con cada subida a GitHub; en cada versión, npm run presupuesto (tiempos con red lenta) y npm run mutaciones (cada corrección protegida la detecta su prueba); el formulario de un proyecto, con herramientas/comprobar-formulario.mjs; capturas en verificacion/capturas; recorrido con teclado y lector de pantalla real; prueba en un iPhone y un Android reales con red limitada; casilla «Verificado en móvil y en escritorio». Lo que no pudo comprobarse se escribe.",
    "porque": "«Se ve bien» sin evidencia no es verificación; lo que no se escribe se olvida.",
    "nivel": "BASE",
    "origen": [
     "B FRM-MET-02",
-    "encargo 9"
+    "encargo 9",
+    "decisión de la Secretaría, 20 oct 2026: las pruebas corren solas en GitHub y en la computadora antes de guardar"
    ],
    "tipo": "decisión del encargo",
-   "verificacion": "herramientas/verificar.mjs; docs/08-verificacion-y-cierre.md"
+   "verificacion": "herramientas/verificar.mjs; .githooks/pre-commit; .github/workflows/verificar.yml; herramientas/mutaciones.mjs; docs/08-verificacion-y-cierre.md"
   },
   {
    "id": "FRM-82",
@@ -1382,6 +1391,20 @@
    ],
    "tipo": "mejor práctica adicional",
    "verificacion": "guía: resultado y sí y no; 07: bajada, ayuda de bloque y línea de datos (P134)"
+  },
+  {
+   "id": "FRM-87",
+   "seccion": 10,
+   "titulo": "Presupuesto de peso y velocidad; en producción, los archivos del estándar juntos",
+   "regla": "En producción, las hojas y los guiones del estándar que carga una página van juntos en un archivo de cada uno, sin comentarios (herramientas/juntar.mjs; las plantillas, en dist/plantillas/). Cada página, en un teléfono sin caché y con el texto comprimido, descarga a lo más 300 KB en 20 archivos o menos y queda lista en 5 s o menos con 4G lenta y en 12 s o menos con 3G, con el procesador cuatro veces más lento.",
+   "porque": "Quien hace un trámite desde el teléfono con datos móviles espera cada archivo por separado: con sus 43 archivos sueltos, la plantilla por pasos tardaba 18.8 s con 3G; juntos y sin comentarios son 15 archivos y 266 KB.",
+   "nivel": "BASE",
+   "origen": [
+    "decisión de la Secretaría, 20 oct 2026: presupuesto por plantilla y dist en producción",
+    "auditoría del estándar, 19 oct 2026"
+   ],
+   "tipo": "mejor práctica adicional",
+   "verificacion": "presupuesto.mjs --sin-tiempos en npm run verificar (peso, archivos y funcionamiento); npm run presupuesto en cada versión (tiempos)"
   }
  ]
 }

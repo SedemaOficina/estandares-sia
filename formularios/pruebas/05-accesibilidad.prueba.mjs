@@ -19,10 +19,11 @@ import { sirve, abreNavegador, abrePagina, abrePlantilla, PERFILES, PAGINAS, RAI
 
 const RUTA_AXE = resolve(RAIZ, 'vendor/axe-core/axe.min.js');
 const ETIQUETAS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
-/* Reglas que no aplican a páginas de muestra: la guía repite a propósito los
-   mismos id de región en demos independientes (cada formulario es una
-   instancia) y «region» exige que todo contenido esté en un landmark, lo que
-   las plantillas cumplen pero la guía, con decenas de muestras, documenta aparte. */
+/* Reglas que no aplican a páginas de muestra (RODEO-06): la guía repite a
+   propósito los mismos id de región en demos independientes (cada formulario
+   es una instancia) y «region» exige que todo contenido esté en un landmark,
+   lo que las plantillas cumplen pero la guía, con decenas de muestras,
+   documenta aparte. Las plantillas y los ejemplos se revisan con todas. */
 const DESACTIVADAS_GUIA = ['region', 'landmark-unique', 'duplicate-id-aria', 'duplicate-id'];
 
 let servidor, navegador;
@@ -30,6 +31,11 @@ test.before(async () => { servidor = await sirve(); navegador = await abreNavega
 test.after(async () => { await navegador.close(); await servidor.cierra(); });
 
 async function axe(p, { desactivadas = [] } = {}) {
+  /* axe mide colores: con un aviso a media transición («Borrador guardado» apareciendo) medía un
+     verde a medias y fallaba de vez en cuando (A1-13). Se mide sin movimiento y con toda
+     animación ya terminada, no tras una espera fija. */
+  await p.emulateMedia({ reducedMotion: 'reduce' });
+  await p.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect && Number.isFinite(a.effect.getComputedTiming().endTime)).map((a) => a.finished.catch(() => null))));
   if (!(await p.evaluate(() => !!window.axe))) await p.addScriptTag({ path: RUTA_AXE });
   return p.evaluate(async ({ etiquetas, desactivadas }) => {
     const res = await window.axe.run(document, { runOnly: { type: 'tag', values: etiquetas }, rules: Object.fromEntries(desactivadas.map((r) => [r, { enabled: false }])) });

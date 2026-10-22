@@ -56,14 +56,19 @@
   function pintaArbol() {
     const form = $('[data-arbol]');
     const marcados = $$('input:checked', form);
-    const elegidos = conDependencias(marcados.flatMap((c) => c.value.split(',').filter(Boolean)));
+    const nombres = marcados.flatMap((c) => c.value.split(',').filter(Boolean));
+    /* Todo formulario que envía confirma el envío con su acuse (RECOMENDADO), sea de una página o
+       por pasos; sólo una consulta o captura interna lo dice con un aviso junto al formulario. */
+    const conAcuse = !form.elements.interna.checked || form.elements.pasos.checked;
+    if (conAcuse) nombres.push('acuse');
+    const elegidos = conDependencias(nombres);
     const lista = $('[data-arbol-piezas]');
     lista.textContent = '';
     lista.append(el('li', {}, [el('strong', { texto: 'Núcleo' }), texto(' · '), badge('BASE'), texto(` · ${MAN.nucleo.archivos.map((a) => a.split('/').pop()).join(', ')}`)]));
     for (const n of elegidos) { const m = modulosPorNombre[n]; lista.append(el('li', {}, [el('strong', { texto: m.titulo }), texto(' · '), badge(m.nivel), texto(` · ${[m.archivos.css, m.archivos.js].filter(Boolean).map((a) => a.split('/').pop()).join(' + ')}`)])); }
     const css = ['codigo/css/tokens.css', 'codigo/css/base.css', 'codigo/css/nucleo.css', ...elegidos.map((n) => modulosPorNombre[n].archivos.css).filter(Boolean)];
     if (elegidos.includes('mapa')) css.push('vendor/leaflet/leaflet.css', 'vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.css');
-    const js = ['configuracion.js  ← tus ajustes: envío, catálogos, mapa', 'codigo/js/validaciones.config.js', 'codigo/js/iconos.js'];
+    const js = ['configuracion.js  ← copia de codigo/plantillas/configuracion-por-pasos.js (o configuracion-una-pagina.js) con tus ajustes: envío, catálogos, mapa', 'codigo/js/validaciones.config.js', 'codigo/js/iconos.js'];
     if (elegidos.includes('cascadas') || elegidos.includes('combo')) js.push('codigo/catalogos/cdmx-ejemplo.js  ← sustituye por el catálogo oficial');
     js.push('codigo/js/formkit.core.js');
     if (elegidos.includes('mapa')) js.push('vendor/leaflet/leaflet.js');
@@ -75,6 +80,7 @@
     if (elegidos.includes('mapa')) notas.push('El mapa base se declara en FORMKIT_CONFIG.mapa (teselas y atribución); sin él, el punto sigue pudiendo colocarse. El complemento de gestos (vendor/leaflet-gesture-handling) no lleva <script>: su dirección va en FORMKIT_CONFIG.mapa.gestos y el módulo lo carga sólo si Leaflet cargó.');
     if (elegidos.includes('visor')) notas.push('El visor carga pdf.js de vendor/pdfjs-dist/: copia esa carpeta junto al paquete o indica su ruta en FORMKIT_CONFIG.visor.pdfjs.');
     if (elegidos.includes('pasos')) notas.push('Con pasos, copia la plantilla codigo/plantillas/por-pasos.html; si no, una-pagina.html.');
+    notas.push(conAcuse ? 'El acuse confirma el envío con su folio: sin él, la persona no sabe que ya envió y vuelve a enviar. Su marcado está en las dos plantillas.' : 'En una captura interna, el folio de lo guardado se muestra en un aviso junto al formulario (ejemplo de captura interna).');
     notas.push(`${elegidos.length} módulo(s) además del núcleo. Las rutas son relativas a la carpeta del paquete; ajústalas a tu proyecto.`);
     $('[data-arbol-nota]').textContent = notas.join(' ');
   }
@@ -91,23 +97,23 @@
 
   /* ---------- Fundamentos ---------- */
   const PALETA = [
-    ['--guinda', 'Identidad: títulos, encabezados de tabla, acción principal, filete de la cabecera.'],
+    ['--guinda', 'Identidad: títulos de página y de paso, encabezados de tabla, acción principal. Nunca en avisos ni junto a un mensaje de error.'],
     ['--guinda-osc', 'Acción principal al pasar el cursor.'],
-    ['--guinda-cl', 'Fondo suave: filas alternas de tabla, panel de resultado.'],
-    ['--dorado', 'Filete institucional y detalles (trazos, nunca texto sobre blanco).'],
+    ['--guinda-cl', 'Fondo suave: filas alternas de tabla, leyenda de obligatorios, número de la secuencia «qué sigue».'],
+    ['--dorado', 'Filete institucional (encabezado, pie y título de bloque) y detalles de trazo; nunca texto sobre blanco.'],
     ['--dorado-txt', 'Dorado como texto: variante oscurecida que cumple 4.5:1 sobre blanco.'],
     ['--texto', 'Cuerpo y respuesta de la persona.'],
     ['--gris', 'Texto secundario: rótulos, pies, notas.'],
-    ['--gris-cl', 'Ayuda de campo, contador, placeholder del select vacío.'],
+    ['--gris-cl', 'Ayuda de campo, contador, texto del select vacío.'],
     ['--linea', 'Separadores y bordes de tarjeta.'],
     ['--borde', 'Borde de control y de botón secundario (3:1 sobre blanco).'],
     ['--fondo', 'Fondo de página.'],
     ['--blanco', 'Tarjetas y controles.'],
-    ['--beige', 'Pie institucional.'],
-    ['--aviso-bg', 'Aviso neutro y control deshabilitado.'],
-    ['--azul', 'Enlaces, casilla marcada, «Atrás», estado seleccionado.'],
-    ['--azul-cl', 'Fondo de lo seleccionado (tarjeta, chip, opción del combo).'],
-    ['--foco', 'Anillo de foco visible en todo elemento interactivo.'],
+    ['--beige', 'Encabezado y pie institucionales.'],
+    ['--aviso-bg', 'Aviso neutro, control deshabilitado.'],
+    ['--azul', 'Enlaces, casilla marcada, «Atrás», lo elegido (opción marcada, página actual de la paginación, pestaña abierta).'],
+    ['--azul-cl', 'Fondo de lo seleccionado (tarjeta, chip, opción de combo).'],
+    ['--foco', 'Anillo de foco de todo elemento interactivo; sobre la cabecera guinda de la tabla va en blanco.'],
     ['--error', 'Error bloqueante: borde, mensaje, resumen, botón de peligro.'],
     ['--pend', 'Advertencia y «Pendiente»: ámbar, siempre con icono y texto.'],
     ['--ok', 'Éxito y «guardado».'],
@@ -189,9 +195,9 @@
       ['--r-pill', 'Radio de chips e insignias.', 'radio'],
       ['--b-1', 'Trazo de bordes y separadores.', 'trazo'],
       ['--foco-ancho', 'Anillo de foco (3 px) separado --foco-sep del elemento.', 'trazo'],
-      ['--bp-sm', 'Punto de corte: hoja inferior → diálogo centrado; chips en fila.', 'texto'],
-      ['--bp-md', 'Punto de corte: campos a dos columnas; tabla real; botones en fila.', 'texto'],
-      ['--bp-lg', 'Punto de corte: navegación lateral; tres columnas.', 'texto'],
+      ['--bp-sm', 'Punto de corte: hoja inferior → diálogo centrado; acciones del acuse, «Hoy» y atajos de fecha, copiar y barra del mapa en fila.', 'texto'],
+      ['--bp-md', 'Punto de corte: campos a dos columnas con subcuadrícula; tabla real; botones en fila con la acción principal a la derecha.', 'texto'],
+      ['--bp-lg', 'Punto de corte: visor de documentos fijo junto a lo que se revisa; índice lateral en la guía.', 'texto'],
       ['--ancho-pagina', 'Ancho máximo del contenido.', 'texto'],
       ['--ancho-lectura', 'Ancho máximo del texto corrido (70 caracteres).', 'texto']
     ];
@@ -265,7 +271,7 @@
     { id: 'n-select', titulo: 'Selector de una lista corta, solo lectura, deshabilitado y casilla de declaración', proposito: 'El select nativo con flecha propia y «Elige una opción» como primera opción vacía. Solo lectura (readonly, borde discontinuo, se envía, copiable) frente a deshabilitado (disabled, gris, no se envía). La casilla de declaración o consentimiento va destacada y nunca premarcada.', demo: { nombre: 'select-casilla' },
       movil: 'El select abre el selector nativo del sistema; la casilla y su texto son un solo objetivo táctil.', escritorio: 'Select con flecha propia; al pasar el cursor por la casilla cambia el fondo.',
       errores: ['Deshabilitar un campo que la persona debe ver y copiar (es solo lectura).', 'Premarcar el consentimiento.', 'Select sin opción vacía inicial: se envía la primera sin querer.'] },
-    { id: 'n-condicional', titulo: 'Pregunta condicional', proposito: 'Un bloque con data-si="campo=valor|valor2" existe sólo mientras la respuesta coincida: no se valida, no viaja en el envío y lo escrito se conserva por si la persona vuelve a cambiar de opinión. Al mostrarse se anuncia al lector de pantalla.', demo: { nombre: 'condicional' },
+    { id: 'n-condicional', titulo: 'Pregunta condicional', proposito: 'Un bloque con data-si="campo=valor|valor2" existe sólo mientras la respuesta coincida: no se valida, no viaja en el envío y lo escrito se conserva por si la persona vuelve a cambiar de opinión. Aparece justo después de la pregunta que lo abre, así que quien usa lector de pantalla lo encuentra al seguir avanzando.', demo: { nombre: 'condicional' },
       errores: ['Ocultar con display:none y seguir validando el campo oculto.', 'Borrar lo escrito al ocultar.', 'Mover el foco al mostrar el bloque.'] },
     { id: 'n-botones', titulo: 'Botones, avisos y pendiente visible', proposito: 'Una sola acción principal por pantalla (guinda, a la derecha o abajo). Secundario gris con borde; peligro sólo para lo destructivo: con contorno el botón que lo abre y rojo relleno el que hace el daño dentro de su confirmación; «Atrás» como enlace azul con flecha, nunca como botón gris; enlace-botón para acciones ligeras; botón de icono sólo con nombre accesible y 44 px. Cuatro avisos, cada uno con el icono de su tono, texto y rol correcto; el que pasa de una frase lleva título. FormKit.aviso() los pinta así cuando responden a una acción. Varias acciones en orden van en una secuencia numerada (ol.secuencia), aquí dentro de un aviso; también en el acuse y en el resultado.', demo: { nombre: 'botones-avisos' },
       movil: 'Botones a lo ancho, apilados con la acción principal arriba (column-reverse: en el HTML va al final, para el teclado).', escritorio: 'En fila desde 760 px, principal a la derecha, ancho al contenido.',
@@ -380,7 +386,7 @@
     const lugar = $('[data-demo-aviso-lugar]', b.closest('.guia-demo-form'));
     if (b.dataset.demoAviso !== 'pasos') { FormKit.aviso(lugar, { tono: 'ok', titulo: 'Nota guardada', texto: `Quedó guardada a las ${hora}. Sólo la ve el personal.`, foco: true }); return; }
     /* Con pasos y un enlace: el texto puede ser un nodo y los pasos van como secuencia. */
-    const p = el('p', {}, [texto('Le avisamos por correo. El detalle está en '), el('a', { href: '#m-resultado', texto: 'el resultado de la revisión' }), texto('.')]);
+    const p = el('p', {}, [texto('La persona recibe un aviso por correo. El detalle está en '), el('a', { href: '#m-resultado', texto: 'el resultado de la revisión' }), texto('.')]);
     FormKit.aviso(lugar, { tono: 'advertencia', titulo: 'Solicitud devuelta para corregir', texto: p, pasos: ['La persona abre «Mis documentos».', 'Sube de nuevo la identificación oficial.', 'Envía la solicitud: la Secretaría la revisa otra vez.'], foco: true });
   });
   /* Resultado de una decisión del personal: confirma con consecuencias y luego dice qué pasó, a qué hora y quién. */
@@ -413,8 +419,8 @@
   /* ---------- Probador de validaciones ---------- */
   const CASOS = {
     nombre: [['valido', 'María José Pérez'], ['valido', "O'Connor"], ['invalido', 'Juan123'], ['limite', 'Ñandú de la Peña-Ruiz'], ['limite', 'D’Angelo']],
-    correo: [['valido', 'nombre@ejemplo.local'], ['invalido', 'nombre@'], ['invalido', 'sin arroba.mx'], ['invalido', 'ana@dominio..mx'], ['invalido', 'ana lopez@correo.mx'], ['limite', 'nombre@gmial.com']],
-    telefono: [['valido', '55 1234 5678'], ['valido', '+52 5512345678'], ['invalido', '123'], ['limite', '(55) 1234-5678'], ['limite', '+52 1 55 1234 5678']],
+    correo: [['valido', 'nombre@ejemplo.local'], ['invalido', 'nombre@'], ['invalido', 'sin arroba.local'], ['invalido', 'ana@ejemplo..local'], ['invalido', 'ana lopez@ejemplo.local'], ['limite', 'nombre@gmial.com']],
+    telefono: [['valido', '55 0000 0000'], ['valido', '+52 5500000000'], ['invalido', '123'], ['limite', '(55) 0000-0000'], ['limite', '+52 1 55 0000 0000']],
     cp: [['valido', '01000'], ['valido', '16999'], ['invalido', '1234'], ['limite', '17000']],
     curp: [['valido', 'PUEF900515HDFRJL04'], ['invalido', 'PUEF900515HDFRJL0'], ['invalido', 'PUEF901345HDFRJL04'], ['limite', 'puef900515hdfrjl04']],
     rfc: [['valido', 'XAXX010101000'], ['valido', 'ABC010101AB1'], ['invalido', 'XAXX0101'], ['limite', 'xaxx-010101-000'], ['limite', 'muño-800101-ab1']],

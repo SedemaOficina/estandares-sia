@@ -192,16 +192,7 @@ function tieneExcepcionAnotada(comentarios, linea) {
 /* Cuenta niveles de descendencia de un selector: compuestos separados por
    espacio, >, + o ~ fuera de paréntesis y corchetes. */
 function nivelesDe(sel) {
-  let prof = 0, niveles = 1, enEspacio = false;
-  for (let j = 0; j < sel.length; j++) {
-    const c = sel[j];
-    if (c === '(' || c === '[') prof++;
-    if (c === ')' || c === ']') prof--;
-    if (prof > 0) continue;
-    if (/[\s>+~]/.test(c)) { if (!enEspacio) { niveles++; enEspacio = true; } if (/[>+~]/.test(c)) { /* el combinador ya contó */ } }
-    else enEspacio = false;
-  }
-  // «a > b» cuenta una sola vez porque los espacios y el símbolo son contiguos o separados por espacios
+  /* «a > b» cuenta una sola vez: los espacios junto a un combinador se quitan antes de contar. */
   const compactado = sel.replace(/\s*([>+~])\s*/g, '$1');
   let pr = 0, k = 1, previoSep = false;
   for (let j = 0; j < compactado.length; j++) {
@@ -230,7 +221,7 @@ function literalDeLongitud(valor) {
   return limpio.match(re);
 }
 
-function auditaHoja(archivo, texto, contexto) {
+function auditaHoja(archivo, texto) {
   let analisis;
   try { analisis = analiza(texto, archivo); }
   catch (e) { hallazgo('A00', archivo, 0, `no se pudo analizar: ${e.message}`); return null; }

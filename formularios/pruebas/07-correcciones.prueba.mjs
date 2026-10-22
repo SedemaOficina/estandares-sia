@@ -633,7 +633,9 @@ test('la bajada y la ayuda de bloque ocupan su tarjeta; el límite de 70ch es de
   const partidos = await tel.evaluate(() => {
     const l = document.createElement('p'); l.className = 'linea-datos';
     l.innerHTML = '<span class="linea-datos-item">Folio EJ-2026-000123</span> · <span class="linea-datos-item">Recibida el 17 de octubre de 2026</span> · <span class="linea-datos-item">Revisión 2 de 3</span>';
-    document.querySelector('main').append(l);
+    /* En una caja angosta un dato largo sí se partiría si pudiera: así la prueba lo distingue. */
+    const caja = document.createElement('div'); caja.className = 'tarjeta'; caja.append(l); document.querySelector('main').append(caja);
+    l.style.maxWidth = '160px';
     return [...l.querySelectorAll('.linea-datos-item')].map((s) => s.getClientRects().length);
   });
   assert.deepEqual(partidos, [1, 1, 1], 'en teléfono cada dato queda en un solo renglón');
@@ -685,15 +687,15 @@ test('la foto viaja sin EXIF ni ubicación aunque recodificada pese más o no se
     const a = FormKit.iniciar(document.getElementById('formulario')).payload().archivos[0];
     const b = new Uint8Array(await a.blob.arrayBuffer());
     let exif = false; for (let i = 0; i + 5 < b.length; i++) if (b[i] === 0x45 && b[i + 1] === 0x78 && b[i + 2] === 0x69 && b[i + 3] === 0x66 && b[i + 4] === 0) { exif = true; break; }
-    return { exif, lat: a.lat_captura, tipo: a.tipo, jpg: b[0] === 0xFF && b[1] === 0xD8 };
+    return { exif, lat: a.lat_captura, tipo: a.tipo, jpg: b[0] === 0xFF && b[1] === 0xD8, recodificada: !!a.dimensiones };
   });
   assert.ok(foto.includes(Buffer.from('Exif\0')), 'la foto de prueba trae EXIF');
   await sube({ name: 'foto.jpg', mimeType: 'image/jpeg', buffer: foto });
-  assert.deepEqual(await enviado(), { exif: false, lat: undefined, tipo: 'image/jpeg', jpg: true }, 'recodificada, aunque pese más que la original');
+  assert.deepEqual(await enviado(), { exif: false, lat: undefined, tipo: 'image/jpeg', jpg: true, recodificada: true }, 'recodificada, aunque pese más que la original (no basta quitarle el EXIF)');
   await p.click('[data-campo="retrato"] .arch-quitar');
   await p.evaluate(() => { window.createImageBitmap = undefined; });
   await sube({ name: 'foto.jpg', mimeType: 'image/jpeg', buffer: foto });
-  assert.deepEqual(await enviado(), { exif: false, lat: undefined, tipo: 'image/jpeg', jpg: true }, 'sin poder recodificar, al JPG se le quitan los metadatos');
+  assert.deepEqual(await enviado(), { exif: false, lat: undefined, tipo: 'image/jpeg', jpg: true, recodificada: false }, 'sin poder recodificar, al JPG se le quitan los metadatos');
   await p.click('[data-campo="retrato"] .arch-quitar');
   await sube({ name: 'foto.png', mimeType: 'image/png', buffer: pngRuido(400, 300) });
   assert.equal(await p.locator('[data-campo="retrato"] .arch').getAttribute('data-estado'), 'listo', 'un PNG que no se pudo recodificar se agrega como está (decisión de la Secretaría, 18 oct 2026)');

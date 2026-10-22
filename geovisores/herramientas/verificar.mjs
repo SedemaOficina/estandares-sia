@@ -33,6 +33,7 @@ function corre(guion, ...args) {
 
 paso('Formularios a un lado (../formularios)', () => { const v = JSON.parse(readFileSync(resolve(RAIZ, '../formularios/package.json'), 'utf8')).version; return [true, `formularios ${v}`]; });
 paso('Documentos generados al día', () => corre('herramientas/generar-reglas.mjs', '--comprobar'));
+paso('Reglas de formularios citadas, sin cambios desde su revisión', () => corre('herramientas/citas-formularios.mjs'));
 paso('Contraste sobre cada fondo real', () => corre('herramientas/contraste.mjs'));
 paso('Rampas y daltonismo', () => corre('herramientas/rampas.mjs'));
 

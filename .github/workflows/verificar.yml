@@ -1,0 +1,39 @@
+# Verificación de los dos estándares en cada subida a GitHub (decisión de la
+# Secretaría del 20 oct 2026: las pruebas corren solas en GitHub y en la
+# computadora antes de guardar; el gancho local está en .githooks/pre-commit).
+# Corre lo mismo que se corre a mano: la verificación de la carpeta común
+# (geovisores, portada, secretos, derivados de formularios) y la de formularios
+# con sus pruebas en navegador.
+name: Verificar
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: formularios/package-lock.json
+      - name: Dependencias de verificación de formularios
+        working-directory: formularios
+        run: npm ci
+      - name: Navegador de las pruebas
+        working-directory: formularios
+        run: npx playwright install --with-deps chromium
+      - name: Carpeta común (geovisores, portada, secretos, derivados)
+        run: npm run verificar
+      - name: Formularios (con pruebas en navegador)
+        working-directory: formularios
+        run: npm run verificar

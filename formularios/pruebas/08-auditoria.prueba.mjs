@@ -11,10 +11,10 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { mkdtempSync, writeFileSync, readFileSync, copyFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, copyFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
-import { sirve, abreNavegador, abrePagina, abrePlantilla, PERFILES, PAGINAS, RAIZ, visible, continuar, llenaSolicitud, llenaLugar, aceptaDeclaraciones, pngRuido, jpegConExif, ocultosVisibles, FRASE_LEGIBLE, PNG_1x1, nuevaPagina } from './ayudas.mjs';
+import { sirve, abreNavegador, abrePagina, abrePlantilla, PERFILES, PAGINAS, RAIZ, visible, continuar, llenaSolicitud, llenaLugar, aceptaDeclaraciones, pngRuido, ocultosVisibles, FRASE_LEGIBLE, PNG_1x1, nuevaPagina, copiaCarpeta } from './ayudas.mjs';
 
 let servidor, navegador;
 test.before(async () => { servidor = await sirve(); navegador = await abreNavegador(); });
@@ -345,7 +345,7 @@ test('el paquete sólo lleva lo guardado en Git, se arma en Windows, sale igual 
   const firma = ['-c', 'user.name=prueba', '-c', 'user.email=prueba@ejemplo.local'];
   execFileSync('git', ['clone', '-q', raizRepo, clon]);
   /* Las herramientas que se prueban son las de esta copia de trabajo. */
-  copyFileSync(resolve(RAIZ, 'herramientas/construir.mjs'), resolve(clon, 'formularios/herramientas/construir.mjs'));
+  for (const h of ['construir.mjs', 'juntar.mjs', 'esquema-desde-html.mjs']) copyFileSync(resolve(RAIZ, 'herramientas', h), resolve(clon, 'formularios/herramientas', h));
   mkdirSync(resolve(clon, 'herramientas'), { recursive: true });
   copyFileSync(resolve(raizRepo, 'herramientas/secretos.mjs'), resolve(clon, 'herramientas/secretos.mjs'));
   copyFileSync(resolve(raizRepo, '.gitignore'), resolve(clon, '.gitignore'));
@@ -1240,4 +1240,248 @@ test('auditar-campos exige data-sin-borrador en el consentimiento y en «No soy 
   const r = spawnSync(process.execPath, [resolve(RAIZ, 'herramientas/auditar-campos.mjs'), html], { encoding: 'utf8' });
   assert.equal(r.status, 1, 'sin la marca, falla');
   assert.match(r.stderr, /D7/);
+});
+
+/* ----- Bloque 6 (1.6.3): documentos, pruebas y entrega ----- */
+
+/* Reglas que no tenían ninguna comprobación automática (A1-12: 10, 35, 59 y 76). */
+test('lo obligatorio: asterisco guinda que el lector no oye, «(obligatorio)» para el lector, una leyenda por pantalla y ningún «(opcional)» (A1-12, FRM-10)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  const r = await p.evaluate(() => {
+    const campos = [...document.querySelectorAll('form [data-requerido]')].filter((el) => el.querySelector('.etiqueta'));
+    const mal = campos.filter((el) => { const etq = el.querySelector('.etiqueta'); const a = etq.querySelector('.marca-oblig'); return !a || a.getAttribute('aria-hidden') !== 'true' || a.textContent !== '*' || !/\(obligatorio\)/.test(etq.querySelector('.solo-lector')?.textContent || ''); }).map((el) => el.dataset.campo);
+    const pasos = [...document.querySelectorAll('[data-paso]')].map((s) => ({ obligatorios: s.querySelectorAll('[data-requerido]').length, leyendas: (s.textContent.match(/son obligatorios/g) || []).length }));
+    return { campos: campos.length, mal, color: getComputedStyle(document.querySelector('.marca-oblig')).color, pasos, opcional: [...document.querySelectorAll('.etiqueta')].filter((e) => /opcional/i.test(e.textContent)).map((e) => e.textContent.trim()) };
+  });
+  assert.ok(r.campos > 5);
+  assert.deepEqual(r.mal, [], 'cada obligatorio lleva su asterisco oculto al lector y la palabra para el lector');
+  assert.equal(r.color, 'rgb(157, 33, 72)', 'el asterisco va en guinda');
+  for (const [i, s] of r.pasos.entries()) if (s.obligatorios) assert.equal(s.leyendas, 1, `el paso ${i + 1} dice una vez qué significa el asterisco`);
+  assert.deepEqual(r.opcional, [], 'ninguna etiqueta dice «(opcional)»');
+  await p.context().close();
+});
+
+test('«Atrás» es un enlace azul con su flecha, no un botón gris (A1-12, FRM-35)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  await llenaSolicitud(p); await continuar(p);
+  const a = await visible(p, '[data-accion="atras"]').evaluate((b) => { const c = getComputedStyle(b); return { clase: b.className, color: c.color, fondo: c.backgroundColor, flecha: b.querySelector('svg use')?.getAttribute('href'), primero: b.firstElementChild?.tagName.toLowerCase() }; });
+  assert.deepEqual(a, { clase: 'btn-atras', color: 'rgb(26, 86, 168)', fondo: 'rgba(0, 0, 0, 0)', flecha: '#i-flecha-izq', primero: 'svg' });
+  await p.context().close();
+});
+
+test('cero valores fijos: ni el núcleo ni los módulos escriben una dirección; vive en la configuración (A1-12, FRM-59)', () => {
+  const archivos = ['codigo/js/formkit.core.js', ...readdirSync(resolve(RAIZ, 'codigo/modulos')).map((m) => `codigo/modulos/${m}/${m}.js`).filter((f) => existsSync(resolve(RAIZ, f)))];
+  const fijas = [];
+  for (const f of archivos) {
+    const codigo = readFileSync(resolve(RAIZ, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    for (const m of codigo.matchAll(/https?:\/\/[^\s'"`)]+/g)) if (m[0] !== 'http://www.w3.org/2000/svg') fijas.push(`${f}: ${m[0]}`);
+  }
+  assert.deepEqual(fijas, [], 'direcciones escritas en el código');
+});
+
+test('datos de ejemplo ficticios: catálogos marcados, plantillas con su franja y teléfonos de ceros en las muestras (A1-12, FRM-76)', async () => {
+  await import(pathToFileURL(resolve(RAIZ, 'codigo/catalogos/cdmx-ejemplo.js')).href);
+  for (const [n, c] of Object.entries(globalThis.FORMKIT_CATALOGOS)) assert.equal(c.es_ficticio, true, `el catálogo «${n}» se declara de ejemplo`);
+  for (const f of ['codigo/plantillas/por-pasos.html', 'codigo/plantillas/una-pagina.html', 'guia-visual/ejemplos/encuesta.html', 'guia-visual/ejemplos/captura-interna.html']) {
+    const html = readFileSync(resolve(RAIZ, f), 'utf8');
+    assert.match(html, /class="entorno-pruebas"/, `${f} dice que es de pruebas`);
+  }
+  for (const f of ['codigo/plantillas/por-pasos.html', 'codigo/plantillas/una-pagina.html', 'guia-visual/index.html', 'guia-visual/guia.js', 'guia-visual/ejemplos/encuesta.html', 'guia-visual/ejemplos/captura-interna.html', 'guia-visual/ejemplos/captura-interna.js']) {
+    const telefonos = (readFileSync(resolve(RAIZ, f), 'utf8').match(/\b55[ -]?\d{4}[ -]?\d{4}\b/g) || []).filter((t) => /[1-9]/.test(t.slice(2)));
+    assert.deepEqual(telefonos, [], `${f}: un teléfono de muestra que podría ser de alguien`);
+  }
+});
+
+test('el guinda no pinta avisos, errores, el resumen, la franja ni el recordatorio: se parece al rojo de error (decisión 21, FRM-39)', () => {
+  const hojas = ['codigo/css/base.css', 'codigo/css/nucleo.css', ...readdirSync(resolve(RAIZ, 'codigo/modulos')).map((m) => `codigo/modulos/${m}/${m}.css`).filter((f) => existsSync(resolve(RAIZ, f)))];
+  const conGuinda = [];
+  for (const h of hojas) {
+    const css = readFileSync(resolve(RAIZ, h), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) if (/\.(aviso|err|resumen-errores|franja|recordatorio|estado-rechazo|resultado-rechazo)\b/.test(m[1]) && /--guinda/.test(m[2])) conGuinda.push(`${h}: ${m[1].trim()}`);
+  }
+  assert.deepEqual(conGuinda, []);
+});
+
+test('lista con búsqueda: un nombre repetido en el catálogo se ofrece una sola vez (A1-12, P37)', async () => {
+  const p = await abrePagina(navegador, servidor.url, 'pruebas/paginas/correcciones.html', { contexto: PERFILES.escritorio.contexto });
+  /* El repetido va en el catálogo desde que carga: la lista toma sus opciones al armarse, así que agregarlo después no probaría nada. */
+  await p.route('**/correcciones-config.js', async (r) => {
+    const res = await r.fetch();
+    await r.fulfill({ response: res, body: `${await res.text()}\nwindow.FORMKIT_CATALOGOS.especies.filas.push('Jacaranda', { nombre: 'Jacaranda', detalle: 'repetida' });\n` });
+  });
+  await p.reload(); await p.waitForLoadState('load');
+  assert.equal(await p.evaluate(() => window.FORMKIT_CATALOGOS.especies.filas.length), 5, 'el catálogo trae los repetidos');
+  await p.click('#especie'); await p.type('#especie', 'jac');
+  await p.locator('.combo-lista li', { hasText: 'Jacaranda' }).first().waitFor();
+  assert.equal(await p.locator('.combo-lista li', { hasText: 'Jacaranda' }).count(), 1);
+  assert.deepEqual(p.registro, [], 'consola limpia');
+  await p.context().close();
+});
+
+test('por pasos: el rechazo del servidor abre el paso de la respuesta con error y pone ahí su resumen (A1-12, P41)', async () => {
+  const p = await abrePlantilla(navegador, servidor.url, { contexto: PERFILES.escritorio.contexto });
+  await hastaRevision(p); await aceptaDeclaraciones(p);
+  await p.evaluate(() => FormKit.iniciar(document.querySelector('form'), { enviar: () => Promise.reject({ errores: [{ campo: 'descripcion', mensaje: 'Esa descripción ya se recibió en otra solicitud.' }] }) }));
+  await visible(p, '[data-accion="enviar"]').click();
+  await p.waitForFunction(() => /No se pudo enviar/.test((document.querySelector('[data-paso]:not([hidden]) .resumen-errores-titulo') || {}).textContent || ''));
+  assert.equal(await pasoVisible(p), 0, 'se abre el paso donde está la descripción, no se queda en la revisión');
+  assert.match(await error(p, 'descripcion'), /ya se recibió/, 'el error va junto a su respuesta');
+  assert.match((await p.locator('[data-paso]:not([hidden]) .resumen-errores a').allTextContents()).join(' '), /ya se recibió/, 'y el resumen del paso lo enlaza');
+  await p.context().close();
+});
+
+test('visor en la copia de un proyecto: el estándar en una carpeta con otro nombre encuentra pdf.js a su lado (A1-12, P96)', async () => {
+  const sitio = mkdtempSync(resolve(tmpdir(), 'formkit-sitio-'));
+  copiaCarpeta(resolve(RAIZ, 'codigo'), resolve(sitio, 'estandar'));
+  copiaCarpeta(resolve(RAIZ, 'vendor/pdfjs-dist'), resolve(sitio, 'vendor/pdfjs-dist'));
+  mkdirSync(resolve(sitio, 'docs')); mkdirSync(resolve(sitio, 'paginas'));
+  copyFileSync(resolve(RAIZ, 'guia-visual/muestras/comprobante-muestra.pdf'), resolve(sitio, 'docs/comprobante.pdf'));
+  /* La página va en su propia subcarpeta, como en un sistema: la ruta por omisión (relativa a la página) no acierta por casualidad. */
+  writeFileSync(resolve(sitio, 'paginas/index.html'), `<!doctype html><html lang="es-MX"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Visor en un proyecto</title>
+<link rel="stylesheet" href="../estandar/css/tokens.css"><link rel="stylesheet" href="../estandar/css/base.css"><link rel="stylesheet" href="../estandar/css/nucleo.css"><link rel="stylesheet" href="../estandar/modulos/visor/visor.css"></head>
+<body><main class="pagina"><div class="visor-area"><div><button type="button" class="btn-enlace" data-visor-url="../docs/comprobante.pdf" data-visor-titulo="Comprobante" data-visor-archivo="comprobante.pdf">Ver documento</button></div>
+<dialog class="visor" data-visor aria-labelledby="visor-titulo"><div class="visor-cabeza"><div class="visor-nombre"><h2 class="visor-titulo" id="visor-titulo" data-visor-titulo>Documento</h2><p class="visor-archivo mono" data-visor-archivo></p></div><button type="button" class="btn-enlace visor-cerrar" data-visor-accion="cerrar">Cerrar</button></div>
+<div class="visor-barra" role="toolbar" aria-label="Herramientas del visor"><button type="button" class="btn btn-secundario" data-visor-accion="alejar" aria-label="Alejar">−</button><output class="visor-zoom" data-visor-zoom aria-live="polite">100 %</output><button type="button" class="btn btn-secundario" data-visor-accion="acercar" aria-label="Acercar">+</button><a class="btn-enlace visor-abrir" data-visor-abrir target="_blank" rel="noopener">Abrir en otra pestaña</a></div>
+<p class="visor-pagina" data-visor-pagina aria-live="polite"></p><div class="aviso visor-aviso" data-visor-aviso hidden></div><div class="visor-hojas" data-visor-hojas role="region" tabindex="0" aria-label="Hojas del documento"></div><p class="visor-nota" data-visor-nota hidden></p></dialog></div></main>
+<script src="../estandar/js/validaciones.config.js"></script><script src="../estandar/js/iconos.js"></script><script src="../estandar/js/formkit.core.js"></script><script src="../estandar/modulos/visor/visor.js"></script></body></html>`);
+  /* Su propio servidor se cierra aunque la prueba falle: abierto, el proceso de pruebas no termina nunca. */
+  const s = await sirve(sitio);
+  const p = await nuevaPagina(navegador, PERFILES.escritorio.contexto);
+  try {
+    await p.goto(`${s.url}/paginas/index.html`);
+    await p.click('[data-visor-url]');
+    await p.waitForFunction(() => document.querySelectorAll('[data-visor-hojas] canvas').length === 2, null, { timeout: 15000 });
+    assert.deepEqual(p.registro, [], 'sin avisos: pdf.js estaba junto a la carpeta del estándar');
+  } finally {
+    await p.context().close(); await s.cierra();
+  }
+});
+
+test('visor: si pdf.js no carga, el documento se abre con el visor del navegador y se dice dónde se buscó (RODEO-05)', async () => {
+  const p = await abrePagina(navegador, servidor.url, PAGINAS.guia, { contexto: PERFILES.escritorio.contexto });
+  await p.route('**/pdf.min.mjs', (r) => r.abort());
+  await p.click('#m-visor [data-visor-url$=".pdf"]');
+  await p.locator('#m-visor .visor-marco').waitFor();
+  assert.match(await p.locator('#m-visor [data-visor-aviso]').textContent(), /visor del navegador/, 'la persona sabe por qué se ve distinto');
+  assert.ok(p.registro.some((l) => /no se pudo cargar pdf\.js desde/.test(l)), 'quien programa ve en la consola dónde se buscó pdf.js');
+  await p.context().close();
+});
+
+test('una página: la lista con búsqueda y el interruptor vuelven del borrador y se leen en palabras (A1-12, combo y toggle)', async () => {
+  const p = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
+  await p.click('#alcaldia'); await p.type('#alcaldia', 'coy'); await p.keyboard.press('ArrowDown'); await p.keyboard.press('Enter'); await p.keyboard.press('Tab');
+  await p.click('[data-toggle]');
+  await p.waitForTimeout(900);
+  await p.reload(); await p.waitForTimeout(300);
+  await p.click('[data-borrador="recuperar"]'); await p.waitForTimeout(300);
+  assert.equal(await p.inputValue('#alcaldia'), 'Coyoacán', 'la lista con búsqueda vuelve con el nombre del catálogo');
+  assert.equal(await p.getAttribute('[data-toggle]', 'aria-checked'), 'true', 'el interruptor vuelve encendido');
+  const palabras = await p.evaluate(() => { const i = FormKit.iniciar(document.getElementById('formulario')); return [i.ctx.textoDeValor('alcaldia'), i.ctx.textoDeValor('avisos')]; });
+  assert.deepEqual(palabras, ['Coyoacán', 'Sí'], 'y se leen como la persona los eligió');
+  await p.context().close();
+});
+
+test('FormKit.confirma avisa en la consola si «si» no dice qué pasa: sin él o con «Aceptar» (F2-13)', async () => {
+  const p = await abrePagina(navegador, servidor.url, 'pruebas/paginas/desenlace.html', { contexto: PERFILES.escritorio.contexto });
+  for (const si of [undefined, 'Aceptar', 'Rechazar solicitud']) {
+    await p.evaluate((s) => { FormKit.confirma(document.querySelector('button'), { titulo: '¿Rechazar la solicitud EJ-1?', si: s }); }, si);
+    await p.locator('dialog[role="alertdialog"][open]').waitFor();
+    await p.keyboard.press('Escape');
+    await p.locator('dialog[role="alertdialog"]').waitFor({ state: 'detached' });
+  }
+  const avisos = p.registro.filter((l) => /FormKit\.confirma/.test(l));
+  assert.equal(avisos.length, 2, `sin «si» y con «Aceptar», no con «Rechazar solicitud»: ${avisos.join(' | ')}`);
+  assert.match(avisos[1], /«Aceptar»/);
+  await p.context().close();
+});
+
+test('un texto sin formato más largo que su máximo se marca también en el navegador, no sólo en el servidor (A1-14)', async () => {
+  const p = await abre();
+  const r = await p.evaluate(() => {
+    const form = document.querySelector('form');
+    const c = Object.assign(document.createElement('div'), { className: 'campo' });
+    c.dataset.campo = 'clave_largo'; c.dataset.uso = 'Prueba.';
+    c.innerHTML = '<label class="etiqueta" for="clave_largo">Clave</label><input class="control" id="clave_largo" name="clave_largo" type="text" maxlength="5"><p class="err" aria-live="polite"><svg class="icono" aria-hidden="true"><use href="#i-error"></use></svg><span></span></p>';
+    form.prepend(c);
+    const i = FormKit.iniciar(form);
+    document.getElementById('clave_largo').value = 'demasiado largo';
+    return i.valida().filter((f) => f.campo === 'clave_largo').map((f) => f.mensaje);
+  });
+  assert.deepEqual(r, ['Usa hasta 5 caracteres en «Clave».']);
+  await p.context().close();
+});
+
+test('plantillas, ejemplos y guías sin guiones, estilos ni manejadores escritos en el HTML: la política de seguridad estricta no los bloquea (B9-01)', () => {
+  const rutas = ['codigo/plantillas/por-pasos.html', 'codigo/plantillas/una-pagina.html', 'guia-visual/index.html', 'guia-visual/ejemplos/encuesta.html', 'guia-visual/ejemplos/captura-interna.html', '../guia-visual/index.html', '../geovisores/guia-visual/index.html'];
+  for (const ruta of rutas.filter((r) => existsSync(resolve(RAIZ, r)))) {
+    const html = readFileSync(resolve(RAIZ, ruta), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+    assert.deepEqual(html.match(/<script\b(?![^>]*\ssrc=)[^>]*>/g) || [], [], `${ruta}: <script> en línea`);
+    assert.deepEqual(html.match(/<[a-z][\w-]*\b[^>]*\s(style|on[a-z]+)="/gi) || [], [], `${ruta}: estilo o manejador en un atributo`);
+  }
+});
+
+test('el árbol de la guía siempre agrega el acuse a un formulario que envía, también al de una página (F5-01)', async () => {
+  const p = await abrePagina(navegador, servidor.url, PAGINAS.guia, { contexto: PERFILES.escritorio.contexto });
+  await p.evaluate(() => { for (const c of document.querySelectorAll('[data-arbol] input')) c.checked = c.name === 'archivos'; document.querySelector('[data-arbol]').dispatchEvent(new Event('change', { bubbles: true })); });
+  const codigo = await p.locator('[data-arbol-codigo]').textContent();
+  assert.match(codigo, /modulos\/acuse\/acuse\.js/, 'con sólo «archivos», el árbol pide el acuse');
+  assert.match(await p.locator('[data-arbol-nota]').textContent(), /acuse confirma el envío/);
+  await p.evaluate(() => { for (const c of document.querySelectorAll('[data-arbol] input')) c.checked = c.name === 'interna'; document.querySelector('[data-arbol]').dispatchEvent(new Event('change', { bubbles: true })); });
+  assert.doesNotMatch(await p.locator('[data-arbol-codigo]').textContent(), /acuse\.js/, 'una captura interna lo dice con un aviso, sin acuse');
+  await p.evaluate(() => localStorage.removeItem('guia-formularios:arbol'));
+  await p.context().close();
+});
+
+test('un catálogo de ejemplo en una página que no dice ser de pruebas se avisa en la consola (D3-01)', async () => {
+  const conFranja = await abrePagina(navegador, servidor.url, PAGINAS['una-pagina'], { contexto: PERFILES.escritorio.contexto });
+  assert.deepEqual(conFranja.registro, [], 'la plantilla dice que es de pruebas: no avisa');
+  const ctx = await navegador.newContext(PERFILES.escritorio.contexto);
+  const p = await ctx.newPage(); const registro = [];
+  p.on('console', (m) => { if (m.type() === 'warning') registro.push(m.text()); });
+  await p.route(/una-pagina\.html/, async (r) => { const resp = await r.fetch(); await r.fulfill({ response: resp, body: (await resp.text()).replace(/<aside class="entorno-pruebas"[^>]*>[^<]*<\/aside>/, '') }); });
+  await p.goto(`${servidor.url}/${PAGINAS['una-pagina']}`); await p.waitForTimeout(300);
+  assert.deepEqual(registro.filter((l) => /es de ejemplo/.test(l)).map((l) => (l.match(/catálogo «([^»]+)»/) || [])[1]), ['alcaldias'], `sin la franja, avisa una vez por catálogo que usa: ${registro.join(' | ')}`);
+  await conFranja.context().close(); await ctx.close();
+});
+
+test('comprobar-formulario: el formulario de un proyecto se comprueba con una orden, y lo que falla se dice (F5-03)', async () => {
+  const bien = spawnSync(process.execPath, [resolve(RAIZ, 'herramientas/comprobar-formulario.mjs'), resolve(RAIZ, 'codigo/plantillas/una-pagina.html'), '--raiz', RAIZ], { encoding: 'utf8' });
+  assert.equal(bien.status, 0, bien.stdout + bien.stderr);
+  assert.match(bien.stdout, /CORRECTO/);
+  assert.match(bien.stdout, /es de ejemplo \(es_ficticio: true\)/, 'dice que el catálogo es de ejemplo');
+  const sitio = mkdtempSync(resolve(tmpdir(), 'formkit-proyecto-'));
+  copiaCarpeta(resolve(RAIZ, 'codigo'), resolve(sitio, 'formkit'));
+  writeFileSync(resolve(sitio, 'malo.html'), `<!doctype html><html lang="es-MX"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Formulario con fallas</title>
+<link rel="stylesheet" href="formkit/css/tokens.css"><link rel="stylesheet" href="formkit/css/base.css"><link rel="stylesheet" href="formkit/css/nucleo.css"><link rel="stylesheet" href="formkit/modulos/combo/combo.css"><link rel="stylesheet" href="formkit/modulos/no-existe/no-existe.css"></head>
+<body><main class="pagina"><form class="tarjeta" data-formkit><h1 class="titulo-paso">Prueba</h1>
+<div class="campo" data-campo="especie" data-requerido data-uso="Prueba."><label class="etiqueta" for="especie">Especie</label><div class="combo" data-combo data-catalogo="especies"><input class="control" id="especie" name="especie" type="text" autocomplete="off"><ul class="combo-lista" hidden></ul></div></div>
+<div style="width:2000px">ancho</div>
+<button type="submit" class="btn btn-primario" data-accion="enviar">Enviar</button></form></main>
+<script>window.FORMKIT_CONFIG = {};</script>
+<script src="formkit/js/validaciones.config.js"></script><script src="formkit/js/iconos.js"></script><script src="formkit/js/formkit.core.js"></script><script src="formkit/modulos/combo/combo.js"></script></body></html>`);
+  const mal = spawnSync(process.execPath, [resolve(RAIZ, 'herramientas/comprobar-formulario.mjs'), resolve(sitio, 'malo.html')], { encoding: 'utf8' });
+  assert.equal(mal.status, 1, mal.stdout);
+  for (const [que, re] of [['el desborde', /se desborda a lo ancho/], ['el guion en línea', /<script> en línea/], ['el estilo en un atributo', /style= en <div>/], ['el archivo que falta', /404 .*no-existe\.css/], ['el catálogo que no cargó', /catálogo «especies» y no se cargó/]]) assert.match(mal.stdout, re, `dice ${que}`);
+});
+
+test('construir --comprobar no reescribe: dice qué derivado se atrasó, y se detiene con un archivo de más en un módulo (A3-01, A3-03)', () => {
+  /* La copia repite la carpeta común: la guía incrusta también la lista de pendientes de ../guia-visual. */
+  const comun = mkdtempSync(resolve(tmpdir(), 'formkit-construir-'));
+  const copia = resolve(comun, 'formularios');
+  for (const c of ['codigo', 'herramientas', 'guia-visual', 'docs', 'dist', 'vendor/leaflet', 'vendor/leaflet-gesture-handling']) copiaCarpeta(resolve(RAIZ, c), resolve(copia, c));
+  if (existsSync(resolve(RAIZ, '../guia-visual'))) copiaCarpeta(resolve(RAIZ, '../guia-visual'), resolve(comun, 'guia-visual'));
+  const corre = () => spawnSync(process.execPath, ['herramientas/construir.mjs', '--comprobar'], { cwd: copia, encoding: 'utf8' });
+  assert.equal(corre().status, 0, 'recién copiado, todo está al día');
+  const indice = resolve(copia, 'guia-visual/index.html');
+  const antes = readFileSync(indice, 'utf8');
+  writeFileSync(indice, antes.replace('</main>', '<p>Un cambio sin construir.</p></main>'));
+  const atrasado = corre();
+  assert.equal(atrasado.status, 1, 'un artefacto atrasado ya no pasa en verde');
+  assert.match(atrasado.stdout, /ATRASADO.*artefacto\.html/);
+  assert.equal(readFileSync(resolve(copia, 'guia-visual/artefacto.html'), 'utf8'), readFileSync(resolve(RAIZ, 'guia-visual/artefacto.html'), 'utf8'), 'y no lo reescribe en silencio');
+  writeFileSync(indice, antes);
+  writeFileSync(resolve(copia, 'codigo/modulos/tabla/copia-vieja.js'), '// sobra');
+  const sobra = corre();
+  assert.notEqual(sobra.status, 0);
+  assert.match(sobra.stderr, /codigo\/modulos\/tabla\/ tiene archivos que el manifiesto no declara: copia-vieja\.js/);
 });

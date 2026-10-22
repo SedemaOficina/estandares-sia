@@ -32,4 +32,5 @@ globalThis.FORMKIT_CATALOGOS.cdmx = {
   ]
 };
 /* Lista plana de alcaldías para la lista desplegable con búsqueda. */
-globalThis.FORMKIT_CATALOGOS.alcaldias = [...new Set(globalThis.FORMKIT_CATALOGOS.cdmx.filas.map((f) => f.alcaldia))].map((nombre) => ({ nombre, detalle: 'Alcaldía' }));
+/* La lista de alcaldías (para la lista con búsqueda) sale de las mismas filas y lleva su misma marca de ejemplo. */
+globalThis.FORMKIT_CATALOGOS.alcaldias = { es_ficticio: true, fuente: globalThis.FORMKIT_CATALOGOS.cdmx.fuente, corte: globalThis.FORMKIT_CATALOGOS.cdmx.corte, filas: [...new Set(globalThis.FORMKIT_CATALOGOS.cdmx.filas.map((f) => f.alcaldia))].map((nombre) => ({ nombre, detalle: 'Alcaldía' })) };

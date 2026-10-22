@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 /* generar-reglas.mjs · Escribe docs/01-reglas.md desde reglas/reglas.json y
-   actualiza la tabla de contraste de docs/02-guia-de-estilo.md desde
-   contraste.mjs. Por qué: un documento escrito a mano y la regla que describe
+   actualiza la tabla de contraste de docs/02-guia-de-estilo.md y la lista
+   guia-visual/pares.js desde contraste.mjs. Por qué: un documento escrito a mano y la regla que describe
    se desacuerdan; aquí hay una sola fuente y el documento es su reflejo.
    Uso: node herramientas/generar-reglas.mjs            (escribe)
         node herramientas/generar-reglas.mjs --comprobar (falla si hay diferencias) */
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { textoParesGuia } from './contraste.mjs';
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const COMPROBAR = process.argv.includes('--comprobar');
@@ -101,12 +102,14 @@ if (existsSync(rutaGuia)) {
 
 const destinos = [[resolve(RAIZ, 'docs/01-reglas.md'), salida + '\n']];
 if (guia !== null) destinos.push([rutaGuia, guia]);
+/* La lista de pares que lee la guía visual sale del mismo archivo que la tabla. */
+destinos.push([resolve(RAIZ, 'guia-visual/pares.js'), textoParesGuia()]);
 let distinto = 0;
 for (const [ruta, contenido] of destinos) {
   const hay = existsSync(ruta) ? readFileSync(ruta, 'utf8') : null;
   if (hay !== contenido) {
     distinto++;
-    if (COMPROBAR) console.error(`✗ ${ruta.replace(RAIZ + '/', '')} no está al día`);
+    if (COMPROBAR) console.error(`✗ ${relative(RAIZ, ruta)} no está al día`);
     else writeFileSync(ruta, contenido);
   }
 }

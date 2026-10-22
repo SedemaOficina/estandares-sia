@@ -89,11 +89,7 @@
   <div class="dialogo-cierre"><button type="button" class="btn btn-primario" data-cierra-dialogo>Cerrar</button></div>
 </dialog>
 <footer class="pie"><div class="pie-int"><p>Secretaría del Medio Ambiente de la Ciudad de México · Sistema de Información Ambiental.</p></div></footer>
-<script>
-window.FORMKIT_CONFIG = {};
-window.FORMKIT_CATALOGOS = { categorias: ['Arbolado', 'Residuos', 'Ruido', 'Fauna', 'Agua', 'Aire', 'Suelo', 'Áreas verdes', 'Otro'] };
-window.FORMKIT_OPCIONES = { enviar: () => new Promise((ok) => setTimeout(() => ok({ folio: 'EJ-' + Date.now().toString(36).toUpperCase(), fecha: new Date().toISOString() }), 300)) };
-</script>
+<script src="captura-interna-config.js"></script>
 <script src="../../codigo/js/validaciones.config.js"></script>
 <script src="../../codigo/js/iconos.js"></script>
 <script src="../../codigo/js/formkit.core.js"></script>

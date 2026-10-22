@@ -1,6 +1,6 @@
 {
-  "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
-  "version": "1.6.2",
+  "_nota": "Fuente única del catálogo de piezas. De aquí se generan docs/04-catalogo-de-componentes.md, el índice de la guía visual y la verificación de dependencias. Los tamaños los escribe herramientas/construir.mjs; no se editan a mano. Niveles: BASE (obligatorio en todo formulario), RECOMENDADO (se aplica salvo justificación escrita), OPCIONAL (sólo si el formulario lo necesita).",
+  "version": "1.6.3",
   "nucleo": {
     "archivos": [
       "codigo/css/tokens.css",
@@ -78,12 +78,12 @@
       }
     ],
     "tamano": {
-      "tokens.css": 8535,
-      "base.css": 6761,
+      "tokens.css": 8460,
+      "base.css": 6961,
       "nucleo.css": 20003,
       "validaciones.config.js": 52004,
       "iconos.js": 6047,
-      "formkit.core.js": 72359
+      "formkit.core.js": 73585
     }
   },
   "modulos": [
@@ -172,7 +172,7 @@
       },
       "tamano": {
         "css": 1466,
-        "js": 11451
+        "js": 11741
       }
     },
     {
@@ -201,7 +201,7 @@
       },
       "tamano": {
         "css": 1003,
-        "js": 7960
+        "js": 7957
       }
     },
     {
@@ -327,7 +327,7 @@
       "dependencias": [],
       "js": true,
       "accesibilidad": "Botones con aria-current=step y nombre «Paso N de M: título, completado»; el foco va al título al cambiar; Enter avanza, no envía.",
-      "movil": "Círculos sin etiqueta + «Paso X de N · Título»; acciones en columna, principal arriba. Opcional: la clase acciones-fijas en el bloque de acciones del paso lo deja fijo al pie, respetando las áreas seguras del teléfono.",
+      "movil": "Círculos sin etiqueta + «Paso X de N · Título»; acciones en columna, principal arriba.",
       "escritorio": "Etiquetas bajo cada círculo; acciones en fila.",
       "errores": [
         "Deshabilitar los pasos futuros (el teclado no puede inspeccionarlos).",
@@ -339,7 +339,7 @@
         "js": "codigo/modulos/pasos/pasos.js"
       },
       "tamano": {
-        "css": 5140,
+        "css": 4569,
         "js": 13774
       }
     },
@@ -463,7 +463,7 @@
       },
       "tamano": {
         "css": 2194,
-        "js": 5887
+        "js": 6127
       }
     },
     {
@@ -647,7 +647,7 @@
       },
       "tamano": {
         "css": 2306,
-        "js": 6181
+        "js": 6172
       }
     },
     {
@@ -710,11 +710,9 @@
       "nivel": "OPCIONAL",
       "tipo": "consulta",
       "proposito": "Tabla con caption, orden por columna accesible (palabras como en español, fechas día/mes/año como fechas), estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.",
-      "cuando": "Consulta interna de registros.",
+      "cuando": "Consulta interna de registros. Una tabla de captura (filas que la persona agrega o quita) es el módulo repetibles con la clase .tabla-captura: entonces se copian los dos.",
       "cuandoNo": "Maquetar.",
-      "dependencias": [
-        "repetibles"
-      ],
+      "dependencias": [],
       "js": true,
       "accesibilidad": "th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123»; sobre la cabecera guinda el anillo de foco va en blanco.",
       "movil": "Cada fila es una tarjeta: rótulo gris de peso normal y dato que destaca.",
@@ -823,7 +821,7 @@
       },
       "tamano": {
         "css": 3228,
-        "js": 12729
+        "js": 12740
       }
     },
     {
@@ -851,8 +849,8 @@
         "js": "codigo/modulos/mapa/mapa.js"
       },
       "tamano": {
-        "css": 3046,
-        "js": 13014
+        "css": 2973,
+        "js": 13123
       }
     },
     {
@@ -908,7 +906,7 @@
       },
       "tamano": {
         "css": 539,
-        "js": 9048
+        "js": 9118
       }
     },
     {
@@ -939,5 +937,5 @@
       }
     }
   ],
-  "generado": "2026-10-21T02:30:22.957Z"
+  "generado": "2026-10-21T05:20:28.549Z"
 }

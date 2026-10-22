@@ -76,7 +76,8 @@
       const acc = document.createElement('div'); acc.className = 'acciones dialogo-acciones';
       const no = document.createElement('button'); no.type = 'button'; no.className = 'btn btn-secundario'; no.textContent = cfg.no || M.confirmaNo; no.dataset.r = 'no';
       const si = document.createElement('button'); si.type = 'button'; si.className = cfg.peligro ? 'btn btn-peligro' : 'btn btn-primario'; si.textContent = cfg.si || M.confirmaSi; si.dataset.r = 'si';
-      if (!cfg.si) console.warn('FormKit.confirma: «si» debe repetir el verbo de la acción («Rechazar solicitud»), no «Confirmar».');
+      /* Para quien programa (FRM-36): sin «si», o con una palabra que no dice qué pasa, la consola lo avisa. */
+      if (!cfg.si || /^(aceptar|confirmar|s[ií]|ok|de acuerdo|continuar|listo)$/i.test(String(cfg.si).trim())) console.warn(`FormKit.confirma: «si» debe repetir el verbo de la acción («Rechazar solicitud»), no «${String(cfg.si || M.confirmaSi).trim()}».`);
       acc.append(no, si);
       d.append(h, desc, acc);
       document.body.appendChild(d);

@@ -138,7 +138,7 @@
     if (ancho.matches) { if (!d.open) d.setAttribute('open', ''); } else if (!d.open) d.showModal();
   }
 
-  /* Si pdf.js no se pudo cargar, el documento se muestra con el visor del navegador. */
+  /* Si pdf.js no se pudo cargar, el documento se muestra con el visor del navegador (RODEO-05). */
   function enNavegador(url, titulo) {
     const marco = document.createElement('iframe');
     marco.className = 'visor-marco';

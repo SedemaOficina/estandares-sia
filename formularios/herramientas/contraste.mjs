@@ -57,6 +57,15 @@ export function mide() {
   });
 }
 
+/* La guía visual abre también desde archivo local, donde el navegador no deja
+   leer un JSON: se le entrega la lista de pares como script. Las razones las
+   calcula la guía en el navegador con los colores reales. generar-reglas.mjs
+   escribe este texto y --comprobar avisa si guia-visual/pares.js se atrasó. */
+export function textoParesGuia() {
+  const { pares } = JSON.parse(readFileSync(resolve(RAIZ, 'herramientas/pares-contraste.json'), 'utf8'));
+  return `/* Generado por herramientas/contraste.mjs --guia desde pares-contraste.json. No se edita a mano. */\nwindow.GUIA_PARES = ${JSON.stringify(pares, null, 1)};\n`;
+}
+
 const esPrincipal = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (esPrincipal) {
   const args = process.argv.slice(2);
@@ -67,12 +76,8 @@ if (esPrincipal) {
   const filas = mide();
   const fallan = filas.filter((f) => f.cumple === false);
   if (args.includes('--guia')) {
-    /* La guía visual abre también desde archivo local, donde el navegador no
-       deja leer un JSON: se le entrega la lista de pares como script. Las
-       razones las calcula la guía en el navegador con los colores reales. */
-    const { pares } = JSON.parse(readFileSync(resolve(RAIZ, 'herramientas/pares-contraste.json'), 'utf8'));
-    writeFileSync(resolve(RAIZ, 'guia-visual/pares.js'), `/* Generado por herramientas/contraste.mjs --guia desde pares-contraste.json. No se edita a mano. */\nwindow.GUIA_PARES = ${JSON.stringify(pares, null, 1)};\n`);
-    console.log(`guia-visual/pares.js escrito: ${pares.length} pares`);
+    writeFileSync(resolve(RAIZ, 'guia-visual/pares.js'), textoParesGuia());
+    console.log(`guia-visual/pares.js escrito: ${filas.length} pares`);
     process.exit(0);
   }
   if (args.includes('--json')) console.log(JSON.stringify(filas, null, 2));

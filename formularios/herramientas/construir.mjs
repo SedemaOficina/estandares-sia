@@ -10,34 +10,61 @@
         para que la guía lo lea abierta desde un archivo local (sin fetch)
      3. dist/formkit.css y dist/formkit.js  ← núcleo + todos los módulos
         («todo en uno», para quien prefiere un solo archivo)
+        dist/plantillas/<plantilla>/formkit.css y .js ← lo que carga cada
+        plantilla, junto (juntar.mjs): su versión de producción
         codigo/servidor/esquemas/*.json ← esquema de cada plantilla
      4. guia-visual/artefacto.html ← guía visual autocontenida (--artefacto):
         CSS, JS, iconos, catálogos y tipografías incrustados, sin recursos
         externos, para publicarla como artefacto
      5. ../estandar-formularios-vX.zip (--zip)
 
+   Antes de construir revisa que cada carpeta de codigo/modulos sea un módulo
+   del manifiesto y lleve sólo su CSS y su JS: lo que sobre detiene todo.
+
    Uso: node herramientas/construir.mjs [--artefacto] [--zip] [--todo]
+        node herramientas/construir.mjs --comprobar   (no escribe nada: sale con 1
+        y dice qué derivado está atrasado, artefacto incluido; así lo usa verificar)
    ========================================================= */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { resolve, dirname, relative, basename } from 'node:path';
+import { resolve, dirname, relative, basename, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync, execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { junta } from './juntar.mjs';
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const todo = args.includes('--todo');
-const lee = (r) => readFileSync(resolve(RAIZ, r), 'utf8');
-/* Sólo escribe lo que cambió: una construcción sin cambios no toca ningún archivo. */
+const COMPROBAR = args.includes('--comprobar');
+const atrasados = [];
+/* Lo incrustado lleva saltos de línea LF (RODEO-07: Leaflet trae CRLF) y rutas con «/»:
+   el artefacto sale igual byte a byte en Windows y en Linux. */
+const lee = (r) => readFileSync(resolve(RAIZ, r), 'utf8').replace(/\r\n/g, '\n');
+const rel = (r) => relative(RAIZ, r).split(sep).join('/');
+/* Sólo escribe lo que cambió: una construcción sin cambios no toca ningún archivo.
+   Con --comprobar no escribe nunca: anota lo atrasado. */
 const escribe = (r, t) => {
   const ruta = resolve(RAIZ, r);
   const igual = existsSync(ruta) && readFileSync(ruta, 'utf8') === t;
-  if (!igual) { mkdirSync(dirname(ruta), { recursive: true }); writeFileSync(ruta, t); }
-  console.log(`· ${r} (${(Buffer.byteLength(t) / 1024).toFixed(1)} KB)${igual ? ' · sin cambios' : ''}`);
+  if (!igual && COMPROBAR) atrasados.push(r);
+  else if (!igual) { mkdirSync(dirname(ruta), { recursive: true }); writeFileSync(ruta, t); }
+  console.log(`· ${r} (${(Buffer.byteLength(t) / 1024).toFixed(1)} KB)${igual ? ' · sin cambios' : COMPROBAR ? ' · ATRASADO' : ''}`);
 };
 const manifiesto = JSON.parse(lee('codigo/manifiesto.json'));
 const manifiestoAnterior = JSON.parse(lee('codigo/manifiesto.json'));
+
+/* 0. Cada carpeta de codigo/modulos es un módulo del manifiesto, con sólo sus archivos. */
+{
+  const declarados = new Map(manifiesto.modulos.map((m) => [m.nombre, [m.css === false ? null : `${m.nombre}.css`, m.js ? `${m.nombre}.js` : null].filter(Boolean)]));
+  for (const d of readdirSync(resolve(RAIZ, 'codigo/modulos'))) {
+    const ruta = resolve(RAIZ, 'codigo/modulos', d);
+    if (!statSync(ruta).isDirectory()) throw new Error(`construir: codigo/modulos/${d} es un archivo suelto; cada módulo va en su carpeta`);
+    if (!declarados.has(d)) throw new Error(`construir: la carpeta codigo/modulos/${d}/ no está en codigo/manifiesto.json`);
+    const sobra = readdirSync(ruta).filter((f) => !declarados.get(d).includes(f));
+    if (sobra.length) throw new Error(`construir: codigo/modulos/${d}/ tiene archivos que el manifiesto no declara: ${sobra.join(', ')}`);
+  }
+}
 
 /* 1. Sprite → iconos.js */
 const sprite = lee('codigo/iconos/sprite.svg').replace(/<!--[\s\S]*?-->/g, '').replace(/\s+/g, ' ').trim();
@@ -96,16 +123,27 @@ const jsTodo = ['codigo/js/validaciones.config.js', 'codigo/js/iconos.js', 'codi
   .map((r) => `/* ===== ${r} ===== */\n${lee(r)}`).join('\n\n');
 escribe('dist/formkit.js', `/* GENERADO: configuración + iconos + núcleo + todos los módulos. */\n${jsTodo}`);
 
+/* 3a. Cada plantilla en producción: sólo las hojas y los guiones del estándar que carga, juntos
+   (juntar.mjs). Son los que mide el presupuesto de peso y velocidad (presupuesto.mjs, docs/08). */
+for (const f of readdirSync(resolve(RAIZ, 'codigo/plantillas')).filter((x) => x.endsWith('.html'))) {
+  const nombre = f.replace(/\.html$/, '');
+  const r = junta(resolve(RAIZ, 'codigo/plantillas', f), resolve(RAIZ, 'dist/plantillas', nombre));
+  escribe(`dist/plantillas/${nombre}/formkit.css`, r.css);
+  escribe(`dist/plantillas/${nombre}/formkit.js`, r.js);
+}
+
 /* 3b. Esquemas de las plantillas para la validación en el servidor */
 for (const f of readdirSync(resolve(RAIZ, 'codigo/plantillas')).filter((x) => x.endsWith('.html'))) {
   const salida = `codigo/servidor/esquemas/${f.replace(/\.html$/, '.json')}`;
   mkdirSync(resolve(RAIZ, 'codigo/servidor/esquemas'), { recursive: true });
-  const aviso = execSync(`node "${resolve(RAIZ, 'herramientas/esquema-desde-html.mjs')}" "${resolve(RAIZ, 'codigo/plantillas', f)}" "${resolve(RAIZ, salida)}"`, { encoding: 'utf8', stdio: 'pipe' });
-  console.log(`· ${salida} (${(peso(salida) / 1024).toFixed(1)} KB)${/sin cambios/.test(aviso) ? ' · sin cambios' : ''}`);
+  const r = spawnSync(process.execPath, [resolve(RAIZ, 'herramientas/esquema-desde-html.mjs'), resolve(RAIZ, 'codigo/plantillas', f), resolve(RAIZ, salida), ...(COMPROBAR ? ['--comprobar'] : [])], { encoding: 'utf8' });
+  if (r.status !== 0 && !COMPROBAR) throw new Error(`construir: el esquema de ${f} no se pudo generar:\n${r.stdout}${r.stderr}`);
+  if (r.status !== 0) atrasados.push(salida);
+  console.log(`· ${salida} (${(peso(salida) / 1024).toFixed(1)} KB)${/sin cambios/.test(r.stdout) ? ' · sin cambios' : COMPROBAR ? ' · ATRASADO' : ''}`);
 }
 
-/* 4. Artefacto autocontenido de la guía visual */
-if (todo || args.includes('--artefacto')) {
+/* 4. Artefacto autocontenido de la guía visual (con --comprobar se arma siempre, para compararlo) */
+if (todo || args.includes('--artefacto') || COMPROBAR) {
   const html = lee('guia-visual/index.html');
   const b64 = (r, tipo) => `data:${tipo};base64,${readFileSync(resolve(RAIZ, r)).toString('base64')}`;
   /* Tipografías: sólo los pesos declarados en tokens.css. */
@@ -117,13 +155,13 @@ if (todo || args.includes('--artefacto')) {
   salida = salida.replace(/<link rel="stylesheet" href="([^"]+)">/g, (m, href) => {
     const r = resolve(RAIZ, 'guia-visual', href);
     if (!existsSync(r)) return m;
-    return `<style data-origen="${relative(RAIZ, r)}">\n${incrustaCss(readFileSync(r, 'utf8'))}\n</style>`;
+    return `<style data-origen="${rel(r)}">\n${incrustaCss(lee(r))}\n</style>`;
   });
   /* Guiones locales se incrustan; los iframes de las plantillas llevan su documento en srcdoc. */
   salida = salida.replace(/<script src="([^"]+)"><\/script>/g, (m, src) => {
     const r = resolve(RAIZ, 'guia-visual', src);
     if (!existsSync(r)) return m;
-    return `<script data-origen="${relative(RAIZ, r)}">\n${readFileSync(r, 'utf8').replace(/<\/script>/g, '<\\/script>')}\n</script>`;
+    return `<script data-origen="${rel(r)}">\n${lee(r).replace(/<\/script>/g, '<\\/script>')}\n</script>`;
   });
   /* Tanto los iframes con src como los diferidos (data-src) llevan su documento completo en srcdoc. */
   salida = salida.replace(/<iframe([^>]*) (?:data-)?src="([^"]+)"([^>]*)><\/iframe>/g, (m, a, src, b) => {
@@ -135,14 +173,14 @@ if (todo || args.includes('--artefacto')) {
   salida = salida.replace(/<img([^>]*) src="([^"]+\.png)"/g, (m, a, src) => { const r = resolve(RAIZ, 'guia-visual', src); return existsSync(r) ? `<img${a} src="${b64(relative(RAIZ, r), 'image/png')}"` : m; });
   /* Los documentos de muestra del visor van dentro: abierta sola, la guía los muestra igual. */
   salida = salida.replace(/data-visor-url="([^"]+\.(pdf|png))"/g, (m, src, ext) => { const r = resolve(RAIZ, 'guia-visual', src); return existsSync(r) ? `data-visor-url="${b64(relative(RAIZ, r), ext === 'pdf' ? 'application/pdf' : 'image/png')}"` : m; });
-  salida = salida.replace('<html lang="es-MX">', '<html lang="es-MX" data-artefacto>');
+  salida = salida.replace('<html lang="es-MX"', '<html lang="es-MX" data-artefacto');
   escribe('guia-visual/artefacto.html', salida);
 
   function incrustaDocumento(ruta) {
     const base = dirname(ruta);
-    let d = readFileSync(ruta, 'utf8');
-    d = d.replace(/<link rel="stylesheet" href="([^"]+)">/g, (m, href) => { const r = resolve(base, href); return existsSync(r) ? `<style>${incrustaCss(readFileSync(r, 'utf8'))}</style>` : m; });
-    const enLinea = (r) => `<script>${readFileSync(r, 'utf8').replace(/<\/script>/g, '<\\/script>')}</script>`;
+    let d = lee(ruta);
+    d = d.replace(/<link rel="stylesheet" href="([^"]+)">/g, (m, href) => { const r = resolve(base, href); return existsSync(r) ? `<style>${incrustaCss(lee(r))}</style>` : m; });
+    const enLinea = (r) => `<script>${lee(r).replace(/<\/script>/g, '<\\/script>')}</script>`;
     /* Leaflet va con su complemento de gestos: el módulo mapa lo carga desde la dirección de la
        configuración, que dentro del artefacto no existe; incrustado, el módulo lo encuentra ya cargado. */
     const gestos = resolve(RAIZ, 'vendor/leaflet-gesture-handling/leaflet-gesture-handling.min.js');
@@ -157,6 +195,11 @@ if (todo || args.includes('--artefacto')) {
    locales, respaldos) nunca entra. Las fechas son las del commit: dos construcciones del
    mismo commit dan el mismo ZIP. Lleva dentro HUELLAS.sha256 (una huella por archivo) y
    junto a él, <zip>.sha256 con la huella del ZIP. */
+if (COMPROBAR) {
+  if (atrasados.length) console.log(`\nATRASADO · ${atrasados.length} derivado(s): ${atrasados.join(', ')}. Corre node herramientas/construir.mjs --artefacto y guarda lo que cambie.`);
+  else console.log('\nderivados al día');
+  process.exit(atrasados.length ? 1 : 0);
+}
 if (todo || args.includes('--zip')) {
   const git = (...a) => execFileSync('git', a, { cwd: resolve(RAIZ, '..'), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   const carpeta = basename(RAIZ);

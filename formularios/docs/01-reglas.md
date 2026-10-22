@@ -2,7 +2,7 @@
 
 > Este documento se **genera** de `reglas/reglas.json` (`node herramientas/generar-reglas.mjs`). No se edita a mano: se corrige la regla en el JSON y se vuelve a generar.
 
-El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **55 BASE** (obligatorias en todo formulario), **21 RECOMENDADAS** (se cumplen salvo justificación escrita) y **10 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 5 son mejores prácticas adicionales.
+El estándar tiene **87 reglas** con numeración corrida FRM-NN (decisión C13). Por nivel de exigencia: **56 BASE** (obligatorias en todo formulario), **21 RECOMENDADAS** (se cumplen salvo justificación escrita) y **10 OPCIONALES** (aplican si el formulario usa la pieza). Por origen: 58 son decisiones heredadas de los paquetes A (Denuncias Ambientales) o B, 23 las fija el encargo del estándar genérico y 6 son mejores prácticas adicionales.
 
 **Cómo leer cada regla.** *Regla*: qué se hace. *Por qué*: el daño que evita. *Nivel*: BASE, RECOMENDADO u OPCIONAL (quien programa elige los módulos, no el nivel). *Origen*: `A FRM-xx` regla del paquete A; `B FRM-XXX-xx` regla del paquete B; `Cn` conflicto decidido en la fase 0 (ver `docs/09-trazabilidad.md`); `encargo n` sección del encargo; `norma n` norma de construcción de sistemas. *Verificación*: la prueba, herramienta o revisión que la comprueba.
 
@@ -17,14 +17,14 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 7. [Ubicación y domicilio](#7-ubicación-y-domicilio) · FRM-46 a FRM-50
 8. [Archivos y evidencia](#8-archivos-y-evidencia) · FRM-51 a FRM-54
 9. [Datos personales y protección contra el abuso](#9-datos-personales-y-protección-contra-el-abuso) · FRM-55 a FRM-59
-10. [Móvil y escritorio](#10-móvil-y-escritorio) · FRM-60 a FRM-65, FRM-85
+10. [Móvil y escritorio](#10-móvil-y-escritorio) · FRM-60 a FRM-65, FRM-85, FRM-87
 11. [Hojas de estilo y código](#11-hojas-de-estilo-y-código) · FRM-66 a FRM-72
 12. [Textos y pendientes visibles](#12-textos-y-pendientes-visibles) · FRM-73 a FRM-76, FRM-86
 13. [Bibliotecas, tipografías y verificación](#13-bibliotecas-tipografías-y-verificación) · FRM-77 a FRM-81
 
 ## Resumen por nivel
 
-- **BASE**: FRM-07, FRM-08, FRM-09, FRM-10, FRM-11, FRM-12, FRM-13, FRM-14, FRM-15, FRM-16, FRM-17, FRM-26, FRM-27, FRM-28, FRM-29, FRM-30, FRM-32, FRM-33, FRM-34, FRM-35, FRM-36, FRM-37, FRM-39, FRM-40, FRM-44, FRM-45, FRM-48, FRM-51, FRM-54, FRM-55, FRM-56, FRM-59, FRM-60, FRM-61, FRM-62, FRM-63, FRM-64, FRM-65, FRM-66, FRM-67, FRM-68, FRM-69, FRM-70, FRM-71, FRM-72, FRM-73, FRM-74, FRM-75, FRM-76, FRM-77, FRM-78, FRM-79, FRM-80, FRM-81, FRM-84
+- **BASE**: FRM-07, FRM-08, FRM-09, FRM-10, FRM-11, FRM-12, FRM-13, FRM-14, FRM-15, FRM-16, FRM-17, FRM-26, FRM-27, FRM-28, FRM-29, FRM-30, FRM-32, FRM-33, FRM-34, FRM-35, FRM-36, FRM-37, FRM-39, FRM-40, FRM-44, FRM-45, FRM-48, FRM-51, FRM-54, FRM-55, FRM-56, FRM-59, FRM-60, FRM-61, FRM-62, FRM-63, FRM-64, FRM-65, FRM-66, FRM-67, FRM-68, FRM-69, FRM-70, FRM-71, FRM-72, FRM-73, FRM-74, FRM-75, FRM-76, FRM-77, FRM-78, FRM-79, FRM-80, FRM-81, FRM-84, FRM-87
 - **RECOMENDADO**: FRM-01, FRM-02, FRM-03, FRM-04, FRM-05, FRM-06, FRM-18, FRM-19, FRM-20, FRM-31, FRM-38, FRM-41, FRM-42, FRM-43, FRM-46, FRM-52, FRM-53, FRM-58, FRM-82, FRM-85, FRM-86
 - **OPCIONAL**: FRM-21, FRM-22, FRM-23, FRM-24, FRM-25, FRM-47, FRM-49, FRM-50, FRM-57, FRM-83
 
@@ -128,9 +128,9 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Por qué.** El asterisco va en guinda, el color de la identidad, y no en rojo, que se confundiría con un error. El guinda se distingue de un error porque el error lleva icono, la palabra «Error» y borde rojo grueso, y el asterisco nunca va solo: va con la leyenda y con «(obligatorio)» para el lector de pantalla, que sin la palabra no lo sabe.
 
-**Nivel.** BASE · **Origen.** A FRM-30; B FRM-CMP-02; C2 (revisada por la Secretaría, 14 oct 2026); decisión de la Secretaría, 14 oct 2026: asterisco guinda (C2 revisada; antes gris) · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-30; B FRM-CMP-02; C2 (revisada por la Secretaría, 14 oct 2026); decisión de la Secretaría, 14 oct 2026: asterisco guinda (C2 revisada; antes gris); auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** nucleo.css .marca-oblig; guía: el campo (ninguna prueba automática revisa todavía el asterisco ni la leyenda)
+**Verificación.** nucleo.css .marca-oblig; guía: el campo; 08: asterisco que el lector no oye, la palabra para el lector, una leyenda por pantalla y ningún «(opcional)» (A1-12)
 
 ### FRM-11 · Cada campo se declara con atributos y la validación vive en un solo archivo
 
@@ -384,19 +384,19 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Por qué.** Un «Atrás» gris junto a «Continuar» guinda se pulsa por error; la flecha dice la dirección sin leer.
 
-**Nivel.** BASE · **Origen.** A FRM-41; B FRM-ACC-01; C7 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-41; B FRM-ACC-01; C7; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** guía: botones; nucleo.css .btn-atras
+**Verificación.** guía: botones; nucleo.css .btn-atras; 08: «Atrás» azul con su flecha (A1-12)
 
 ### FRM-36 · Los botones dicen qué hacen; nunca «Aceptar», «OK» ni «Confirmar»
 
-**Regla.** La etiqueta es un verbo concreto con su objeto («Enviar solicitud», «Guardar borrador», «Descartar borrador»), nunca «Aceptar», «OK», «Confirmar» ni «Sí». Los botones de icono llevan aria-label; los de descarga dicen formato y peso.
+**Regla.** La etiqueta es un verbo concreto con su objeto («Enviar solicitud», «Guardar borrador», «Descartar borrador»), nunca «Aceptar», «OK», «Confirmar» ni «Sí». Los botones de icono llevan aria-label; los de descarga dicen formato y peso. FormKit.confirma avisa en la consola si su botón no repite el verbo: sin «si», o con «Aceptar», «Confirmar», «Sí» u «OK».
 
 **Por qué.** «Aceptar» no dice qué se acepta; un icono sin nombre es un botón mudo para el lector de pantalla.
 
-**Nivel.** BASE · **Origen.** B FRM-ACC-02; auditoría del estándar, 18 oct 2026 · *decisión heredada*
+**Nivel.** BASE · **Origen.** B FRM-ACC-02; auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 03-anchos: ningún botón sin nombre; guía: botones
+**Verificación.** 03-anchos: ningún botón sin nombre; guía: botones; 08: aviso de FormKit.confirma (F2-13)
 
 ### FRM-37 · Un botón no se deshabilita en silencio: aria-disabled y aria-busy
 
@@ -420,13 +420,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-39 · Cuatro avisos, cada uno con el icono de su tono, título, texto y rol
 
-**Regla.** Neutro (informa, sin rol, icono info), advertencia (ámbar, sin bloqueo, icono alerta), bloqueo (rojo, role=alert, icono error) y éxito (verde, role=status, icono ok). El icono de su tono va siempre. Un aviso de más de una frase lleva título (.aviso-titulo) que dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. Lo que impide continuar es asertivo; lo demás es cortés. El aviso que responde a una acción de la persona recibe el foco; FormKit.aviso(lugar, {tono, titulo, texto, pasos, foco}) lo pinta así, con su cuerpo en <div class="aviso-texto">: texto puede ser un nodo (un párrafo con un enlace) y pasos, la secuencia «qué sigue». Un aviso nunca sustituye al mensaje del campo.
+**Regla.** Neutro (informa, sin rol, icono info), advertencia (ámbar, sin bloqueo, icono alerta), bloqueo (rojo, role=alert, icono error) y éxito (verde, role=status, icono ok). El icono de su tono va siempre. Un aviso de más de una frase lleva título (.aviso-titulo) que dice de un vistazo si algo salió bien, quedó pendiente o se rechazó. Lo que impide continuar es asertivo; lo demás es cortés. El aviso que responde a una acción de la persona recibe el foco; FormKit.aviso(lugar, {tono, titulo, texto, pasos, foco}) lo pinta así, con su cuerpo en <div class="aviso-texto">: texto puede ser un nodo (un párrafo con un enlace) y pasos, la secuencia «qué sigue». Un aviso nunca sustituye al mensaje del campo. Ningún aviso usa el guinda (ni de fondo, ni de borde, ni de texto) y el guinda no va junto a un mensaje de error: se parece al rojo de error (decisión de la Secretaría, 20 oct 2026); los colores no cambian.
 
 **Por qué.** Un aviso rojo para todo entrena a ignorarlo; un alert cortés no se oye; una frase larga sin título no deja ver si algo salió bien o mal.
 
-**Nivel.** BASE · **Origen.** encargo 5.4; P115 (proyecto de acreditaciones, 17 oct 2026); P131 (proyecto de acreditaciones, 18 oct 2026) · *decisión del encargo*
+**Nivel.** BASE · **Origen.** encargo 5.4; P115 (proyecto de acreditaciones, 17 oct 2026); P131 (proyecto de acreditaciones, 18 oct 2026); decisión de la Secretaría, 20 oct 2026: el guinda no se usa en avisos ni junto a un mensaje de error · *decisión del encargo*
 
-**Verificación.** guía: botones y avisos; 05-accesibilidad; 07: FormKit.aviso (P115); 07: aviso con pasos y enlace (P131)
+**Verificación.** guía: botones y avisos; 05-accesibilidad; 07: FormKit.aviso (P115); 07: aviso con pasos y enlace (P131); 08: ninguna hoja pinta de guinda un aviso, un error, el resumen, la franja o el recordatorio (decisión 21)
 
 ### FRM-40 · Lo que cambia sin recargar se anuncia, y todo anuncio también se ve
 
@@ -662,9 +662,9 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Por qué.** Un valor escrito en el código se despliega mal en el siguiente ambiente.
 
-**Nivel.** BASE · **Origen.** A FRM-83; norma 1.6 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-83; norma 1.6; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** revisión de código; plantillas: configuracion-*.js
+**Verificación.** revisión de código; plantillas: configuracion-*.js; 08: ni el núcleo ni los módulos escriben una dirección (A1-12)
 
 ## 10. Móvil y escritorio
 
@@ -738,6 +738,16 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 **Verificación.** 06: tamaño del logotipo y de su <img> (P130)
 
+### FRM-87 · Presupuesto de peso y velocidad; en producción, los archivos del estándar juntos
+
+**Regla.** En producción, las hojas y los guiones del estándar que carga una página van juntos en un archivo de cada uno, sin comentarios (herramientas/juntar.mjs; las plantillas, en dist/plantillas/). Cada página, en un teléfono sin caché y con el texto comprimido, descarga a lo más 300 KB en 20 archivos o menos y queda lista en 5 s o menos con 4G lenta y en 12 s o menos con 3G, con el procesador cuatro veces más lento.
+
+**Por qué.** Quien hace un trámite desde el teléfono con datos móviles espera cada archivo por separado: con sus 43 archivos sueltos, la plantilla por pasos tardaba 18.8 s con 3G; juntos y sin comentarios son 15 archivos y 266 KB.
+
+**Nivel.** BASE · **Origen.** decisión de la Secretaría, 20 oct 2026: presupuesto por plantilla y dist en producción; auditoría del estándar, 19 oct 2026 · *mejor práctica adicional*
+
+**Verificación.** presupuesto.mjs --sin-tiempos en npm run verificar (peso, archivos y funcionamiento); npm run presupuesto en cada versión (tiempos)
+
 ## 11. Hojas de estilo y código
 
 ### FRM-66 · Orden fijo de bloques en toda hoja
@@ -782,23 +792,23 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-70 · Sin manejadores en línea, sin estilos en línea, sin código zombi
 
-**Regla.** Los eventos se registran por delegación en el código; el HTML no lleva onclick ni style (salvo variables de muestra en la guía). Toda clase y variable declarada se usa en algún HTML o script del paquete.
+**Regla.** Los eventos se registran por delegación en el código; el HTML no lleva onclick, style ni un <script> con código dentro de la página: la política de seguridad estricta que pide el SIA los bloquea, y la configuración de cada página va en su propio archivo .js. Toda clase y variable declarada se usa en algún HTML o script del paquete.
 
 **Por qué.** Un onclick en el HTML no se puede probar ni auditar; una clase sin uso es una promesa que nadie cumple.
 
-**Nivel.** BASE · **Origen.** A FRM-89; A FRM-90; B FRM-STY-07; auditoría del estándar, 18 oct 2026 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-89; A FRM-90; B FRM-STY-07; auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** auditor-css A09, A14, A16; revisión
+**Verificación.** auditor-css A09, A14, A16; revisión; 08: plantillas, ejemplos y guías sin guiones, estilos ni manejadores en el HTML (B9-01); comprobar-formulario.mjs, para el formulario de un proyecto
 
 ### FRM-71 · Núcleo obligatorio y módulos independientes con manifiesto
 
-**Regla.** El núcleo (tokens, base, nucleo, validaciones.config, iconos, formkit.core) va siempre; cada módulo vive en su carpeta con su CSS y su JS, declara en codigo/manifiesto.json nivel, propósito, cuándo, cuándo no, dependencias, accesibilidad y comportamiento en teléfono y escritorio, y se activa solo si el formulario contiene su selector. Los módulos de ámbito documento se inician una sola vez aunque la página tenga varios formularios. Cada formulario se inicia una sola vez: una segunda llamada a FormKit.iniciar le suma sus opciones y devuelve la misma instancia. Un módulo que también sirve sin formulario (tabla, visor, estado) se inicia solo al cargar la página. Cada módulo arranca por su cuenta: si uno falla, los demás y el formulario siguen, y la consola dice cuál. Un módulo también se activa si su selector está en la plantilla de una fila repetible, y prepara los campos de cada fila que se agrega (evento formkit:fila). Cada formulario lleva en el HTML el aviso «La página no terminó de cargar» ([data-carga-pendiente]), que el núcleo oculta al arrancar (por pasos, el módulo de pasos al mostrar el primero); en una página, el botón de enviar es type="button": sin el núcleo no envía nada.
+**Regla.** El núcleo (tokens, base, nucleo, validaciones.config, iconos, formkit.core) va siempre; cada módulo vive en su carpeta con su CSS y su JS, declara en codigo/manifiesto.json nivel, propósito, cuándo, cuándo no, dependencias, accesibilidad y comportamiento en teléfono y escritorio, y se activa solo si el formulario contiene su selector. Los módulos de ámbito documento se inician una sola vez aunque la página tenga varios formularios. Cada formulario se inicia una sola vez: una segunda llamada a FormKit.iniciar le suma sus opciones y devuelve la misma instancia. Un módulo que también sirve sin formulario (tabla, visor, estado) se inicia solo al cargar la página. Cada módulo arranca por su cuenta: si uno falla, los demás y el formulario siguen, y la consola dice cuál. Un módulo también se activa si su selector está en la plantilla de una fila repetible, y prepara los campos de cada fila que se agrega (evento formkit:fila). Cada formulario lleva en el HTML el aviso «La página no terminó de cargar» ([data-carga-pendiente]), que el núcleo oculta al arrancar (por pasos, el módulo de pasos al mostrar el primero); en una página, el botón de enviar es type="button": sin el núcleo no envía nada. La construcción se detiene si una carpeta de codigo/modulos no está en el manifiesto o lleva un archivo que el manifiesto no declara, y la verificación revisa lo derivado (dist, esquemas, artefacto) sin reescribirlo: si algo se atrasó, falla y dice qué.
 
 **Por qué.** Un paquete monolítico se copia entero o no se copia; un módulo sin ficha se usa mal.
 
 **Nivel.** BASE · **Origen.** C1; encargo 7; P110 (proyecto de acreditaciones, 17 oct 2026); P111 (proyecto de acreditaciones, 17 oct 2026); auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión del encargo*
 
-**Verificación.** 06-servidor: manifiesto; 04-modulos: varios formularios en una página; 08: módulo que falla, aviso de carga y filas agregadas (B5-03, B5-04, F2-09)
+**Verificación.** 06-servidor: manifiesto; 04-modulos: varios formularios en una página; 08: módulo que falla, aviso de carga y filas agregadas (B5-03, B5-04, F2-09); construir.mjs --comprobar en npm run verificar; 08: derivado atrasado y archivo de más (A3-01, A3-03)
 
 ### FRM-72 · Iconografía: un solo sprite SVG, catálogo cerrado
 
@@ -844,13 +854,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-76 · Datos de ejemplo siempre ficticios y legibles
 
-**Regla.** Nombres, correos, teléfonos, folios y catálogos de muestra son inequívocamente falsos (ejemplo.local, teléfonos de ceros, «Fulana de Tal»), marcados como ficticios, y legibles para que no parezcan un error del sistema.
+**Regla.** Nombres, correos, teléfonos, folios y catálogos de muestra son inequívocamente falsos (ejemplo.local, teléfonos de ceros, «Fulana de Tal»), marcados como ficticios, y legibles para que no parezcan un error del sistema. Mientras un catálogo diga es_ficticio: true, una página que no se presente como de pruebas (franja .entorno-pruebas) lo avisa en la consola.
 
 **Por qué.** Un dato creíble en una base de pruebas termina en una captura o en producción y ya no se distingue.
 
-**Nivel.** BASE · **Origen.** norma 3; encargo · *decisión del encargo*
+**Nivel.** BASE · **Origen.** norma 3; encargo; auditoría del estándar, 19 oct 2026 · *decisión del encargo*
 
-**Verificación.** revisión; catálogo cdmx-ejemplo.js es_ficticio
+**Verificación.** catálogo cdmx-ejemplo.js es_ficticio; 06: catálogo completo (D1-05); 08: catálogos marcados, franja de pruebas y teléfonos de ceros en las muestras (A1-12); 08: aviso del catálogo de ejemplo (D3-01)
 
 ### FRM-86 · El límite de 70 caracteres es del texto corrido; la bajada y las líneas de datos ocupan su tarjeta
 
@@ -886,13 +896,13 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-79 · Cada biblioteca con versión exacta, licencia y suma de verificación
 
-**Regla.** vendor/MANIFIESTO.json registra Leaflet, leaflet-gesture-handling, pdf.js y axe-core con versión, licencia y SHA-256; herramientas/vendor.mjs --verificar lo comprueba.
+**Regla.** vendor/MANIFIESTO.json registra Leaflet, leaflet-gesture-handling, pdf.js y axe-core con versión, licencia y SHA-256; herramientas/vendor.mjs --verificar lo comprueba. Lo que una biblioteca hace mal y el estándar rodea en su código lleva en el comentario su clave (RODEO-01…) y su fila en docs/07, sección 5: biblioteca y versión, qué falla, dónde está el rodeo y cuándo se quita; herramientas/rodeos.mjs exige que coincidan.
 
 **Por qué.** Una biblioteca sin suma puede cambiar sin que nadie lo note.
 
-**Nivel.** BASE · **Origen.** A FRM-98; B FRM-LIB-02; auditoría del estándar, 18 oct 2026 · *decisión heredada*
+**Nivel.** BASE · **Origen.** A FRM-98; B FRM-LIB-02; auditoría del estándar, 18 oct 2026; auditoría del estándar, 19 oct 2026 · *decisión heredada*
 
-**Verificación.** 06-servidor: bibliotecas coinciden con el manifiesto
+**Verificación.** 06-servidor: bibliotecas coinciden con el manifiesto; rodeos.mjs en npm run verificar (06: G2-01)
 
 ### FRM-80 · Lo que sólo sirve para verificar no viaja al sitio
 
@@ -906,11 +916,11 @@ El estándar tiene **86 reglas** con numeración corrida FRM-NN (decisión C13).
 
 ### FRM-81 · Ningún bloque se cierra sin verificación con evidencia
 
-**Regla.** Antes de liberar: npm run verificar en verde (auditor, contraste, campos, bibliotecas, documentos generados, pruebas en dos perfiles y siete anchos, axe-core); capturas en verificacion/capturas; recorrido con teclado y lector de pantalla real; prueba en un iPhone y un Android reales con red limitada; casilla «Verificado en móvil y en escritorio». Lo que no pudo comprobarse se escribe.
+**Regla.** Antes de liberar: npm run verificar en verde (auditor, contraste, campos, bibliotecas y sus rodeos, documentos y derivados al día, presupuesto de peso, pruebas en dos perfiles y siete anchos, axe-core), que también corre solo antes de cada commit (gancho .githooks) y con cada subida a GitHub; en cada versión, npm run presupuesto (tiempos con red lenta) y npm run mutaciones (cada corrección protegida la detecta su prueba); el formulario de un proyecto, con herramientas/comprobar-formulario.mjs; capturas en verificacion/capturas; recorrido con teclado y lector de pantalla real; prueba en un iPhone y un Android reales con red limitada; casilla «Verificado en móvil y en escritorio». Lo que no pudo comprobarse se escribe.
 
 **Por qué.** «Se ve bien» sin evidencia no es verificación; lo que no se escribe se olvida.
 
-**Nivel.** BASE · **Origen.** B FRM-MET-02; encargo 9 · *decisión del encargo*
+**Nivel.** BASE · **Origen.** B FRM-MET-02; encargo 9; decisión de la Secretaría, 20 oct 2026: las pruebas corren solas en GitHub y en la computadora antes de guardar · *decisión del encargo*
 
-**Verificación.** herramientas/verificar.mjs; docs/08-verificacion-y-cierre.md
+**Verificación.** herramientas/verificar.mjs; .githooks/pre-commit; .github/workflows/verificar.yml; herramientas/mutaciones.mjs; docs/08-verificacion-y-cierre.md
 

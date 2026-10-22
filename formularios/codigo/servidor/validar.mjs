@@ -208,8 +208,9 @@ export function validaPayload(payload, esquema, opciones = {}) {
         else { v = hallada.nombre; datos[n] = v; if (hallada.valor !== undefined) claves[n] = hallada.valor; }
       }
     }
-    /* Texto con formato: normalizar, validar y conservar lo normalizado. */
-    const f = cfg.formatos[c.formato || (c.tipo === 'textarea' ? 'texto' : '')];
+    /* Texto con formato: normalizar, validar y conservar lo normalizado. Un <input data-legible>
+       usa el formato «texto», como en el navegador. */
+    const f = cfg.formatos[c.formato || (c.tipo === 'textarea' || c.atributos?.legible ? 'texto' : '')];
     if (f) {
       /* El largo se revisa antes de normalizar, como lo limita el navegador: un texto
          enorme no llega a la expresión del formato. */

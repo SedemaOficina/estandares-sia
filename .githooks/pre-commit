@@ -1,0 +1,22 @@
+#!/bin/sh
+# Gancho de Git: antes de guardar (commit) corre la misma verificación que
+# GitHub corre al subir (.github/workflows/verificar.yml). Si algo falla, el
+# commit no se guarda: se corrige y se vuelve a intentar.
+# Se activa una vez en cada copia del repositorio con:
+#   npm run gancho        (o: git config core.hooksPath .githooks)
+set -e
+raiz="$(git rev-parse --show-toplevel)"
+cd "$raiz"
+
+echo "Verificando la carpeta común (geovisores, portada, secretos, derivados)..."
+node herramientas/verificar.mjs
+
+# Las pruebas en navegador tardan minutos: corren sólo si cambió algo de formularios.
+if git diff --cached --name-only | grep -q '^formularios/'; then
+  if [ ! -d formularios/node_modules ]; then
+    echo "Falta instalar las dependencias de verificación: cd formularios && npm install"
+    exit 1
+  fi
+  echo "Verificando formularios con sus pruebas en navegador (tarda unos minutos)..."
+  (cd formularios && node herramientas/verificar.mjs)
+fi

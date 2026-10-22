@@ -9,7 +9,7 @@ Para quien arma un formulario nuevo. Cada fila dice qué pieza del paquete resue
 | Cabe en una pantalla sin desplazarse mucho en el teléfono (hasta unas 8 preguntas) | **Una página**: copia `codigo/plantillas/una-pagina.html`. |
 | Tiene más de una pantalla de preguntas, o pide datos de distinta naturaleza (qué pasa, dónde, quién) | **Por pasos**: copia `codigo/plantillas/por-pasos.html` (módulos pasos, revisión, acuse). |
 | Es una encuesta anónima corta | Una página + escala + progreso (ejemplo `guia-visual/ejemplos/encuesta.html`). |
-| Es una consulta o captura interna del personal | Pestañas, tabla, paginación, chips, descarga, etiquetas de estado, resultado de una decisión, visor y confirmaciones (ejemplo `guia-visual/ejemplos/captura-interna.html`). Mismo estándar, otro catálogo. |
+| Es una consulta o captura interna del personal | Pestañas, migas, tabla, paginación, lista con búsqueda, chips, fechas, identificadores, copiar, descarga, etiquetas de estado y confirmaciones (ejemplo `guia-visual/ejemplos/captura-interna.html`); si se decide sobre un trámite o se revisan documentos, además resultado de una decisión y visor (fichas de la guía). Mismo estándar, otro catálogo. |
 
 ## 2. Por tipo de respuesta
 

@@ -170,6 +170,28 @@ test('servidor · condiciones anidadas: un campo exige las de todos sus ancestro
   assert.deepEqual(v({ modalidad: 'renovacion', tipo: 'poda' }).errores, [], 'con el ancestro de afuera oculto no se exige');
   const r = v({ modalidad: 'renovacion', tipo: 'poda', experiencia: '3' });
   assert.equal(r.datos.experiencia, undefined, 'y lo que llegue se descarta');
+  /* Una condición de afuera sobre otra pregunta, que no es la de la condición cercana: aquí no basta
+     que «urgente» esté activa; el servidor debe exigir también la de afuera (A1-12). */
+  const e2 = esquemaDe(`
+    <fieldset class="grupo" data-campo="modalidad" data-uso="Prueba."><legend class="etiqueta">Modalidad</legend>
+      <label><input type="radio" name="modalidad" value="nueva">Nueva</label><label><input type="radio" name="modalidad" value="renovacion">Renovación</label></fieldset>
+    <fieldset class="grupo" data-campo="urgente" data-uso="Prueba."><legend class="etiqueta">Urgente</legend>
+      <label><input type="radio" name="urgente" value="si">Sí</label><label><input type="radio" name="urgente" value="no">No</label></fieldset>
+    <div data-si="modalidad=nueva">
+      <section data-si="urgente=si">
+        <div class="campo" data-campo="motivo" data-requerido data-uso="Prueba."><label class="etiqueta" for="motivo">Motivo</label><input id="motivo" name="motivo" type="text"></div>
+      </section>
+    </div>`);
+  const v2 = (datos) => validaPayload({ datos, archivos: [], meta: META }, e2);
+  assert.ok(v2({ modalidad: 'nueva', urgente: 'si' }).errores.some((x) => x.campo === 'motivo'), 'con las dos condiciones, se exige');
+  assert.deepEqual(v2({ modalidad: 'renovacion', urgente: 'si' }).errores, [], 'con la de afuera sin cumplir no se exige, aunque la cercana se cumpla');
+});
+
+test('servidor · un <input data-legible> se revisa como texto legible, igual que en el navegador (A1-14)', () => {
+  const e = esquemaDe(`<div class="campo" data-campo="nota" data-requerido data-uso="Prueba."><label class="etiqueta" for="nota">Nota</label><input id="nota" name="nota" type="text" maxlength="200" data-legible></div>`);
+  const v = (nota) => validaPayload({ datos: { nota }, archivos: [], meta: META }, e);
+  assert.ok(v('asdfasdf asdfasdf qwrtzpkl').errores.some((x) => x.campo === 'nota'), 'lo que no parece texto se rechaza también en el servidor');
+  assert.deepEqual(v(BUENO.datos.descripcion).errores, [], 'y una frase se acepta');
 });
 
 test('servidor · datos calculados (data-auxiliar) y cruzadas con un rol opcional vacío', () => {
@@ -363,6 +385,25 @@ test('auditoría de campos · el «?» que repite la ayuda visible y la misma ay
 });
 herramienta('bibliotecas coinciden con el manifiesto', ['herramientas/vendor.mjs', '--verificar']);
 herramienta('documentos generados al día', ['herramientas/generar-reglas.mjs', '--comprobar']);
+herramienta('cada rodeo de una biblioteca está registrado en docs/07 (G2-01)', ['herramientas/rodeos.mjs']);
+
+test('guía · ningún id se repite entre sus muestras: cada etiqueta nombra a su control (A5-01, RODEO-06)', () => {
+  /* axe no lo ve en la guía (duplicate-id está apagada ahí, RODEO-06): se revisa aquí, en el HTML. */
+  const html = readFileSync(resolve(RAIZ, 'guia-visual/index.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+  const cuenta = {};
+  for (const m of html.matchAll(/\sid="([^"]+)"/g)) cuenta[m[1]] = (cuenta[m[1]] || 0) + 1;
+  assert.deepEqual(Object.entries(cuenta).filter(([, n]) => n > 1).map(([id]) => id), []);
+});
+
+test('catálogo · cada fila completa, con código postal de 5 dígitos, y su marca de ejemplo, fuente y corte (D1-05)', () => {
+  /* Lo que codigo/catalogos/LEEME.md promete para cualquier catálogo de alcaldía → colonia → código postal. */
+  const cat = globalThis.FORMKIT_CATALOGOS.cdmx;
+  assert.ok(Array.isArray(cat.filas) && cat.filas.length, 'el catálogo trae sus filas en «filas»');
+  const malas = cat.filas.filter((f) => !f || typeof f.alcaldia !== 'string' || !f.alcaldia.trim() || typeof f.colonia !== 'string' || !f.colonia.trim() || typeof f.cp !== 'string' || !/^\d{5}$/.test(f.cp));
+  assert.deepEqual(malas, [], 'filas incompletas o con un código postal que no es de 5 dígitos');
+  assert.equal(typeof cat.es_ficticio, 'boolean', 'declara si es de ejemplo (es_ficticio)');
+  for (const k of ['fuente', 'corte']) assert.ok(typeof cat[k] === 'string' && cat[k].trim(), `declara «${k}»`);
+});
 
 test('manifiesto · archivos existentes, dependencias reales y niveles admitidos', () => {
   const m = JSON.parse(readFileSync(resolve(RAIZ, 'codigo/manifiesto.json'), 'utf8'));

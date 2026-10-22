@@ -6,7 +6,7 @@ Los dos estándares viven juntos porque comparten lo mismo: colores, letra, boto
 
 | Estándar | Versión | Estado |
 |---|---|---|
-| [Formularios](formularios/README.md) | 1.6.2 | En uso |
+| [Formularios](formularios/README.md) | 1.6.3 | En uso |
 | [Geovisores (mapas)](geovisores/README.md) | 0.1.2 | Fase 1: reglas, estilo y tokens, en revisión |
 
 ## Ver la guía visual
@@ -31,7 +31,8 @@ La portada pregunta «¿Qué vas a construir?» y lleva a la guía de formulario
 | `guia-visual/` | Portada común: qué vas a construir, lo que comparten los dos estándares y la lista de pendientes (`pendientes.js`). |
 | `formularios/` | Estándar de formularios: reglas FRM, núcleo y módulos, bloques listos (identificación, domicilio, edad, redes sociales), plantillas, validador para el servidor, guía visual, pruebas y capturas de verificación. |
 | `geovisores/` | Estándar de visores de mapas: reglas GEO, tokens y temas del mapa, rampas de datos probadas para daltonismo, mapas base, guía visual. |
-| `herramientas/` | `verificar.mjs`: revisa los dos estándares y la portada con un solo veredicto. |
+| `herramientas/` | `verificar.mjs`: revisa los dos estándares y la portada con un solo veredicto; `secretos.mjs`: que no se publique una llave ni un respaldo. |
+| `.github/` y `.githooks/` | La verificación que corre sola en GitHub con cada subida y en la computadora antes de cada commit. |
 
 Cada estándar tiene su `README.md` (cómo usarlo), su `CHANGELOG.md` (qué cambió y por qué), sus documentos en `docs/` y sus reglas en `reglas/reglas.json`.
 
@@ -49,7 +50,8 @@ Cada estándar tiene su `README.md` (cómo usarlo), su `CHANGELOG.md` (qué camb
 2. Copia `formularios/codigo/` a tu proyecto, o sólo el núcleo y los módulos que te indicó la guía.
 3. Parte de una plantilla (`codigo/plantillas/por-pasos.html` o `una-pagina.html`) y de los bloques listos de la guía. Cada pregunta declara para qué se pide el dato (`data-uso`) y, si es dato personal, su finalidad (`data-finalidad`).
 4. Valida también en el servidor, con las mismas reglas: genera el esquema desde tu HTML y usa `codigo/servidor/validar.mjs`.
-5. Antes de liberar, sigue la lista de `formularios/docs/08-verificacion-y-cierre.md`.
+5. En producción, junta los archivos del estándar que usa tu página en uno de cada tipo (`node herramientas/juntar.mjs`, dentro de `formularios/`): así cabe en el presupuesto de peso y velocidad.
+6. Antes de liberar, comprueba tu formulario con `node herramientas/comprobar-formulario.mjs <tu-formulario.html>` y sigue la lista de `formularios/docs/08-verificacion-y-cierre.md`.
 
 Detalle completo: [`formularios/README.md`](formularios/README.md).
 
@@ -77,27 +79,29 @@ npm install
 npm run verificar
 ```
 
+Las dos verificaciones corren solas en GitHub con cada subida y, antes de cada commit, en la computadora (gancho de Git; se activa una vez por copia con `npm run gancho` en esta carpeta). En cada versión de formularios se corren además `npm run presupuesto` (peso y velocidad con red lenta) y `npm run mutaciones` (que las pruebas detecten lo que dicen proteger).
+
 Lo que una máquina no puede comprobar (un teléfono real, un lector de pantalla, Firefox y Safari) está en `formularios/docs/08-verificacion-y-cierre.md`.
 
 ## Cómo se cambia un estándar
 
 1. **Una regla sólo cambia con una decisión registrada** de la persona responsable de los estándares.
-2. Se edita la fuente, nunca lo generado. Las fuentes son `reglas/reglas.json`, los tokens CSS, los módulos y `codigo/manifiesto.json`. Lo generado es `docs/01-reglas.md`, `formularios/docs/04-catalogo-de-componentes.md`, `formularios/dist/`, `guia-visual/manifiesto.js`, `pares.js` y `artefacto.html`.
+2. Se edita la fuente, nunca lo generado. Las fuentes son `reglas/reglas.json`, los tokens CSS, los módulos, las plantillas, `herramientas/pares-contraste.json` y `codigo/manifiesto.json` (salvo sus tamaños y rutas, que escribe la construcción). Lo generado es `docs/01-reglas.md`, las tablas entre marcas de cada `docs/02`, `formularios/docs/04-catalogo-de-componentes.md`, `formularios/codigo/js/iconos.js`, `formularios/codigo/servidor/esquemas/`, `formularios/dist/` (también `dist/plantillas/`), `guia-visual/manifiesto.js`, `pares.js` y `artefacto.html`.
 3. Se regenera lo derivado:
-   - En `formularios/`, `npm run construir`; para publicar la guía autocontenida, `npm run artefacto`.
+   - En `formularios/`, `npm run artefacto` (rehace todo lo derivado, la guía autocontenida incluida). `npm run verificar` no lo rehace: si algo quedó atrasado, falla y dice qué.
    - En `geovisores/`, `npm run generar`.
-4. Se anota en el `CHANGELOG.md` del estándar, en la sección «Sin publicar».
+4. Se anota en el `CHANGELOG.md` del estándar: formularios sube de versión con cada cambio (parche para fallas, menor para piezas nuevas); geovisores lo acumula en la sección «Sin publicar» hasta su siguiente versión.
 5. `npm run verificar` debe terminar en **CORRECTO**.
 
 Reglas de redacción: español de México, claro y sin tecnicismos en lo que lee la gente; las acciones se atribuyen a «la Secretaría»; ninguna cita de ley sin verificar (se deja `[Art. __, fracc. __]`); los datos de ejemplo siempre son ficticios.
 
 ## Versiones
 
-Cada estándar lleva su propia versión, con la forma MAYOR.MENOR.PARCHE, en su `package.json` y en su `CHANGELOG.md`. Lo que todavía no se publica se acumula en la sección «Sin publicar» del CHANGELOG y recibe número al publicarse.
+Cada estándar lleva su propia versión, con la forma MAYOR.MENOR.PARCHE, en su `package.json` y en su `CHANGELOG.md`. Formularios publica cada cambio con su número; en geovisores, lo que todavía no se publica se acumula en la sección «Sin publicar» del CHANGELOG y recibe número al publicarse.
 
 ## Pendientes
 
-Lo que falta decidir o terminar está en la portada de la guía, sección «Pendientes». La lista vive en [`guia-visual/pendientes.js`](guia-visual/pendientes.js) y la guía de formularios muestra la misma, filtrada. Cuando algo se resuelve, sale de la lista y queda en el CHANGELOG.
+Lo que falta decidir o terminar está en la portada de la guía, sección «Pendientes». La lista vive en [`guia-visual/pendientes.js`](guia-visual/pendientes.js) y la guía de formularios muestra la misma, filtrada. Cuando algo se resuelve, sale de la lista y queda en el CHANGELOG. Las piezas que se agregarán cuando un proyecto las pida (consulta de folio, calendario de citas, firma…) están aparte, en `formularios/docs/09-trazabilidad.md`, sección 3.
 
 ## Datos personales y privacidad
 

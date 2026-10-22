@@ -17,10 +17,11 @@ codigo/
   servidor/   validar.mjs · esquemas/*.json (generados)
   manifiesto.json   núcleo y módulos: nivel, propósito, dependencias, archivos, tamaños
 dist/         formkit.css · formkit.js  («todo en uno», generado; para quien no quiere elegir módulos)
+              plantillas/<plantilla>/formkit.css · formkit.js  (lo que carga cada plantilla, junto y sin comentarios: su versión de producción, generada)
 guia-visual/  index.html · guia.css · guia.js · guia-config.js · ejemplos/ · muestras/ · manifiesto.js y pares.js (generados) · artefacto.html (autocontenido, generado)
-herramientas/ construir · auditor-css · contraste · auditar-campos · esquema-desde-html · generar-reglas · vendor · verificar · capturas
-pruebas/      *.prueba.mjs (node:test + Playwright) · ayudas.mjs · ejecutar.mjs · paginas/ (correcciones, desenlace, consulta, borrador)
-reglas/       reglas.json (fuente única de las 86 reglas)
+herramientas/ construir · juntar · auditor-css · contraste · auditar-campos · esquema-desde-html · generar-reglas · vendor · rodeos · verificar · presupuesto · mutaciones · comprobar-formulario · capturas
+pruebas/      *.prueba.mjs (node:test + Playwright) · ayudas.mjs · ejecutar.mjs · paginas/ (correcciones, desenlace, consulta, borrador, auditoría, envío)
+reglas/       reglas.json (fuente única de las reglas FRM)
 docs/         01–09
 vendor/       leaflet · leaflet-gesture-handling · pdfjs-dist (visor) · axe-core (con MANIFIESTO.json y sumas)
 ```
@@ -121,6 +122,7 @@ En el `<form>`: `data-formkit` (arranque automático; `data-formkit="manual"` pa
 - `[data-carga-pendiente]`: aviso visible en el HTML («La página no terminó de cargar. Recárgala…»). El núcleo lo oculta al arrancar y, por pasos, el módulo de pasos al mostrar el primero: si falta un archivo del estándar, la persona lo ve en lugar de una pantalla vacía. En una página, el botón de enviar es `type="button"` con `data-accion="enviar"`: sin el núcleo no envía nada.
 - `[data-recordatorio]` con `[data-recordatorio-texto]`: lo que la persona eligió al principio, a la vista en los pasos siguientes (módulo `pasos`).
 - `[data-limite]`: pantalla de límite de envíos (429), fuera del `<form>`, con su título y `[data-accion="reintentar"]` («Volver a la revisión» o «Volver al formulario»). La llevan las dos plantillas (módulo `acuse`).
+- `.entorno-pruebas` (la franja «Entorno de pruebas · datos ficticios») o `<html data-muestras>` (la guía y las páginas de muestra): dicen que la página es de pruebas. Sin ninguno de los dos, un catálogo con `es_ficticio: true` avisa una vez en la consola, para no publicar un formulario con datos inventados (`FormKit.utilidades.avisaFicticio`, que usan `cascadas` y `combo`).
 - `[data-trampa]` (campo señuelo), `[data-accion="enviar|siguiente|atras"]`.
 
 Eventos: `formkit:enviado` (en el form, si no hay `alEnviar`), `formkit:paso` ({indice, paso, total}), `formkit:fila` ({fila}, en el form, al agregar una fila repetible: los módulos preparan sus campos), `formkit:enviando` ({enviando}, en el form, al empezar y al terminar un envío: el módulo de pasos no deja cambiar de paso mientras tanto), `formkit:muestra` ({elemento}, en el form: el núcleo necesita mostrar algo que quedó en una parte oculta, como el aviso de envío; el módulo de pasos abre ese paso), `formkit:pagina` ({pagina, tamano, desde, hasta}, en el nav), `formkit:tabla` (repintar tabla; si una columna está ordenada, las filas nuevas toman ese orden).
@@ -244,12 +246,18 @@ Reglas del módulo: su CSS declara bloques `componentes → estados → adaptaci
 
 | Orden | Qué hace |
 |---|---|
-| `node herramientas/construir.mjs [--artefacto] [--zip] [--todo]` | Genera `iconos.js`, tamaños del manifiesto, `guia-visual/manifiesto.js`, `docs/04`, `dist/`, esquemas de las plantillas; con `--artefacto` la guía autocontenida; con `--zip` el paquete. |
+| `node herramientas/construir.mjs [--artefacto] [--zip] [--todo]` | Genera `iconos.js`, tamaños del manifiesto, `guia-visual/manifiesto.js`, `docs/04`, `dist/` (y `dist/plantillas/`), esquemas de las plantillas; con `--artefacto` la guía autocontenida; con `--zip` el paquete. Se detiene si una carpeta de `codigo/modulos` no está en el manifiesto o lleva un archivo de más. |
+| `node herramientas/construir.mjs --comprobar` | No escribe nada: dice qué derivado está atrasado (artefacto incluido) y sale con 1. Así lo usa `verificar`. |
+| `node herramientas/juntar.mjs <pagina.html> <salida>` | Las hojas y los guiones del estándar que carga la página, juntos y sin comentarios, en `<salida>/formkit.css` y `formkit.js`; dice qué etiquetas poner en su lugar (producción, FRM-87). |
+| `node herramientas/comprobar-formulario.mjs <pagina.html o dirección> [--raiz carpeta] [--permitir servidor]` | Comprueba el formulario de un proyecto: consola, red, anchos, axe, 44 px, nada escrito en el HTML, resumen al enviar vacío, catálogos y `auditar-campos` (`docs/08`). |
+| `node herramientas/presupuesto.mjs [--sin-tiempos]` | Peso, archivos y (sin la opción) tiempos con red lenta de cada plantilla en producción, contra el presupuesto de FRM-87. |
+| `node herramientas/mutaciones.mjs` | Rompe a propósito, en una copia, cada corrección protegida y exige que su prueba falle (y que termine: una prueba que pasa de 5 minutos cuenta como falla de la prueba). |
+| `node herramientas/rodeos.mjs` | Cada `RODEO-NN` del código está en la tabla de `docs/07`, sección 5, y en el archivo que cita. |
 | `node herramientas/auditor-css.mjs` | Reglas A01 a A11 y A13 a A16 (no hay A12) sobre todas las hojas (ver `docs/02` y `auditor-css.config.json`). |
 | `node herramientas/contraste.mjs [--md\|--guia]` | Mide los pares de `pares-contraste.json`; genera la tabla de `docs/02` y `guia-visual/pares.js`. |
 | `node herramientas/auditar-campos.mjs [html…]` | `data-uso`, `data-finalidad` → `autocomplete`, `data-sensible`, `inputmode`; ayudas sin repetir (D5, D6). |
 | `node herramientas/esquema-desde-html.mjs <html> [salida.json]` | Esquema para el servidor. |
-| `node herramientas/generar-reglas.mjs [--comprobar]` | `docs/01` desde `reglas/reglas.json`; tabla de contraste de `docs/02`. |
+| `node herramientas/generar-reglas.mjs [--comprobar]` | `docs/01` desde `reglas/reglas.json`; tabla de contraste de `docs/02` y `guia-visual/pares.js`. |
 | `node herramientas/vendor.mjs [--verificar]` | Descarga/verifica Leaflet, gestos, pdf.js y axe-core con sumas. |
 | `npm run probar` / `npm run verificar` | Pruebas (node:test + Playwright) / todo lo anterior en una orden. |
 | `node herramientas/capturas.mjs` | Capturas de verificación en `verificacion/capturas/`. |

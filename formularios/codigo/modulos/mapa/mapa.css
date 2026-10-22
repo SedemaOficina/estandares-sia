@@ -59,7 +59,6 @@
 /* @bloque estados */
 
 .mapa[aria-invalid="true"]{border:var(--b-2) solid var(--error)}
-.ficha[data-fuera]{background:var(--error-bg);border-color:var(--error)}
 
 /* @bloque adaptaciones */
 

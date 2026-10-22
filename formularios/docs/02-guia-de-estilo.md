@@ -6,10 +6,10 @@ Qué se ve y por qué. Todo valor de este documento vive en `codigo/css/tokens.c
 
 | Token | Valor | Trabajo |
 |---|---|---|
-| `--guinda` | #9D2148 | Identidad: títulos de página y de paso, encabezados de tabla, acción principal. |
+| `--guinda` | #9D2148 | Identidad: títulos de página y de paso, encabezados de tabla, acción principal. Nunca en avisos ni junto a un mensaje de error: se parece al rojo de error (decisión de la Secretaría, 20 oct 2026). |
 | `--guinda-osc` | #7A1A38 | Acción principal al pasar el cursor. |
 | `--guinda-cl` | #F7F1F3 | Fondo suave: filas alternas de tabla, leyenda de obligatorios, número de la secuencia «qué sigue». |
-| `--dorado` | #B28E5C | Filete institucional y detalles de trazo. **Nunca como texto sobre blanco** (3.1:1). |
+| `--dorado` | #B28E5C | Filete institucional (encabezado, pie y título de bloque) y detalles de trazo. **Nunca como texto sobre blanco** (3.1:1). |
 | `--dorado-txt` | #8C6C3E | Dorado como texto: variante oscurecida que cumple 4.5:1. |
 | `--texto` | #2B2D2E | Cuerpo y respuesta de la persona. |
 | `--gris` | #55585A | Texto secundario: rótulos, pies, notas. |
@@ -18,7 +18,7 @@ Qué se ve y por qué. Todo valor de este documento vive en `codigo/css/tokens.c
 | `--borde` | #878B8E | Borde de control y de botón secundario (3:1 sobre blanco). |
 | `--fondo` | #F4F5F6 | Fondo de página. |
 | `--blanco` | #FFFFFF | Tarjetas y controles. |
-| `--beige` | #FFFEF8 | Pie institucional. |
+| `--beige` | #FFFEF8 | Encabezado y pie institucionales. |
 | `--aviso-bg` | #F7F8F9 | Aviso neutro, control deshabilitado. |
 | `--azul` | #1A56A8 | Enlaces, casilla marcada, «Atrás», lo elegido (opción marcada, página actual de la paginación, pestaña abierta). |
 | `--azul-cl` | #EEF3FA | Fondo de lo seleccionado (tarjeta, chip, opción de combo). |
@@ -124,7 +124,8 @@ Cada par de la tabla es un uso real del estándar: el texto sobre el fondo donde
 | Título de bloque (`.titulo-bloque`) | Cabin 600, filete dorado superior | `--t-lg` = clamp(18px, 1.5vw + 12px, 20px) |
 | Pregunta (`.etiqueta`) | Roboto 500 | `--t-base` = 16px |
 | Respuesta y cuerpo | Roboto 400 | `--t-base` = 16px, interlineado 1.55; ancho máximo de 70 caracteres sólo en el texto corrido (`.texto-corrido`) |
-| Botones secundarios, celdas | Roboto 500 | `--t-md` = 14px |
+| Botones (principal, secundario y de peligro) | Cabin 600 | `--t-base` = 16px |
+| Celdas de tabla | Roboto 400 | `--t-md` = 14px |
 | Ayuda y contador (`.ayuda`, `.contador`) | Roboto 400 | `--t-md` = 14px en el teléfono; desde 760 px, `--t-sm` = 13px la ayuda y `--t-xs` = 12px el contador (decisión de la Secretaría, 20 oct 2026) |
 | Pies y notas | Roboto 400 | `--t-sm` = 13px |
 | Rótulo (`.rotulo`) | Roboto 400, mayúsculas, tracking .06em | `--t-sm` = 13px |
@@ -163,7 +164,7 @@ Entre niveles cambia el tamaño o el peso, nunca sólo el color. No se inventan 
 
 ## 6. Puntos de quiebre: móvil primero
 
-El CSS parte del teléfono y sólo crece. Hay tres puntos de corte, declarados en `tokens.css` y repetidos en la configuración del auditor (CSS no admite variables en `@media`): `--bp-sm` 560 px (hoja inferior → diálogo centrado; acciones del acuse en fila), `--bp-md` 760 px (campos a dos columnas con subcuadrícula; tabla real; botones en fila con la acción principal a la derecha), `--bp-lg` 1024 px (navegación lateral en la guía; visor fijo junto a lo que se revisa). Sólo `min-width`: el auditor rechaza `max-width`.
+El CSS parte del teléfono y sólo crece. Hay tres puntos de corte, declarados en `tokens.css` y repetidos en la configuración del auditor (CSS no admite variables en `@media`): `--bp-sm` 560 px (hoja inferior → diálogo centrado; lo que en el teléfono va apilado se pone en fila: acciones del acuse, «Hoy» y atajos de fecha, copiar, barra del mapa), `--bp-md` 760 px (campos a dos columnas con subcuadrícula; tabla real; botones en fila con la acción principal a la derecha), `--bp-lg` 1024 px (visor de documentos fijo junto a lo que se revisa; índice lateral en la guía). Sólo `min-width`: el auditor rechaza `max-width`.
 
 ## 7. Estados
 
@@ -188,7 +189,7 @@ El botón principal es guinda relleno, uno por pantalla (y uno por diálogo). El
 
 ## 8. Iconografía
 
-Un solo sprite SVG (`codigo/iconos/sprite.svg`, 30 símbolos) que `formkit.core.js` inyecta una vez por página. Los iconos heredan el color del texto (`currentColor`), miden `--icono` (20 px) o `--icono-sm` (16 px). El decorativo lleva `aria-hidden="true"`; el que comunica algo va siempre junto a texto; sólo «cerrar», «buscar» y los enlaces a redes sociales pueden ir solos, con `aria-label` y 44 px de objetivo. Catálogo: alerta, error, ok, info, ayuda, cerrar, palomita, flecha-izq, flecha-der, abajo, descarga, copiar, compartir, eliminar, editar, ubicacion, fecha, adjunto, camara, buscar, mas, cargando, reloj, externo, archivo. Marcas de redes sociales (rellenas, como las publica cada red; sólo en el bloque de redes del pie): facebook, x, instagram, tiktok, youtube.
+Un solo sprite SVG (`codigo/iconos/sprite.svg`, 30 símbolos) que `formkit.core.js` inyecta una vez por página. Los iconos heredan el color del texto (`currentColor`), miden `--icono` (20 px) o `--icono-sm` (16 px). El decorativo lleva `aria-hidden="true"`; el que comunica algo va siempre junto a texto; sólo «cerrar», «buscar», «ayuda», «quitar» o «eliminar» en una fila y los enlaces a redes sociales pueden ir solos, siempre con nombre accesible y 44 px de objetivo (FRM-72). Catálogo: alerta, error, ok, info, ayuda, cerrar, palomita, flecha-izq, flecha-der, abajo, descarga, copiar, compartir, eliminar, editar, ubicacion, fecha, adjunto, camara, buscar, mas, cargando, reloj, externo, archivo. Marcas de redes sociales (rellenas, como las publica cada red; sólo en el bloque de redes del pie): facebook, x, instagram, tiktok, youtube.
 
 ## 9. Palabras: una para cada cosa
 

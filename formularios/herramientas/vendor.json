@@ -41,7 +41,7 @@
       "paquete": "axe-core",
       "version": "4.13.0",
       "licencia": "MPL-2.0",
-      "uso": "Sólo verificación (pruebas/accesibilidad.prueba.mjs). No viaja al sitio publicado.",
+      "uso": "Sólo verificación (pruebas/05-accesibilidad.prueba.mjs y herramientas/comprobar-formulario.mjs). No viaja al sitio publicado.",
       "archivos": [
         "axe.min.js"
       ],

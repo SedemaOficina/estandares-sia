@@ -33,17 +33,17 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 |---|---|---|---|---|---|---|
 | `opciones` | Opciones elegibles | BASE | pregunta | — | 5.1 KB | — |
 | `otro` | Opción «Otro» con especificación | RECOMENDADO | pregunta | opciones | — | 4.2 KB |
-| `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 11.2 KB |
+| `combo` | Lista desplegable con búsqueda | RECOMENDADO | pregunta | — | 1.4 KB | 11.5 KB |
 | `fecha` | Fecha y hora con «Hoy» y atajos | RECOMENDADO | pregunta | — | 1003 B | 7.8 KB |
 | `identificadores` | CURP, RFC y folios | OPCIONAL | pregunta | — | — | 4.4 KB |
 | `repetibles` | Grupos repetibles («Agregar otro») | OPCIONAL | pregunta | modal | 1.1 KB | 9.5 KB |
 | `toggle` | Interruptor | OPCIONAL | pregunta | — | 1.4 KB | 2.9 KB |
 | `escala` | Escala o valoración | OPCIONAL | pregunta | opciones | 2.2 KB | — |
-| `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 5.0 KB | 13.5 KB |
+| `pasos` | Formulario por pasos y barra de avance | RECOMENDADO | navegacion | — | 4.5 KB | 13.5 KB |
 | `revision` | Pantalla de revisión | RECOMENDADO | retroalimentacion | pasos | 1.8 KB | 3.2 KB |
 | `acuse` | Acuse y «qué sigue» | RECOMENDADO | retroalimentacion | copiar | 2.2 KB | 7.2 KB |
 | `resultado` | Resultado de una decisión | RECOMENDADO | retroalimentacion | — | 2.5 KB | 6.3 KB |
-| `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 2.1 KB | 5.7 KB |
+| `modal` | Diálogo y confirmación | RECOMENDADO | retroalimentacion | — | 2.1 KB | 6.0 KB |
 | `copiar` | Copiar y compartir | RECOMENDADO | retroalimentacion | — | 542 B | 4.4 KB |
 | `descarga` | Botón de descarga | OPCIONAL | retroalimentacion | — | 434 B | 4.1 KB |
 | `acordeon` | Acordeón y secciones plegables | OPCIONAL | navegacion | — | 2.0 KB | — |
@@ -53,13 +53,13 @@ Archivos, en este orden: `codigo/css/tokens.css`, `codigo/css/base.css`, `codigo
 | `paginacion` | Paginación de resultados | OPCIONAL | consulta | — | 2.3 KB | 6.0 KB |
 | `version` | Distintivo de versión | OPCIONAL | navegacion | — | 2.2 KB | — |
 | `tooltip` | Ayuda desplegable | OPCIONAL | pregunta | — | 1.5 KB | 2.9 KB |
-| `tabla` | Tabla de consulta y de captura | OPCIONAL | consulta | repetibles | 4.6 KB | 8.3 KB |
+| `tabla` | Tabla de consulta y de captura | OPCIONAL | consulta | — | 4.6 KB | 8.3 KB |
 | `estado` | Etiquetas de estado | OPCIONAL | retroalimentacion | — | 1.5 KB | 2.9 KB |
 | `archivos` | Carga de archivos y fotografías | RECOMENDADO | archivos | — | 3.1 KB | 28.4 KB |
 | `visor` | Visor de documentos | OPCIONAL | archivos | — | 3.2 KB | 12.4 KB |
-| `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 3.0 KB | 12.7 KB |
+| `mapa` | Mapa con selección de punto | OPCIONAL | archivos | — | 2.9 KB | 12.8 KB |
 | `enlace-mapa` | Coordenadas desde un enlace de Google Maps | OPCIONAL | archivos | — | — | 8.0 KB |
-| `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 8.8 KB |
+| `cascadas` | Campos dependientes en cascada | OPCIONAL | pregunta | — | 539 B | 8.9 KB |
 | `chips` | Chips de uso frecuente | OPCIONAL | pregunta | — | 2.0 KB | 9.8 KB |
 
 ### Opciones elegibles (`opciones`) · BASE
@@ -247,7 +247,7 @@ Pasos con barra fija navegable que valida igual que «Continuar»; estados compl
 
 **Accesibilidad.** Botones con aria-current=step y nombre «Paso N de M: título, completado»; el foco va al título al cambiar; Enter avanza, no envía.
 
-**En teléfono.** Círculos sin etiqueta + «Paso X de N · Título»; acciones en columna, principal arriba. Opcional: la clase acciones-fijas en el bloque de acciones del paso lo deja fijo al pie, respetando las áreas seguras del teléfono.
+**En teléfono.** Círculos sin etiqueta + «Paso X de N · Título»; acciones en columna, principal arriba.
 
 **En escritorio.** Etiquetas bajo cada círculo; acciones en fila.
 
@@ -539,11 +539,11 @@ Botón «?» que muestra un texto corto, por clic y teclado, con Escape.
 
 Tabla con caption, orden por columna accesible (palabras como en español, fechas día/mes/año como fechas), estados vacío/carga/error, acciones por fila con nombre completo; en teléfono, tarjetas apiladas.
 
-**Cuándo.** Consulta interna de registros.
+**Cuándo.** Consulta interna de registros. Una tabla de captura (filas que la persona agrega o quita) es el módulo repetibles con la clase .tabla-captura: entonces se copian los dos.
 
 **Cuándo no.** Maquetar.
 
-**Depende de.** repetibles · **Archivos.** `codigo/modulos/tabla/tabla.css`, `codigo/modulos/tabla/tabla.js`
+**Depende de.** sólo del núcleo · **Archivos.** `codigo/modulos/tabla/tabla.css`, `codigo/modulos/tabla/tabla.js`
 
 **Accesibilidad.** th con scope y aria-sort; cada celda lleva su encabezado en teléfono; «Eliminar registro 123»; sobre la cabecera guinda el anillo de foco va en blanco.
 

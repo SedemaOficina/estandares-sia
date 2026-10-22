@@ -1,0 +1,86 @@
+{
+ "_nota": "Huella del título y el texto de cada regla FRM que geovisores cita, tal como estaba cuando se revisó la cita. La escribe herramientas/citas-formularios.mjs --actualizar después de revisar; no se edita a mano.",
+ "revisado": "2026-10-21",
+ "citas": {
+  "FRM-30": {
+   "huella": "2294fe02278e98af",
+   "titulo": "Validaciones por formato: nombre, correo, teléfono de 10 dígitos, CP de 5 dígitos, fecha real (también día/mes/año), hora, numérico, texto, coordenadas, folio, folio fiscal, contraseña"
+  },
+  "FRM-34": {
+   "huella": "f972bed5db4d43f2",
+   "titulo": "Una sola acción principal por pantalla"
+  },
+  "FRM-38": {
+   "huella": "6f7be465f5efa8bb",
+   "titulo": "Toda acción que no se deshace o que afecta a otra persona pide confirmación dentro de la página, con sus consecuencias"
+  },
+  "FRM-40": {
+   "huella": "0eaec4444247d7f9",
+   "titulo": "Lo que cambia sin recargar se anuncia, y todo anuncio también se ve"
+  },
+  "FRM-45": {
+   "huella": "ec93f44d221d0515",
+   "titulo": "El envío no se duplica"
+  },
+  "FRM-46": {
+   "huella": "59043cba461e72ab",
+   "titulo": "La dirección va primero y el mapa nunca es el único camino"
+  },
+  "FRM-50": {
+   "huella": "8a5e09831a03418d",
+   "titulo": "El mapa base, el marcador y el cruce son del proyecto, no de un tercero"
+  },
+  "FRM-56": {
+   "huella": "ae3ca043508bfdbc",
+   "titulo": "El aviso de privacidad se lee en pantalla antes de enviar y los fundamentos sin verificar quedan en hueco"
+  },
+  "FRM-59": {
+   "huella": "3b5441a635f08422",
+   "titulo": "Cero valores fijos en el código"
+  },
+  "FRM-62": {
+   "huella": "9c8a4868b9123bfb",
+   "titulo": "Todo lo que se toca mide al menos 44 px con puntero táctil"
+  },
+  "FRM-65": {
+   "huella": "3d14a08bab9fb891",
+   "titulo": "Movimiento reducido, alto contraste forzado e impresión"
+  },
+  "FRM-66": {
+   "huella": "0b7c8f9536ac0b9e",
+   "titulo": "Orden fijo de bloques en toda hoja"
+  },
+  "FRM-67": {
+   "huella": "559bffc32fe9806b",
+   "titulo": "Ningún color ni longitud literal fuera de tokens.css"
+  },
+  "FRM-68": {
+   "huella": "c0f0897cde74c29e",
+   "titulo": "Un selector, una declaración; sin !important; sin id; dos niveles como máximo"
+  },
+  "FRM-69": {
+   "huella": "12197e37c735ce6e",
+   "titulo": "[hidden] se oculta sin !important y nada lo pisa"
+  },
+  "FRM-70": {
+   "huella": "cbc10532eb5f1450",
+   "titulo": "Sin manejadores en línea, sin estilos en línea, sin código zombi"
+  },
+  "FRM-73": {
+   "huella": "fa87b2b485dc575d",
+   "titulo": "Registro institucional claro: frases cortas, voz activa, sin siglas sin explicar"
+  },
+  "FRM-77": {
+   "huella": "8fbbe8e0bd2eb2cf",
+   "titulo": "Todo se sirve desde el propio servidor"
+  },
+  "FRM-78": {
+   "huella": "ccb536114033918e",
+   "titulo": "Cabin 600/700 para títulos y Roboto 400/500/700 para el cuerpo, autoalojadas con licencia"
+  },
+  "FRM-79": {
+   "huella": "da4751e3c111dd8e",
+   "titulo": "Cada biblioteca con versión exacta, licencia y suma de verificación"
+  }
+ }
+}

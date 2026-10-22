@@ -561,7 +561,7 @@
 
   /* ---------- Configuración ---------- */
   const CONFIG = {
-    version: '1.6.2',
+    version: '1.6.3',
     idioma: 'es-MX',
     /* horas24: el reloj de las fechas que se muestran (acuse, borrador, resultado); false, con a.m. y p.m. */
     fechas: { zonaHoraria: 'America/Mexico_City', horas24: true },

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es-MX">
+<html lang="es-MX" data-muestras>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -118,12 +118,13 @@
           <p class="texto-gris" data-arbol-nota></p>
         </div>
       </div>
-      <h3 class="rotulo">Cómo se usa el paquete, en cuatro pasos</h3>
+      <h3 class="rotulo">Cómo se usa el paquete, en cinco pasos</h3>
       <ol class="guia-pasos-uso">
-        <li><strong>Copia el núcleo</strong> (<code>codigo/css/</code>, <code>codigo/js/</code>, <code>codigo/fuentes/</code>, <code>codigo/iconos/</code>) y los módulos que te indique el árbol de arriba, en el orden que aparece.</li>
+        <li><strong>Copia el núcleo</strong> (<code>codigo/css/</code>, <code>codigo/js/</code>, <code>codigo/fuentes/</code>, <code>codigo/iconos/</code>, <code>codigo/imagenes/</code>) y los módulos que te indique el árbol de arriba, en el orden que aparece. Si hay lista con búsqueda o cascadas, también <code>codigo/catalogos/</code> o el catálogo oficial.</li>
         <li><strong>Declara cada campo con atributos</strong>: <code>data-campo</code>, <code>data-formato</code>, <code>required</code> o <code>data-requerido</code>, <code>data-si</code>, <code>data-uso</code>, <code>data-finalidad</code>. Los mensajes, patrones y límites viven en <code>validaciones.config.js</code>; no los escribas en el HTML.</li>
-        <li><strong>Copia la plantilla</strong> que más se parezca (por pasos o de una página), sustituye el contenido y ajusta <code>configuracion-*.js</code> (envío y, si hay mapa, su proveedor).</li>
-        <li><strong>Verifica antes de liberar</strong>: <code>npm run verificar</code> y la lista de la última sección. El servidor repite toda validación con <code>codigo/servidor/validar.mjs</code> y el esquema que genera <code>herramientas/esquema-desde-html.mjs</code>.</li>
+        <li><strong>Copia la plantilla</strong> que más se parezca (por pasos o de una página), sustituye el contenido y ajusta <code>configuracion-*.js</code> (envío y, si hay mapa, su proveedor). Cambia sus rutas <code>../css/…</code>, <code>../modulos/…</code> y <code>../../vendor/…</code> a donde quedó la copia en tu proyecto.</li>
+        <li><strong>Comprueba tu formulario</strong>: <code>node herramientas/comprobar-formulario.mjs tu-formulario.html</code> (consola, red, anchos, accesibilidad, catálogos y campos) y la lista de la última sección. El servidor repite toda validación con <code>codigo/servidor/validar.mjs</code> y el esquema que genera <code>herramientas/esquema-desde-html.mjs</code>.</li>
+        <li><strong>En producción, junta los archivos</strong>: <code>node herramientas/juntar.mjs tu-formulario.html carpeta</code> deja las hojas y los guiones del estándar en un archivo de cada uno, sin comentarios. Así la plantilla por pasos pasa de 43 archivos a 15 y carga en unos 4 s con 4G lenta (presupuesto: 300 KB, 20 archivos, 5 s con 4G lenta y 12 s con 3G).</li>
       </ol>
     </section>
 
@@ -258,7 +259,9 @@
       <h2 class="titulo-bloque" id="t-verificacion">Antes de liberar un formulario</h2>
       <p class="bajada">Lista corta para quien adopta el paquete. La lista completa, con evidencia por punto, está en <code>docs/08-verificacion-y-cierre.md</code>.</p>
       <ol class="guia-lista-verif">
-        <li><code>npm run verificar</code> en verde: auditor de CSS, contraste, pruebas en navegador (móvil y escritorio) y axe-core.</li>
+        <li><code>node herramientas/comprobar-formulario.mjs</code> en verde sobre tu formulario: consola y red limpias, sin desplazamiento horizontal, axe-core sin violaciones, 44 px, nada escrito dentro del HTML, catálogos completos y campos declarados.</li>
+        <li>En producción, los archivos del estándar juntos (<code>herramientas/juntar.mjs</code>) y dentro del presupuesto: 300 KB, 20 archivos, 5 s con 4G lenta y 12 s con 3G.</li>
+        <li>El catálogo oficial en lugar del de ejemplo: mientras diga <code>es_ficticio: true</code>, una página sin la franja de pruebas lo avisa en la consola.</li>
         <li>Todo campo declara <code>data-uso</code>; los de datos personales, <code>data-finalidad</code>; los que no deben guardarse en borrador, <code>data-sensible</code> (<code>node herramientas/auditar-campos.mjs</code> lo comprueba).</li>
         <li>Cada campo de identidad, contacto y domicilio de quien llena lleva su <code>autocomplete</code>; los de terceros lo desactivan con su motivo en comentario.</li>
         <li>Una sola acción principal por pantalla; «Atrás» como enlace con flecha; sin «Aceptar» ni «OK».</li>
@@ -379,10 +382,10 @@
   </div>
 </fieldset>
 <div data-si="n_contacto=si">
-  <div class="campo" data-campo="n_correo2" data-formato="correo" data-requerido data-sensible data-uso="Contacto." data-finalidad="Informar el avance.">
-    <label class="etiqueta" for="n_correo2">Correo electrónico</label>
+  <div class="campo" data-campo="n_correo_contacto" data-formato="correo" data-requerido data-sensible data-uso="Contacto." data-finalidad="Informar el avance.">
+    <label class="etiqueta" for="n_correo_contacto">Correo electrónico</label>
     <p class="ayuda">Sólo existe mientras la respuesta sea «Sí»: si cambias a «No», no se valida ni viaja, y lo escrito se conserva.</p>
-    <input class="control" id="n_correo2" name="n_correo2" type="email" autocomplete="email">
+    <input class="control" id="n_correo_contacto" name="n_correo_contacto" type="email" autocomplete="email">
   </div>
 </div>
 </template>

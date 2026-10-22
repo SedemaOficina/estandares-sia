@@ -1,6 +1,6 @@
 # 09 · Trazabilidad y registro de decisiones
 
-De dónde viene cada pieza del estándar (paquete A «Denuncias Ambientales», paquete B, o construido nuevo para este encargo), qué se decidió en los trece conflictos de la fase 0 y qué quedó fuera de la versión 1.0. El análisis completo de la fase 0 está en `00-fase-0-analisis-comparativo.md` (entregado aparte).
+De dónde viene cada pieza del estándar (paquete A «Denuncias Ambientales», paquete B, o construido nuevo para este encargo), qué se decidió en los trece conflictos de la fase 0 y qué quedó fuera de la versión 1.0. El análisis completo de la fase 0 se entregó aparte, fuera de este repositorio (documento «00 · Fase 0, análisis comparativo»); lo que decidió está resumido aquí.
 
 ## 1. Decisiones de la fase 0 (confirmadas por la persona responsable)
 
@@ -20,7 +20,7 @@ De dónde viene cada pieza del estándar (paquete A «Denuncias Ambientales», p
 | C12 | Pesos tipográficos | Cabin 600/700; Roboto 400/500/700 | `tokens.css`, `codigo/fuentes/`; FRM-78 |
 | C13 | Nomenclatura de reglas | **FRM-NN corrida** | `reglas/reglas.json`; `docs/01` |
 
-Decisiones adicionales tomadas durante la construcción (no estaban en la fase 0), para confirmar o revertir:
+Decisiones adicionales tomadas durante la construcción (no estaban en la fase 0), **confirmadas por la Secretaría el 20 oct 2026** (decisión 16 de la auditoría del 19 oct 2026):
 
 | Id | Decisión | Motivo |
 |---|---|---|

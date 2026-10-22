@@ -29,7 +29,7 @@
   FormKit.registra('fecha', {
     selector: '[data-hoy],[data-ahora],[data-rango],[data-formato="fecha"][data-deriva],[data-formato="fecha-dma"]',
     iniciar(form, ctx) {
-      const { $, $$, cfg, M, plantilla, anuncia, envoltura, controlPrincipal, validaYPinta, programaBorrador } = ctx;
+      const { $$, cfg, M, plantilla, anuncia, envoltura, controlPrincipal, validaYPinta, programaBorrador } = ctx;
 
       form.addEventListener('click', (e) => {
         const b = e.target.closest('[data-hoy],[data-ahora],[data-atajo]');

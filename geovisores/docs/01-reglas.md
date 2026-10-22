@@ -572,7 +572,7 @@ El estándar tiene **133 reglas**: 103 BASE, 24 RECOMENDADO, 6 OPCIONAL. 120 sal
 
 **RECOMENDADO** · aplica a: buscador
 
-**Regla.** El buscador acepta coordenadas decimales, grados-minutos-segundos, geo: y ligas largas de Google Maps; en esas ligas el punto marcado (!3d…!4d…) gana a @. Una liga corta no trae coordenadas: se explica cómo copiarlas (complementa FRM-30). Pegar «19.42, -99.14» llena los dos campos y detecta el orden invertido.
+**Regla.** El buscador acepta coordenadas decimales, grados-minutos-segundos, geo: y ligas largas de Google Maps; en esas ligas el punto marcado (!3d…!4d…) gana a @. Una liga corta no trae coordenadas: se explica cómo copiarlas. FRM-30 valida el formato de las coordenadas; las ligas las lee el módulo enlace-mapa de formularios. Pegar «19.42, -99.14» llena los dos campos y detecta el orden invertido.
 
 **Por qué.** La @ de una liga es el centro de la pantalla de quien la compartió, no el lugar marcado. PL: el teclado numérico del iPhone no trae el signo menos, así que pegar es la vía práctica.
 
@@ -696,7 +696,7 @@ El estándar tiene **133 reglas**: 103 BASE, 24 RECOMENDADO, 6 OPCIONAL. 120 sal
 
 **BASE** · aplica a: todos
 
-**Regla.** Cada vista tiene un solo botón principal, en guinda (complementa FRM-34). Cuando la ficha y el panel se ven a la vez, el del panel pasa a secundario. Lo que se toca y lo elegido van en azul.
+**Regla.** Cada vista tiene un solo botón principal, en guinda (complementa FRM-34); en la confirmación de algo destructivo, el único botón relleno es el rojo de peligro, como en formularios. Cuando la ficha y el panel se ven a la vez, el del panel pasa a secundario. Lo que se toca y lo elegido van en azul.
 
 **Por qué.** GA usa body.con-ficha para bajar de peso el botón del panel: con la ficha abierta había dos botones guinda a la vista. PL D124 y D166 cambiaron la acción a azul porque su guinda y su rojo de error medían 1.1:1 entre sí; el estándar conserva el guinda y resuelve ese choque con el ámbar en el mapa (GEO-66).
 
@@ -800,11 +800,11 @@ El estándar tiene **133 reglas**: 103 BASE, 24 RECOMENDADO, 6 OPCIONAL. 120 sal
 
 **Verificación.** prueba: después de guardar, ningún campo conserva valor
 
-### GEO-64 · Confirmar solo lo irreversible
+### GEO-64 · Confirmar sólo lo que no se deshace o afecta a otra persona
 
 **BASE** · aplica a: todos
 
-**Regla.** Se pide confirmación solo para lo que no se puede deshacer, y borrar pide escribir la palabra (complementa FRM-38). Lo demás se hace de inmediato y el aviso ofrece «Deshacer».
+**Regla.** Se pide confirmación, dentro de la página, para lo que no se puede deshacer o afecta a otra persona, con sus consecuencias y un botón que repite el verbo (FRM-38); borrar algo que no se recupera pide además escribir la palabra. Lo demás se hace de inmediato y el aviso ofrece «Deshacer».
 
 **Por qué.** Una confirmación en cada acción se acepta sin leer; cuando llega la que importa, ya nadie la lee (PL).
 
@@ -1380,7 +1380,7 @@ El estándar tiene **133 reglas**: 103 BASE, 24 RECOMENDADO, 6 OPCIONAL. 120 sal
 
 **BASE** · aplica a: todos
 
-**Regla.** Un solo role=status; para anunciar, se vacía y se llena en el siguiente cuadro. Se anuncia solo la conclusión («12 resultados»), no cada paso. Los datos derivados van en <output> (complementa FRM-40).
+**Regla.** Un solo role=status; para anunciar, se vacía y se llena en el siguiente cuadro. Se anuncia solo la conclusión («12 resultados»), no cada paso. Los datos derivados van en <output>. Como en formularios, todo anuncio también se ve en pantalla: nada se dice sólo al lector (FRM-40).
 
 **Por qué.** GA: un status que aparece y cambia de texto a la vez a veces no se lee.
 

@@ -24,7 +24,9 @@ const TIPOS = {
 };
 
 const servidor = createServer((pet, res) => {
-  let ruta = decodeURIComponent(new URL(pet.url, 'http://x').pathname);
+  /* Una dirección mal escrita («/%E0%A4%A») se contesta con 400; antes tumbaba el servidor. */
+  let ruta;
+  try { ruta = decodeURIComponent(new URL(pet.url, 'http://x').pathname); } catch { res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Dirección mal escrita'); return; }
   if (ruta === '/') { res.writeHead(302, { Location: '/guia-visual/' }); res.end(); return; }
   if (ruta.endsWith('/')) ruta += 'index.html';
   const archivo = normalize(join(RAIZ, ruta));

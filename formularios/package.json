@@ -1,6 +1,6 @@
 {
   "name": "estandar-formularios-sia",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "private": true,
   "description": "Estándar de formularios web del Sistema de Información Ambiental (SEDEMA CDMX). Las dependencias son sólo de verificación; el código del estándar no tiene ninguna.",
   "type": "module",
@@ -14,6 +14,11 @@
     "reglas": "node herramientas/generar-reglas.mjs",
     "probar": "node pruebas/ejecutar.mjs",
     "verificar": "node herramientas/verificar.mjs",
+    "presupuesto": "node herramientas/presupuesto.mjs",
+    "mutaciones": "node herramientas/mutaciones.mjs",
+    "comprobar": "node herramientas/comprobar-formulario.mjs",
+    "juntar": "node herramientas/juntar.mjs",
+    "rodeos": "node herramientas/rodeos.mjs",
     "capturas": "node herramientas/capturas.mjs"
   },
   "devDependencies": {

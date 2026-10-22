@@ -40,6 +40,7 @@
       const { $, $$, M, plantilla, anuncia, etiquetaDe, limpia, programaBorrador } = ctx;
       for (const cont of $$('[data-cascada]', form)) {
         const cat = (window.FORMKIT_CATALOGOS || {})[cont.dataset.catalogo];
+        FormKit.utilidades.avisaFicticio(cont.dataset.catalogo, cat);
         const niveles = $$('[data-nivel]', cont);
         const por = Object.fromEntries(niveles.map((c) => [c.dataset.nivel, c]));
         const campoDe = (c) => c.closest('[data-campo]');

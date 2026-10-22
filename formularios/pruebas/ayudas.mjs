@@ -8,9 +8,10 @@
    ========================================================= */
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { existsSync, readdirSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { basename, dirname, extname, join, resolve, normalize } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { gzipSync } from 'node:zlib';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from '@playwright/test';
 
@@ -24,18 +25,39 @@ const PREFIJO = BASE === RAIZ ? '' : `/${basename(RAIZ)}`;
 
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.pdf': 'application/pdf', '.ttf': 'font/ttf', '.pfb': 'application/octet-stream', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.txt': 'text/plain; charset=utf-8' };
 
-export function sirve() {
+/* Sin carpeta sirve el paquete; con una carpeta (la copia de un proyecto, por ejemplo), sirve ésa en la raíz.
+   Con gzip, el texto viaja comprimido, como lo serviría el sitio (para medir el peso real). */
+export function sirve(carpeta, { gzip = false } = {}) {
+  const base = carpeta ? resolve(carpeta) : BASE;
+  const prefijo = carpeta ? '' : PREFIJO;
   const servidor = createServer(async (req, res) => {
+    /* Una dirección mal escrita contesta 400 (antes tumbaba el servidor) y el 200 se
+       escribe sólo con el archivo ya leído: una carpeta sin index.html da 404. */
+    let ruta;
+    try { ruta = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)); } catch { res.writeHead(400); return res.end('dirección mal escrita'); }
+    let archivo = join(base, ruta);
+    if (!archivo.startsWith(base)) { res.writeHead(403); return res.end(); }
+    let cuerpo;
     try {
-      const ruta = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname));
-      let archivo = join(BASE, ruta);
-      if (!archivo.startsWith(BASE)) { res.writeHead(403); return res.end(); }
       if ((await stat(archivo)).isDirectory()) archivo = join(archivo, 'index.html');
-      res.writeHead(200, { 'content-type': TIPOS[extname(archivo)] || 'application/octet-stream' });
-      res.end(await readFile(archivo));
-    } catch (e) { res.writeHead(404); res.end('no existe'); }
+      cuerpo = await readFile(archivo);
+    } catch { res.writeHead(404); return res.end('no existe'); }
+    const tipo = TIPOS[extname(archivo)] || 'application/octet-stream';
+    if (gzip && /^(text\/|application\/json|image\/svg)/.test(tipo) && /gzip/.test(req.headers['accept-encoding'] || '')) { res.writeHead(200, { 'content-type': tipo, 'content-encoding': 'gzip', vary: 'accept-encoding' }); return res.end(gzipSync(cuerpo)); }
+    res.writeHead(200, { 'content-type': tipo });
+    res.end(cuerpo);
   });
-  return new Promise((ok) => servidor.listen(0, '127.0.0.1', () => ok({ servidor, origen: `http://127.0.0.1:${servidor.address().port}`, url: `http://127.0.0.1:${servidor.address().port}${PREFIJO}`, cierra: () => new Promise((r) => servidor.close(r)) })));
+  return new Promise((ok) => servidor.listen(0, '127.0.0.1', () => ok({ servidor, origen: `http://127.0.0.1:${servidor.address().port}`, url: `http://127.0.0.1:${servidor.address().port}${prefijo}`, cierra: () => new Promise((r) => servidor.close(r)) })));
+}
+
+/* Copia una carpeta completa. fs.cpSync hace caer a Node en Windows cuando la ruta lleva acentos
+   («Información», «Páginas»): por eso se copia archivo por archivo. */
+export function copiaCarpeta(origen, destino) {
+  mkdirSync(destino, { recursive: true });
+  for (const e of readdirSync(origen, { withFileTypes: true })) {
+    const de = join(origen, e.name), a = join(destino, e.name);
+    if (e.isDirectory()) copiaCarpeta(de, a); else copyFileSync(de, a);
+  }
 }
 
 function ejecutable() {

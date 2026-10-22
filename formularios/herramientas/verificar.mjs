@@ -6,9 +6,14 @@
    comprobar por sí mismo, y resume al final (no se detiene en la primera
    falla: se quiere ver todo lo que está mal de una vez):
      1. auditor de CSS (A01–A16)            2. contraste de todos los pares
-     3. auditoría de campos                 4. bibliotecas contra su manifiesto
-     5. documentos generados al día         6. construcción reproducible (manifiesto, dist, esquemas)
-     7. pruebas en navegador (dos perfiles, siete anchos, axe-core) salvo --sin-pruebas
+     3. auditoría de campos                 4. bibliotecas contra su manifiesto y sus rodeos registrados
+     5. documentos generados al día         6. derivados al día (manifiesto, dist, esquemas, artefacto):
+                                               no los reescribe; si alguno se atrasó, falla y dice cuál
+     7. presupuesto de peso de las plantillas en producción y pruebas en navegador
+        (dos perfiles, siete anchos, axe-core), salvo --sin-pruebas
+   Nada de esto escribe en el paquete: lo derivado se rehace con construir.mjs.
+   En cada versión, además: npm run presupuesto (tiempos con red lenta) y
+   npm run mutaciones (que las pruebas detecten lo que dicen proteger).
    Lo que NO puede comprobar y queda para personas está al final de la
    salida y en docs/08-verificacion-y-cierre.md.
    Uso: node herramientas/verificar.mjs [--sin-pruebas]
@@ -26,7 +31,8 @@ function externa(nombre, args, { ultimas = 25 } = {}) {
   const inicio = Date.now();
   const r = spawnSync(process.execPath, args, { cwd: RAIZ, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   const salida = (r.stdout + r.stderr).trim().split('\n').filter(Boolean);
-  const conteo = salida.filter((l) => /^# (pass|fail) /.test(l)).map((l) => l.slice(2)).join(' · ');
+  /* El resumen de node:test: «# pass 12» en TAP, «ℹ pass 12» en el formato de Node 23 en adelante. */
+  const conteo = salida.map((l) => /^(?:#|ℹ) (tests|pass|fail) (\d+)/.exec(l)).filter(Boolean).map((m) => `${m[2]} ${{ tests: 'pruebas', pass: 'pasan', fail: 'fallan' }[m[1]]}`).join(' · ');
   paso(nombre, r.status === 0, `${conteo || (salida.at(-1) ?? '')} · ${((Date.now() - inicio) / 1000).toFixed(1)} s`);
   if (r.status !== 0) console.log(salida.filter((l) => !/agent-proxy|^- |^For details/.test(l)).slice(-ultimas).map((l) => '    ' + l).join('\n'));
 }
@@ -35,10 +41,13 @@ externa('Auditor de CSS (A01–A16)', ['herramientas/auditor-css.mjs']);
 externa('Contraste de todos los pares', ['herramientas/contraste.mjs']);
 externa('Auditoría de campos (uso, finalidad, autocomplete, sensible, teclado)', ['herramientas/auditar-campos.mjs']);
 externa('Bibliotecas coinciden con vendor/MANIFIESTO.json', ['herramientas/vendor.mjs', '--verificar']);
+externa('Rodeos de las bibliotecas registrados en docs/07', ['herramientas/rodeos.mjs']);
 externa('Documentos generados al día (01-reglas, tabla de contraste)', ['herramientas/generar-reglas.mjs', '--comprobar']);
-externa('Construcción (iconos, manifiesto, dist, esquemas, catálogo 04)', ['herramientas/construir.mjs']);
-if (!SIN_PRUEBAS) externa('Pruebas en navegador: flujos en dos perfiles, siete anchos, módulos, axe-core, servidor', ['pruebas/ejecutar.mjs'], { ultimas: 60 });
-else paso('Pruebas en navegador', true, 'omitidas (--sin-pruebas)');
+externa('Derivados al día, sin reescribirlos (iconos, manifiesto, dist, esquemas, catálogo 04, artefacto)', ['herramientas/construir.mjs', '--comprobar']);
+if (!SIN_PRUEBAS) {
+  externa('Presupuesto de las plantillas en producción (≤ 300 KB y ≤ 20 archivos; los tiempos, con npm run presupuesto)', ['herramientas/presupuesto.mjs', '--sin-tiempos']);
+  externa('Pruebas en navegador: flujos en dos perfiles, siete anchos, módulos, axe-core, servidor', ['pruebas/ejecutar.mjs'], { ultimas: 60 });
+} else paso('Presupuesto y pruebas en navegador', true, 'omitidos (--sin-pruebas)');
 
 const fallas = resultados.filter((r) => !r.ok);
 console.log('');

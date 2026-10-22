@@ -3,6 +3,10 @@
 ## Sin publicar
 
 - `herramientas/servir.mjs` (el servidor local de la guía común) sirve también `.pdf` y `.ttf`, para el visor de documentos de formularios 1.2.0.
+- **Citas de formularios al día (auditoría del 19 oct 2026, D1-02).** Cuatro reglas citaban una regla de formularios con un sentido que formularios ya cambió: GEO-64 («Confirmar sólo lo que no se deshace o afecta a otra persona»: también lo que afecta a otra persona, con sus consecuencias y un botón que repite el verbo, como FRM-38; borrar sigue pidiendo escribir la palabra), GEO-111 (todo anuncio también se ve, FRM-40), GEO-55 (en una confirmación destructiva el único botón relleno es el rojo, FRM-34) y GEO-45 (las ligas las lee el módulo enlace-mapa; FRM-30 sólo valida coordenadas). El auditor de CSS ya no dice que revisa FRM-69.
+- **Nadie se entera si formularios cambia una regla citada: ahora sí.** `herramientas/citas-formularios.mjs` guarda en `reglas/citas-formularios.json` una huella del título y el texto de cada una de las 20 reglas FRM que geovisores cita, y `verificar` falla si alguna cambió o si hay una cita nueva sin revisar. Después de revisar la cita: `node herramientas/citas-formularios.mjs --actualizar`.
+- `herramientas/servir.mjs` contesta 400 a una dirección mal escrita («/%E0%A4%A»); antes se caía (auditoría, F2-14).
+- Código muerto fuera del auditor de CSS (un primer conteo de niveles que no se usaba y una variable sin uso) (auditoría, A4-01).
 
 ## 0.1.2 · 14 oct 2026 · Fichas claras, rampa de verdor, norte, opacidad y mapas base
 

@@ -71,6 +71,8 @@
       function arma(wrap) {
         if (wrap.dataset.comboListo !== undefined) return;
         wrap.dataset.comboListo = '';
+        /* Al armarse ya dice si su catálogo es de ejemplo, sin esperar a que la persona escriba. */
+        FormKit.utilidades.avisaFicticio(wrap.dataset.catalogo, (window.FORMKIT_CATALOGOS || {})[wrap.dataset.catalogo]);
         const campo = wrap.closest('[data-campo]');
         const n = campo.dataset.campo;
         const entrada = $('input', wrap);
@@ -183,6 +185,7 @@
 
   function catalogo(wrap) {
     const cat = (window.FORMKIT_CATALOGOS || {})[wrap.dataset.catalogo];
+    FormKit.utilidades.avisaFicticio(wrap.dataset.catalogo, cat);
     const lista = Array.isArray(cat) ? cat : (cat && Array.isArray(cat.filas) ? cat.filas : []);
     const vistos = new Set();
     return lista.map((o) => (typeof o === 'string' ? { nombre: o } : o)).filter((o) => o && o.nombre && !vistos.has(o.nombre) && vistos.add(o.nombre));

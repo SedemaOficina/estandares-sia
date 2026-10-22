@@ -98,8 +98,8 @@ Los 204 mensajes del núcleo viven en `mensajes` dentro de `validaciones.config.
 | `limitesSegun` | vacío | Funciones `(datos) => número` para `data-min-segun`/`data-max-segun`. |
 | `chips` | 5, `sia-chips` | Máximo de chips del historial y clave del almacén local (la lista fija no guarda nada). |
 | `visor` | pdf.js junto al paquete; fijo desde 1024 px | Dónde está pdf.js (`pdfjs`), desde qué ancho el visor queda fijo junto a la revisión (`fijoDesde`) y la espera para repintar (`retardoMs`). |
-| `mapa` | sin teselas | Proveedor, atribución, centro, zoom. |
-| `mensajes` | 204 textos | Cualquier mensaje, también los de formatos y cruzadas. |
+| `mapa` | sin teselas | `teselas` (dirección de las teselas, con {z}/{x}/{y}), `atribucion` (crédito que se muestra en el mapa), `centro` ([lat, lon]), `zoom`, `gestos` (dirección del complemento de gestos) y `aproximadaM` (desde cuántos metros de imprecisión «Usar mi ubicación» avisa que es aproximada; 100). |
+| `mensajes` | todos los textos de `validaciones.config.js` | Cualquier mensaje, también los de formatos y cruzadas. |
 
 ## 7. En el servidor
 

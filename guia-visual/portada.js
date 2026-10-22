@@ -56,9 +56,9 @@
   const cortes = document.getElementById('portada-cortes');
   for (const [token, formularios, mapas] of [
     [null, 'Una sola columna; los botones ocupan todo el ancho, uno debajo de otro.', 'Visor de consulta en dos pantallas: información y mapa.'],
-    ['--bp-sm', 'Igual que en el teléfono.', 'Igual que en el teléfono.'],
+    ['--bp-sm', 'El diálogo deja de ser hoja inferior; las acciones del acuse, los atajos de fecha y la barra del mapa se ponen en fila.', 'Igual que en el teléfono.'],
     ['--bp-md', 'Los renglones de campos pasan a dos o tres columnas; los botones toman su ancho y se ponen en fila.', 'Panel a la izquierda (320 px) y mapa a la derecha.'],
-    ['--bp-lg', 'Igual que en 760; la página no pasa de su ancho máximo.', 'Panel de 400 px.']
+    ['--bp-lg', 'El visor de documentos queda fijo junto a lo que se revisa; la página no pasa de su ancho máximo.', 'Panel de 400 px.']
   ]) {
     const tr = document.createElement('tr');
     for (const c of [token ? `${valor(token)} (${token})` : 'El teléfono', formularios, mapas]) tr.appendChild(crea('td', '', c));

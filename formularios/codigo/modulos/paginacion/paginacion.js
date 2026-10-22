@@ -20,7 +20,7 @@
 (function () {
   'use strict';
   function pinta(nav, ctx) {
-    const { M, plantilla, anuncia, icono } = ctx;
+    const { M, plantilla, icono } = ctx;
     const total = Number(nav.dataset.total || 0), tam = Number(nav.dataset.tamano || 20);
     const paginas = Math.max(1, Math.ceil(total / tam));
     const pagina = Math.min(paginas, Math.max(1, Number(nav.dataset.pagina || 1)));

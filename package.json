@@ -7,6 +7,7 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "guia": "node geovisores/herramientas/servir.mjs",
-    "verificar": "node herramientas/verificar.mjs"
+    "verificar": "node herramientas/verificar.mjs",
+    "gancho": "git config core.hooksPath .githooks"
   }
 }

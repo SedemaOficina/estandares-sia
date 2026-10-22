@@ -145,9 +145,9 @@
 
 /* @bloque estados */
 
-.guia-nivel-badge[data-nivel="BASE"]{background:var(--guinda)}
-.guia-nivel-badge[data-nivel="RECOMENDADO"]{background:var(--azul)}
-.guia-nivel-badge[data-nivel="OPCIONAL"]{background:var(--gris)}
+.guia-nivel-badge[data-nivel="BASE"]{background:var(--texto)}
+.guia-nivel-badge[data-nivel="RECOMENDADO"]{background:var(--gris)}
+.guia-nivel-badge[data-nivel="OPCIONAL"]{background:var(--gris-cl)}
 /* Lo elegido (la sección que se lee, el ancho de los ejemplos) va en azul, como en el estándar. */
 .guia-nav-lista a[aria-current="true"]{font-weight:var(--peso-fuerte);color:var(--azul)}
 .guia-nav-sub a[aria-current="true"]{font-weight:var(--peso-semi)}

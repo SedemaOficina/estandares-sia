@@ -117,7 +117,7 @@ test('paginación: cambia de página, conserva filtros y mueve el foco a la list
   const p = await abrePagina(navegador, servidor.url, PAGINAS['captura-interna'], { contexto: PERFILES.escritorio.contexto });
   await p.waitForTimeout(300);
   await p.selectOption('#estado', 'recibido');
-  const filasFiltradas = await p.locator('#tabla-registros tbody tr').count();
+  const primera = await p.locator('#tabla-registros tbody tr').evaluateAll((filas) => filas.map((f) => f.dataset.folio));
   const nav = p.locator('[data-paginacion]');
   const paginas = await nav.locator('[data-ir]').allTextContents();
   assert.ok(paginas.length >= 2, `hay más de una página: ${paginas.join(' ')}`);
@@ -126,7 +126,10 @@ test('paginación: cambia de página, conserva filtros y mueve el foco a la list
   assert.equal(await nav.getAttribute('data-pagina'), '2');
   assert.equal(await p.inputValue('#estado'), 'recibido', 'el filtro se conserva al cambiar de página');
   assert.ok(await p.evaluate(() => document.activeElement.id === 'tabla-registros' || document.activeElement.closest('.tabla-marco, [data-paginacion]') !== null), 'el foco va a la lista de resultados');
-  assert.ok((await p.locator('#tabla-registros tbody tr').count()) <= filasFiltradas || true);
+  const enPagina2 = await p.locator('#tabla-registros tbody tr').evaluateAll((filas) => filas.map((f) => ({ folio: f.dataset.folio, estado: f.querySelector('.estado').textContent.trim() })));
+  assert.ok(enPagina2.length > 0 && enPagina2.length <= Number(await nav.getAttribute('data-tamano')), `la página 2 trae a lo más una página de filas: ${enPagina2.length}`);
+  assert.ok(enPagina2.every((f) => f.estado === 'Recibido'), 'todas cumplen el filtro');
+  assert.ok(!enPagina2.some((f) => primera.includes(f.folio)), 'y ninguna se repite de la página 1');
   assert.deepEqual(p.registro, []);
   await p.context().close();
 });

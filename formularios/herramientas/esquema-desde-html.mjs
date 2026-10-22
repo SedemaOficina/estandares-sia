@@ -8,7 +8,8 @@
    EXACTAMENTE lo que el HTML declara. Así el servidor no tiene una segunda
    lista de reglas que pueda desactualizarse: se regenera con cada cambio.
 
-   Uso: node herramientas/esquema-desde-html.mjs codigo/plantillas/por-pasos.html [salida.json]
+   Uso: node herramientas/esquema-desde-html.mjs codigo/plantillas/por-pasos.html [salida.json] [--comprobar]
+   Con --comprobar no escribe: sale con 1 si el esquema guardado está atrasado.
 
    Limitaciones (documentadas): analiza el HTML con expresiones regulares
    sobre la estructura que el estándar prescribe (un [data-campo] por
@@ -21,7 +22,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 await import('../codigo/js/validaciones.config.js');
 const CRUZADAS = globalThis.FORMKIT_VALIDACIONES.cruzadas;
 
-const [, , entrada, salida] = process.argv;
+const COMPROBAR = process.argv.includes('--comprobar');
+const [entrada, salida] = process.argv.slice(2).filter((a) => a !== '--comprobar');
 if (!entrada) { console.error('Uso: node herramientas/esquema-desde-html.mjs <formulario.html> [salida.json]'); process.exit(2); }
 /* Lo comentado no es parte del formulario: un campo dentro de <!-- --> no se declara. */
 const pagina = readFileSync(entrada, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
@@ -179,6 +181,7 @@ let previo = null;
 if (salida) try { previo = JSON.parse(readFileSync(salida, 'utf8')); } catch { previo = null; }
 const sinFecha = (e) => JSON.stringify({ ...e, generado: undefined });
 if (previo && sinFecha(previo) === sinFecha(esquema)) console.log(`Esquema con ${Object.keys(campos).length} campos → ${salida} (sin cambios)`);
+else if (COMPROBAR) { console.log(`Esquema ${salida} (atrasado)`); process.exit(1); }
 else {
   const texto = JSON.stringify(esquema, null, 2);
   if (salida) { writeFileSync(salida, texto); console.log(`Esquema con ${Object.keys(campos).length} campos → ${salida}`); } else process.stdout.write(texto);

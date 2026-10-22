@@ -90,18 +90,6 @@
 }
 .recordatorio-texto{flex:1}
 
-/* Barra de acciones fija al pie en teléfono (opcional). */
-.acciones-fijas{
-  position:sticky;
-  bottom:0;
-  z-index:var(--z-barra);
-  margin:var(--e-6) calc(var(--e-seccion) * -1) calc(var(--e-seccion) * -1);
-  padding:var(--e-3) calc(var(--e-seccion) + var(--safe-izq)) calc(var(--e-3) + var(--safe-inf)) calc(var(--e-seccion) + var(--safe-der));
-  background:var(--blanco);
-  border-top:var(--b-1) solid var(--linea);
-  border-radius:0 0 var(--r-caja) var(--r-caja);
-}
-
 /* @bloque estados */
 
 .pasos-btn[data-hecho]{color:var(--gris)}
@@ -125,7 +113,6 @@
   .barra-fija{padding:var(--e-3) 0 var(--e-2)}
   .pasos-etq{display:block}
   .pasos-actual{display:none}
-  .acciones-fijas{position:static;margin:var(--e-6) 0 0;padding:var(--e-5) 0 0;border-radius:0}
 }
 
 /* Pantalla baja (teléfono acostado, zoom al 400 %): fija, la barra taparía más de la mitad. */

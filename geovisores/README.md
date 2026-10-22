@@ -30,7 +30,7 @@ Reglas, estilo y verificaciones para que los visores de mapas de la Secretaría 
 - **Una regla:** se edita `reglas/reglas.json` y se corre `npm run generar`. `docs/01` no se edita a mano.
 - **Un color del mapa:** `codigo/css/tokens-mapa.css` y, si cambia un par, `herramientas/pares-contraste.json`; correr `node herramientas/contraste.mjs --guia` y `npm run generar`.
 - **Una rampa nueva:** se mide primero con `node herramientas/rampas.mjs --candidata '#…,#…'`; entra a los tokens solo si cumple.
-- **Formularios cambia:** no hay nada que copiar (geovisores lo lee de `../formularios`); basta `npm run verificar` en la raíz y revisar la guía visual.
+- **Formularios cambia:** no hay nada que copiar (geovisores lo lee de `../formularios`); basta `npm run verificar` en la raíz y revisar la guía visual. Si cambió una regla FRM que geovisores cita, `verificar` lo dice: se revisa la cita y se guarda con `node herramientas/citas-formularios.mjs --actualizar`.
 - Todo cambio se anota en `CHANGELOG.md` y deja `npm run verificar` en verde.
 
 ## A quién consultar

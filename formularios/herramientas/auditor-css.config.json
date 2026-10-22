@@ -274,9 +274,7 @@
     "--blanco": "archivos.js pinta de este color el fondo de la foto antes de optimizarla (un PNG transparente quedaría negro)",
     "--bp-sm": "referencia documentada del punto de quiebre; la lee guia.js para el selector de ancho",
     "--bp-md": "referencia documentada del punto de quiebre; la lee guia.js",
-    "--bp-lg": "referencia documentada del punto de quiebre; la lee guia.js",
-    "--safe-izq": "reservado para la barra de acciones fija en teléfonos apaisados; lo usa acciones-fijas en pasos.css",
-    "--safe-der": "reservado igual que --safe-izq"
+    "--bp-lg": "referencia documentada del punto de quiebre; la lee guia.js"
   },
   "_nota_propias": "Hojas que pueden definir variables propias, con prefijo obligatorio. La guía visual no viaja con el paquete y necesita medidas que ningún formulario usa (anchos de los marcos de ejemplo); con prefijo --guia- no se confunden con los tokens.",
   "variablesPropias": {
